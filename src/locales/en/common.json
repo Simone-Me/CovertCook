@@ -1,0 +1,92 @@
+{
+  "app": {
+    "name": "CovertCook",
+    "tagline": "One dinner, one secret recipe, one chain."
+  },
+  "actions": {
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "next": "Next",
+    "back": "Back",
+    "save": "Save",
+    "confirm": "Confirm",
+    "copy": "Copy",
+    "copied": "Copied!",
+    "leave": "Leave",
+    "approve": "Approve",
+    "reject": "Reject"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Create an account",
+    "email": "Email",
+    "password": "Password",
+    "displayName": "First name or nickname",
+    "forgotPassword": "Forgot your password?",
+    "resetPassword": "Reset password",
+    "resetSent": "If an account exists for that address, an email has been sent.",
+    "noAccount": "Don't have an account?",
+    "hasAccount": "Already have an account?",
+    "signOut": "Sign out"
+  },
+  "dietary": {
+    "title": "Your dietary restrictions",
+    "help": "What you can't eat — never a diagnosis, just what's needed to cook for you.",
+    "noRestrictions": "I have no dietary restrictions",
+    "addEntry": "Add a restriction",
+    "kind": {
+      "ALLERGY_SEVERE": "Severe allergy",
+      "ALLERGY_MILD": "Mild allergy",
+      "DIET": "Diet (vegetarian, vegan, halal, kosher, no pork…)",
+      "DISLIKE": "Just don't like it"
+    },
+    "label": "What",
+    "note": "Note (optional)",
+    "required": "Tick \"no restrictions\" or add at least one entry.",
+    "panelTitle": "Dinner's dietary panel",
+    "panelEmpty": "Nobody has flagged a restriction for this dinner."
+  },
+  "rounds": {
+    "myRounds": "My rounds",
+    "create": "Create a round",
+    "join": "Join with a code",
+    "name": "Round name",
+    "visibility": {
+      "label": "Who can join",
+      "PUBLIC_LINK": "Public link",
+      "PRIVATE_CODE": "Private code"
+    },
+    "anonymity": {
+      "label": "Anonymity",
+      "ANONYMOUS": "Anonymous until the final reveal",
+      "OPEN": "Names stay visible"
+    },
+    "requiresApproval": "Host must approve each player",
+    "joinCode": "Round code",
+    "joinCodePlaceholder": "e.g. R63ZFCSZ",
+    "shareLink": "Link to share",
+    "createSuccess": "Round created!",
+    "joinSuccess": "You joined the round.",
+    "secretName": "Your secret name for this round",
+    "roster": "Players",
+    "pendingApproval": "Awaiting approval",
+    "seatCount": "{{count}} player",
+    "seatCount_other": "{{count}} players",
+    "phase": {
+      "DRAFT": "Draft",
+      "OPEN": "Registration open",
+      "LOCKED": "Locked",
+      "ASSIGNED": "Assigned",
+      "BRIEFS_CLOSED": "Briefs closed",
+      "DINNER": "Dinner day",
+      "VOTING": "Voting",
+      "RESULTS": "Results",
+      "ARCHIVED": "Archived",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "notAuthenticated": "You must be signed in."
+  }
+}

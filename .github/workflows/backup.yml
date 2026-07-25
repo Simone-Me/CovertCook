@@ -1,0 +1,41 @@
+name: Nightly backup
+
+# Supabase Free keeps no backups at all — this is the only copy of the data
+# that exists outside the live project. Artifacts naturally rotate off
+# after retention-days, which is what gives the 14-day window; swap the
+# upload step for a push to a private backup repo/bucket if off-GitHub
+# storage is preferred later.
+on:
+  schedule:
+    - cron: '11 3 * * *' # 03:11 UTC nightly
+  workflow_dispatch:
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install postgresql-client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Dump database
+        run: |
+          set -euo pipefail
+          filename="covertcook-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
+          pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-privileges | gzip > "$filename"
+          echo "BACKUP_FILE=$filename" >> "$GITHUB_ENV"
+
+      - name: Upload backup artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ env.BACKUP_FILE }}
+          path: ${{ env.BACKUP_FILE }}
+          retention-days: 14
+
+      - name: Verify the dump is non-empty
+        run: |
+          size=$(stat -c%s "${{ env.BACKUP_FILE }}")
+          echo "backup size: $size bytes"
+          if [ "$size" -lt 1024 ]; then
+            echo "backup suspiciously small — treating as a failure"
+            exit 1
+          fi

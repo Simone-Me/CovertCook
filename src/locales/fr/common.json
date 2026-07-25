@@ -1,0 +1,92 @@
+{
+  "app": {
+    "name": "CovertCook",
+    "tagline": "Un dîner, une recette secrète, une seule chaîne."
+  },
+  "actions": {
+    "submit": "Valider",
+    "cancel": "Annuler",
+    "next": "Suivant",
+    "back": "Retour",
+    "save": "Enregistrer",
+    "confirm": "Confirmer",
+    "copy": "Copier",
+    "copied": "Copié !",
+    "leave": "Quitter",
+    "approve": "Approuver",
+    "reject": "Refuser"
+  },
+  "auth": {
+    "signIn": "Se connecter",
+    "signUp": "Créer un compte",
+    "email": "E-mail",
+    "password": "Mot de passe",
+    "displayName": "Prénom ou pseudo",
+    "forgotPassword": "Mot de passe oublié ?",
+    "resetPassword": "Réinitialiser le mot de passe",
+    "resetSent": "Si un compte existe pour cette adresse, un e-mail a été envoyé.",
+    "noAccount": "Pas encore de compte ?",
+    "hasAccount": "Déjà un compte ?",
+    "signOut": "Se déconnecter"
+  },
+  "dietary": {
+    "title": "Vos restrictions alimentaires",
+    "help": "Ce que vous ne pouvez pas manger — jamais un diagnostic, juste ce qu'il faut savoir pour cuisiner pour vous.",
+    "noRestrictions": "Je n'ai aucune restriction alimentaire",
+    "addEntry": "Ajouter une restriction",
+    "kind": {
+      "ALLERGY_SEVERE": "Allergie sévère",
+      "ALLERGY_MILD": "Allergie légère",
+      "DIET": "Régime (végétarien, végan, halal, casher, sans porc…)",
+      "DISLIKE": "Je n'aime juste pas"
+    },
+    "label": "Quoi",
+    "note": "Précision (optionnel)",
+    "required": "Cochez « aucune restriction » ou ajoutez au moins une entrée.",
+    "panelTitle": "Panneau diététique du dîner",
+    "panelEmpty": "Personne n'a signalé de restriction pour ce dîner."
+  },
+  "rounds": {
+    "myRounds": "Mes dîners",
+    "create": "Créer un dîner",
+    "join": "Rejoindre avec un code",
+    "name": "Nom du dîner",
+    "visibility": {
+      "label": "Qui peut rejoindre",
+      "PUBLIC_LINK": "Lien public",
+      "PRIVATE_CODE": "Code privé"
+    },
+    "anonymity": {
+      "label": "Anonymat",
+      "ANONYMOUS": "Anonyme jusqu'à la révélation finale",
+      "OPEN": "Les noms restent visibles"
+    },
+    "requiresApproval": "Le hôte doit approuver chaque participant",
+    "joinCode": "Code du dîner",
+    "joinCodePlaceholder": "ex. R63ZFCSZ",
+    "shareLink": "Lien à partager",
+    "createSuccess": "Dîner créé !",
+    "joinSuccess": "Vous avez rejoint le dîner.",
+    "secretName": "Votre nom secret pour ce dîner",
+    "roster": "Participants",
+    "pendingApproval": "En attente d'approbation",
+    "seatCount": "{{count}} participant",
+    "seatCount_other": "{{count}} participants",
+    "phase": {
+      "DRAFT": "Brouillon",
+      "OPEN": "Inscriptions ouvertes",
+      "LOCKED": "Verrouillé",
+      "ASSIGNED": "Attribué",
+      "BRIEFS_CLOSED": "Recettes closes",
+      "DINNER": "Jour J",
+      "VOTING": "Vote en cours",
+      "RESULTS": "Résultats",
+      "ARCHIVED": "Archivé",
+      "CANCELLED": "Annulé"
+    }
+  },
+  "errors": {
+    "generic": "Une erreur est survenue. Réessayez.",
+    "notAuthenticated": "Vous devez être connecté."
+  }
+}
