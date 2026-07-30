@@ -50,6 +50,7 @@
     "myRounds": "My rounds",
     "create": "Create a round",
     "join": "Join with a code",
+    "joining": "Joining the round…",
     "name": "Round name",
     "visibility": {
       "label": "Who can join",
@@ -62,6 +63,8 @@
       "OPEN": "Names stay visible"
     },
     "requiresApproval": "Host must approve each player",
+    "limitPlayers": "Limit the number of players",
+    "maxPlayers": "Maximum players",
     "joinCode": "Round code",
     "joinCodePlaceholder": "e.g. R63ZFCSZ",
     "shareLink": "Link to share",

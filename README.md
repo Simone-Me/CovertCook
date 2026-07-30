@@ -35,6 +35,13 @@ does not learn A's identity until the final reveal.
 
 ---
 
+## Design principle
+
+The website must stay **simple and intuitive** — every screen should be
+usable without instructions. When a feature could go either the simple
+route or the more powerful/configurable route, default to simple unless
+there's a concrete reason (e.g. dietary safety) to do otherwise.
+
 ## Key characteristics (the decisions that shape everything else)
 
 - **Game logic lives in Postgres**, not the frontend. Assignment, phase

@@ -11,10 +11,10 @@ import { supabase } from '../lib/supabase'
 // menu.
 export function AppHeader() {
   const { t } = useTranslation()
-  const { session } = useAuth()
+  const { session, profile } = useAuth()
   const navigate = useNavigate()
   const { roundId } = useParams()
-  const { data: rounds } = useMyRounds()
+  const { data: rounds } = useMyRounds(profile?.id)
 
   if (!session) {
     return (

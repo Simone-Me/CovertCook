@@ -11,6 +11,8 @@ export function CreateRoundPage() {
   const [visibility, setVisibility] = useState<RoundVisibility>('PRIVATE_CODE')
   const [anonymity, setAnonymity] = useState<RoundAnonymity>('ANONYMOUS')
   const [requiresApproval, setRequiresApproval] = useState(true)
+  const [limitPlayers, setLimitPlayers] = useState(false)
+  const [maxPlayers, setMaxPlayers] = useState(8)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -19,7 +21,13 @@ export function CreateRoundPage() {
     setError(null)
     setSubmitting(true)
     try {
-      const roundId = await createRound({ name, visibility, anonymity, requiresApproval })
+      const roundId = await createRound({
+        name,
+        visibility,
+        anonymity,
+        requiresApproval,
+        maxPlayers: limitPlayers ? maxPlayers : null,
+      })
       navigate(`/rounds/${roundId}`, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
@@ -63,6 +71,30 @@ export function CreateRoundPage() {
           />
           {t('rounds.requiresApproval')}
         </label>
+
+        <label className="row">
+          <input
+            type="checkbox"
+            style={{ width: 'auto' }}
+            checked={limitPlayers}
+            onChange={(e) => setLimitPlayers(e.target.checked)}
+          />
+          {t('rounds.limitPlayers')}
+        </label>
+
+        {limitPlayers && (
+          <div>
+            <label htmlFor="maxPlayers">{t('rounds.maxPlayers')}</label>
+            <input
+              id="maxPlayers"
+              type="number"
+              min={3}
+              required
+              value={maxPlayers}
+              onChange={(e) => setMaxPlayers(Number(e.target.value))}
+            />
+          </div>
+        )}
 
         <button type="submit" disabled={submitting}>
           {t('actions.submit')}

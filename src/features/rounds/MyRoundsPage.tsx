@@ -1,10 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
+import { useAuth } from '../../lib/auth'
 import { useMyRounds } from './hooks'
 
 export function MyRoundsPage() {
   const { t } = useTranslation()
-  const { data: rounds, isLoading } = useMyRounds()
+  const { profile } = useAuth()
+  const { data: rounds, isLoading } = useMyRounds(profile?.id)
 
   return (
     <div className="stack">
@@ -33,7 +35,10 @@ export function MyRoundsPage() {
                 <strong>
                   {r.accent_emoji} {r.name}
                 </strong>
-                <span className="badge">{t(`rounds.phase.${r.status}`)}</span>
+                <span className="row">
+                  {!r.approved && <span className="badge">{t('rounds.pendingApproval')}</span>}
+                  <span className="badge">{t(`rounds.phase.${r.status}`)}</span>
+                </span>
               </div>
             </div>
           </Link>

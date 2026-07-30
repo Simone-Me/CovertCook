@@ -86,11 +86,11 @@ export function RoundHomePage() {
 
       {error && <div className="error">{error}</div>}
 
-      {isHost && round.visibility === 'PRIVATE_CODE' && round.status === 'OPEN' && (
+      {isHost && round.status === 'OPEN' && (
         <div className="card">
-          <label>{t('rounds.joinCode')}</label>
+          <label>{t('rounds.shareLink')}</label>
           <div className="row">
-            <code>{round.join_code}</code>
+            {round.visibility === 'PRIVATE_CODE' && <code>{round.join_code}</code>}
             <button type="button" className="secondary" onClick={() => navigator.clipboard.writeText(shareLink)}>
               {t('actions.copy')}
             </button>

@@ -16,16 +16,28 @@ export interface RoundRow {
   timezone: string
 }
 
-export function useMyRounds() {
+export interface MyRoundRow extends RoundRow {
+  approved: boolean
+}
+
+export function useMyRounds(uid: string | undefined) {
   return useQuery({
-    queryKey: ['rounds', 'mine'],
+    queryKey: ['rounds', 'mine', uid],
+    enabled: !!uid,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('rounds')
-        .select('id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone')
-        .order('created_at', { ascending: false })
+        .from('round_members')
+        .select(
+          'approved, rounds(id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone)',
+        )
+        .eq('profile_id', uid as string)
+        .eq('status', 'ACTIVE')
+        .order('joined_at', { ascending: false })
       if (error) throw error
-      return data as RoundRow[]
+      return (data ?? []).map((m) => ({
+        ...(m.rounds as unknown as RoundRow),
+        approved: m.approved,
+      })) as MyRoundRow[]
     },
   })
 }

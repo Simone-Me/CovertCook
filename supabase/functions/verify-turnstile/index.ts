@@ -14,20 +14,35 @@ interface VerifyRequest {
   subject?: string
 }
 
+// The browser calls this function from a different origin (the app's own
+// domain vs *.functions.supabase.co), so it always preflights with OPTIONS
+// first. Without these headers the browser blocks the real request before
+// it's ever sent, and supabase-js surfaces that as an opaque "Failed to
+// send a request to the Edge Function" — not a 4xx/5xx from this code.
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+}
+
 Deno.serve(async (req) => {
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { headers: corsHeaders })
+  }
+
   if (req.method !== 'POST') {
-    return new Response('method not allowed', { status: 405 })
+    return new Response('method not allowed', { status: 405, headers: corsHeaders })
   }
 
   let body: VerifyRequest
   try {
     body = await req.json()
   } catch {
-    return new Response(JSON.stringify({ error: 'invalid JSON body' }), { status: 400 })
+    return new Response(JSON.stringify({ error: 'invalid JSON body' }), { status: 400, headers: corsHeaders })
   }
 
   if (!body.token || !body.purpose) {
-    return new Response(JSON.stringify({ error: 'token and purpose are required' }), { status: 400 })
+    return new Response(JSON.stringify({ error: 'token and purpose are required' }), { status: 400, headers: corsHeaders })
   }
 
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY')
@@ -40,7 +55,10 @@ Deno.serve(async (req) => {
 
   if (!devBypass) {
     if (!secret) {
-      return new Response(JSON.stringify({ error: 'TURNSTILE_SECRET_KEY is not configured' }), { status: 500 })
+      return new Response(JSON.stringify({ error: 'TURNSTILE_SECRET_KEY is not configured' }), {
+        status: 500,
+        headers: corsHeaders,
+      })
     }
 
     const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
@@ -52,6 +70,7 @@ Deno.serve(async (req) => {
     if (!verifyJson.success) {
       return new Response(JSON.stringify({ error: 'turnstile verification failed', detail: verifyJson['error-codes'] }), {
         status: 403,
+        headers: corsHeaders,
       })
     }
   }
@@ -68,10 +87,10 @@ Deno.serve(async (req) => {
     .single()
 
   if (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500 })
+    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders })
   }
 
   return new Response(JSON.stringify({ ticket_id: data.id }), {
-    headers: { 'Content-Type': 'application/json' },
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
   })
 })

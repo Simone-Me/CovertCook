@@ -50,6 +50,7 @@
     "myRounds": "Mes dîners",
     "create": "Créer un dîner",
     "join": "Rejoindre avec un code",
+    "joining": "Adhésion au dîner…",
     "name": "Nom du dîner",
     "visibility": {
       "label": "Qui peut rejoindre",
@@ -62,6 +63,8 @@
       "OPEN": "Les noms restent visibles"
     },
     "requiresApproval": "Le hôte doit approuver chaque participant",
+    "limitPlayers": "Limiter le nombre de participants",
+    "maxPlayers": "Nombre maximum de participants",
     "joinCode": "Code du dîner",
     "joinCodePlaceholder": "ex. R63ZFCSZ",
     "shareLink": "Lien à partager",
