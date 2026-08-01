@@ -4,6 +4,34 @@ Dated entries, newest first. `README.md` stays the living status doc (what
 exists / what's missing right now); this file is the history of how it got
 there.
 
+## 2026-08-01 (4)
+
+**Changed: frontend deploy now goes through Netlify's own Git integration**
+instead of GitHub Actions. While setting up the Netlify site, connecting
+it via Netlify's "Import from Git" would have run a second, independent
+build on every push — on top of the one `deploy.yml` already did in
+Actions — racing it and, since Netlify's own build had no env vars
+configured yet, deploying a broken build (undefined `VITE_SUPABASE_URL`)
+half the time. Resolved by picking Netlify-builds-it-directly as the one
+pipeline: removed `.github/workflows/deploy.yml` entirely, and the four
+`VITE_*` frontend env vars now live in Netlify's dashboard (Site
+configuration → Environment variables) instead of GitHub repo Variables.
+`keepalive.yml`/`backup.yml` are unaffected — they still read
+`VITE_SUPABASE_URL`/`VITE_SUPABASE_ANON_KEY`/`SUPABASE_DB_URL` from GitHub
+repo Variables/Secrets, same as before, just now the only workflows that
+do.
+
+**Added:** `public/_redirects` (`/*  /index.html  200`) — without it,
+Netlify 404s on any client-side route it doesn't have a literal file for
+(anything other than `/`), since nothing previously told it this is an
+SPA. Would have broken every deep link and every page refresh.
+
+**Flagged, not fixed:** `VITE_TURNSTILE_SITE_KEY` still isn't set anywhere
+real. Until it is, `Turnstile.tsx`'s dev-only bypass is live in
+production too, meaning bot protection on signup/join is currently
+inert past local dev. Called out explicitly in the new "Deploying the
+frontend" README section so it isn't missed.
+
 ## 2026-08-01 (3)
 
 **Added: the rest of the player-facing game loop.** Brief editor, Cook

@@ -85,9 +85,10 @@ there's a concrete reason (e.g. dietary safety) to do otherwise.
 
 ## Stack
 
-React 18 + TypeScript + Vite → Netlify (PWA) · Supabase (Postgres + Auth +
-Edge Functions + pg_cron) · Brevo (transactional email) · Cloudflare
-Turnstile (bot protection) · GitHub Actions (deploy, keep-alive, backup).
+React 18 + TypeScript + Vite → Netlify (PWA, builds directly from Git —
+see below) · Supabase (Postgres + Auth + Edge Functions + pg_cron) · Brevo
+(transactional email) · Cloudflare Turnstile (bot protection) · GitHub
+Actions (keep-alive, backup only — Netlify owns the frontend build/deploy).
 
 See `.env.example` for the public frontend config and
 `supabase/functions/*` for where secrets (service role key, Turnstile
@@ -95,34 +96,55 @@ secret, Brevo key) actually live — never in the frontend bundle.
 
 ---
 
+## Deploying the frontend (Netlify)
+
+The Netlify site is connected directly to this repo's `main` branch and
+builds it itself (`npm run build`, publish directory `dist`) — there is
+**no GitHub Actions deploy step**; an earlier `deploy.yml` that built in
+Actions and pushed to Netlify via API was removed once the site was
+connected through Netlify's own Git integration, to avoid two pipelines
+building and deploying on every push.
+
+Because Netlify does the build, its **own** dashboard needs the frontend
+env vars — not GitHub's. Site configuration → Environment variables:
+
+| Name | Value | Notes |
+|---|---|---|
+| `VITE_SUPABASE_URL` | Supabase → Project Settings → API | Public |
+| `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | The anon/publishable key — intentionally public, same as it is in the frontend bundle |
+| `VITE_APP_BASE_URL` | the real deployed URL (e.g. `https://covertcook.netlify.app`) | **Not** `localhost` — that's the local-dev-only value in `.env.local` |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile dashboard | Until this is set, `Turnstile.tsx` falls back to a dev placeholder token that bypasses bot protection entirely (see "Known simplifications") — do not ship without a real key |
+
+`public/_redirects` (`/*  /index.html  200`) is what makes client-side
+routing work on Netlify — without it, refreshing or deep-linking to
+anything other than `/` 404s, since Netlify otherwise looks for a literal
+file at that path.
+
+---
+
 ## CI/CD & required GitHub configuration
 
-The three workflows in `.github/workflows/` all read from GitHub repo
-**Settings → Secrets and variables → Actions**, not from `.env.local`
-(which is gitignored and never leaves your machine). If a workflow run
-shows blank interpolations in its log (an empty `apikey:` header, a URL
-missing its host, `pg_dump` falling back to a local socket), the cause is
-always a missing entry here, not the workflow YAML — GitHub silently
-resolves an unset secret/variable to an empty string rather than failing
-the run.
+The remaining two workflows in `.github/workflows/` (`keepalive.yml`,
+`backup.yml`) read from GitHub repo **Settings → Secrets and variables →
+Actions**, not from `.env.local` (which is gitignored and never leaves
+your machine). If a workflow run shows blank interpolations in its log
+(an empty `apikey:` header, a URL missing its host, `pg_dump` falling back
+to a local socket), the cause is always a missing entry here, not the
+workflow YAML — GitHub silently resolves an unset secret/variable to an
+empty string rather than failing the run.
 
-Populate these once per repo (values live in your Supabase/Netlify
-dashboards — nothing here should ever be committed):
+Populate these once per repo (values live in your Supabase dashboard —
+nothing here should ever be committed):
 
 | Where | Name | Used by | Source |
 |---|---|---|---|
-| Variables | `VITE_SUPABASE_URL` | `deploy.yml`, `keepalive.yml` | Supabase → Project Settings → API |
-| Variables | `VITE_SUPABASE_ANON_KEY` | `deploy.yml`, `keepalive.yml` | Supabase → Project Settings → API (anon/publishable key — intentionally public, hence a Variable not a Secret, same as it is in the frontend bundle) |
-| Variables | `VITE_APP_BASE_URL` | `deploy.yml` | Your production URL |
-| Variables | `VITE_TURNSTILE_SITE_KEY` | `deploy.yml` | Cloudflare Turnstile dashboard |
+| Variables | `VITE_SUPABASE_URL` | `keepalive.yml` | Supabase → Project Settings → API |
+| Variables | `VITE_SUPABASE_ANON_KEY` | `keepalive.yml` | Supabase → Project Settings → API (anon/publishable key — intentionally public, hence a Variable not a Secret) |
 | Secrets | `SUPABASE_DB_URL` | `backup.yml` | Supabase → Project Settings → Database → Connection string (pooler host is in `supabase/.temp/pooler-url` after linking; password isn't stored anywhere in the repo) |
-| Secrets | `NETLIFY_AUTH_TOKEN` | `deploy.yml` | Netlify → User settings → Applications → Personal access tokens |
-| Secrets | `NETLIFY_SITE_ID` | `deploy.yml` | Netlify → Site settings → General → Site details |
 
-`keepalive.yml` reads the anon key from `vars.VITE_SUPABASE_ANON_KEY`
-(the same Variable `deploy.yml` uses) — an earlier version referenced a
-separate `secrets.SUPABASE_ANON_KEY` that was never actually set, which is
-why that job failed every run.
+These two GitHub Variables are separate from the four Netlify env vars
+above — same values, but two different dashboards, since the frontend
+build and the keep-alive ping now run in two different places.
 
 ---
 
@@ -174,7 +196,8 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test3.sql
 - Frontend: auth (sign in/up with mandatory dietary step, reset), round
   create/join/roster/approval, round-switcher header, i18n scaffold, PWA
   config, `verify-turnstile` Edge Function.
-- GitHub Actions: deploy (Netlify), keep-alive ping, nightly `pg_dump`
+- Netlify deploy (builds directly from Git — see "Deploying the
+  frontend" above) + GitHub Actions keep-alive ping and nightly `pg_dump`
   backup (14-day rotation via artifact expiry).
 - Host round-settings page (`/rounds/:roundId/settings`): editable diner
   info (location/date-time/timezone via `update_round_details`, blocked
