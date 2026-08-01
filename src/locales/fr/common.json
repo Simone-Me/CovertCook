@@ -14,7 +14,9 @@
     "copied": "Copié !",
     "leave": "Quitter",
     "approve": "Approuver",
-    "reject": "Refuser"
+    "reject": "Refuser",
+    "add": "Ajouter",
+    "remove": "Retirer"
   },
   "auth": {
     "signIn": "Se connecter",
@@ -64,6 +66,15 @@
       "OPEN": "Les noms restent visibles"
     },
     "requiresApproval": "Le hôte doit approuver chaque participant",
+    "votingEnabled": "Activer le vote et les récompenses après le dîner",
+    "slotMode": {
+      "label": "Plats",
+      "FREE": "Libre (chacun apporte ce qu'il veut)",
+      "CATEGORIES": "Plats spécifiques (vous choisissez entrées/plats/etc.)"
+    },
+    "remove": "Retirer",
+    "removeConfirm": "Retirer ce participant du dîner ?",
+    "removeDishConfirm": "Le plat reçu et le plat envoyé sont déjà soumis tous les deux ; retirer ce participant en supprime un. Continuer ?",
     "limitPlayers": "Limiter le nombre de participants",
     "maxPlayers": "Nombre maximum de participants",
     "joinCode": "Code du dîner",
@@ -112,7 +123,127 @@
       "noStepBack": "Ce dîner est déjà à sa première phase.",
       "dangerZone": "Zone dangereuse",
       "cancelRound": "Annuler le dîner",
-      "cancelConfirm": "Ceci annule le dîner pour tout le monde. Cette action est irréversible. Continuer ?"
+      "cancelConfirm": "Ceci annule le dîner pour tout le monde. Cette action est irréversible. Continuer ?",
+      "exclusions": "Exclusions",
+      "exclusionsHelp": "Choisissez deux participants qui ne doivent pas être associés (ex. un couple qui préfère ne pas cuisiner l'un pour l'autre).",
+      "noExclusions": "Aucune exclusion configurée.",
+      "courses": "Plats à remplir",
+      "coursesHelp": "Ce dîner utilise des plats spécifiques — le nombre de créneaux ci-dessous doit être égal au nombre de participants actifs ({{count}}) avant de générer l'attribution."
+    },
+    "entryPoints": {
+      "writeRecipe": "Écrire votre recette",
+      "yourRecipe": "Votre recette à cuisiner",
+      "vote": "Voter",
+      "results": "Voir les résultats"
+    }
+  },
+  "briefs": {
+    "editorTitle": "Écrivez votre recette secrète",
+    "writingFor": "Vous écrivez pour : {{name}}",
+    "alreadySubmitted": "Votre recette est soumise et verrouillée.",
+    "editingClosed": "La fenêtre de soumission de ce dîner est fermée.",
+    "dishName": "Nom du plat",
+    "course": "Type de plat",
+    "courseOption": {
+      "STARTER": "Entrée",
+      "MAIN": "Plat principal",
+      "DESSERT": "Dessert",
+      "DRINK": "Boisson",
+      "OTHER": "Autre"
+    },
+    "ingredients": "Ingrédients",
+    "ingredientName": "Ingrédient",
+    "quantity": "Qté",
+    "unit": "Unité",
+    "addIngredient": "Ajouter un ingrédient",
+    "procedure": "Préparation",
+    "procedureMinLength": "{{count}} caractères (minimum 50 pour soumettre)",
+    "externalUrl": "Lien vers une recette (optionnel)",
+    "difficulty": "Difficulté",
+    "prepMinutes": "Temps de préparation (minutes)",
+    "estCost": "Coût estimé",
+    "noteToCook": "Note pour le cuisinier (optionnel)",
+    "containsTags": "Ce plat contient / utilise",
+    "addTagPlaceholder": "Ajouter une autre étiquette",
+    "addTag": "Ajouter",
+    "tagsConfirmed": "J'ai vérifié le panneau diététique ci-dessus et confirme que les étiquettes cochées sont exactes.",
+    "noBriefYet": "Aucune recette à afficher pour l'instant.",
+    "cannotCook": "Je ne peux finalement pas cuisiner ce plat",
+    "cannotCookSent": "Envoyé — l'hôte a été prévenu."
+  },
+  "chat": {
+    "title": "Messages",
+    "empty": "Aucun message pour l'instant.",
+    "categoryLabel": "Catégorie",
+    "pickCategory": "Choisissez une catégorie…",
+    "message": "Message",
+    "pickMessage": "Choisissez un message…",
+    "slotValue": "Complétez le champ",
+    "slotValueRequired": "Ce message nécessite de compléter un champ.",
+    "send": "Envoyer",
+    "report": "Signaler",
+    "reported": "Signalé",
+    "category": {
+      "CLARIFICATION": "Demander une précision",
+      "SUBSTITUTION": "Demander une substitution",
+      "NUDGE": "Envoyer un rappel",
+      "CANNOT_COOK": "Je ne peux pas cuisiner ce plat",
+      "NO_BRIEF": "Je n'ai pas reçu de recette",
+      "THANKS": "Dire merci",
+      "REPLY": "Répondre"
+    }
+  },
+  "vote": {
+    "title": "Vote",
+    "instructions": "Glissez pour classer chaque plat, du meilleur au moins bon. Optionnel : notez l'originalité et le respect de la recette.",
+    "originality": "Originalité",
+    "briefRespect": "Respect de la recette",
+    "submitBallot": "Valider le vote",
+    "thanks": "Merci — votre vote a été enregistré.",
+    "nothingToRank": "Rien à classer pour l'instant."
+  },
+  "results": {
+    "title": "Résultats",
+    "points": "{{points}} pts",
+    "whoCookedForYou": "Qui a cuisiné pour vous",
+    "whoYouCookedFor": "Pour qui vous avez cuisiné",
+    "award": {
+      "BEST_STARTER": "Meilleure entrée",
+      "BEST_MAIN": "Meilleur plat",
+      "BEST_DESSERT": "Meilleur dessert",
+      "BEST_DRINK": "Meilleure boisson",
+      "MOST_ORIGINAL": "Plus original",
+      "BEST_BRIEF_RESPECT": "Meilleur respect de la recette"
+    }
+  },
+  "chain": {
+    "title": "Chaîne",
+    "spoilerWarning": "Ceci révèle toutes les attributions du dîner. N'ouvrez que si vous êtes prêt à savoir.",
+    "reveal": "Révéler la chaîne",
+    "multipleCycles": "Cette attribution s'est divisée en {{count}} boucles distinctes (un échange manuel peut faire ça) — tout le monde reste attribué exactement une fois.",
+    "cycleTitle": "Boucle {{index}}",
+    "loopsBackTo": "boucle vers {{name}}",
+    "swapTitle": "Échanger une attribution",
+    "sender": "Expéditeur",
+    "newCook": "Nouveau cuisinier pour lui/elle",
+    "applySwap": "Appliquer l'échange",
+    "spliceTitle": "Insérer un arrivant tardif dans la chaîne",
+    "applySplice": "Insérer",
+    "spliceConfirm": "Tous les expéditeurs ont déjà soumis ; l'insertion remplace un plat déjà cuisiné. Continuer ?"
+  },
+  "alerts": {
+    "title": "Alertes de l'hôte",
+    "openAlerts": "Alertes ouvertes",
+    "none": "Aucune alerte ouverte.",
+    "resolve": "Résoudre",
+    "reportedMessages": "Messages signalés",
+    "noReports": "Aucun message signalé.",
+    "kind": {
+      "CANNOT_COOK": "Un participant ne peut pas cuisiner son plat",
+      "NO_BRIEF": "Un participant n'a pas reçu de recette",
+      "DROPOUT": "Un participant s'est désisté",
+      "REPORTED_MESSAGE": "Un message a été signalé",
+      "OTHER": "Autre"
     }
   },
   "errors": {

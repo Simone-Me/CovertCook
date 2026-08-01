@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import type { RoundAnonymity, RoundStatus, RoundVisibility } from '../../lib/rpc'
+import type { RoundAnonymity, RoundStatus, RoundVisibility, SlotMode } from '../../lib/rpc'
 
 export interface RoundRow {
   id: string
@@ -15,6 +15,8 @@ export interface RoundRow {
   dinner_at: string | null
   timezone: string
   location: string | null
+  voting_enabled: boolean
+  slot_mode: SlotMode
 }
 
 export interface MyRoundRow extends RoundRow {
@@ -29,7 +31,7 @@ export function useMyRounds(uid: string | undefined) {
       const { data, error } = await supabase
         .from('round_members')
         .select(
-          'approved, rounds(id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location)',
+          'approved, rounds(id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,voting_enabled,slot_mode)',
         )
         .eq('profile_id', uid as string)
         .eq('status', 'ACTIVE')
@@ -51,7 +53,7 @@ export function useRound(roundId: string | undefined) {
       const { data, error } = await supabase
         .from('rounds')
         .select(
-          'id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location',
+          'id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,voting_enabled,slot_mode',
         )
         .eq('id', roundId as string)
         .single()

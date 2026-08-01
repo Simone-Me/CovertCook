@@ -10,6 +10,12 @@ import { CreateRoundPage } from './features/rounds/CreateRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
 import { RoundHomePage } from './features/rounds/RoundHomePage'
 import { RoundSettingsPage } from './features/rounds/RoundSettingsPage'
+import { ChainPage } from './features/rounds/ChainPage'
+import { HostAlertsPage } from './features/rounds/HostAlertsPage'
+import { BriefEditorPage } from './features/briefs/BriefEditorPage'
+import { CookViewPage } from './features/briefs/CookViewPage'
+import { BallotPage } from './features/vote/BallotPage'
+import { ResultsPage } from './features/vote/ResultsPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, profile, loading, needsSignupCompletion } = useAuth()
@@ -70,6 +76,54 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <RoundSettingsPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/chain"
+        element={
+          <RequireAuth>
+            <ChainPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/alerts"
+        element={
+          <RequireAuth>
+            <HostAlertsPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/brief"
+        element={
+          <RequireAuth>
+            <BriefEditorPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/recipe"
+        element={
+          <RequireAuth>
+            <CookViewPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/ballot"
+        element={
+          <RequireAuth>
+            <BallotPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/results"
+        element={
+          <RequireAuth>
+            <ResultsPage />
           </RequireAuth>
         }
       />

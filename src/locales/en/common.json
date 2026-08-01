@@ -14,7 +14,9 @@
     "copied": "Copied!",
     "leave": "Leave",
     "approve": "Approve",
-    "reject": "Reject"
+    "reject": "Reject",
+    "add": "Add",
+    "remove": "Remove"
   },
   "auth": {
     "signIn": "Sign in",
@@ -64,6 +66,15 @@
       "OPEN": "Names stay visible"
     },
     "requiresApproval": "Host must approve each player",
+    "votingEnabled": "Enable voting & awards after dinner",
+    "slotMode": {
+      "label": "Courses",
+      "FREE": "Free-for-all (everyone brings any dish)",
+      "CATEGORIES": "Specific courses (you choose starters/mains/etc.)"
+    },
+    "remove": "Remove",
+    "removeConfirm": "Remove this player from the round?",
+    "removeDishConfirm": "Both the incoming and outgoing dish are already submitted; removing this member discards one of them. Continue?",
     "limitPlayers": "Limit the number of players",
     "maxPlayers": "Maximum players",
     "joinCode": "Round code",
@@ -112,7 +123,127 @@
       "noStepBack": "This round is at its earliest phase.",
       "dangerZone": "Danger zone",
       "cancelRound": "Cancel round",
-      "cancelConfirm": "This cancels the round for everyone. This cannot be undone. Continue?"
+      "cancelConfirm": "This cancels the round for everyone. This cannot be undone. Continue?",
+      "exclusions": "Exclusions",
+      "exclusionsHelp": "Pick two players who must not be paired together (e.g. a couple who'd rather not cook for each other).",
+      "noExclusions": "No exclusions configured.",
+      "courses": "Courses to fill",
+      "coursesHelp": "This round uses specific courses — the number of slots below must equal the number of active players ({{count}}) before you can generate the assignment."
+    },
+    "entryPoints": {
+      "writeRecipe": "Write your recipe",
+      "yourRecipe": "Your recipe to cook",
+      "vote": "Vote",
+      "results": "See results"
+    }
+  },
+  "briefs": {
+    "editorTitle": "Write your recipe brief",
+    "writingFor": "You're writing for: {{name}}",
+    "alreadySubmitted": "Your brief is submitted and locked.",
+    "editingClosed": "The submission window for this round has closed.",
+    "dishName": "Dish name",
+    "course": "Course",
+    "courseOption": {
+      "STARTER": "Starter",
+      "MAIN": "Main",
+      "DESSERT": "Dessert",
+      "DRINK": "Drink",
+      "OTHER": "Other"
+    },
+    "ingredients": "Ingredients",
+    "ingredientName": "Ingredient",
+    "quantity": "Qty",
+    "unit": "Unit",
+    "addIngredient": "Add ingredient",
+    "procedure": "Procedure",
+    "procedureMinLength": "{{count}} characters (minimum 50 to submit)",
+    "externalUrl": "Link to a recipe (optional)",
+    "difficulty": "Difficulty",
+    "prepMinutes": "Prep time (minutes)",
+    "estCost": "Estimated cost",
+    "noteToCook": "Note to the cook (optional)",
+    "containsTags": "This dish contains / uses",
+    "addTagPlaceholder": "Add another tag",
+    "addTag": "Add",
+    "tagsConfirmed": "I've reviewed the dietary panel above and confirmed the tags I've checked are accurate.",
+    "noBriefYet": "No recipe to show yet.",
+    "cannotCook": "I can't cook this after all",
+    "cannotCookSent": "Sent — the host has been notified."
+  },
+  "chat": {
+    "title": "Messages",
+    "empty": "No messages yet.",
+    "categoryLabel": "Category",
+    "pickCategory": "Choose a category…",
+    "message": "Message",
+    "pickMessage": "Choose a message…",
+    "slotValue": "Fill in the blank",
+    "slotValueRequired": "This message needs a value filled in.",
+    "send": "Send",
+    "report": "Report",
+    "reported": "Reported",
+    "category": {
+      "CLARIFICATION": "Ask for clarification",
+      "SUBSTITUTION": "Ask about a substitution",
+      "NUDGE": "Send a reminder",
+      "CANNOT_COOK": "I can't cook this",
+      "NO_BRIEF": "I haven't received a brief",
+      "THANKS": "Say thanks",
+      "REPLY": "Reply"
+    }
+  },
+  "vote": {
+    "title": "Vote",
+    "instructions": "Drag to rank every dish, best first. Optional: rate originality and how closely the brief was followed.",
+    "originality": "Originality",
+    "briefRespect": "Brief respect",
+    "submitBallot": "Submit ballot",
+    "thanks": "Thanks — your ballot has been recorded.",
+    "nothingToRank": "Nothing to rank yet."
+  },
+  "results": {
+    "title": "Results",
+    "points": "{{points}} pts",
+    "whoCookedForYou": "Who cooked for you",
+    "whoYouCookedFor": "Who you cooked for",
+    "award": {
+      "BEST_STARTER": "Best starter",
+      "BEST_MAIN": "Best main",
+      "BEST_DESSERT": "Best dessert",
+      "BEST_DRINK": "Best drink",
+      "MOST_ORIGINAL": "Most original",
+      "BEST_BRIEF_RESPECT": "Best brief respect"
+    }
+  },
+  "chain": {
+    "title": "Chain",
+    "spoilerWarning": "This reveals every pairing in the round. Only open this once you're ready to know.",
+    "reveal": "Reveal the chain",
+    "multipleCycles": "This assignment has split into {{count}} separate loops (a manual swap can do this) — everyone is still assigned exactly once.",
+    "cycleTitle": "Loop {{index}}",
+    "loopsBackTo": "loops back to {{name}}",
+    "swapTitle": "Swap a pairing",
+    "sender": "Sender",
+    "newCook": "New cook for them",
+    "applySwap": "Apply swap",
+    "spliceTitle": "Add a late joiner into the chain",
+    "applySplice": "Splice in",
+    "spliceConfirm": "Every sender has already submitted; splicing replaces one already-cooked dish. Continue?"
+  },
+  "alerts": {
+    "title": "Host alerts",
+    "openAlerts": "Open alerts",
+    "none": "No open alerts.",
+    "resolve": "Resolve",
+    "reportedMessages": "Reported messages",
+    "noReports": "No reported messages.",
+    "kind": {
+      "CANNOT_COOK": "A player can't cook their dish",
+      "NO_BRIEF": "A player hasn't received a brief",
+      "DROPOUT": "A player dropped out",
+      "REPORTED_MESSAGE": "A message was reported",
+      "OTHER": "Other"
     }
   },
   "errors": {

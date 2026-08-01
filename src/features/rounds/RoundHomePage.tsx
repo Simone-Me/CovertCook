@@ -4,26 +4,29 @@ import { Link, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
+import { RoundTimeline } from './RoundTimeline'
+import { DietaryPanelGrid } from './DietaryPanelGrid'
 import {
   advancePhase,
   approveMember,
   rejectMember,
+  removeMember,
+  REMOVE_REQUIRES_CONFIRMATION,
   assignmentExists,
   generateAssignment,
+  nextPhaseFor,
   getDietaryPanel,
   getRoundProgress,
-  type RoundStatus,
+  ROUND_PHASE_ORDER,
 } from '../../lib/rpc'
 
-const FORWARD_PHASE: Partial<Record<RoundStatus, RoundStatus>> = {
-  DRAFT: 'OPEN',
-  OPEN: 'LOCKED',
-  LOCKED: 'ASSIGNED',
-  ASSIGNED: 'BRIEFS_CLOSED',
-  BRIEFS_CLOSED: 'DINNER',
-  DINNER: 'VOTING',
-  VOTING: 'RESULTS',
-  RESULTS: 'ARCHIVED',
+const ENTRY_POINT: Partial<Record<string, { to: string; labelKey: string }>> = {
+  ASSIGNED: { to: 'brief', labelKey: 'rounds.entryPoints.writeRecipe' },
+  BRIEFS_CLOSED: { to: 'recipe', labelKey: 'rounds.entryPoints.yourRecipe' },
+  DINNER: { to: 'recipe', labelKey: 'rounds.entryPoints.yourRecipe' },
+  VOTING: { to: 'ballot', labelKey: 'rounds.entryPoints.vote' },
+  RESULTS: { to: 'results', labelKey: 'rounds.entryPoints.results' },
+  ARCHIVED: { to: 'results', labelKey: 'rounds.entryPoints.results' },
 }
 
 export function RoundHomePage() {
@@ -58,7 +61,7 @@ export function RoundHomePage() {
   if (roundLoading || !round) return <p className="muted">…</p>
 
   const isHost = round.host_id === profile?.id
-  const nextPhase = FORWARD_PHASE[round.status]
+  const nextPhase = nextPhaseFor(round.status, round.voting_enabled)
   const shareLink = `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`
   const activeApprovedCount = members?.filter((m) => m.status === 'ACTIVE' && m.approved).length ?? 0
   // Mirrors the precondition generate_assignment/advance_phase enforce
@@ -111,6 +114,23 @@ export function RoundHomePage() {
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
   }
 
+  async function onRemove(memberId: string, confirmDishChange = false) {
+    if (!roundId) return
+    if (!confirmDishChange && !window.confirm(t('rounds.removeConfirm'))) return
+    setError(null)
+    try {
+      await removeMember(roundId, memberId, confirmDishChange)
+      queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('errors.generic')
+      if (message === REMOVE_REQUIRES_CONFIRMATION) {
+        if (window.confirm(t('rounds.removeDishConfirm'))) await onRemove(memberId, true)
+      } else {
+        setError(message)
+      }
+    }
+  }
+
   return (
     <div className="stack">
       <div className="row" style={{ justifyContent: 'space-between' }}>
@@ -120,9 +140,25 @@ export function RoundHomePage() {
         <span className="badge">{t(`rounds.phase.${round.status}`)}</span>
       </div>
 
-      {isHost && <Link to={`/rounds/${roundId}/settings`}>{t('rounds.settings.title')}</Link>}
+      <div className="row">
+        {isHost && <Link to={`/rounds/${roundId}/settings`}>{t('rounds.settings.title')}</Link>}
+        {isHost && ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED') && (
+          <>
+            <Link to={`/rounds/${roundId}/chain`}>{t('chain.title')}</Link>
+            <Link to={`/rounds/${roundId}/alerts`}>{t('alerts.title')}</Link>
+          </>
+        )}
+      </div>
+
+      <RoundTimeline round={round} />
 
       {error && <div className="error">{error}</div>}
+
+      {ENTRY_POINT[round.status] && (
+        <Link to={`/rounds/${roundId}/${ENTRY_POINT[round.status]!.to}`} className="link-button">
+          {t(ENTRY_POINT[round.status]!.labelKey)}
+        </Link>
+      )}
 
       {isHost && round.status === 'OPEN' && (
         <div className="card">
@@ -166,23 +202,17 @@ export function RoundHomePage() {
                   </button>
                 </div>
               )}
+              {isHost && m.approved && m.role !== 'HOST' && (
+                <button type="button" className="secondary" onClick={() => onRemove(m.id)}>
+                  {t('rounds.remove')}
+                </button>
+              )}
             </div>
           ))}
       </div>
 
       <h2>{t('dietary.panelTitle')}</h2>
-      {dietaryPanel && dietaryPanel.length === 0 && <p className="muted">{t('dietary.panelEmpty')}</p>}
-      <div className="allergy-grid">
-        {dietaryPanel?.map((d, i) => (
-          <div key={i} className="allergy-card">
-            <div className="allergy-placeholder" aria-hidden="true">
-              {d.label.slice(0, 1).toUpperCase()}
-            </div>
-            <span className="muted">{t(`dietary.kind.${d.kind}`)}</span>
-            <span>{d.label}</span>
-          </div>
-        ))}
-      </div>
+      <DietaryPanelGrid entries={dietaryPanel} />
 
       {round.status === 'LOCKED' && (
         <>

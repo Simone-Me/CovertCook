@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router-dom'
-import { createRound, type RoundAnonymity, type RoundVisibility } from '../../lib/rpc'
+import { createRound, type RoundAnonymity, type RoundVisibility, type SlotMode } from '../../lib/rpc'
 
 export function CreateRoundPage() {
   const { t } = useTranslation()
@@ -11,6 +11,8 @@ export function CreateRoundPage() {
   const [visibility, setVisibility] = useState<RoundVisibility>('PRIVATE_CODE')
   const [anonymity, setAnonymity] = useState<RoundAnonymity>('ANONYMOUS')
   const [requiresApproval, setRequiresApproval] = useState(true)
+  const [votingEnabled, setVotingEnabled] = useState(true)
+  const [slotMode, setSlotMode] = useState<SlotMode>('FREE')
   const [limitPlayers, setLimitPlayers] = useState(false)
   const [maxPlayers, setMaxPlayers] = useState(8)
   const [error, setError] = useState<string | null>(null)
@@ -26,6 +28,8 @@ export function CreateRoundPage() {
         visibility,
         anonymity,
         requiresApproval,
+        votingEnabled,
+        slotMode,
         maxPlayers: limitPlayers ? maxPlayers : null,
       })
       navigate(`/rounds/${roundId}`, { replace: true })
@@ -62,6 +66,14 @@ export function CreateRoundPage() {
           </select>
         </div>
 
+        <div>
+          <label htmlFor="slotMode">{t('rounds.slotMode.label')}</label>
+          <select id="slotMode" value={slotMode} onChange={(e) => setSlotMode(e.target.value as SlotMode)}>
+            <option value="FREE">{t('rounds.slotMode.FREE')}</option>
+            <option value="CATEGORIES">{t('rounds.slotMode.CATEGORIES')}</option>
+          </select>
+        </div>
+
         <label className="row">
           <input
             type="checkbox"
@@ -70,6 +82,16 @@ export function CreateRoundPage() {
             onChange={(e) => setRequiresApproval(e.target.checked)}
           />
           {t('rounds.requiresApproval')}
+        </label>
+
+        <label className="row">
+          <input
+            type="checkbox"
+            style={{ width: 'auto' }}
+            checked={votingEnabled}
+            onChange={(e) => setVotingEnabled(e.target.checked)}
+          />
+          {t('rounds.votingEnabled')}
         </label>
 
         <label className="row">

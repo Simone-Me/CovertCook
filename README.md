@@ -1,6 +1,6 @@
 # CovertCook
 
-A mobile-first PWA that organises a dinner among friends like a Secret Santa:
+A mobile-first PWA that organises a dinner among friends:
 each participant is secretly assigned another participant and writes them a
 **recipe brief** that the other must cook. Everyone brings their dish, it's
 served as a shared buffet, and afterwards everyone ranks the dishes to crown
@@ -143,13 +143,18 @@ npm run dev
 `supabase/smoke_test.sql` + `supabase/smoke_test2.sql` play a full 4-player
 round end to end directly in SQL (signup → dietary block → assignment →
 briefs → chat → voting → results → reveal) — useful for re-validating the
-backend after any migration change:
+backend after any migration change. `supabase/smoke_test3.sql` covers the
+host-tools RPCs that only got a frontend later (`splice_member`,
+`set_pairing`, `remove_member` post-assignment, `exclusion_pairs`/
+`slots` direct CRUD, `host_alerts` resolve) — all three are independent
+and self-contained, each starting from its own `db reset`:
 
 ```bash
 npx supabase db reset
 CID=$(docker ps --filter "name=supabase_db" --format "{{.Names}}")
 docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test.sql
 docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
+docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test3.sql
 ```
 
 ---
@@ -183,28 +188,79 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
   `assignment_exists` RPC to know on load without spoiling the chain).
 - Dietary panel rendered as a placeholder image grid (per-entry square
   placeholder + label), ready to swap in real allergen icons later.
+- Round-page timeline: a bulleted progress stepper (every phase, current
+  one highlighted) so any player — not just the host — can see at a glance
+  where the round stands, since the single phase badge alone doesn't
+  convey the sequence.
+- Optional voting: a host can disable voting at round creation
+  (`rounds.voting_enabled`, `0013_optional_voting.sql`). Such a round skips
+  `VOTING` entirely — `advance_phase` moves it `DINNER → RESULTS` directly
+  and now explicitly rejects any attempt to enter `VOTING` at all for that
+  round. `compute_results` already tolerated zero ballots, so results still
+  publish (dishes listed, no meaningful ranking beyond the disclosed random
+  tiebreak). Matches how every other round-configuration setting
+  (`slot_mode`, `allow_mutual_pairs`, `requires_approval`, …) already
+  works: set once at creation, no update RPC.
+- The full player-facing game loop: brief editor (`/rounds/:roundId/brief`,
+  ingredients list, dietary-panel cross-reference, contains-tags
+  confirmation, round-wide dietary-conflict errors surfaced plainly), Cook
+  view (`/recipe`, recipe card + "can't cook this" quick action), a shared
+  canned-chat `ChatThread` component embedded in both (and in Results,
+  where each player's own two threads unmask automatically once
+  `RESULTS`/`ARCHIVED` — that's the actual identity reveal moment, per
+  `get_thread`), ballot voting (`/ballot`, drag-and-drop ranking via
+  `@dnd-kit`, optional originality/brief-respect scores), and
+  results/awards (`/results`). `RoundHomePage` now surfaces one
+  phase-appropriate entry point at a time into this loop instead of
+  requiring players to know the URLs.
+- Host tools: chain view (`/chain`, spoiler-gated behind an explicit
+  "Reveal" click, never auto-fetched — matches the existing
+  `host_saw_chain_at` design) rendered as the grid-of-chefs-with-arrows
+  layout, handling the case where a manual swap has split the assignment
+  into more than one cycle (see `0014`'s notes below); manual pairing
+  swap (`set_pairing`) and late-joiner splice (`splice_member`) from that
+  same page; a "Remove" action on the roster (`remove_member`, handling
+  its confirmation-required branch); host alerts inbox (`/alerts`,
+  `host_alerts` + `get_reported_messages`, resolve action); exclusion
+  pairs and (for `CATEGORIES`-mode rounds) course-slot configuration on
+  the settings page, both direct-`supabase-js` CRUD against existing
+  host-write RLS policies — no RPC needed for either.
+- `0014_brief_pairing_and_alerts.sql`: `get_my_brief` now returns
+  `pairing_id` (the Cook had no way to open their chat thread without
+  it); new `get_my_brief_draft` so a Sender can re-fetch their own
+  in-progress brief (`save_brief_draft` was write-only before); a
+  host-scoped update policy so alerts can actually be resolved (was
+  select-only); and `host_alerts.pairing_id`'s foreign key now
+  `ON DELETE SET NULL` instead of the implicit `NO ACTION` — the old
+  default made `remove_member` crash with a raw constraint violation the
+  instant the pairing being removed already had a `CANNOT_COOK` alert
+  against it, which is the single most natural sequence that alert exists
+  to prompt. Found and fixed via `supabase/smoke_test3.sql`, not by
+  inspection.
+- Simple placeholder icons: PWA install icons (`public/pwa-*.png` —
+  `vite.config.ts` referenced these before they existed, so installability
+  was silently broken) and per-`dietary_kind` inline SVG glyphs in the
+  allergy grid (shape-distinguished, not just color, for colorblind-safe
+  legibility) — functional, not final branding.
+- `CreateRoundPage` gained a slot-mode choice (Free-for-all / Specific
+  courses); previously nothing in the UI ever set `CATEGORIES`, so the
+  courses-configuration UI above would have been unreachable dead code.
 
 ### Not built yet
-- Brief editor screen (ingredients list, dietary panel while writing,
-  contains-tags confirmation).
-- Cook view (recipe card) + chat thread UI.
 - Dinner-day screens: shopping list, printable buffet label cards, offline
   cache verification.
-- Ballot UI (drag-and-drop ranking) + results/reveal screens.
-- `send-email` and `send-invite` Edge Functions (folders exist, empty).
-- Host tools: slot/exclusion configuration UI, chain view (spoiler-gated),
-  manual pairing edit UI, host alerts inbox.
-- Legal pages (privacy/terms), info & help layer, first-run tour.
-- Real allergen icons for the dietary-panel grid (currently text
-  placeholders — see `.allergy-placeholder` in `src/index.css`).
-- Real PWA icons — `vite.config.ts` references `pwa-192x192.png` /
-  `pwa-512x512.png`, which don't exist yet; installability will fail until
-  they're added.
+- `send-email` and `send-invite` Edge Functions (folders exist, empty) —
+  blocked on a real Brevo API key and email copy, neither fabricated here.
+- Legal pages (privacy/terms; won't draft real legal text), info & help
+  layer, first-run tour.
+- Real allergen icons and PWA icons — see "Simple placeholder icons" above;
+  current ones are functional stand-ins, not final design.
 - Security pass against the full checklist (RLS-missing-policy CI check,
-  password-list check, session/re-auth rules) and the manual pen-test pass.
+  password-list check, session/re-auth rules) and the manual pen-test pass
+  (the pen-test specifically needs a human, not just more automation).
 - 1000-run assignment fuzz test, splice/remove property tests, Borda
-  tie-break tests as actual automated tests (currently validated manually
-  via the smoke-test SQL scripts, not an automated suite).
+  tie-break tests as an actual automated suite — `smoke_test.sql`–
+  `smoke_test3.sql` currently cover this by manual re-run, not CI.
 
 ### Known simplifications (deliberate, not oversights)
 - The round-wide dietary check matches `dietary_entries.label` against
