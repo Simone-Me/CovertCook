@@ -9,6 +9,7 @@ import { MyRoundsPage } from './features/rounds/MyRoundsPage'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
 import { RoundHomePage } from './features/rounds/RoundHomePage'
+import { RoundSettingsPage } from './features/rounds/RoundSettingsPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, profile, loading, needsSignupCompletion } = useAuth()
@@ -61,6 +62,14 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <RoundHomePage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/settings"
+        element={
+          <RequireAuth>
+            <RoundSettingsPage />
           </RequireAuth>
         }
       />

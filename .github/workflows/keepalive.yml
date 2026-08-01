@@ -17,7 +17,7 @@ jobs:
       - name: Ping a trivial public REST endpoint
         run: |
           status=$(curl -s -o /dev/null -w "%{http_code}" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
+            -H "apikey: ${{ vars.VITE_SUPABASE_ANON_KEY }}" \
             "${{ vars.VITE_SUPABASE_URL }}/rest/v1/")
           echo "status=$status"
           # PostgREST returns 200 (or occasionally 401 without a bearer

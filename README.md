@@ -11,7 +11,8 @@ cook, you don't know who chose yours, and you all find out at the end.
 
 > **This file is a living status doc**, updated as the build progresses.
 > Read it before starting new work — it's the fastest way to know what
-> exists, what's validated, and what's still open.
+> exists, what's validated, and what's still open. For a dated history of
+> what changed and why, see [`CHANGELOG.md`](./CHANGELOG.md).
 
 ---
 
@@ -94,6 +95,37 @@ secret, Brevo key) actually live — never in the frontend bundle.
 
 ---
 
+## CI/CD & required GitHub configuration
+
+The three workflows in `.github/workflows/` all read from GitHub repo
+**Settings → Secrets and variables → Actions**, not from `.env.local`
+(which is gitignored and never leaves your machine). If a workflow run
+shows blank interpolations in its log (an empty `apikey:` header, a URL
+missing its host, `pg_dump` falling back to a local socket), the cause is
+always a missing entry here, not the workflow YAML — GitHub silently
+resolves an unset secret/variable to an empty string rather than failing
+the run.
+
+Populate these once per repo (values live in your Supabase/Netlify
+dashboards — nothing here should ever be committed):
+
+| Where | Name | Used by | Source |
+|---|---|---|---|
+| Variables | `VITE_SUPABASE_URL` | `deploy.yml`, `keepalive.yml` | Supabase → Project Settings → API |
+| Variables | `VITE_SUPABASE_ANON_KEY` | `deploy.yml`, `keepalive.yml` | Supabase → Project Settings → API (anon/publishable key — intentionally public, hence a Variable not a Secret, same as it is in the frontend bundle) |
+| Variables | `VITE_APP_BASE_URL` | `deploy.yml` | Your production URL |
+| Variables | `VITE_TURNSTILE_SITE_KEY` | `deploy.yml` | Cloudflare Turnstile dashboard |
+| Secrets | `SUPABASE_DB_URL` | `backup.yml` | Supabase → Project Settings → Database → Connection string (pooler host is in `supabase/.temp/pooler-url` after linking; password isn't stored anywhere in the repo) |
+| Secrets | `NETLIFY_AUTH_TOKEN` | `deploy.yml` | Netlify → User settings → Applications → Personal access tokens |
+| Secrets | `NETLIFY_SITE_ID` | `deploy.yml` | Netlify → Site settings → General → Site details |
+
+`keepalive.yml` reads the anon key from `vars.VITE_SUPABASE_ANON_KEY`
+(the same Variable `deploy.yml` uses) — an earlier version referenced a
+separate `secrets.SUPABASE_ANON_KEY` that was never actually set, which is
+why that job failed every run.
+
+---
+
 ## Running locally
 
 ```bash
@@ -139,6 +171,18 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
   config, `verify-turnstile` Edge Function.
 - GitHub Actions: deploy (Netlify), keep-alive ping, nightly `pg_dump`
   backup (14-day rotation via artifact expiry).
+- Host round-settings page (`/rounds/:roundId/settings`): editable diner
+  info (location/date-time/timezone via `update_round_details`, blocked
+  once `DINNER` phase starts), one-step-back "unlock" control, cancel round
+  (`0012_round_settings.sql`).
+- Assignment-generation UI on the round page: `LOCKED`-phase host action
+  that calls `generate_assignment` (previously backend-only — the frontend
+  had no way to trigger it, which is what made "Next → Assigned" dead-end
+  with a raw Postgres error; the "Next" button is now disabled with an
+  explanation until an assignment exists, using the new
+  `assignment_exists` RPC to know on load without spoiling the chain).
+- Dietary panel rendered as a placeholder image grid (per-entry square
+  placeholder + label), ready to swap in real allergen icons later.
 
 ### Not built yet
 - Brief editor screen (ingredients list, dietary panel while writing,
@@ -151,6 +195,8 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 - Host tools: slot/exclusion configuration UI, chain view (spoiler-gated),
   manual pairing edit UI, host alerts inbox.
 - Legal pages (privacy/terms), info & help layer, first-run tour.
+- Real allergen icons for the dietary-panel grid (currently text
+  placeholders — see `.allergy-placeholder` in `src/index.css`).
 - Real PWA icons — `vite.config.ts` references `pwa-192x192.png` /
   `pwa-512x512.png`, which don't exist yet; installability will fail until
   they're added.

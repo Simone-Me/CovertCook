@@ -44,7 +44,8 @@
     "note": "Note (optional)",
     "required": "Tick \"no restrictions\" or add at least one entry.",
     "panelTitle": "Dinner's dietary panel",
-    "panelEmpty": "Nobody has flagged a restriction for this dinner."
+    "panelEmpty": "Nobody has flagged a restriction for this dinner.",
+    "gridAlt": "Placeholder — allergen icons coming soon"
   },
   "rounds": {
     "myRounds": "My rounds",
@@ -86,6 +87,32 @@
       "RESULTS": "Results",
       "ARCHIVED": "Archived",
       "CANCELLED": "Cancelled"
+    },
+    "assignment": {
+      "title": "Assignment",
+      "generate": "Generate assignment",
+      "reroll": "Re-roll assignment",
+      "rerollConfirm": "This replaces everyone's current pairing with a new random one. Continue?",
+      "ready": "Assignment generated — ready to move to \"Assigned\".",
+      "needed": "Generate the assignment below before you can move to \"Assigned\".",
+      "waitingForHost": "Waiting for the host to generate the assignment."
+    },
+    "settings": {
+      "title": "Round settings",
+      "dinerInfo": "Diner info",
+      "location": "Location / address",
+      "dinnerAt": "Date & time",
+      "timezone": "Timezone",
+      "detailsLockedNote": "Diner info can no longer be edited once the dinner has started.",
+      "saved": "Saved.",
+      "phaseControl": "Status",
+      "currentPhase": "Current phase",
+      "stepBackTo": "Unlock — go back to \"{{phase}}\"",
+      "stepBackConfirm": "This moves the round back to \"{{phase}}\". Continue?",
+      "noStepBack": "This round is at its earliest phase.",
+      "dangerZone": "Danger zone",
+      "cancelRound": "Cancel round",
+      "cancelConfirm": "This cancels the round for everyone. This cannot be undone. Continue?"
     }
   },
   "errors": {

@@ -155,6 +155,36 @@ button:disabled {
   margin-bottom: 12px;
 }
 
+.allergy-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.allergy-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  text-align: center;
+  font-size: 12px;
+}
+
+.allergy-placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 20px;
+  font-weight: 600;
+}
+
 .badge {
   display: inline-flex;
   align-items: center;

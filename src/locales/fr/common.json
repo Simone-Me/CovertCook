@@ -44,7 +44,8 @@
     "note": "Précision (optionnel)",
     "required": "Cochez « aucune restriction » ou ajoutez au moins une entrée.",
     "panelTitle": "Panneau diététique du dîner",
-    "panelEmpty": "Personne n'a signalé de restriction pour ce dîner."
+    "panelEmpty": "Personne n'a signalé de restriction pour ce dîner.",
+    "gridAlt": "Espace réservé — icônes d'allergènes à venir"
   },
   "rounds": {
     "myRounds": "Mes dîners",
@@ -86,6 +87,32 @@
       "RESULTS": "Résultats",
       "ARCHIVED": "Archivé",
       "CANCELLED": "Annulé"
+    },
+    "assignment": {
+      "title": "Attribution",
+      "generate": "Générer l'attribution",
+      "reroll": "Relancer l'attribution",
+      "rerollConfirm": "Ceci remplace le tirage actuel de tout le monde par un nouveau, aléatoire. Continuer ?",
+      "ready": "Attribution générée — prêt à passer à « Attribué ».",
+      "needed": "Générez l'attribution ci-dessous avant de pouvoir passer à « Attribué ».",
+      "waitingForHost": "En attente que l'hôte génère l'attribution."
+    },
+    "settings": {
+      "title": "Paramètres du dîner",
+      "dinerInfo": "Infos du dîner",
+      "location": "Lieu / adresse",
+      "dinnerAt": "Date et heure",
+      "timezone": "Fuseau horaire",
+      "detailsLockedNote": "Les infos du dîner ne sont plus modifiables une fois le jour J commencé.",
+      "saved": "Enregistré.",
+      "phaseControl": "Statut",
+      "currentPhase": "Phase actuelle",
+      "stepBackTo": "Déverrouiller — revenir à « {{phase}} »",
+      "stepBackConfirm": "Ceci ramène le dîner à la phase « {{phase}} ». Continuer ?",
+      "noStepBack": "Ce dîner est déjà à sa première phase.",
+      "dangerZone": "Zone dangereuse",
+      "cancelRound": "Annuler le dîner",
+      "cancelConfirm": "Ceci annule le dîner pour tout le monde. Cette action est irréversible. Continuer ?"
     }
   },
   "errors": {

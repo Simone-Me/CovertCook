@@ -100,6 +100,31 @@ export async function advancePhase(roundId: string, target: RoundStatus) {
   return unwrap(res)
 }
 
+export async function generateAssignment(roundId: string) {
+  const res = await supabase.rpc('generate_assignment', { p_round_id: roundId })
+  return unwrap<number>(res) // new assignment_version
+}
+
+export async function assignmentExists(roundId: string) {
+  const res = await supabase.rpc('assignment_exists', { p_round_id: roundId })
+  return unwrap<boolean>(res)
+}
+
+export async function updateRoundDetails(input: {
+  roundId: string
+  location: string | null
+  dinnerAt: string | null
+  timezone: string
+}) {
+  const res = await supabase.rpc('update_round_details', {
+    p_round_id: input.roundId,
+    p_location: input.location,
+    p_dinner_at: input.dinnerAt,
+    p_timezone: input.timezone,
+  })
+  return unwrap(res)
+}
+
 export interface RoundProgress {
   total_players: number
   briefs_submitted: number

@@ -14,6 +14,7 @@ export interface RoundRow {
   host_id: string
   dinner_at: string | null
   timezone: string
+  location: string | null
 }
 
 export interface MyRoundRow extends RoundRow {
@@ -28,7 +29,7 @@ export function useMyRounds(uid: string | undefined) {
       const { data, error } = await supabase
         .from('round_members')
         .select(
-          'approved, rounds(id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone)',
+          'approved, rounds(id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location)',
         )
         .eq('profile_id', uid as string)
         .eq('status', 'ACTIVE')
@@ -49,7 +50,9 @@ export function useRound(roundId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('rounds')
-        .select('id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone')
+        .select(
+          'id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location',
+        )
         .eq('id', roundId as string)
         .single()
       if (error) throw error
