@@ -20,9 +20,9 @@ jobs:
         run: |
           echo "length: ${#DB_URL}"
           echo "starts with: ${DB_URL:0:13}..."
-          
-      - name: Install postgresql-client
-        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      # - name: Install postgresql-client
+      #   run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Install postgresql-client 17
         run: |
@@ -35,7 +35,7 @@ jobs:
         run: |
           set -euo pipefail
           filename="covertcook-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
-          pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-privileges | gzip > "$filename"
+          /usr/lib/postgresql/17/bin/pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-privileges | gzip > "$filename"
           echo "BACKUP_FILE=$filename" >> "$GITHUB_ENV"
 
       - name: Upload backup artifact
