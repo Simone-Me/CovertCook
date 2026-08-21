@@ -18,10 +18,18 @@ jobs:
         run: sudo apt-get update && sudo apt-get install -y postgresql-client
 
       - name: Dump database
+        env:
+          # Prefer the Secret; keep a Variable fallback for existing setups
+          # that stored this value there by mistake.
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL != '' && secrets.SUPABASE_DB_URL || vars.SUPABASE_DB_URL }}
         run: |
           set -euo pipefail
+          if [ -z "${SUPABASE_DB_URL:-}" ]; then
+            echo "::error::SUPABASE_DB_URL is empty. Set repository Secret SUPABASE_DB_URL (preferred) or Variable SUPABASE_DB_URL."
+            exit 1
+          fi
           filename="covertcook-$(date -u +%Y%m%dT%H%M%SZ).sql.gz"
-          pg_dump "${{ secrets.SUPABASE_DB_URL }}" --no-owner --no-privileges | gzip > "$filename"
+          pg_dump "$SUPABASE_DB_URL" --no-owner --no-privileges | gzip > "$filename"
           echo "BACKUP_FILE=$filename" >> "$GITHUB_ENV"
 
       - name: Upload backup artifact

@@ -140,7 +140,7 @@ nothing here should ever be committed):
 |---|---|---|---|
 | Variables | `VITE_SUPABASE_URL` | `keepalive.yml` | Supabase → Project Settings → API |
 | Variables | `VITE_SUPABASE_ANON_KEY` | `keepalive.yml` | Supabase → Project Settings → API (anon/publishable key — intentionally public, hence a Variable not a Secret) |
-| Secrets | `SUPABASE_DB_URL` | `backup.yml` | Supabase → Project Settings → Database → Connection string (pooler host is in `supabase/.temp/pooler-url` after linking; password isn't stored anywhere in the repo) |
+| Secrets (preferred; Variable fallback supported) | `SUPABASE_DB_URL` | `backup.yml` | Supabase → Project Settings → Database → Connection string (pooler host is in `supabase/.temp/pooler-url` after linking; password isn't stored anywhere in the repo) |
 
 These two GitHub Variables are separate from the four Netlify env vars
 above — same values, but two different dashboards, since the frontend
