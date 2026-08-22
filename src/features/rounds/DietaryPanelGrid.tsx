@@ -57,10 +57,15 @@ export function DietaryPanelGrid({ entries }: { entries: DietaryPanelEntry[] | u
     <div className="allergy-grid">
       {entries?.map((d, i) => (
         <div key={i} className="allergy-card">
-          <div className="allergy-placeholder" aria-label={t('dietary.gridAlt')}>
+          {/* The thing itself, not its category. Every card used to carry
+              the full kind label — "Diet (vegetarian, vegan, halal, kosher,
+              no pork…)" above the word "nuts" — which made a panel of four
+              restrictions taller than the dinner. The icon already says
+              which kind it is; the title attribute says it in words for
+              anyone who needs them. */}
+          <div className="allergy-placeholder" title={t(`dietary.kind.${d.kind}`)} aria-label={t(`dietary.kind.${d.kind}`)}>
             <KindIcon kind={d.kind} />
           </div>
-          <span className="muted">{t(`dietary.kind.${d.kind}`)}</span>
           <span>{d.label}</span>
         </div>
       ))}

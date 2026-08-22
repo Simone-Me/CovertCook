@@ -1,12 +1,12 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import type { RoundAnonymity, RoundStatus, RoundVisibility, SlotMode } from '../../lib/rpc'
+import type { RoundAccess, RoundAnonymity, RoundStatus, SlotMode, VotingMode } from '../../lib/rpc'
 
 export interface RoundRow {
   id: string
   name: string
   status: RoundStatus
-  visibility: RoundVisibility
+  access: RoundAccess
   anonymity: RoundAnonymity
   join_code: string
   accent_color: string
@@ -15,8 +15,22 @@ export interface RoundRow {
   dinner_at: string | null
   timezone: string
   location: string | null
+  voting_mode: VotingMode
+  results_published_at: string | null
+  // Generated in Postgres from voting_mode (0018) — the phase machine only
+  // ever needed "does voting happen at all", so it still reads this.
   voting_enabled: boolean
   slot_mode: SlotMode
+}
+
+const ROUND_COLUMNS =
+  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,voting_mode,voting_enabled,results_published_at,slot_mode'
+
+// A round nobody is playing any more: cancelled, or finished and archived.
+// Kept out of the main list rather than deleted — several people's writing
+// lives in a round, and one person cancelling shouldn't erase it.
+export function isPastRound(r: Pick<RoundRow, 'status'>) {
+  return r.status === 'CANCELLED' || r.status === 'ARCHIVED'
 }
 
 export interface MyRoundRow extends RoundRow {
@@ -30,9 +44,7 @@ export function useMyRounds(uid: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('round_members')
-        .select(
-          'approved, rounds(id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,voting_enabled,slot_mode)',
-        )
+        .select(`approved, rounds(${ROUND_COLUMNS})`)
         .eq('profile_id', uid as string)
         .eq('status', 'ACTIVE')
         .order('joined_at', { ascending: false })
@@ -52,9 +64,7 @@ export function useRound(roundId: string | undefined) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('rounds')
-        .select(
-          'id,name,status,visibility,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,voting_enabled,slot_mode',
-        )
+        .select(ROUND_COLUMNS)
         .eq('id', roundId as string)
         .single()
       if (error) throw error

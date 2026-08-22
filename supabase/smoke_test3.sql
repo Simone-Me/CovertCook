@@ -1,6 +1,6 @@
 -- Smoke test 3: the backend pieces that only just got a frontend in this
 -- pass (0014's get_my_brief_draft/pairing_id/host_alerts, plus
--- exclusion_pairs/slots direct CRUD, splice_member, set_pairing,
+-- exclusion_pairs direct CRUD, the menu RPCs, splice_member, set_pairing,
 -- remove_member post-assignment) — previously validated only by code
 -- review, now exercised end to end. Run after `npx supabase db reset`;
 -- self-contained, does not depend on smoke_test.sql/smoke_test2.sql having
@@ -33,7 +33,7 @@ select complete_signup('Ivan', 'en', true, '[]'::jsonb);
 
 \echo '=== CATEGORIES slot mode: host configures courses before assignment ==='
 select _as('00000000-0000-0000-0000-000000000101');
-select create_round('Categories Dinner', 'PRIVATE_CODE', 'ANONYMOUS', 'CATEGORIES', null, null, 'Europe/Paris', null, false, true, true) as round_id \gset
+select create_round('Categories Dinner', 'CODE', 'ANONYMOUS', 'CATEGORIES', null, null, 'Europe/Paris', null, false, true, 'LIVE') as round_id \gset
 select advance_phase(:'round_id'::uuid, 'OPEN');
 
 reset role;
@@ -86,11 +86,14 @@ begin
   end;
 end $$;
 
-\echo '--- CATEGORIES slots: host adds exactly 3 courses (matching 3 active approved players) ---'
+\echo '--- the menu: host adds exactly 3 courses, matching 3 seated chefs ---'
+-- Through add_course, not a direct insert: 0027 revoked write access to
+-- slots because the phase preconditions belong in a function, not in an
+-- RLS policy that only knows who you are.
 select _as('00000000-0000-0000-0000-000000000101');
-insert into slots (round_id, course) values (:'round_id'::uuid, 'STARTER');
-insert into slots (round_id, course) values (:'round_id'::uuid, 'MAIN');
-insert into slots (round_id, course) values (:'round_id'::uuid, 'DESSERT');
+select add_course(:'round_id'::uuid, 'STARTER');
+select add_course(:'round_id'::uuid, 'MAIN');
+select add_course(:'round_id'::uuid, 'DESSERT');
 select count(*) as slot_count from slots where round_id = :'round_id'::uuid;
 
 select advance_phase(:'round_id'::uuid, 'LOCKED');

@@ -5,8 +5,19 @@
 // arguments) only need to be spelled correctly once.
 import { supabase } from './supabase'
 
-export type RoundVisibility = 'PUBLIC_LINK' | 'PRIVATE_CODE'
-export type RoundAnonymity = 'ANONYMOUS' | 'OPEN'
+// How someone gets a seat. CODE = share a code, anyone holding it can ask;
+// INVITE = the host names existing accounts, who accept or decline in-app.
+// Replaces PUBLIC_LINK/PRIVATE_CODE, which were two names for one act.
+export type RoundAccess = 'CODE' | 'INVITE'
+
+// What members know about each other once seated. SPY sits between the
+// other two: the host sees real names, nobody else does.
+export type RoundAnonymity = 'ANONYMOUS' | 'SPY' | 'OPEN'
+
+// Not whether voting happens, but how. LIVE = the host opens it during
+// dinner and publishes results when ready; TIMED = a deadline publishes
+// them itself; DISABLED = no voting, and that choice is final.
+export type VotingMode = 'LIVE' | 'TIMED' | 'DISABLED'
 export type SlotMode = 'FREE' | 'CATEGORIES'
 export type RoundStatus =
   | 'DRAFT' | 'OPEN' | 'LOCKED' | 'ASSIGNED' | 'BRIEFS_CLOSED'
@@ -42,7 +53,7 @@ export async function completeSignup(input: {
 
 export async function createRound(input: {
   name: string
-  visibility: RoundVisibility
+  access: RoundAccess
   anonymity: RoundAnonymity
   slotMode?: SlotMode
   maxPlayers?: number | null
@@ -51,11 +62,11 @@ export async function createRound(input: {
   location?: string | null
   allowMutualPairs?: boolean
   requiresApproval?: boolean
-  votingEnabled?: boolean
+  votingMode?: VotingMode
 }) {
   const res = await supabase.rpc('create_round', {
     p_name: input.name,
-    p_visibility: input.visibility,
+    p_access: input.access,
     p_anonymity: input.anonymity,
     p_slot_mode: input.slotMode ?? 'FREE',
     p_max_players: input.maxPlayers ?? null,
@@ -64,9 +75,55 @@ export async function createRound(input: {
     p_location: input.location ?? null,
     p_allow_mutual_pairs: input.allowMutualPairs ?? false,
     p_requires_approval: input.requiresApproval ?? true,
-    p_voting_enabled: input.votingEnabled ?? true,
+    p_voting_mode: input.votingMode ?? 'LIVE',
   })
   return unwrap<string>(res) // round id
+}
+
+// Host-only, and only on a SPY round — the RPC refuses outright anywhere
+// else, so this can't leak by being called on the wrong round.
+export interface MemberIdentity {
+  member_id: string
+  real_name: string
+}
+
+export async function getMemberIdentities(roundId: string) {
+  const res = await supabase.rpc('get_member_identities', { p_round_id: roundId })
+  return unwrap<MemberIdentity[]>(res)
+}
+
+// Raised by invite_member when no account uses that address. Surfaced as a
+// named constant rather than prose so the UI can say "no chef with this
+// address" in the user's own language.
+export const NO_SUCH_CHEF = 'NO_SUCH_CHEF'
+
+export async function inviteMember(roundId: string, email: string) {
+  const res = await supabase.rpc('invite_member', { p_round_id: roundId, p_email: email })
+  return unwrap<string>(res) // invitation id
+}
+
+export interface RoundInvitation {
+  invitation_id: string
+  round_id: string
+  round_name: string
+  accent_emoji: string
+  invited_day: string
+}
+
+// The round's name comes back with the invitation because an invitee is
+// not a member yet and cannot read `rounds` — without it they'd be looking
+// at an invitation to a dinner they can't see the name of.
+export async function getMyInvitations() {
+  const res = await supabase.rpc('get_my_invitations', {})
+  return unwrap<RoundInvitation[]>(res)
+}
+
+export async function respondToInvitation(invitationId: string, accept: boolean) {
+  const res = await supabase.rpc('respond_to_invitation', {
+    p_invitation_id: invitationId,
+    p_accept: accept,
+  })
+  return unwrap<string | null>(res) // member id when accepted
 }
 
 // Mirrors v_forward_order in advance_phase (supabase/migrations/0006_phases.sql,
@@ -113,6 +170,44 @@ export async function approveMember(roundId: string, memberId: string) {
 
 export async function rejectMember(roundId: string, memberId: string) {
   const res = await supabase.rpc('reject_member', { p_round_id: roundId, p_member_id: memberId })
+  return unwrap(res)
+}
+
+export interface PendingMember {
+  member_id: string
+  real_name: string
+  joined_day: string
+}
+
+// Host-only: the real names of people waiting to be let in. Not reachable
+// as a plain table read — profiles_select_co_members needs both sides
+// approved, so a pending member has no readable profile for anyone
+// (0015_pending_member_identity.sql). Approving them ends this: from then
+// on they are their secret name, to the host too.
+export async function getPendingMembers(roundId: string) {
+  const res = await supabase.rpc('get_pending_members', { p_round_id: roundId })
+  return unwrap<PendingMember[]>(res)
+}
+
+// Feeds the Messaggi envelope's badge: messages addressed to me, across
+// both of my conversations, that I haven't opened yet (0022).
+export async function getUnreadCount(roundId: string) {
+  const res = await supabase.rpc('get_unread_count', { p_round_id: roundId })
+  return unwrap<number>(res)
+}
+
+// Stamps the other party's messages in one thread as read. Called when a
+// thread is opened — a badge that clears on a timer stops meaning anything.
+export async function markThreadRead(pairingId: string) {
+  const res = await supabase.rpc('mark_thread_read', { p_pairing_id: pairingId })
+  return unwrap(res)
+}
+
+// The cook's "seen, understood, no problem" — the answer that sits between
+// silence and CANNOT_COOK, and the only way a sender learns their recipe
+// landed at all.
+export async function acknowledgeBrief(roundId: string) {
+  const res = await supabase.rpc('acknowledge_brief', { p_round_id: roundId })
   return unwrap(res)
 }
 
@@ -213,6 +308,7 @@ export interface MyBrief {
   note_to_cook: string | null
   contains_tags: string[]
   ingredients: BriefIngredient[]
+  acknowledged: boolean
 }
 
 export async function getMyBrief(roundId: string) {
@@ -453,11 +549,24 @@ export async function spliceMember(roundId: string, memberId: string, confirmDis
   return unwrap(res)
 }
 
-export async function removeMember(roundId: string, memberId: string, confirmDishChange = false) {
+// COLLAPSE reconnects the chain around the departing member (everyone keeps
+// a dish, but the next cook is handed a different recipe); LEAVE changes
+// nothing but the roster (nobody is disturbed, one dish goes uncooked).
+// Only meaningful once an assignment exists — before that both behave the
+// same. See 0016_removal_mode.sql.
+export type RemovalMode = 'COLLAPSE' | 'LEAVE'
+
+export async function removeMember(
+  roundId: string,
+  memberId: string,
+  confirmDishChange = false,
+  mode: RemovalMode = 'COLLAPSE',
+) {
   const res = await supabase.rpc('remove_member', {
     p_round_id: roundId,
     p_member_id: memberId,
     p_confirm_dish_change: confirmDishChange,
+    p_mode: mode,
   })
   return unwrap(res)
 }
@@ -545,4 +654,95 @@ export async function addSlot(roundId: string, course: Course) {
 export async function removeSlot(id: string) {
   const { error } = await supabase.from('slots').delete().eq('id', id)
   if (error) throw new Error(error.message)
+}
+
+// ---------------------------------------------------------------------------
+// Voting, phase 3 (0024 / 0025). LIVE and TIMED differ in who triggers the
+// close and when results become visible — never in the phase machine.
+// ---------------------------------------------------------------------------
+
+export const RESULTS_NOT_PUBLISHED = 'RESULTS_NOT_PUBLISHED'
+export const RESULTS_NOT_READY = 'RESULTS_NOT_READY'
+
+// Fixed choices, not a free datetime: this is decided at a table with a
+// glass in hand. null clears the deadline.
+export type DeadlineMinutes = 5 | 10 | 60 | 180 | 1440
+
+export async function setVotingDeadline(roundId: string, minutes: DeadlineMinutes | null) {
+  const res = await supabase.rpc('set_voting_deadline', { p_round_id: roundId, p_minutes: minutes })
+  return unwrap<string | null>(res)
+}
+
+export interface VoteProgress {
+  voted: number
+  eligible: number
+}
+
+// Counts only — the host must never learn a single ballot's contents.
+export async function getVoteProgress(roundId: string) {
+  const res = await supabase.rpc('get_vote_progress', { p_round_id: roundId })
+  const rows = unwrap<VoteProgress[]>(res)
+  return rows[0] ?? null
+}
+
+export async function publishResults(roundId: string) {
+  const res = await supabase.rpc('publish_results', { p_round_id: roundId })
+  return unwrap(res)
+}
+
+// Drops the ballot so it can be cast again. Replacing rather than editing:
+// ballot_items cascade, so one delete leaves nothing half-rewritten.
+export async function withdrawBallot(roundId: string) {
+  const res = await supabase.rpc('withdraw_ballot', { p_round_id: roundId })
+  return unwrap(res)
+}
+
+// Straight to the results without a vote, for the evening that ran long.
+// Does not rewrite voting_mode — the round was a voting round.
+export async function skipVoting(roundId: string) {
+  const res = await supabase.rpc('skip_voting', { p_round_id: roundId })
+  return unwrap(res)
+}
+
+// ---------------------------------------------------------------------------
+// The menu (0026). slot_mode used to be decided in the seconds before a
+// round existed and never again; it is now changeable until the table locks,
+// because CATEGORIES only needs to be settled before briefs are written.
+// ---------------------------------------------------------------------------
+
+export const MENU_LOCKED = 'MENU_LOCKED'
+
+export async function setSlotMode(roundId: string, mode: SlotMode) {
+  const res = await supabase.rpc('set_slot_mode', { p_round_id: roundId, p_mode: mode })
+  return unwrap(res)
+}
+
+export interface MenuStatus {
+  courses: number
+  seats: number
+}
+
+// generate_assignment has always refused unless these two match — one
+// course per chef, because every chef cooks exactly one dish. It was
+// enforced and never shown, so being one short produced a refusal instead
+// of a number.
+export async function getMenuStatus(roundId: string) {
+  const res = await supabase.rpc('get_menu_status', { p_round_id: roundId })
+  const rows = unwrap<MenuStatus[]>(res)
+  return rows[0] ?? null
+}
+
+export const COURSE_IN_USE = 'COURSE_IN_USE'
+
+// Menu edits go through functions, not table writes: the preconditions are
+// about the round's phase, not about who you are, and RLS can only answer
+// the second question (0027).
+export async function addCourse(roundId: string, course: Course) {
+  const res = await supabase.rpc('add_course', { p_round_id: roundId, p_course: course })
+  return unwrap<string>(res)
+}
+
+export async function removeCourse(roundId: string, slotId: string) {
+  const res = await supabase.rpc('remove_course', { p_round_id: roundId, p_slot_id: slotId })
+  return unwrap(res)
 }

@@ -4,6 +4,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound } from './hooks'
 import { getHostAlerts, getReportedMessages, resolveHostAlert } from '../../lib/rpc'
+import { BackToTable } from '../../components/BackToTable'
 
 export function HostAlertsPage() {
   const { t } = useTranslation()
@@ -33,7 +34,8 @@ export function HostAlertsPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <h1>{t('alerts.title')}</h1>
 
       <h2>{t('alerts.openAlerts')}</h2>

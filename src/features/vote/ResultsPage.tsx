@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ChatThread } from '../chat/ChatThread'
 import { getMyAssignment, getMyBrief, getResults } from '../../lib/rpc'
+import { BackToTable } from '../../components/BackToTable'
 
 export function ResultsPage() {
   const { t } = useTranslation()
@@ -31,7 +32,8 @@ export function ResultsPage() {
   if (isLoading) return <p className="muted">…</p>
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <h1>{t('results.title')}</h1>
 
       <div className="stack">

@@ -1,0 +1,29 @@
+-- Joining a round by code has never worked through the app.
+--
+-- 0003 created turnstile_tickets and left this note beside it:
+--
+--   "No policies: only the edge function (service_role, bypasses RLS)
+--    inserts; only SECURITY DEFINER functions (also bypass RLS) consume."
+--
+-- The premise is wrong in a way that is easy to miss: **service_role
+-- bypasses RLS, not table GRANTs.** Those are two different gates, and
+-- this table only ever cleared the first. Inspecting the live grants shows
+-- service_role holding TRUNCATE, REFERENCES and TRIGGER — and none of
+-- INSERT, SELECT, UPDATE or DELETE.
+--
+-- So verify-turnstile's insert fails with "permission denied for table
+-- turnstile_tickets", surfacing in the UI as the opaque "Edge Function
+-- returned a non-2xx status code", and join_round is never reached at all.
+--
+-- Why the smoke tests all pass anyway, and why this went unnoticed: every
+-- one of them seeds its ticket by hand as the postgres superuser
+-- (`reset role; insert into turnstile_tickets ...`) before calling
+-- join_round. That skips the edge function entirely, so the suite has
+-- always tested the second half of a path whose first half was broken.
+-- Worth remembering when reading a green test run: it proves the code the
+-- test exercises, not the journey a person takes.
+--
+-- SELECT is needed as well as INSERT — the function does
+-- `.insert(...).select('id')` to hand the ticket id back to the client.
+
+grant insert, select on turnstile_tickets to service_role;

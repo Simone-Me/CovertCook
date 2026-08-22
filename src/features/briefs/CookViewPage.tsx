@@ -3,8 +3,9 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ChatThread } from '../chat/ChatThread'
-import { getMessageTemplates, getMyBrief, sendMessage } from '../../lib/rpc'
+import { acknowledgeBrief, getMessageTemplates, getMyBrief, sendMessage } from '../../lib/rpc'
 import { useAuth } from '../../lib/auth'
+import { BackToTable } from '../../components/BackToTable'
 
 export function CookViewPage() {
   const { t } = useTranslation()
@@ -22,7 +23,23 @@ export function CookViewPage() {
     queryFn: () => getMessageTemplates(locale),
   })
   const [cannotCookSent, setCannotCookSent] = useState(false)
+  const [acked, setAcked] = useState(false)
+  const [acking, setAcking] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
+  async function onAcknowledge() {
+    if (!roundId) return
+    setError(null)
+    setAcking(true)
+    try {
+      await acknowledgeBrief(roundId)
+      setAcked(true)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setAcking(false)
+    }
+  }
 
   async function onCannotCook() {
     if (!brief) return
@@ -43,7 +60,8 @@ export function CookViewPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <h1>{brief.dish_name}</h1>
       <span className="badge">{t(`briefs.courseOption.${brief.course}`)}</span>
       {error && <div className="error">{error}</div>}
@@ -103,13 +121,25 @@ export function CookViewPage() {
         )}
       </div>
 
-      {!cannotCookSent ? (
-        <button type="button" className="secondary" onClick={onCannotCook}>
-          {t('briefs.cannotCook')}
-        </button>
-      ) : (
-        <p className="muted">{t('briefs.cannotCookSent')}</p>
-      )}
+      {/* Two opposite answers, and until now only the unhappy one existed:
+          a cook could raise CANNOT_COOK or say nothing at all, so a sender
+          who wrote a recipe never learned whether it landed. */}
+      <div className="row">
+        {brief.acknowledged || acked ? (
+          <p className="muted">{t('briefs.acknowledged')}</p>
+        ) : (
+          <button type="button" disabled={acking} onClick={onAcknowledge}>
+            {t('briefs.acknowledge')}
+          </button>
+        )}
+        {!cannotCookSent ? (
+          <button type="button" className="secondary" onClick={onCannotCook}>
+            {t('briefs.cannotCook')}
+          </button>
+        ) : (
+          <p className="muted">{t('briefs.cannotCookSent')}</p>
+        )}
+      </div>
 
       <h2>{t('chat.title')}</h2>
       <ChatThread pairingId={brief.pairing_id} />

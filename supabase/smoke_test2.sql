@@ -130,7 +130,27 @@ end $$;
 select _as('00000000-0000-0000-0000-000000000001');
 select advance_phase(:'round_id'::uuid, 'RESULTS');
 
-\echo '--- results (via get_results, since briefs stays RPC-only forever) ---'
+-- Reaching RESULTS is no longer the same thing as everyone seeing them
+-- (0025). On a LIVE round the Executive Chef reads the room first and
+-- announces when ready, so a player asking too early is refused by name.
+\echo '--- a player before the announcement: expect RESULTS_NOT_PUBLISHED ---'
+select _as('00000000-0000-0000-0000-000000000002');
+do $$
+begin
+  perform 1 from get_results((select id from rounds where name = 'Test Dinner'));
+  raise exception 'SMOKE FAIL: results were readable before being announced';
+exception
+  when others then
+    if sqlerrm like 'SMOKE FAIL%' then raise; end if;
+    raise notice 'correctly withheld: %', sqlerrm;
+end $$;
+
+\echo '--- the host can see them all along, which is the point ---'
+select _as('00000000-0000-0000-0000-000000000001');
+select count(*) as host_sees_results from get_results(:'round_id'::uuid);
+
+\echo '--- once announced, everyone can ---'
+select publish_results(:'round_id'::uuid);
 select _as('00000000-0000-0000-0000-000000000002');
 select dish_name, course, borda_points, first_places, final_rank, award_keys
 from get_results(:'round_id'::uuid)

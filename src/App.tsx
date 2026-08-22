@@ -1,11 +1,14 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
 import type { ReactNode } from 'react'
 import { useAuth } from './lib/auth'
+import { rememberJoinCode } from './lib/pendingJoin'
 import { AppHeader } from './components/AppHeader'
+import { PendingJoinBanner } from './components/PendingJoinBanner'
 import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { MyRoundsPage } from './features/rounds/MyRoundsPage'
+import { ProfilePage } from './features/profile/ProfilePage'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
 import { RoundHomePage } from './features/rounds/RoundHomePage'
@@ -19,10 +22,22 @@ import { ResultsPage } from './features/vote/ResultsPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, profile, loading, needsSignupCompletion } = useAuth()
+  const location = useLocation()
 
   if (loading) return null
-  if (!session) return <Navigate to="/signin" replace />
-  if (needsSignupCompletion) return <Navigate to="/signup" replace />
+
+  // Last chance to keep the invitation. These redirects use `replace`, so
+  // the ?code= that brought someone here is about to be erased from
+  // history — stash it now and MyRoundsPage will pick it up on the way
+  // back. See src/lib/pendingJoin.ts.
+  if (!session || needsSignupCompletion) {
+    if (location.pathname === '/join') {
+      const code = new URLSearchParams(location.search).get('code')
+      if (code) rememberJoinCode(code)
+    }
+    return <Navigate to={session ? '/signup' : '/signin'} replace />
+  }
+
   if (!profile) return null
 
   return <>{children}</>
@@ -44,6 +59,14 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <MyRoundsPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/profile"
+        element={
+          <RequireAuth>
+            <ProfilePage />
           </RequireAuth>
         }
       />
@@ -136,7 +159,12 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppHeader />
-      <main>
+      <PendingJoinBanner />
+      {/* The tablecloth is the app, not one page of it. Every screen sits
+          on it, and .sheet is the paper each one is written on — the rule
+          that nothing readable touches the checks holds everywhere. The
+          round page opts out of .sheet because it lays its own paper. */}
+      <main className="cloth">
         <AppRoutes />
       </main>
     </BrowserRouter>

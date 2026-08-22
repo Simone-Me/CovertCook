@@ -5,6 +5,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
 import { getChain, setPairing, spliceMember, SPLICE_REQUIRES_CONFIRMATION, type ChainLink } from '../../lib/rpc'
+import { BackToTable } from '../../components/BackToTable'
 
 // Walks the sender->cook edges into cycle order (get_chain returns rows
 // ordered by lap + sender secret name, not by chain position) so the grid
@@ -100,7 +101,8 @@ export function ChainPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <h1>{t('chain.title')}</h1>
       {error && <div className="error">{error}</div>}
 

@@ -4,9 +4,11 @@ import { useNavigate, useParams, Link, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
+import { BackToTable } from '../../components/BackToTable'
 import {
   advancePhase,
   previousPhaseFor,
+  ROUND_PHASE_ORDER,
   updateRoundDetails,
   getExclusionPairs,
   addExclusionPair,
@@ -172,13 +174,39 @@ export function RoundSettingsPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <h1>{t('rounds.settings.title')}</h1>
         <Link to={`/rounds/${roundId}`}>{t('actions.back')}</Link>
       </div>
 
       {error && <div className="error">{error}</div>}
+
+      {/* Mirrors the panel on the round page. Filling the table is a thing
+          a host comes back to, and they don't always come back the same
+          way — so it lives in both places they'd look. */}
+      <h2>{t('rounds.settings.filling')}</h2>
+      <div className="card stack">
+        <label>{t('rounds.shareLink')}</label>
+        <div className="row">
+          <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() =>
+              navigator.clipboard.writeText(
+                `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`,
+              )
+            }
+          >
+            {t('actions.copy')}
+          </button>
+        </div>
+        {ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED') && (
+          <p className="muted">{t('rounds.lateJoinerWarning')}</p>
+        )}
+      </div>
 
       <h2>{t('rounds.settings.dinerInfo')}</h2>
       {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}

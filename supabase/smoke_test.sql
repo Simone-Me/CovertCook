@@ -29,7 +29,7 @@ table profiles;
 
 -- Alice creates a round
 select _as('00000000-0000-0000-0000-000000000001');
-select create_round('Test Dinner', 'PRIVATE_CODE', 'ANONYMOUS', 'FREE', null, null, 'Europe/Paris', null, false, false) as round_id \gset
+select create_round('Test Dinner', 'CODE', 'ANONYMOUS', 'FREE', null, null, 'Europe/Paris', null, false, false) as round_id \gset
 
 \echo '--- round ---'
 select id, name, status, join_code, accent_color, accent_emoji from rounds;

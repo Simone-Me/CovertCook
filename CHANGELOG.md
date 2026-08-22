@@ -4,6 +4,730 @@ Dated entries, newest first. `README.md` stays the living status doc (what
 exists / what's missing right now); this file is the history of how it got
 there.
 
+---
+
+## Where to pick up
+
+Everything below from 2026-08-22 onwards is **local only** — production is
+still on migration `0014`. Nothing has been deployed.
+
+**Next, in order:**
+
+1. **The board** (`PRESENTATION.md` drawer 4) — the round-wide channel,
+   `round_messages` as its own table rather than by loosening `messages`,
+   unattributed posts with the author stored but never sent. Phrases are
+   already drafted. This finishes the redesign's original scope.
+2. **Free-text chat** alongside the templates, with the length cap and the
+   rate limit already decided.
+3. **The settings page** — still a flat list; the round page has moved to
+   folds and envelopes and this hasn't followed.
+4. **Real table props** — placeholder drawings today; the three rules for
+   the real renders are in `TableProps.tsx`.
+5. **Notifications** (`PRESENTATION.md` phase 5) — email, not push, and
+   the reasoning is written down. Needs a mail provider key.
+
+**Two open questions that need you, not code:**
+
+- **Severe allergies still hard-block submission.** The tagging changed
+  (found in the text rather than ticked) but the block did not. If you want
+  a card on the dish to replace the block rather than accompany it, say so
+  — that's a product call about a real risk at a shared table, not a
+  refactor.
+- **"Executive Chef" is identical in both languages**, treated as a role
+  name rather than translated ("Chef exécutif"). Two strings to change if
+  you prefer the French form.
+
+---
+
+## 2026-08-22 (13)
+
+**Two smoke tests updated to match behaviour they were written before.**
+Both failures were the new guards working, not regressions — worth
+recording because a red suite after a deliberate change is exactly when
+it's tempting to weaken the change instead of the test.
+
+- `smoke_test3.sql` inserted courses straight into `slots`, which `0027`
+  revoked. Now uses `add_course`, so it exercises the phase precondition
+  the direct write never had.
+- `smoke_test2.sql` read the results as a player the moment the round
+  reached `RESULTS`, which `0025` no longer allows on a LIVE round. It now
+  asserts the whole sequence instead: a player is refused with
+  `RESULTS_NOT_PUBLISHED`, the host can see them all along — that being
+  the point — and after `publish_results` everyone can.
+
+All six pass.
+
+## 2026-08-22 (12)
+
+**Fixed: deleting a course after the roulette had run gave a raw
+constraint error.** `pairings.slot_id` is NOT NULL and points at the
+course, so removing one — or switching the menu back to free, which
+removes them all — aborted with `violates foreign key constraint
+pairings_slot_id_fkey`. Nothing had stopped the attempt, because the RLS
+policy asks "are you the host", not "is this still a menu anyone can
+change".
+
+The fix isn't a friendlier message on the same path: changing the menu is
+a decision with preconditions, and preconditions don't belong in a policy
+that only knows who you are. `add_course` and `remove_course` (`0027`)
+carry the phase check, direct writes to `slots` are revoked, and the two
+failures have names — "the menu is set, the chefs already have their
+courses" and "somebody is already cooking that course".
+
+**Changed: one pass instead of a column of panels.** Named after the pass
+in a real kitchen — the counter orders are called across, where everything
+goes through one person. It shows only what's up right now, and opens by
+itself only when the round is genuinely blocked on the Executive Chef.
+Long notices became one line with the detail folded behind it: the
+late-joiner warning was three sentences sitting permanently above the
+dinner.
+
+**Changed: writing a recipe has two modes** (`0028`). Quick is a name plus
+either a link or one block of text; detailed is the itemised version for
+whoever enjoys it. `submit_brief` used to demand a name, 50 characters of
+procedure, an ingredient row *and* an "I confirm the allergen tags" tick —
+reasonable one at a time, and together a form nobody fills honestly.
+
+Removed from the form: difficulty, prep time, cost, note to cook, and the
+course dropdown. The course was never the sender's to choose — the
+roulette decides it, or the round is free-for-all — so offering it invited
+people to contradict their own assignment. It's now stated, not asked.
+
+**Changed: allergen tags are found, not ticked.** They were a row of
+checkboxes plus a confirmation, which is a chore that means nothing: a tick
+nobody understands is an obstacle people learn to click through, not
+consent. The labels are already known — they come from the table's own
+restrictions — so the editor scans what was written for them, whole words
+only so "nuts" doesn't fire on "doughnuts".
+
+When something matches, the sender gets the one instruction that actually
+helps at a shared table: *"Put a card next to this dish — it contains
+nuts, and somebody at this table has said that matters to them."*
+
+**Unchanged, deliberately:** severe allergies and diets still hard-block
+submission. The dish goes on a shared table, so it is still checked
+against everyone's restrictions rather than just its cook's. What changed
+is who does the tagging, not whether the check happens.
+
+**Changed: the dietary panel got shorter.** Every card carried the full
+kind label — "Diet (vegetarian, vegan, halal, kosher, no pork…)" above the
+word "nuts" — which made four restrictions taller than the dinner. The
+icon already says which kind it is; the words moved to its tooltip.
+
+## 2026-08-22 (11)
+
+The menu, and why it looked broken.
+
+**Fixed: the menu could only be decided in the seconds before a round
+existed.** `slot_mode` was create-time-only, and the courses UI only
+renders for a `CATEGORIES` round — so a host who took the default and
+later wanted a proper menu had no route to one. The report was "I can't
+remove menu elements"; the truth was there were none, and no way to ask
+for any.
+
+`0018` had said keeping it immutable was correct, and it was — but for a
+narrower reason than "settings don't change". `CATEGORIES` needs each
+brief to know its course *before* it is written, which is only true once
+the assignment exists. Before `LOCKED` there is no chain and no brief, so
+switching is free. `set_slot_mode` (`0026`) refuses at exactly that line
+instead of at creation.
+
+Switching back to free deletes the courses. They describe a menu nobody is
+cooking, and keeping them would let a later switch silently resurrect a
+menu the host thought they had thrown away.
+
+**Fixed: a rule that was enforced and never stated.** `generate_assignment`
+has always refused unless the courses equal the seated chefs — one dish
+each — so a host one course short met a refusal rather than a count, which
+reads as a broken button. `get_menu_status` returns both numbers and the
+panel shows the arithmetic as it happens: *"0 courses for 2 chefs. Every
+chef cooks exactly one dish, so these two have to match before the
+roulette can run."*
+
+**Changed: composing the menu sits with the other host actions**, above
+the envelopes, not on a settings page someone would have to know to visit
+— and it knocks for attention while the courses don't add up. Terminology
+follows: *compose the menu*, *free-for-all* or *a composed menu*.
+
+**Verified in a browser:** switching free → composed, adding a course
+(count goes to 1 of 2), and removing it again (back to 0) all work from
+the round page. Migrations applied with `migration up`; TypeScript, oxlint
+and build clean; 307 locale keys in both languages.
+
+## 2026-08-22 (10)
+
+Phase 3 (voting), plus four corrections to how the round page behaves.
+
+**Fixed: back only worked on round pages.** `BackToTable` needed a
+`roundId`, so the profile — reachable from a dinner — had no way back at
+all: you could only leave via the home screen and in again. It now asks
+history, with a fallback for the cases where there isn't any (a deep link,
+a reload, a PWA opened cold), so it is never a dead control.
+
+**Changed: the tablecloth is the app, not one page of it.** Writing a
+recipe used to drop you onto plain white. The cloth now sits under every
+screen and each page is written on a `.sheet` — the rule that nothing
+readable touches the checks holds everywhere rather than only where it was
+first written.
+
+**Changed: host actions fold.** Three panels stacked open above the
+envelopes pushed the dinner itself off the screen. Each is a `<details>`
+with a triangle now, and the one the round is actually blocked on takes
+the accent colour and knocks a few times before stopping — something that
+never stops asking is something people learn to ignore.
+
+**Fixed: a stray rule between names.** The fold crease drawn on every
+opened envelope reads as folded paper on a short letter and as a
+horizontal rule cutting through the content on a list of names. Now opt-in
+(`.letter--creased`), kept for the takeover screens where the page really
+is one sheet.
+
+**Added: removing a chef shows the chain.** "Collapse" and "leave" are
+words that mean nothing until you can see what each does to the people
+either side, so the choice is now drawn: `A → B → D → E` against
+`A → B → ✕   D → E`.
+
+### Voting (0024, 0025)
+
+`0018` recorded LIVE/TIMED/DISABLED and deliberately left `advance_phase`
+alone, because the phase machine only ever needed to know *whether* voting
+happens. This is the other half — who triggers it, when results become
+visible, whether a vote can be changed — and it also leaves the phase
+machine alone: everything is a new column defaulting to today's behaviour,
+or a new host-only RPC.
+
+- **A deadline that can actually be set.** `voting_closes_at` has existed
+  since `0001` and `submit_ballot` has always respected it, but nothing
+  could write it — the column was a promise the app never kept. Fixed
+  minutes rather than a free datetime: this is decided at a table with a
+  glass in hand, not in a calendar.
+- **A vote can be changed until it can't.** "Ballots are final" is right at
+  the moment the count is taken and wrong for the twenty minutes before it.
+  The ballot is withdrawn and recast rather than edited, because
+  `ballot_items` cascade — one delete leaves nothing half-rewritten.
+- **Results are published, not merely computed.** Reaching `RESULTS` used
+  to make them readable by everyone at once, which is the whole of the
+  TIMED story and none of the LIVE one. The phase stays one thing;
+  visibility became a second question. A TIMED round publishes itself —
+  waiting on a host who has gone to bed would miss the point of choosing
+  TIMED.
+- **Progress without contents.** The Executive Chef gets one number —
+  how many have finished — and never a ballot. Counts, from a function, so
+  the client has nothing to widen.
+- **Skipping without rewriting the round.** The dinner ran long and nobody
+  can rank six dishes; `skip_voting` goes to the results and deliberately
+  does not touch `voting_mode`. The round was a voting round; this evening
+  just didn't get there.
+
+**Verified:** migrations applied with `migration up` (no reset, no accounts
+destroyed), round page renders with the folding actions, TypeScript,
+oxlint and build clean, 299 locale keys in both languages.
+
+## 2026-08-22 (9)
+
+Four roster and round-page corrections, all from watching someone use it.
+
+**Changed: "spin the roulette" moved out of the Chefs envelope.** At
+`LOCKED` the round is waiting on exactly one person to do exactly one
+thing, and that thing was hidden two taps inside a drawer — so the page
+looked like it was waiting for nothing. It now sits in the open with a
+line saying what it does, and players see the matching "waiting for the
+Executive Chef" instead of a page with no visible state.
+
+**Changed: removing a chef is a mark, not a button.** A full-width Remove
+beside every name gave the rarest action in the roster the same weight as
+the person it sat next to, and then put a `confirm()` on top. Now it's a
+small banana peel you have to aim at, and the named choice it opens *is*
+the confirmation — two deliberate taps either way, one fewer modal. The
+one interruption that stays is the case where both dishes are written and
+one is about to be discarded; that genuinely deserves stopping for.
+
+**Fixed: the invitation banner outlived its invitation.** It kept saying
+"your invitation is being held" after the code had been used, until a
+reload. `sessionStorage` fires no event in the tab that wrote it — the
+`storage` event is for *other* tabs — so nothing told the banner to
+re-render. Now published through a small event and read with
+`useSyncExternalStore`, so it disappears the moment the code is consumed.
+
+**Added: you can find yourself in the roster.** Every name in the list is
+a pseudonym, including your own, so there was no way to tell which
+stranger was you. Marked with a wine ring — the same trace the cloth picks
+up as the evening goes on, so the answer belongs to the table rather than
+to a generic "(you)" label.
+
+**Verified in a browser:** the wine ring lands on the signed-in member and
+nobody else, the banana peel appears only beside removable chefs and opens
+into a named choice, and the banner is absent once the code is spent.
+
+## 2026-08-22 (8)
+
+Three problems in the join flow, one of them introduced earlier the same
+day.
+
+**Fixed: a redirect loop that hid rounds you had joined.** `JoinRoundPage`
+read its code as `searchParams.get('code') ?? takeJoinCode()`, and
+`takeJoinCode()` is what *clears* the stash — so whenever the URL carried
+a code, the short-circuit meant the stash was never cleared. `MyRoundsPage`
+then saw a pending code on every visit and redirected back to `/join`,
+forever. The symptom was the one reported: a dinner you had definitely
+joined never appeared. `takeJoinCode()` now runs first and
+unconditionally; the URL still wins as the value.
+
+Introduced in 2026-08-22 (5) along with the stash itself, which is a
+reminder about `??`: it is a control-flow operator, so a call on its right
+side is a call that might not happen.
+
+**Fixed: "already a member of this round" shown to people who weren't.**
+`join_round` used one existence check on `round_members`, but that row
+covers four situations and only one of them is "you're in". Someone who
+asked to join a round that requires approval gets a row immediately,
+unapproved — and was then told they were already a member, which is
+exactly the opposite of what they needed to know. `0023` splits it into
+named outcomes: `ALREADY_MEMBER`, `AWAITING_APPROVAL`, `PREVIOUSLY_LEFT`,
+`WAS_REMOVED`. Named constants rather than prose, for the same reason
+`REMOVE_REQUIRES_CONFIRMATION` was: the client must not match on English,
+and these have to be sayable in both languages.
+
+`PREVIOUSLY_LEFT` and `WAS_REMOVED` stay refusals rather than silent
+re-joins — rejoining after removal would undo the Executive Chef's
+decision, and rejoining after leaving would mint a second secret name for
+one person in one round. Both want a human, not a retry.
+
+**Added: the invitation is visible while you sign up.** Following a dinner
+link without an account dropped you into a sign-up form with nothing to
+suggest the invitation had survived, or that finishing would take you
+anywhere near the dinner. A sticky banner now names the code on every
+screen of the detour, until it's used. It shows the code and not the
+dinner's name deliberately: the name would have to be readable by someone
+not signed in, which turns a code into something you could probe for.
+
+**Verified end to end in a browser**, with two accounts: a stashed code
+survives the redirect and is cleared exactly once, the confirmation
+appears with the code shown, a second attempt says "waiting for the
+Executive Chef" instead of rejecting, and after approval the round appears
+on the guest's home screen. TypeScript, oxlint clean; 283 locale keys in
+both languages.
+
+## 2026-08-22 (7)
+
+The three loose ends from phase 2, plus two fixes found by using the app.
+
+**Fixed: the language picker only worked once.** Changing language then
+changing back needed a page reload. The `<select>` is controlled by
+`profile.locale`, which lives in `AuthProvider`'s state — and the handler
+invalidated a react-query key that nothing uses, so the stored value never
+caught up. The dropdown kept displaying the *old* language while the
+interface spoke the new one, and choosing the language it was already
+showing fires no change event at all. Now calls `refreshProfile()`, which
+re-reads the row the dropdown actually reads from. Also stops changing the
+UI language when the write fails: chat templates and secret names are
+chosen server-side from that column, so the two drifting apart is worse
+than not switching.
+
+**Changed: the code and invite field moved above the envelopes**, and are
+mirrored on the settings page. Filling the table is the host's whole job
+while sign-up is open, and burying it two taps inside a drawer made the
+one thing they need to do the hardest thing to find. Past assignment, a
+line explains what adding someone now costs — the chain is opened at one
+point to fit them in, so the chefs around that point change partner.
+
+**Added: unread message counts** (`0022`). `messages.read_at` has existed
+since `0001` and nothing ever wrote to it, so there was no way to tell a
+thread with a new question from one finished yesterday — worse under a
+collapsible UI, where what you don't open you don't see. Opening a thread
+stamps the *other* party's messages (never your own — that would make
+every thread look permanently caught up), and the Messaggi envelope counts
+what's addressed to you across both conversations.
+
+**Added: "I can cook this"** (`0022`, `briefs.acknowledged_at`). A cook had
+two possible answers — raise `CANNOT_COOK`, or say nothing — with nothing
+in between, so a sender who wrote a recipe never learned it landed. Only
+the cook can acknowledge, and only a brief actually handed to them.
+
+**Changed: the organiser is the Executive Chef** everywhere a person can
+read it. Code, schema and docs keep `host` — this is a label, not a
+rename.
+
+**Note on migrating without destroying accounts:** `npx supabase
+migration up --local` applies pending migrations against the existing
+database, where `db reset` rebuilds it from scratch and takes `auth.users`
+with it. The second is what wiped a signed-in account mid-session earlier
+today. Two things learned the hard way while applying `0022`: a partly
+applied migration leaves its earlier statements in place, so a re-run must
+be made safe first; and `create or replace function` cannot change a
+`RETURNS TABLE` signature — adding a column needs an explicit
+`drop function` first.
+
+**Verified in a browser:** language switches EN→FR→EN with no reload, the
+code and invite panel renders above the envelopes on a real round, and the
+profile page shows real data. TypeScript, oxlint, build clean; 275 locale
+keys in both languages.
+
+## 2026-08-22 (6)
+
+**Fixed: a session can outlive its account, and said so in Postgres.**
+Signing up produced `insert or update on table "profiles" violates
+foreign key constraint "profiles_id_fkey"` — accurate, and useless to the
+person reading it.
+
+`profiles.id` references `auth.users(id)`, so that violation means one
+specific thing: the browser holds a signed, unexpired token for an account
+that no longer exists. Nothing noticed, because the JWT is still perfectly
+valid on its own terms — the mismatch only surfaced when
+`complete_signup` tried to write a row pointing at the missing user.
+
+The immediate cause was a development one: `npx supabase db reset` rebuilds
+`auth.users` along with everything else, so resetting while someone is
+signed in deletes their account out from under an open tab. But the same
+state is reachable any time an account is removed, so the fix isn't
+dev-only: `AuthProvider` now asks the server who the token belongs to on
+load, and if the answer is "nobody" it clears the session and lets the
+person sign in again — a clean sign-out instead of an error. `SignUpPage`
+recognises the constraint by name for a tab that was already open when the
+account vanished, and says what happened in plain words.
+
+Verified in a browser: a token for a deleted user now lands on the sign-in
+screen with the stale token removed from storage, no error shown.
+
+## 2026-08-22 (5)
+
+Four fixes and two additions, all from actually using the app.
+
+**Fixed: joining a round by code has never worked.** `0003` created
+`turnstile_tickets` with this note beside it:
+
+> "No policies: only the edge function (service_role, bypasses RLS)
+> inserts"
+
+The premise is wrong in a way that's easy to miss: **service_role bypasses
+RLS, not table GRANTs.** Those are two gates and the table only ever
+cleared one. The live grants show service_role holding TRUNCATE,
+REFERENCES and TRIGGER — and none of INSERT, SELECT, UPDATE, DELETE. So
+`verify-turnstile`'s insert failed with "permission denied", surfacing as
+the opaque "Edge Function returned a non-2xx status code", and
+`join_round` was never reached. `0021` grants what the function needs.
+
+**Why six green smoke tests never caught it:** every one of them seeds its
+ticket by hand as the postgres superuser before calling `join_round`. The
+suite has always tested the second half of a path whose first half was
+broken. Worth remembering when reading a green run — it proves the code
+the test exercises, not the journey a person takes.
+
+**Fixed: a shared round link lost its code at sign-up.** Follow a link
+without an account, and `RequireAuth` redirected with `replace` — erasing
+the `?code=` from history. You'd finish signing up on an empty "my
+rounds" with no idea what became of the invitation. The code is now
+stashed in `sessionStorage` at the moment of redirect and picked up on
+the way back. sessionStorage rather than localStorage deliberately: this
+is one journey, not a preference, and a stale code from last week must
+never silently pull someone into the wrong dinner.
+
+**Changed: joining now asks.** A link with `?code=` used to enrol the
+visitor the instant the captcha resolved — you could be in a dinner
+without ever agreeing to it, and after a sign-up detour you wouldn't know
+which one. It now shows the code and asks, with a way to correct it.
+
+**Removed: dark mode.** Tried as a dimmed version of the same table and
+dropped: it read as a washed-out copy rather than the same room later in
+the evening. The design now commits to one visual world, the way a
+photograph does — no `prefers-color-scheme` block and no `[data-theme]`
+block anywhere in the stylesheets, every colour defined once. Bringing it
+back is a design question (what does this table look like at night?), not
+a token-inversion exercise.
+
+**Added: a profile page.** The address you signed up with was invisible,
+and dietary restrictions could only be set once during sign-up with no way
+back — the wrong shape for the one thing in this app that has to be right,
+since every brief in every round is validated against that list. Now:
+name, email, language, and add/remove restrictions.
+
+**Removed: the round switcher in the header.** It solved a problem this
+product doesn't have — people run one dinner at a time, and every round
+they're in is already on the home screen. A dropdown duplicating that list
+was occupying the one row visible on every screen. That row now leads to
+the profile instead.
+
+**Verified:** driven in a real browser this time. A test fixture user was
+seeded in the local database (the same way the smoke tests seed theirs)
+and a session minted through the local dev auth API, which is what finally
+made the authenticated screens observable. Confirmed rendering: the round
+page's envelopes, the four-step host progress bar, the waiting messages,
+and the profile page with its real data. `verify-turnstile` now returns a
+ticket instead of a 500. Smoke tests 3–6 pass, TypeScript/oxlint/build
+clean, 269 locale keys in both languages.
+
+## 2026-08-22 (4)
+
+Phase 2: the round page stops being a flat list and becomes a table.
+
+**Changed: the round page is now a tablecloth with envelopes on it.** The
+red-and-white gingham fills the screen; every drawer is an ivory envelope
+with a folded flap and a wax seal, laid at a slight angle so a stack reads
+as objects someone put down rather than rows in a menu. The direction and
+its reasoning are in `PRESENTATION.md`.
+
+One rule holds it up, and everything in `src/styles/table.css` follows
+from it: **nothing readable ever sits on the checks.** Every block of text
+lives on a `.paper` or `.env` surface laid over the cloth with its own
+shadow. The cloth shows in margins, gaps and around the props — it is the
+room, not the background of the text.
+
+**Dark mode is not an inversion.** The reference for this whole direction
+is a candlelit dinner shot from overhead; light mode is that table at
+noon, dark mode is the same table at ten. The checks stay red, the cloth
+stays cloth, the luminance drops. A table is a place, and places don't
+invert.
+
+**Changed: nine phases became three steps, or four.** The database keeps
+its nine because the state machine needs that precision; a diner does not.
+Players see Sign-up → Recipe → Vote, the Executive Chef also sees Roles,
+because for a player that phase is indistinguishable from waiting.
+`RESULTS`/`ARCHIVED` sit past the last step rather than being one, a
+`DISABLED` round drops the vote step rather than showing one it will skip,
+and a cancelled round gets no bar at all — a fact, not a progress
+indicator.
+
+**Added: envelopes that can't open yet say why.** "Opens once the
+Executive Chef spins the roulette" rather than a control that simply
+doesn't respond. Two rules keep this honest: a drawer that will *never*
+open in this round is not rendered at all (a `DISABLED` round has no vote
+envelope, rather than one dimmed forever promising something that isn't
+coming), and **a dimmed envelope never carries a badge** — it can't be
+acted on, so flagging it for attention would be a lie.
+
+**Added: a way back.** `/brief`, `/recipe`, `/ballot`, `/results`,
+`/chain`, `/alerts` and `/settings` rendered no back control at all —
+a player arriving by deep link, or an installed PWA with no browser
+chrome, had only a gesture that may not exist. Worded as putting the
+letter back in the envelope rather than as a generic arrow, because the
+screen you're on *is* the letter.
+
+**Added: the table wears through the evening.** Laid and clean during
+sign-up; by recipe time the plate is askew, the glass has moved and left
+its ring, and there are crumbs; by voting the plates are stacked and the
+cloth carries the marks. Marks **accumulate rather than reset**, so the
+evening leaves a trace instead of looking re-laid between phases. One
+table in three states, not three drawings.
+
+The props are placeholders. The three rules the real renders must follow —
+one shared camera angle, one shared light source, shadow baked into the
+file — are in `TableProps.tsx` and `PRESENTATION.md`.
+
+**Changed: `index.css` split** into `styles/tokens.css`, `styles/base.css`
+and `styles/table.css`, deliberately rather than by accretion. Still
+hand-rolled, still no framework.
+
+**Verified:** TypeScript, oxlint and `vite build` clean; 259 locale keys
+in both languages. **The round page itself has not been seen rendered** —
+it needs a signed-in session, and signing in isn't something this pass
+did. That is the one outstanding check on this phase.
+
+## 2026-08-22 (3)
+
+Two things found by actually clicking through the app, neither of which
+the type checker, the build or six passing SQL smoke tests could have
+caught.
+
+**Not a bug in the code: `.env.local` pointed at production.** Creating a
+round failed with `Could not find the function public.create_round(...)`
+because the deployed project is still on `0014` — migrations `0015`–`0020`
+exist only locally. An earlier check in this session claimed the file
+pointed at local Supabase; it matched on `VITE_APP_BASE_URL=http://localhost:5173`
+and never looked at `VITE_SUPABASE_URL`. `.env.local` now points at the
+local stack, with the production values kept beside it in
+`.env.production-backup.local` (gitignored) to swap back. Nothing was
+pushed to production.
+
+The second report, `round is not open for joining`, is `join_round`
+behaving correctly: it distinguishes an unmatched code (`invalid code`)
+from a round that exists but hasn't opened yet. A freshly created round
+sits in `DRAFT` until the host advances it — worth remembering when
+phase 2 designs the progress bar, since "your dinner exists but nobody
+can join yet" is a state the current page states only implicitly.
+
+**Added: a ceiling on the seat limit** (`0020`). 30, chosen rather than
+rounded to: `secret_name_words` holds 24 entries per locale, and
+`assign_secret_name` starts appending random characters once it runs out
+("Chef Basilic a3f"). Past two dozen the game stops naming people and
+starts numbering them, which spoils the dinner well before it becomes a
+technical problem. The floor of 3 was already implicit — a Sattolo cycle
+needs three to be a chain rather than a swap — and is now explicit too.
+
+A check constraint rather than a guard inside `create_round`, so it holds
+on every path into the column rather than the one that happens to exist
+today. The form mirrors it and says so in plain words instead of letting
+a raw constraint violation surface after the click.
+
+**Verified:** the constraint rejects 50 on a direct insert, accepts 30,
+rejects 2. The language switcher and the local-Supabase connection were
+confirmed in a real browser.
+
+## 2026-08-22 (2)
+
+Phase 1 of the redesign: how a dinner is configured, and how people get
+into one. Backend and the screens that touch it; the round page itself is
+still the old flat layout, which is phase 2.
+
+**Changed: `visibility` described the same act twice.** `PUBLIC_LINK` and
+`PRIVATE_CODE` both meant "share a code" — the distinction named nothing
+a person would recognise. Replaced by `round_access`: **`CODE`** (share a
+code, anyone holding it can ask for a seat) and **`INVITE`** (the host
+names existing accounts). A new type rather than renaming values in
+place, because Postgres can't remove enum values and `PUBLIC_LINK` would
+have sat in the schema forever meaning nothing (`0018`).
+
+**Added: in-app invitations** (`0019`). The host gives the address an
+account signed up with, and that person finds an invitation waiting —
+accept or decline, no code to mistype or forward. Deliberately **not**
+email: the address is only a handle for finding an account, the
+invitation is a row. That's what lets this ship now instead of waiting on
+the mail provider `send-invite` is still blocked on.
+
+Its own table rather than a new `member_status`, because `round_members`
+needs a `secret_name` (not null, unique per round) — minting one for
+someone who may decline would burn a name from a finite per-round list
+for nothing. Accepting creates the member row properly, secret name and
+all, exactly as `join_round` does. An invited member skips approval: the
+host already chose them by name.
+
+One deliberate trade-off, worth stating plainly: telling the host "no
+chef with that address" confirms whether an address is registered, a mild
+account-enumeration surface. The alternative — always saying "sent" —
+silently swallows exactly the typo this feature exists to prevent. A cap
+of 30 invitations an hour is what stops it being usable as a bulk probe.
+
+**Changed: `voting_enabled` became `voting_mode`** (`LIVE` / `TIMED` /
+`DISABLED`) — not *whether* voting happens but *how*. `advance_phase` is
+deliberately **not** rewritten: the phase machine only ever needed to
+know whether voting happens at all, and LIVE vs TIMED differ in who
+triggers the transition and when results publish, which is phase 3's
+problem. So `voting_enabled` survives as a **generated column** derived
+from the new one, and every existing branch — including 0013's guard
+stopping a DISABLED round re-entering `VOTING` — keeps working untouched.
+`smoke_test6.sql` asserts the column can't be written directly, so the
+two can't drift.
+
+**Added: `SPY` anonymity** (`0017`, `0018`). The host keeps every member's
+real name beside their pseudonym; nobody else does. Distinct from the
+chain-reveal gate, which is about who cooks for whom — a SPY host still
+has to ask before seeing the chain. `get_member_identities` is host-only
+*and* refuses outright on a round that isn't SPY, so it can't be reached
+by accident on an anonymous one. Its own migration for the enum value,
+because Postgres won't let a value added by `ALTER TYPE` be used in the
+same transaction, and Supabase runs each migration file as one.
+
+**Frontend:** a classic/custom split on round creation (classic decides
+nothing — covered dinner, one recipe, voting on), the invitations inbox
+on the home screen, an invite field for the host, and past dinners folded
+into a collapsed section instead of accumulating in the main list
+forever. Tema chef and recipes-per-brief appear disabled, so the shape of
+the product is legible before either is built.
+
+**Changed: English is now the default language**, and there is finally a
+way to change it. Language was chosen by browser detection alone, with no
+override — a French speaker on an English phone had no recourse. The
+picker writes `profiles.locale`, not just the client language, because
+chat templates and secret-name word lists are stored per locale in
+Postgres and read with that column; switching only the browser side would
+have left a French player with English canned messages.
+
+**Verified:** new `smoke_test6.sql` (voting_mode driving the generated
+column and refusing direct writes, SPY identity reads rejected for
+non-hosts and on non-SPY rounds, invitations end to end including typos,
+double answers, and inviting an existing member). All six smoke tests
+pass. TypeScript, oxlint and `vite build` clean; both locale files carry
+all 237 keys. The language switcher was driven in a real browser — the UI
+flips FR/EN with no console errors. **Authenticated screens were not
+driven end to end**: that needs a login, and signing in isn't something
+this pass did. Not pushed to production.
+
+## 2026-08-22
+
+First code from the presentation redesign specced in
+[`PRESENTATION.md`](./PRESENTATION.md) — its phase 0, plus a real bug and
+a design gap found while validating it. Frontend still on the old flat
+round page; the drawer shell is phase 2.
+
+**Fixed: the host was approving people they couldn't identify.** The
+roster addressed every member by `secret_name`, including the ones still
+waiting to be let in, which makes a human approval step meaningless. This
+was assumed to be a frontend that had simply forgotten to ask for the
+name; it wasn't. `profiles_select_co_members` (`0002_rls.sql`) requires
+**both** sides of the join to be approved, so a pending member's
+`display_name` is unreadable to every client, the host's included —
+`smoke_test4.sql` asserts exactly that, and gets 0 rows.
+
+Widening that policy would have exposed pending profiles to the whole
+round rather than to the one person doing the vetting, so
+`0015_pending_member_identity.sql` adds a narrow host-only
+`get_pending_members` instead. It covers the moment of the decision and
+stops returning a member the instant they're approved — from then on they
+are their secret name to everyone, host included.
+
+**Fixed: `remove_member` crashed with a raw duplicate-key error**, on the
+branch that exists to preserve a departing member's finished brief. It
+did:
+
+```sql
+update pairings set sender_id = v_edge_in.sender_id where id = v_edge_out.id;
+delete from pairings where id = v_edge_in.id;
+```
+
+which briefly puts two rows on the same `sender_id` — and
+`unique (round_id, assignment_version, lap, sender_id)` (`0001`) is not
+deferrable, so the UPDATE aborts before the DELETE can clear the
+conflict. It fires whenever the departing member had submitted and their
+own sender hadn't: precisely the case that branch handles. Fixed by
+deleting first (both rows are already held in record variables, so the
+reorder costs nothing).
+
+This is what made `smoke_test3.sql` fail roughly one run in three —
+blamed on flakiness, actually a reachable product bug whose trigger
+depended on which random Sattolo assignment came out. Five consecutive
+runs pass now; before the fix, two of three did. `smoke_test5.sql` reads
+the chain back after assignment and picks the submitting member from it,
+so the branch is exercised deterministically instead of by luck.
+
+**Added: the host chooses what a departure costs**
+(`0016_removal_mode.sql`, new `removal_mode` enum). Removing a link from
+the chain always loses one dish; which one, and who gets disturbed, is a
+judgement call:
+- `COLLAPSE` (default, previous behaviour) reconnects the neighbours, so
+  everyone still has something to make — but the next cook is handed a
+  different recipe than the one they already have.
+- `LEAVE` changes nothing but the roster. Nobody is disturbed and the
+  buffet is one dish shorter. Better late in the round, once people have
+  shopped.
+
+`LEAVE` is the first thing in this schema that can leave a pairing
+pointing at a cook who is no longer active, and a dish nobody will cook
+must not reach the ballot — `submit_ballot` demands *every* eligible dish
+be ranked, so a phantom entry would be both unrankable and unskippable.
+Rather than add a "cook still active" test to the three places that
+filter briefs, this reuses `briefs.delivered`, which exists for exactly
+this purpose ("mark a dish not delivered to exclude it from voting",
+`0009`). One flag, all three queries, no change to the voting code.
+
+The old 3-argument `remove_member` is dropped rather than left beside the
+4-argument one, which would have made a three-argument call ambiguous.
+
+**Both modes are reachable from the UI**, deliberately: the previous
+round of work in this repo produced an RPC the frontend had no way to
+call (`generate_assignment`, see 2026-08-01), and that's not worth
+repeating. Post-assignment the roster shows both actions with plain-words
+explanations of the consequence; before an assignment exists there's no
+chain to repair, the two modes are indistinguishable, and one button is
+the honest answer.
+
+**Verified:** new `smoke_test4.sql` (pending-member identity: unreadable
+by plain read, readable via the host RPC, rejected for a non-host,
+cleared by approve and by reject) and `smoke_test5.sql` (both removal
+modes, including the previously-crashing branch and the orphaned-dish
+exclusion) both pass against a real local Postgres.
+`smoke_test.sql`/`smoke_test2.sql`/`smoke_test3.sql` re-run clean against
+migration `0016`. TypeScript and oxlint clean; both locale files carry
+every new string. Not pushed to production.
+
 ## 2026-08-01 (4)
 
 **Changed: frontend deploy now goes through Netlify's own Git integration**
@@ -189,3 +913,37 @@ against migration `0012` (full signup→assignment→briefs→chat→voting→
 results→reveal path), plus targeted checks of `update_round_details`
 (host-only, blocked once `DINNER` phase starts) and `assignment_exists`
 (member-only, correct true/false).
+
+## 2026-07-30
+
+**Fixed: joining and re-visiting a round had two visibility gaps**, found
+while testing the initial build's signup/join flow end to end.
+- `JoinRoundPage` required retyping and resubmitting the code even when
+  arriving via a shared round link that already carried `?code=` — it now
+  auto-submits once Turnstile resolves, falling back to the manual form on
+  failure.
+- `MyRoundsPage` queried `rounds` directly, which only ever returns rows
+  the profile can already `SELECT` — a player who'd joined but wasn't
+  approved yet had no visibility into that round at all, so a successful
+  join looked identical to a failed one. New migration
+  `0011_pending_round_visibility.sql` adds `is_round_participant()` (true
+  for any `ACTIVE` member, approved or not) and updates
+  `rounds_select_member` to use it; `useMyRounds` now queries through
+  `round_members` instead of `rounds`, and the page shows a "pending
+  approval" badge rather than silently omitting the round. Everything
+  else (roster, dietary panel, briefs, chat) stays gated behind the
+  existing approved check, unchanged.
+
+## 2026-07-25
+
+**Initial build.** Backend: schema, RLS, and RPCs for signup, round
+lifecycle, Sattolo-cycle assignment (splice/remove/manual-edit), brief
+writing with round-wide dietary enforcement, canned chat, and Borda
+voting/results/awards (`0001`–`0010`) — validated end to end against a
+real local Postgres instance via `supabase/smoke_test.sql`/
+`smoke_test2.sql`. Frontend: Vite/React/TS scaffold, auth screens (sign up
+with a mandatory dietary step, sign in, password reset), round create/
+join/roster/approval, round-switcher header, i18n (FR/EN), PWA config, and
+the `verify-turnstile` Edge Function. GitHub Actions: deploy (later
+replaced by Netlify's own Git integration — see 2026-08-01 (4)),
+keep-alive ping, nightly backup.
