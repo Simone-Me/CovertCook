@@ -45,6 +45,36 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (5)
+
+**Added: the app has a mark.** The wok goes in the browser tab, on the
+home screen, and beside the name in the header.
+
+Three things were decided rather than just placed:
+
+*It is red, not black.* The artwork arrived as pure black on transparent,
+and black appears nowhere in this palette except `--marker`, which means
+"redacted" — a different thing entirely. Repainted in the accent so it
+reads as the app's mark instead of a stray glyph. The alpha channel is the
+shape, so recolouring is a matter of keeping the alpha and replacing the
+colour; no halo, no compositing tricks.
+
+*The favicon has its own ground.* A black glyph on transparent vanishes
+into a dark browser tab. The tab and home-screen versions are a cream wok
+on a red rounded tile, which reads on any tab bar.
+
+*The placeholder PWA icons are gone.* `pwa-192` and `pwa-512` were
+functional placeholders (README said so); they are the real mark now, plus
+a `maskable` entry so Android does not letterbox it inside its own shape.
+
+**Fixed: two bits of chrome that had drifted.** The document title was
+lowercase `covertcook`, and the manifest's `theme_color` was `#E4572E` — an
+orange that appears nowhere in the product. Both now match: `CovertCook`
+and `#C6202C`, with the background colour moved from `#111111` to the
+app's lino.
+
+---
+
 ## 2026-08-24 (4)
 
 **Security pass.** Checked rather than assumed, and it found one real gap.

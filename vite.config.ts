@@ -8,18 +8,21 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      includeAssets: ['favicon.svg'],
+      includeAssets: ['favicon-32.png', 'favicon-192.png', 'apple-touch-icon.png'],
       manifest: {
         name: 'CovertCook',
         short_name: 'CovertCook',
         description: 'Secret recipe briefs for your next dinner.',
-        theme_color: '#E4572E',
-        background_color: '#111111',
+        // The app's accent (--accent in tokens.css). This had drifted to an
+        // orange nothing in the product uses.
+        theme_color: '#C6202C',
+        background_color: '#FFFCF6',
         display: 'standalone',
         start_url: '/',
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
+          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {

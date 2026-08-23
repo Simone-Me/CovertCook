@@ -12,7 +12,11 @@ These are the masters. The versions the app actually loads live in `public/`:
 | `inside_fridge.png` (1122×1402, 1.2 MB) | `inside_fridge.webp` (820 px wide, 42 KB) | 28× smaller; 820 px covers a 2× phone and a desktop fold |
 | *(deleted)* `cutlery_anim.gif` | `cutlery_anim.mp4` (165 KB) + `cutlery_anim.png` poster | the GIF was the same animation 5× heavier and impossible to pause, so it was removed rather than kept as a master |
 
-`icons/` holds the ten 512×512 icon masters. What ships is a 96 px WebP each —
+`icons/` holds the 512×512 icon masters, `cooking_logo.png` among them — that
+one is the app mark, and everything in the browser tab and on the home screen
+is generated from it (see the CHANGELOG for 2026-08-24 (5)).
+
+`icons/` holds the 512×512 icon masters. What ships is a 96 px WebP each —
 3× a 32 px icon, which is every phone worth designing for — and the set went
 from **273 KB to 37 KB** doing it.
 

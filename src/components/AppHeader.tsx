@@ -23,6 +23,8 @@ export function AppHeader() {
           the cloth, so the way back announces itself before it's clicked. */}
       <Link to="/" className="app-logo" aria-label={t('rounds.myRounds')}>
         <span className="app-logo__back" aria-hidden="true">←</span>
+        {/* Decorative: the name is right beside it and says the same thing. */}
+        <img className="app-logo__mark" src="/logo.webp" alt="" aria-hidden="true" width={26} height={26} />
         <span className="app-logo__name">{t('app.name')}</span>
       </Link>
       {session && (

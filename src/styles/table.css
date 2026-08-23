@@ -1658,3 +1658,14 @@
   color: var(--accent-contrast);
   font-weight: 700;
 }
+
+/* The mark beside the name. It rides the same lift as the word — they are one
+   control, so they move together rather than the picture sitting still while
+   the text rises. */
+.app-logo__mark {
+  display: block;
+  flex: none;
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
