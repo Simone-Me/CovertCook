@@ -7,10 +7,9 @@ create or replace function _as(p_uid uuid) returns void language sql as $$
 $$;
 set role authenticated;
 
--- Carol removes the conflicting tag and resubmits
-select _as('00000000-0000-0000-0000-000000000003');
-select save_brief_draft(:'round_id'::uuid, 'Poulet roti', 'MAIN', '[{"name":"chicken","quantity":1,"unit":"whole"}]'::jsonb, repeat('Season the chicken generously, roast at high heat with root vegetables until the skin is crisp. ', 1), null, 2, '15€', 90, null, '{}', true);
-select submit_brief(:'round_id'::uuid);
+-- Carol's dish went in at the end of part 1, allergen and all — 0029 turned
+-- the refusal into a notice, so there is nothing here to fix and resubmit.
+-- Her brief is already SUBMITTED and, deliberately, can no longer be edited.
 
 -- Dave writes and submits
 select _as('00000000-0000-0000-0000-000000000004');

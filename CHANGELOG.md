@@ -8,36 +8,373 @@ there.
 
 ## Where to pick up
 
-Everything below from 2026-08-22 onwards is **local only** — production is
-still on migration `0014`. Nothing has been deployed.
+Everything from 2026-08-22 onwards is **local only** — production is still
+on migration `0014`. Nothing has been deployed. Work is on the
+`redesign/drawers` branch, to be merged.
+
+Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 **Next, in order:**
 
-1. **The board** (`PRESENTATION.md` drawer 4) — the round-wide channel,
-   `round_messages` as its own table rather than by loosening `messages`,
-   unattributed posts with the author stored but never sent. Phrases are
-   already drafted. This finishes the redesign's original scope.
-2. **Free-text chat** alongside the templates, with the length cap and the
-   rate limit already decided.
-3. **The settings page** — still a flat list; the round page has moved to
-   folds and envelopes and this hasn't followed.
-4. **Real table props** — placeholder drawings today; the three rules for
-   the real renders are in `TableProps.tsx`.
-5. **Notifications** (`PRESENTATION.md` phase 5) — email, not push, and
-   the reasoning is written down. Needs a mail provider key.
+1. **Free-text chat** alongside the templates — the length cap (280) and
+   the rate limit (the existing 10/hour) are already decided.
+2. **Notifications** (`PRESENTATION.md` phase 5) — email, not push, and
+   the reasoning is written down. Needs the Resend key below.
+3. **Real table props** — drawings today, not renders. `DESIGN.md` §4 has
+   the three constraints any render has to meet, and the three questions
+   still open (which objects, how many variants, single objects or one
+   laid table).
 
-**Two open questions that need you, not code:**
+**What the email work needs from you** (see also `.env.example`): a Resend
+API key, a verified sender domain, and a decision on the from-address.
+`supabase/functions/send-email/` and `send-invite/` are empty folders
+waiting for exactly that. Set the key as a Supabase Edge Function secret,
+not a frontend env var — it must never reach the bundle.
 
-- **Severe allergies still hard-block submission.** The tagging changed
-  (found in the text rather than ticked) but the block did not. If you want
-  a card on the dish to replace the block rather than accompany it, say so
-  — that's a product call about a real risk at a shared table, not a
-  refactor.
-- **"Executive Chef" is identical in both languages**, treated as a role
-  name rather than translated ("Chef exécutif"). Two strings to change if
-  you prefer the French form.
+**Settled since:** allergens inform instead of blocking (`0029`); the
+roster is revealed all at once when sign-ups close, never as people
+arrive (`0032`); the board reads as a chat and its food icons are per
+message, never per person (`0033`); "Executive Chef" stays identical in both languages, as a
+role name rather than a translation.
+
+**The design direction now has a file.** `DESIGN.md` is the transcription
+of the "Buste sulla Tavola" artifact — palette, the three rules that hold
+the table together, the envelope-to-document gesture, the three states of
+wear, and the constraints on the object renders. Read it before touching
+the interface, and add to its change log when a decision moves.
 
 ---
+
+## 2026-08-23 (19)
+
+**Corrected: stepping a dinner back destroys nothing.** The assumption
+being designed around was that going back from `ASSIGNED` would force the
+pairings to be redone from scratch. It doesn't. `advance_phase` (`0006`)
+on a backward step runs exactly one statement — `update rounds set
+status` — and touches no other table. Pairings, briefs and ballots all
+survive. What changes is only what people are *allowed to do* at that
+moment, because every action RPC gates on the phase: `join_round` needs
+`OPEN`, `save_brief_draft` needs `ASSIGNED`, `submit_ballot` needs
+`VOTING`, and the cook can only read the recipe they received from
+`BRIEFS_CLOSED` on.
+
+So the warnings say that instead. One per destination, written from those
+gates rather than from intuition, plus a standing line that nothing is
+deleted. Re-rolling the assignment *is* destructive — but that is
+`generate_assignment`, a separate button with its own question.
+
+**Changed: no browser dialogs anywhere.** All four remaining
+`window.confirm` calls are gone — step back, re-roll the assignment,
+remove a chef whose dish is already submitted, cancel the dinner. Each is
+now an `InlineConfirm` on the page, beside the control that raised it.
+
+A `confirm()` tears the reader out of what they were looking at, strips
+the message of formatting, cannot say what will happen in more than one
+flat sentence, and gives the destructive option a button identical in
+weight to the safe one. The step-back warning in particular now opens **in
+the gap it describes** — under the course you would go back to, above the
+one you would leave — which is the one place it reads without explanation.
+The buttons are small: the weight of a decision belongs in the words, not
+in the size of the target.
+
+**Fixed: the rolling pin's right-hand end.** Both handles were tucked
+under the barrel by the same negative margin, but paint order follows the
+DOM, so the left one was drawn under the barrel and the right one over it
+— same markup, opposite result. The barrel now sits on its own stacking
+level above both.
+
+Handles went from 46×22 to 64×28, the barrel from 84 px tall to 58, and a
+chevron sits at its right-hand end and bobs until the pin is first turned.
+A cylinder drawn flat gives no hint that there is anything above or below
+the phrase in the light, and the hint retires once it has taught the
+gesture rather than decorating the control forever.
+
+---
+
+## 2026-08-23 (18)
+
+**Changed: Status is a menu card.** A dropdown reading "Current phase:
+ASSIGNED" told the host one fact and hid the shape of the evening. The
+phases are now written as a menu: courses already served struck through,
+the one being plated marked, the rest still to come. Where the dinner is
+became something you see rather than something you read.
+
+Going back is deliberately two gestures. A turn-back arrow sits beside the
+last course actually served — the one a step back un-serves — and it only
+*offers*; the button it reveals is what acts. Stepping a dinner backwards
+can strand work people have already done, and it should never be one
+mis-tap away.
+
+**Changed: Vote is "Vote the menu", and the menu comes first.** The ballot
+opened straight onto the thing you drag rows around in, so the only way to
+see what the meal *was* was to read the control. The dishes are now a menu
+card above it — read top to bottom, touch nothing — which separates "what
+was served" from "what I thought of it".
+
+**Changed: the rolling pin turns the right way.** Side to side was the pin
+sliding along the counter. It rolls top to bottom now: a phrase rises into
+the bright band across the middle and leaves under it, which is the
+direction the surface of a pin actually travels. Handles went from 26 px
+square caps to 46×22 — long enough to read as handles.
+
+**Changed: the Messages envelope carries a mark that ranks.** A chef
+writing to you personally always outranks the table being cheerful, so the
+chef stays even when new fridge lines land on top of it; the fridge only
+gets the envelope when nobody has written to you. The count was replaced
+by the mark itself — the number was never the useful part.
+
+**Changed: the fridge forgets after a day** (`0034`). Board lines are
+"what a lovely day!" and "don't burn a finger" — worth reading for an
+evening, worth nothing after it, and left alone they accumulate forever.
+Two halves: `get_board` serves nothing older than 24 hours, and
+`post_to_board` sweeps the round it is posting to. Posting is the only
+moment the board is written to anyway, so it is the cheapest place to
+sweep and it needs no scheduler.
+
+The date left the bubble with it: at a day's retention it always said
+today, so it was a line of text that never varied.
+
+**Changed: the dinner's details are actually details** (`0034`). One
+free-text `location` box was doing the work of a city and a street, so the
+envelope could only ever show one line and it was usually the wrong one.
+`city` is a new column, `notes` was already there and unused. The envelope
+shows the city closed; open, it lists dinner, city, address, date, time,
+timezone and what else guests should know — each on its own line, blank
+fields omitted rather than printed empty.
+
+Times are read in the dinner's timezone, not the reader's, and in `hh:mm`.
+A guest flying in wants the time they have to be at the door.
+
+**Changed: the chain is a ring.** A list of "A → B" rows could only assert
+that the chain closes — the host had to read to the bottom and trust
+"loops back to A". A circle shows it, puts every arrow between neighbours
+because members sit in cycle order, and makes the two failure modes
+visible instead of deduced: a member who has fallen out is not on the
+ring, and a chain a manual swap has split into two is two rings. The
+written pairs stay underneath, because a name is easier to copy from a
+line than from a diagram and a screen reader gets a list rather than a
+picture.
+
+**Removed: `cutlery_anim.gif`.** Same animation as the MP4 already beside
+it, five times the weight, and impossible to pause. Nothing referenced it.
+
+---
+
+## 2026-08-23 (17)
+
+**Added: the first real images, and they were put on a diet first.**
+`inside_fridge.png` (1122×1402, 1.2 MB) and `cutlery_anim.gif` (888 KB)
+arrived in `public/`, which is the one folder where a full-size master is
+expensive: everything there is copied into `dist/` and then precached by
+the service worker, so it ships to every phone that installs the PWA
+whether or not anyone looks at it. `DESIGN.md` §4 already said as much.
+
+Both masters moved to `assets-src/` — kept in the repo, out of the build —
+and what ships is a resized WebP (820 px, **42 KB**, 28× smaller) and the
+MP4 already sitting beside the GIF (165 KB, same animation, 5× lighter).
+`assets-src/README.md` has the regeneration command.
+
+**Changed: settings is the crossing cutlery, not the word.** Beside the
+dinner's name, a second piece of text competed with the title for the same
+line. It is a `<video>` with the still as its poster and `preload="none"`,
+so the file is not fetched until somebody points at it — still by default,
+moving on hover, because the movement *is* the affordance and a header
+that animates unprompted is a distraction the whole page pays for.
+
+**Changed: the Fridge is the picture, and it holds still.** The hand-drawn
+shelves are gone. The illustration is painted on the container at a fixed
+420 px and the conversation scrolls over it inside that window — growing
+the fridge to fit the messages would turn a room into a background. A 34%
+white veil sits between, so an opaque bubble doesn't have to fight a
+fridge full of groceries for contrast.
+
+Bubbles are pared back to the text: no border, 4 px / 8 px of padding, and
+the date is a 9 px footnote rather than a second line of content.
+
+**Fixed: the roller was unrecognisable, so it was rebuilt as a rolling
+pin.** It was vertical, showed one phrase at a time, and had nothing at
+either end — which reads as a cropped list, not an object. A rolling pin
+is horizontal and it is mostly handles; that is what makes it a rolling
+pin. The barrel now lies across with a turned handle sticking out of each
+end, and each phrase takes 66% of the barrel so the previous and next ones
+show at the edges. Seeing that there is more either side is the entire
+reason it reads as something that turns.
+
+Underneath it is still an ordinary scroll container with snap points —
+horizontal now — so wheel, swipe, Tab and arrows all work. Measured after
+the change: three phrases partly visible at any scroll position, handles
+26 px against a 61 px barrel.
+
+---
+
+## 2026-08-23 (16)
+
+**Changed: the board became a conversation, and moved into a fridge**
+(`0033`). Messages was one long scroll: a public board that grows all
+evening, with the two private threads permanently below it. It is now two
+folds.
+
+*The Fridge* is the public half, drawn as the inside of an open fridge —
+cold light off the back wall, glass shelves, bubbles standing on them.
+Classic chat layout: yours right, everyone else's left, each bubble
+carrying a food icon.
+
+**The icon is per message, never per person.** It is derived from the
+message id, which is random per row, so the same person gets a different
+one every time they speak. An icon that stayed with someone would be a
+pseudonym you could follow all evening — which is exactly what the board
+has always refused to hand out.
+
+What `0033` does give up, and it should be said plainly: `0031` collapsed
+identical phrases into one line with a count, which made the board
+unattributable *by construction*. A chat needs its rows one per message,
+so that is gone. What is not given up, and must not be later: the author
+never leaves Postgres, and the only clock exposed is the day. A reader
+gains the count and the order of messages, not who wrote any of them.
+
+Reporting now takes down one bubble instead of every copy of its wording,
+and a flagged message stays visible to its own author only — a phrase
+vanishing for everyone would itself be a signal that somebody flagged it.
+
+*Your Chef* is the other fold: the two private threads, which are where a
+question actually gets answered.
+
+**Added: the roller and the egg.** The phrases sit on a drum you turn
+rather than a list you read — two or three in the light, the rest curving
+away. Underneath it is a scroll container with snap points, so the wheel,
+a swipe, Tab and the arrow keys all still work; the cylinder is shading,
+not a widget. Beside it is an egg-shaped die that picks a phrase at random
+and sends it, then spins the drum to what it chose so you can see what you
+said.
+
+**Changed: the table props move.** They were drawn for three states but
+stood in the same place in all three, so the wear was a texture change
+rather than an evening passing. Plate, glass, bowl, napkin, fork, knife
+and a new bread board now each have their own position per phase: the
+plate is shoved in and turned −7° with leftovers on it, the glass wanders
+down the screen and leaves its ring where it *was*, the cutlery stops
+being parallel and ends up thrown on the stack. Crumbs are in two tones,
+because crumb and crust are not the same colour and one tone reads as
+noise.
+
+Verified by mounting the three states side by side and measuring: every
+object's box moves between phases, and none of them is in the same place
+twice.
+
+---
+
+## 2026-08-23 (15)
+
+**Added: the design direction is written down.** `DESIGN.md` transcribes
+the "Buste sulla Tavola" artifact, which until now existed only as a link.
+It carries the palette, the three rules (nothing readable touches the
+gingham; one light; one camera), the envelope→document gesture, the three
+states of table wear, and the render constraints. Two sections are new
+rather than transcribed — "La lista dei chef" and "Quando si scoprono i
+chef" — because the redaction in the mockup was a picture, and it needed
+to be a rule.
+
+**Changed: the roster stays covered until sign-ups close** (`0032`). Names
+appearing one at a time as people joined turned arrival order into an
+identity leak — whoever showed up right after you passed the code to Marco
+*is* Marco. No bug needed; the timing alone gave it away.
+
+`list_round_members` now withholds `secret_name` while the round is
+`DRAFT` or `OPEN`, and column-level `SELECT` on that column is revoked
+from `authenticated`, so the client has to come through the function. This
+had to be a server change: `.redact` is a drawing, and the browser is
+assumed hostile — a covered name still on the wire is readable in the
+network tab.
+
+Ordering moved from `joined_at` to `secret_name` for the same reason. A
+list revealed in arrival order hands the leak straight back the moment the
+bars come off.
+
+Two exceptions kept, both already decided: you always see yourself
+(`.chef-you`), and the host reads pending members' real names at the door
+(`0015`), because approving a pseudonym is approving nobody.
+
+**Changed: settings and round creation fold.** New `Fold` component, built
+on `<details>`/`<summary>` so the keyboard, screen readers and
+find-in-page work without being reimplemented. The settings page's six
+headings and the seven custom-round options are shut by default and open
+one at a time; a closed row keeps its current answer visible on the right,
+so folding hides the choices without hiding the choice you made. This was
+item 2 of the pick-up list.
+
+**Changed: "1 / 3" on *My recipe* became three glyphs.** The envelope
+showed the table's tally of submitted briefs on the one drawer that is
+entirely about you, which read as a score you were losing. It now shows
+your own state: `○` not written, `◐` draft saved, `●` sent to your cook.
+
+**Fixed: the wide ingredients field came back to quick mode.** Quick mode
+had a name, one prose block and a link — the ingredients field had gone
+missing entirely. It's a textarea, one ingredient per line, saved as the
+same rows careful mode produces so the cook gets a list either way.
+Switching modes translates between the two shapes instead of discarding
+what's typed, and a draft whose ingredients carry no quantity or unit
+reopens in quick mode rather than exploding into rows.
+
+**Changed: three small orientation fixes.** The header name is now visibly
+the way home (an arrow unfolds out of it on hover, and it lifts); dinners
+you host carry a toque next to the name in the list, since hosting and
+attending looked identical; and *Join with a code* has a back link, which
+it needed most of all because it is usually reached cold from a link.
+
+---
+
+## 2026-08-22 (14)
+
+**Changed: allergens inform instead of blocking** (`0029`). A dish whose
+tags matched somebody's severe allergy or diet could not be submitted at
+all. The intent was safety; the effect was a refusal at the last possible
+moment, delivered to the one person who could do nothing with it — the
+sender had already written the recipe, and the allergic guest never
+learned a thing.
+
+Now the dish is served and everyone who needs to know is told: the sender
+is asked to put a card by it, the Executive Chef gets a note naming the
+dish and the allergen so they can say it when the food goes down, and any
+diner can look up which dishes carry what — `get_allergen_dishes` is open
+to the whole table, not just the host, because the point of informing is
+that the person with the allergy decides for themselves.
+
+The detection is unchanged and still runs against everyone's restrictions
+rather than one cook's. What changed is the consequence, deliberately: a
+card is what a host would actually do, and an adult with an allergy at a
+shared buffet is better served by knowing than by one dish silently never
+existing.
+
+**Added: the board** (`0030`, `0031`) — one channel the whole table reads
+and posts to, from ten ready-made cheerful phrases in both languages.
+
+Its own table rather than a loosened `messages`, because that one has no
+player-facing SELECT policy *ever* (enforced by REVOKE, not just RLS)
+precisely so a pairing message can't give away who wrote to whom before
+the reveal, and every row carries a `pairing_id` and a `direction` that
+mean nothing for a message addressed to everybody. Sharing it would have
+meant an "unless it's a broadcast" branch inside each of those guards.
+
+**Nothing is attributed, and not merely by omission.** Identical phrases
+collapse into one line with a count, so three people saying "everything's
+ready" is one cheerful fact — which leaves nothing to attribute even
+before the RPC decides what to send. The author is still on the row and
+never leaves Postgres, which is what lets a reported phrase be acted on.
+
+**Changed: the props are drawn rather than sketched.** Soft radial shading
+instead of flat fills, a rim highlight on each glazed surface cut to an arc
+(a rim only shines where it faces the window), and every shadow falling
+from the same upper-left light. Getting that consistent is most of what
+makes a set of objects look like they share a table — and it's the same
+rule the real renders will have to follow.
+
+**Two smoke tests updated, again because a rule changed rather than
+broke.** `smoke_test.sql` ended on the dietary refusal as its final
+assertion; it now asserts the opposite — submission succeeds and the host
+alert exists. `smoke_test2.sql` opened by "fixing" that brief and
+resubmitting, which is now impossible because it was accepted the first
+time. New `smoke_test7.sql` covers the board end to end and the allergen
+notice. All seven pass.
 
 ## 2026-08-22 (13)
 

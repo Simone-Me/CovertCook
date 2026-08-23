@@ -17,6 +17,7 @@ import { ChainPage } from './features/rounds/ChainPage'
 import { HostAlertsPage } from './features/rounds/HostAlertsPage'
 import { BriefEditorPage } from './features/briefs/BriefEditorPage'
 import { CookViewPage } from './features/briefs/CookViewPage'
+import { BoardPage } from './features/chat/BoardPage'
 import { BallotPage } from './features/vote/BallotPage'
 import { ResultsPage } from './features/vote/ResultsPage'
 
@@ -131,6 +132,14 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <CookViewPage />
+          </RequireAuth>
+        }
+      />
+      <Route
+        path="/rounds/:roundId/messages"
+        element={
+          <RequireAuth>
+            <BoardPage />
           </RequireAuth>
         }
       />

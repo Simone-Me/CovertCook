@@ -7,6 +7,8 @@ import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { Envelope } from './Envelope'
+import { CutleryLink } from '../../components/CutleryLink'
+import { InlineConfirm } from '../../components/InlineConfirm'
 import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
 import { MenuPanel } from './MenuPanel'
@@ -22,7 +24,8 @@ import {
   nextPhaseFor,
   getDietaryPanel,
   getPendingMembers,
-  getRoundProgress,
+  getBoardUnread,
+  getMyBriefDraft,
   getUnreadCount,
   getVoteProgress,
   inviteMember,
@@ -36,6 +39,10 @@ import {
 } from '../../lib/rpc'
 
 type OpenDrawer = 'chefs' | 'allergies' | 'info' | null
+
+// The two marks the Messages envelope can carry, in rank order.
+const CHEF_MARK = '🧑‍🍳'
+const FRIDGE_MARK = '🧊'
 
 export function RoundHomePage() {
   const { t } = useTranslation()
@@ -51,6 +58,10 @@ export function RoundHomePage() {
   const [inviteNote, setInviteNote] = useState<string | null>(null)
   const [inviting, setInviting] = useState(false)
   const [open, setOpen] = useState<OpenDrawer>(null)
+  // Two decisions that used to be browser dialogs. Both are held here and
+  // answered on the page, beside the control that raised them.
+  const [rerollAsk, setRerollAsk] = useState(false)
+  const [removeAsk, setRemoveAsk] = useState<{ memberId: string; mode: RemovalMode } | null>(null)
 
   const { data: dietaryPanel } = useQuery({
     queryKey: ['rounds', roundId, 'dietary-panel'],
@@ -58,10 +69,13 @@ export function RoundHomePage() {
     queryFn: () => getDietaryPanel(roundId as string),
   })
 
-  const { data: progress } = useQuery({
-    queryKey: ['rounds', roundId, 'progress'],
-    enabled: !!roundId && (round?.status === 'ASSIGNED' || round?.status === 'BRIEFS_CLOSED'),
-    queryFn: () => getRoundProgress(roundId as string),
+  // Your own recipe, not the table's tally. The envelope used to read
+  // "1 / 3" — a number about everyone else, on the one drawer that is
+  // entirely about you, so it looked like a score you were losing.
+  const { data: myBrief } = useQuery({
+    queryKey: ['rounds', roundId, 'my-brief-draft'],
+    enabled: !!roundId && ROUND_PHASE_ORDER.indexOf(round?.status ?? 'DRAFT') >= ROUND_PHASE_ORDER.indexOf('ASSIGNED'),
+    queryFn: () => getMyBriefDraft(roundId as string),
   })
 
   const { data: hasAssignment } = useQuery({
@@ -85,6 +99,15 @@ export function RoundHomePage() {
     refetchInterval: 10000,
   })
 
+  // The fridge half of the Messages mark. Chef outranks fridge, so this is
+  // only ever consulted when no chef is waiting — see messageMark below.
+  const { data: boardUnread } = useQuery({
+    queryKey: ['rounds', roundId, 'board-unread'],
+    enabled: !!roundId && !!round && ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED'),
+    queryFn: () => getBoardUnread(roundId as string),
+    refetchInterval: 30000,
+  })
+
   // Source for the Messaggi badge. Only once there is a chain to talk
   // across — before that there are no threads to be unread (0022).
   const { data: unread } = useQuery({
@@ -105,6 +128,50 @@ export function RoundHomePage() {
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE') ?? []
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
   const pendingCount = pendingMembers?.length ?? 0
+
+  // While the door is open the server sends no names but your own (0032), so
+  // the list is seats rather than people. Everyone is uncovered at the same
+  // instant when the round locks — see "Quando si scoprono i chef" in
+  // DESIGN.md for why arrival order is the thing being hidden.
+  const rosterCovered = round.status === 'DRAFT' || round.status === 'OPEN'
+
+  // Read in the dinner's timezone, not the reader's: a guest flying in wants
+  // the time they have to be at the door, not what their own phone calls that
+  // instant. Hours and minutes only — no dinner ever started at a second past
+  // the hour, and printing one invites the question of how precise this is.
+  const when = round.dinner_at
+    ? {
+        date: new Date(round.dinner_at).toLocaleDateString(profile?.locale ?? 'en', {
+          weekday: 'long',
+          day: 'numeric',
+          month: 'long',
+          timeZone: round.timezone,
+        }),
+        time: new Date(round.dinner_at).toLocaleTimeString(profile?.locale ?? 'en', {
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false,
+          timeZone: round.timezone,
+        }),
+      }
+    : null
+
+  // One envelope, one mark, so it has to choose. A chef writing to you
+  // personally always outranks the table being cheerful in the fridge — the
+  // chef stays even when new fridge lines land on top of it. Only when
+  // nobody has written to you does the fridge get the envelope.
+  const messageMark = unread && unread > 0 ? CHEF_MARK : boardUnread && boardUnread > 0 ? FRIDGE_MARK : undefined
+
+  // Three states, one glyph each: nothing written, saved but still yours,
+  // gone to the cook. A draft counts as started only if something is
+  // actually in it — an empty row saved by accident isn't progress.
+  const briefState = !myBrief
+    ? 'blank'
+    : myBrief.status === 'SUBMITTED'
+      ? 'sent'
+      : myBrief.dish_name.trim() || myBrief.procedure.trim() || myBrief.ingredients.length > 0
+        ? 'draft'
+        : 'blank'
 
   const nextBlockedReason =
     round.status === 'LOCKED' && nextPhase === 'ASSIGNED' && !hasAssignment
@@ -148,7 +215,6 @@ export function RoundHomePage() {
 
   async function onGenerateAssignment() {
     if (!roundId) return
-    if (hasAssignment && !window.confirm(t('rounds.assignment.rerollConfirm'))) return
     setError(null)
     setGenerating(true)
     try {
@@ -251,7 +317,7 @@ export function RoundHomePage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : t('errors.generic')
       if (message === REMOVE_REQUIRES_CONFIRMATION) {
-        if (window.confirm(t('rounds.removeDishConfirm'))) await onRemove(memberId, mode, true)
+        setRemoveAsk({ memberId, mode })
       } else {
         setError(message)
       }
@@ -268,7 +334,7 @@ export function RoundHomePage() {
             <h1 style={{ margin: 0 }}>
               {round.accent_emoji} {round.name}
             </h1>
-            {isHost && <Link to={`/rounds/${roundId}/settings`}>{t('rounds.settings.title')}</Link>}
+            {isHost && <CutleryLink to={`/rounds/${roundId}/settings`} />}
           </div>
           <p className="muted" style={{ margin: '2px 0 0' }}>
             {t('rounds.seatCount', { count: activeApprovedCount })}
@@ -386,9 +452,30 @@ export function RoundHomePage() {
           <div className="stack">
             <span className="pass__section-title">{t('rounds.assignment.title')}</span>
             <PassNote short={hasAssignment ? t('rounds.assignment.ready') : t('rounds.assignment.explain')} />
-            <button type="button" onClick={onGenerateAssignment} disabled={generating}>
+            {/* Re-rolling replaces everyone's pairing, so it asks first —
+                here, beside the button, not in a dialog over the page. */}
+            {rerollAsk ? (
+              <InlineConfirm
+                title={t('rounds.assignment.reroll')}
+                confirmLabel={t('rounds.assignment.reroll')}
+                busy={generating}
+                onConfirm={() => {
+                  setRerollAsk(false)
+                  onGenerateAssignment()
+                }}
+                onCancel={() => setRerollAsk(false)}
+              >
+                <p className="confirmbox__why">{t('rounds.assignment.rerollConfirm')}</p>
+              </InlineConfirm>
+            ) : (
+            <button
+              type="button"
+              onClick={() => (hasAssignment ? setRerollAsk(true) : onGenerateAssignment())}
+              disabled={generating}
+            >
               {hasAssignment ? t('rounds.assignment.reroll') : t('rounds.assignment.generate')}
             </button>
+            )}
           </div>
         )}
 
@@ -420,19 +507,27 @@ export function RoundHomePage() {
         >
           {open === 'chefs' && (
             <div className="stack">
-              {activeMembers.map((m) => (
+              {activeMembers.map((m) => {
+                // Pending members show their real name — approving a
+                // pseudonym is approving nobody (0015). Once approved they
+                // are their secret name to everyone, host too.
+                const name = pendingById.get(m.id)?.real_name ?? m.secret_name
+                return (
                 <div key={m.id} className="row" style={{ justifyContent: 'space-between' }}>
                   <span>
-                    {/* Pending members show their real name — approving a
-                        pseudonym is approving nobody (0015). Once approved
-                        they are their secret name to everyone, host too. */}
                     {/* Everyone in the list is a pseudonym, including you —
                         so without a mark there is no way to tell which
                         stranger you are. A wine ring, the same trace the
                         cloth picks up as the evening goes on. */}
-                    <span className={m.profile_id === profile?.id ? 'chef-you' : undefined}>
-                      {pendingById.get(m.id)?.real_name ?? m.secret_name}
-                    </span>
+                    {name ? (
+                      <span className={m.profile_id === profile?.id ? 'chef-you' : undefined}>
+                        {name}
+                      </span>
+                    ) : (
+                      /* Nothing to uncover: the name never left the server.
+                         The bar covers a placeholder, as .redact requires. */
+                      <span className="redact">{t('rounds.chefCovered')}</span>
+                    )}
                     {!m.approved && <span className="badge"> {t('rounds.pendingApproval')}</span>}
                   </span>
                   {isHost && !m.approved && (
@@ -449,7 +544,32 @@ export function RoundHomePage() {
                     <RemoveChef assigned={assigned} onRemove={(mode) => onRemove(m.id, mode)} />
                   )}
                 </div>
-              ))}
+                )
+              })}
+
+              {/* Says when the bars come off, so a covered list reads as a
+                  rule of the game rather than something still loading. */}
+              {/* Removing a chef when both dishes are already submitted throws
+                  one of them away, so the question is asked in the roster
+                  itself rather than over it. */}
+              {removeAsk && (
+                <InlineConfirm
+                  title={t('rounds.remove')}
+                  confirmLabel={t('rounds.remove')}
+                  onConfirm={() => {
+                    const ask = removeAsk
+                    setRemoveAsk(null)
+                    onRemove(ask.memberId, ask.mode, true)
+                  }}
+                  onCancel={() => setRemoveAsk(null)}
+                >
+                  <p className="confirmbox__why">{t('rounds.removeDishConfirm')}</p>
+                </InlineConfirm>
+              )}
+
+              {rosterCovered && (
+                <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>
+              )}
 
 
 
@@ -464,7 +584,7 @@ export function RoundHomePage() {
         <Envelope
           icon="📝"
           name={t('rounds.drawers.myRecipe')}
-          meta={progress ? `${progress.briefs_submitted} / ${progress.total_players}` : undefined}
+          meta={assigned ? t(`briefs.state.${briefState}`) : undefined}
           waitingFor={waitBrief}
           to={`/rounds/${roundId}/brief`}
           tilt={2}
@@ -483,9 +603,9 @@ export function RoundHomePage() {
           icon="✉"
           name={t('rounds.drawers.messages')}
           meta={t('rounds.drawers.messagesMeta')}
-          badge={unread && unread > 0 ? unread : undefined}
+          badge={messageMark}
           waitingFor={waitBrief}
-          to={`/rounds/${roundId}/recipe`}
+          to={`/rounds/${roundId}/messages`}
           tilt={4}
         />
 
@@ -516,14 +636,55 @@ export function RoundHomePage() {
         <Envelope
           icon="📍"
           name={t('rounds.drawers.info')}
-          meta={round.location ?? undefined}
+          meta={round.city ?? round.location ?? undefined}
           tilt={3}
           onOpen={() => toggle('info')}
         >
           {open === 'info' && (
             <div className="stack">
-              <p className="muted">{round.location ?? t('rounds.info.noLocation')}</p>
-              <p className="muted">{round.dinner_at ?? t('rounds.info.noDate')}</p>
+              {/* Everything a guest needs in order to turn up, each thing on
+                  its own line. One free-text box used to carry all of it, so
+                  the envelope could only show one line and it was usually the
+                  wrong one (0034). Blank fields are omitted, not printed
+                  empty. */}
+              <dl className="info">
+                <dt>{t('rounds.info.title')}</dt>
+                <dd>{round.name}</dd>
+
+                {round.city && (
+                  <>
+                    <dt>{t('rounds.info.city')}</dt>
+                    <dd>{round.city}</dd>
+                  </>
+                )}
+
+                {round.location && (
+                  <>
+                    <dt>{t('rounds.info.address')}</dt>
+                    <dd>{round.location}</dd>
+                  </>
+                )}
+
+                <dt>{t('rounds.info.date')}</dt>
+                <dd>{when?.date ?? t('rounds.info.noDate')}</dd>
+
+                {when && (
+                  <>
+                    <dt>{t('rounds.info.time')}</dt>
+                    <dd>{when.time}</dd>
+                  </>
+                )}
+
+                <dt>{t('rounds.settings.timezone')}</dt>
+                <dd>{round.timezone}</dd>
+
+                {round.notes && (
+                  <>
+                    <dt>{t('rounds.info.notes')}</dt>
+                    <dd>{round.notes}</dd>
+                  </>
+                )}
+              </dl>
               {isHost && <Link to={`/rounds/${roundId}/settings`}>{t('rounds.settings.title')}</Link>}
               {isHost && assigned && <Link to={`/rounds/${roundId}/alerts`}>{t('alerts.title')}</Link>}
             </div>

@@ -46,7 +46,11 @@ export function ChatThread({ pairingId }: { pairingId: string }) {
     markThreadRead(pairingId).catch(() => {})
   }, [pairingId, thread?.length])
 
-  const categories = Array.from(new Set(templates?.map((tpl) => tpl.category) ?? []))
+  // BOARD phrases belong to the whole table and are posted through
+  // post_to_board, so they must not appear in a private thread's picker.
+  const categories = Array.from(
+    new Set(templates?.filter((tpl) => tpl.category !== 'BOARD').map((tpl) => tpl.category) ?? []),
+  )
   const templatesInCategory = templates?.filter((tpl) => tpl.category === category) ?? []
   const selectedTemplate = templates?.find((tpl) => tpl.id === templateId)
 

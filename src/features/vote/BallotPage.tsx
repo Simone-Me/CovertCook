@@ -182,6 +182,24 @@ export function BallotPage() {
     <div className="stack sheet">
       <BackToTable />
       <h1>{t('vote.title')}</h1>
+
+      {/* The menu first, the ballot second. You are being asked to judge a
+          meal, and until now the only way to see what the meal WAS was to
+          read the thing you drag rows around in. A card you can read top to
+          bottom without touching anything separates "what was served" from
+          "what I thought of it". */}
+      <div className="menucard">
+        <p className="menucard__head">{t('vote.theMenu')}</p>
+        <ol className="menucard__list">
+          {options?.map((o) => (
+            <li key={o.brief_id} className="menucard__course">
+              <span className="menucard__name">{o.dish_name}</span>
+              <span className="menucard__course-kind">{t(`briefs.courseOption.${o.course}`)}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+
       <p className="muted">{t('vote.instructions')}</p>
       {error && <div className="error">{error}</div>}
 

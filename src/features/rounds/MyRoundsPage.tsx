@@ -7,7 +7,7 @@ import { isPastRound, useMyRounds, type MyRoundRow } from './hooks'
 import { getMyInvitations, respondToInvitation } from '../../lib/rpc'
 import { peekJoinCode } from '../../lib/pendingJoin'
 
-function RoundCard({ round }: { round: MyRoundRow }) {
+function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
   const { t } = useTranslation()
   return (
     <Link to={`/rounds/${round.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
@@ -15,6 +15,14 @@ function RoundCard({ round }: { round: MyRoundRow }) {
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <strong>
             {round.accent_emoji} {round.name}
+            {/* The dinners you run and the dinners you were invited to look
+                identical in this list, and they are not the same job. The
+                toque says which ones are yours to steer. */}
+            {isHost && (
+              <span className="toque" title={t('rounds.youHost')} aria-label={t('rounds.youHost')}>
+                🧑‍🍳
+              </span>
+            )}
           </strong>
           <span className="row">
             {!round.approved && <span className="badge">{t('rounds.pendingApproval')}</span>}
@@ -128,7 +136,7 @@ export function MyRoundsPage() {
 
       <div className="stack">
         {current.map((r) => (
-          <RoundCard key={r.id} round={r} />
+          <RoundCard key={r.id} round={r} isHost={r.host_id === profile?.id} />
         ))}
       </div>
 
@@ -137,7 +145,8 @@ export function MyRoundsPage() {
           <button type="button" className="secondary" onClick={() => setShowPast((v) => !v)}>
             {t('rounds.pastRounds', { count: past.length })}
           </button>
-          {showPast && past.map((r) => <RoundCard key={r.id} round={r} />)}
+          {showPast &&
+            past.map((r) => <RoundCard key={r.id} round={r} isHost={r.host_id === profile?.id} />)}
         </div>
       )}
     </div>

@@ -4,6 +4,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import { joinRound } from '../../lib/rpc'
 import { getTurnstileTicket } from '../../lib/turnstileTicket'
 import { Turnstile } from '../../components/Turnstile'
+import { BackToTable } from '../../components/BackToTable'
 import { takeJoinCode } from '../../lib/pendingJoin'
 
 export function JoinRoundPage() {
@@ -72,6 +73,10 @@ export function JoinRoundPage() {
 
   return (
     <div className="stack sheet">
+      {/* A code you can't place is a dead end otherwise: this page is often
+          reached cold from a link, so BackToTable's fallback (home, i.e. the
+          dinners you're already in) is the point rather than the safety net. */}
+      <BackToTable />
       <h1>{t('rounds.join')}</h1>
       {error && <div className="error">{error}</div>}
 

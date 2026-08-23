@@ -234,12 +234,16 @@ export async function assignmentExists(roundId: string) {
 export async function updateRoundDetails(input: {
   roundId: string
   location: string | null
+  city: string | null
+  notes: string | null
   dinnerAt: string | null
   timezone: string
 }) {
   const res = await supabase.rpc('update_round_details', {
     p_round_id: input.roundId,
     p_location: input.location,
+    p_city: input.city,
+    p_notes: input.notes,
     p_dinner_at: input.dinnerAt,
     p_timezone: input.timezone,
   })
@@ -379,8 +383,12 @@ export async function getMyBriefDraft(roundId: string) {
 // Chat (supabase/migrations/0008_chat.sql)
 // ---------------------------------------------------------------------------
 
+// BOARD is the odd one out: those phrases go to the whole table through
+// round_messages rather than to one pairing, so they must be filtered OUT
+// of the thread pickers and IN on the board (0030).
 export type MessageCategory =
   | 'CLARIFICATION' | 'SUBSTITUTION' | 'NUDGE' | 'CANNOT_COOK' | 'NO_BRIEF' | 'THANKS' | 'REPLY'
+  | 'BOARD'
 export type MessageSlotType = 'NONE' | 'INGREDIENT' | 'SHORT_TEXT'
 export type MessageDirection = 'SENDER_TO_COOK' | 'COOK_TO_SENDER'
 
@@ -745,4 +753,58 @@ export async function addCourse(roundId: string, course: Course) {
 export async function removeCourse(roundId: string, slotId: string) {
   const res = await supabase.rpc('remove_course', { p_round_id: roundId, p_slot_id: slotId })
   return unwrap(res)
+}
+
+// ---------------------------------------------------------------------------
+// The board (0030 / 0031 / 0033). Its own table rather than a loosened
+// `messages`. It reads as a conversation now, one row per message, but the
+// author never leaves Postgres and the only clock exposed is the day — the
+// reader can place themselves via is_mine and nobody else (0033).
+// ---------------------------------------------------------------------------
+
+export interface BoardMessage {
+  message_id: string
+  body: string
+  is_mine: boolean
+  reported: boolean
+}
+
+export async function getBoard(roundId: string) {
+  const res = await supabase.rpc('get_board', { p_round_id: roundId })
+  return unwrap<BoardMessage[]>(res)
+}
+
+export async function postToBoard(roundId: string, templateId: string) {
+  const res = await supabase.rpc('post_to_board', { p_round_id: roundId, p_template_id: templateId })
+  return unwrap(res)
+}
+
+// How many board lines have appeared since you last opened the fridge. Your
+// own never count — nothing you just said is news to you (0034).
+export async function getBoardUnread(roundId: string) {
+  const res = await supabase.rpc('get_board_unread', { p_round_id: roundId })
+  return unwrap<number>(res)
+}
+
+export async function markBoardRead(roundId: string) {
+  const res = await supabase.rpc('mark_board_read', { p_round_id: roundId })
+  return unwrap(res)
+}
+
+export async function reportBoardMessage(messageId: string) {
+  const res = await supabase.rpc('report_board_message', { p_message_id: messageId })
+  return unwrap(res)
+}
+
+// Dishes carrying something somebody at this table flagged. Every diner can
+// read it, not only the host — the point of informing instead of blocking is
+// that the person with the allergy decides for themselves (0029).
+export interface AllergenDish {
+  dish_name: string
+  labels: string[]
+}
+
+export async function getAllergenDishes(roundId: string) {
+  const res = await supabase.rpc('get_allergen_dishes', { p_round_id: roundId })
+  return unwrap<AllergenDish[]>(res)
 }

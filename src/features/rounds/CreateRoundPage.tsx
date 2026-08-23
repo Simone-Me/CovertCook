@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { Fold } from '../../components/Fold'
 import { useNavigate } from 'react-router-dom'
 import {
   createRound,
@@ -102,19 +103,25 @@ export function CreateRoundPage() {
 
         {custom && (
           <div className="stack card">
-            <div>
-              <label htmlFor="access">{t('rounds.access.label')}</label>
-              <select id="access" value={access} onChange={(e) => setAccess(e.target.value as RoundAccess)}>
+            {/* Seven settings stacked open was a wall of selects nobody read
+                to the bottom. Folded, each is a question you answer and shut,
+                and the closed row keeps the answer in view — so choices
+                already made don't have to be reopened to be checked. */}
+            <Fold title={t('rounds.access.label')} aside={t(`rounds.access.${access}`)}>
+              <select
+                aria-label={t('rounds.access.label')}
+                value={access}
+                onChange={(e) => setAccess(e.target.value as RoundAccess)}
+              >
                 <option value="CODE">{t('rounds.access.CODE')}</option>
                 <option value="INVITE">{t('rounds.access.INVITE')}</option>
               </select>
               <p className="muted">{t(`rounds.access.${access}Hint`)}</p>
-            </div>
+            </Fold>
 
-            <div>
-              <label htmlFor="anonymity">{t('rounds.anonymity.label')}</label>
+            <Fold title={t('rounds.anonymity.label')} aside={t(`rounds.anonymity.${anonymity}`)}>
               <select
-                id="anonymity"
+                aria-label={t('rounds.anonymity.label')}
                 value={anonymity}
                 onChange={(e) => setAnonymity(e.target.value as RoundAnonymity)}
               >
@@ -123,12 +130,11 @@ export function CreateRoundPage() {
                 <option value="OPEN">{t('rounds.anonymity.OPEN')}</option>
               </select>
               <p className="muted">{t(`rounds.anonymity.${anonymity}Hint`)}</p>
-            </div>
+            </Fold>
 
-            <div>
-              <label htmlFor="votingMode">{t('rounds.voting.label')}</label>
+            <Fold title={t('rounds.voting.label')} aside={t(`rounds.voting.${votingMode}`)}>
               <select
-                id="votingMode"
+                aria-label={t('rounds.voting.label')}
                 value={votingMode}
                 onChange={(e) => setVotingMode(e.target.value as VotingMode)}
               >
@@ -142,33 +148,32 @@ export function CreateRoundPage() {
               <p className={votingMode === 'DISABLED' ? 'error' : 'muted'}>
                 {t(`rounds.voting.${votingMode}Hint`)}
               </p>
-            </div>
+            </Fold>
 
-            <div>
-              <label htmlFor="slotMode">{t('rounds.slotMode.label')}</label>
-              <select id="slotMode" value={slotMode} onChange={(e) => setSlotMode(e.target.value as SlotMode)}>
+            <Fold title={t('rounds.slotMode.label')} aside={t(`rounds.slotMode.${slotMode}`)}>
+              <select
+                aria-label={t('rounds.slotMode.label')}
+                value={slotMode}
+                onChange={(e) => setSlotMode(e.target.value as SlotMode)}
+              >
                 <option value="FREE">{t('rounds.slotMode.FREE')}</option>
                 <option value="CATEGORIES">{t('rounds.slotMode.CATEGORIES')}</option>
               </select>
-            </div>
+            </Fold>
 
             {/* Shown so the shape of the product is legible, disabled because
                 neither is built — see PRESENTATION.md, both are v2. */}
-            <div>
-              <label htmlFor="nameTheme">{t('rounds.nameTheme.label')}</label>
-              <select id="nameTheme" disabled value="FOOD">
+            <Fold title={t('rounds.nameTheme.label')} aside={t('rounds.comingSoon')}>
+              <select aria-label={t('rounds.nameTheme.label')} disabled value="FOOD" onChange={() => {}}>
                 <option value="FOOD">{t('rounds.nameTheme.FOOD')}</option>
               </select>
-              <p className="muted">{t('rounds.comingSoon')}</p>
-            </div>
+            </Fold>
 
-            <div>
-              <label htmlFor="recipesPerBrief">{t('rounds.recipesPerBrief.label')}</label>
-              <select id="recipesPerBrief" disabled value="1">
+            <Fold title={t('rounds.recipesPerBrief.label')} aside={t('rounds.comingSoon')}>
+              <select aria-label={t('rounds.recipesPerBrief.label')} disabled value="1" onChange={() => {}}>
                 <option value="1">{t('rounds.recipesPerBrief.one')}</option>
               </select>
-              <p className="muted">{t('rounds.comingSoon')}</p>
-            </div>
+            </Fold>
 
             <label className="row">
               <input

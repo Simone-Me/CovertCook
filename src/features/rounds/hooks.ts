@@ -14,7 +14,12 @@ export interface RoundRow {
   host_id: string
   dinner_at: string | null
   timezone: string
+  // location is the street, city is the city, notes is everything else a
+  // guest might need (door code, what to bring). One box could not do all
+  // three, which is why the envelope only ever showed one line (0034).
   location: string | null
+  city: string | null
+  notes: string | null
   voting_mode: VotingMode
   results_published_at: string | null
   // Generated in Postgres from voting_mode (0018) — the phase machine only
@@ -24,7 +29,7 @@ export interface RoundRow {
 }
 
 const ROUND_COLUMNS =
-  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,voting_mode,voting_enabled,results_published_at,slot_mode'
+  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,results_published_at,slot_mode'
 
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing
@@ -77,7 +82,10 @@ export interface RoundMemberRow {
   id: string
   round_id: string
   profile_id: string
-  secret_name: string
+  // Null while sign-ups are still open: the roster is revealed to everyone at
+  // once when the door closes, so that arrival order can't be read back as
+  // identity (0032). Your own name is always present.
+  secret_name: string | null
   role: 'HOST' | 'PLAYER'
   status: 'ACTIVE' | 'LEFT' | 'REMOVED'
   approved: boolean
@@ -88,11 +96,11 @@ export function useRoundMembers(roundId: string | undefined) {
     queryKey: ['rounds', roundId, 'members'],
     enabled: !!roundId,
     queryFn: async () => {
-      const { data, error } = await supabase
-        .from('round_members')
-        .select('id,round_id,profile_id,secret_name,role,status,approved')
-        .eq('round_id', roundId as string)
-        .order('joined_at', { ascending: true })
+      // Not a table read: secret_name is withheld server-side until the round
+      // locks, and the client no longer has SELECT on that column (0032).
+      const { data, error } = await supabase.rpc('list_round_members', {
+        p_round_id: roundId as string,
+      })
       if (error) throw error
       return data as RoundMemberRow[]
     },

@@ -120,6 +120,9 @@
     "secretName": "Your secret name for this round",
     "roster": "Players",
     "pendingApproval": "Awaiting approval",
+    "youHost": "You are the Executive Chef of this dinner",
+    "chefCovered": "Chef ——————",
+    "rosterCovered": "Names stay covered until sign-ups close, so nobody can tell who is who from the order people arrived in.",
     "seatCount": "{{count}} player",
     "seatCount_other": "{{count}} players",
     "phase": {
@@ -155,7 +158,6 @@
       "phaseControl": "Status",
       "currentPhase": "Current phase",
       "stepBackTo": "Unlock — go back to \"{{phase}}\"",
-      "stepBackConfirm": "This moves the round back to \"{{phase}}\". Continue?",
       "noStepBack": "This round is at its earliest phase.",
       "dangerZone": "Danger zone",
       "cancelRound": "Cancel round",
@@ -165,7 +167,20 @@
       "noExclusions": "No exclusions configured.",
       "courses": "Courses to fill",
       "coursesHelp": "This round uses specific courses — the number of slots below must equal the number of active players ({{count}}) before you can generate the assignment.",
-      "filling": "Filling the table"
+      "city": "City",
+      "notes": "Anything else guests should know",
+      "notesPlaceholder": "Door code, what to bring, where to park.",
+      "filling": "Filling the table",
+      "stepBackWhat": {
+        "DRAFT": "The join code stops working, so nobody new can ask for a seat. Everyone already at the table stays.",
+        "OPEN": "The door reopens: anyone holding the code can ask for a seat again.",
+        "LOCKED": "The pairings stay exactly as they are — they are not thrown away. Chefs simply cannot write their recipe again until you move forward.",
+        "ASSIGNED": "Recipes become editable again, and the cooks stop seeing the one they received until you move forward. Anything already submitted stays submitted.",
+        "BRIEFS_CLOSED": "The dinner stops being marked as happening. The recipes stay readable to the chefs cooking them.",
+        "DINNER": "Voting closes. Ballots already cast are kept, and voting picks up where it left off if you move forward again.",
+        "VOTING": "The results go back to provisional and are recalculated when you move forward. Every ballot is kept."
+      },
+      "stepBackNothingLost": "Nothing is deleted by stepping back — only what people are allowed to do right now changes."
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
@@ -190,7 +205,7 @@
       "signup": "Sign-up",
       "assign": "Roles",
       "recipe": "Recipe",
-      "vote": "Vote"
+      "vote": "Menu"
     },
     "drawers": {
       "chefs": "Chefs",
@@ -199,7 +214,7 @@
       "receivedMeta": "What you are cooking",
       "messages": "Messages",
       "messagesMeta": "Board and conversations",
-      "vote": "Vote",
+      "vote": "Vote the menu",
       "results": "Results",
       "allergies": "Allergies",
       "info": "The dinner"
@@ -210,6 +225,12 @@
       "vote": "Opens when the Executive Chef starts the vote"
     },
     "info": {
+      "title": "Dinner",
+      "city": "City",
+      "address": "Address",
+      "date": "Date",
+      "time": "Time",
+      "notes": "Good to know",
       "noLocation": "No address yet",
       "noDate": "No date yet"
     },
@@ -297,8 +318,13 @@
       "quick": "Quick",
       "careful": "Detailed"
     },
-    "everything": "The recipe",
-    "everythingPlaceholder": "Ingredients and how to make it — write it however you like.",
+    "ingredientsPlaceholder": "One per line — 200 g flour, 3 eggs, a pinch of salt.",
+    "procedurePlaceholder": "How to make it. However you like.",
+    "state": {
+      "blank": "○ Not written",
+      "draft": "◐ Draft saved",
+      "sent": "● Sent to your cook"
+    },
     "assignedCourse": "The roulette gave you: {{course}}",
     "freeChoice": "Free choice — any dish you like.",
     "labelDish": "Put a card next to this dish",
@@ -332,7 +358,8 @@
     }
   },
   "vote": {
-    "title": "Vote",
+    "title": "Vote the menu",
+    "theMenu": "Tonight's menu",
     "instructions": "Drag to rank every dish, best first. Optional: rate originality and how closely the brief was followed.",
     "originality": "Originality",
     "briefRespect": "Brief respect",
@@ -407,5 +434,17 @@
       "en": "English",
       "fr": "Français"
     }
+  },
+  "board": {
+    "pageTitle": "Messages",
+    "fridge": "The Fridge",
+    "help": "The whole table talks here, and nobody signs it. Turn the rolling pin for something to say, or throw the egg and let it choose.",
+    "empty": "Nothing in the fridge yet. Be the first.",
+    "throwEgg": "Throw the egg — say something at random",
+    "rateLimit": "That is plenty for one hour. Let somebody else talk.",
+    "yourChef": "Your Chef",
+    "yourChefHelp": "Your two private conversations: the chef you write for, and the chef who writes for you.",
+    "toYourCook": "With the chef you write for",
+    "toYourSender": "With the chef who writes for you"
   }
 }

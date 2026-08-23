@@ -6,6 +6,8 @@ import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
 import { getChain, setPairing, spliceMember, SPLICE_REQUIRES_CONFIRMATION, type ChainLink } from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
+import { ChainCircle } from './ChainCircle'
+import { InlineConfirm } from '../../components/InlineConfirm'
 
 // Walks the sender->cook edges into cycle order (get_chain returns rows
 // ordered by lap + sender secret name, not by chain position) so the grid
@@ -59,6 +61,10 @@ export function ChainPage() {
   const [swapSenderId, setSwapSenderId] = useState('')
   const [swapCookId, setSwapCookId] = useState('')
   const [spliceMemberId, setSpliceMemberId] = useState('')
+  // Raised by the RPC, answered on the page: splice_member refuses the first
+  // time when a dish would change hands, and this is that refusal made
+  // readable instead of thrown into a browser dialog.
+  const [spliceNeedsOk, setSpliceNeedsOk] = useState(false)
 
   if (roundLoading || !round) return <p className="muted">…</p>
   const isHost = round.host_id === profile?.id
@@ -93,7 +99,7 @@ export function ChainPage() {
     } catch (err) {
       const message = err instanceof Error ? err.message : t('errors.generic')
       if (message === SPLICE_REQUIRES_CONFIRMATION) {
-        if (window.confirm(t('chain.spliceConfirm'))) await onSplice(true)
+        setSpliceNeedsOk(true)
       } else {
         setError(message)
       }
@@ -121,16 +127,25 @@ export function ChainPage() {
           {cycles.map((cycle, ci) => (
             <div key={cycle[0]?.sender_member_id ?? ci} className="stack">
               {cycles.length > 1 && <h2>{t('chain.cycleTitle', { index: ci + 1 })}</h2>}
-              {cycle.map((link, i) => (
-                <div key={link.sender_member_id} className="row" style={{ flexWrap: 'wrap' }}>
-                  <span className="badge">{link.sender_secret_name}</span>
-                  <span>→</span>
-                  <span className="badge">{link.cook_secret_name}</span>
-                  {i === cycle.length - 1 && (
-                    <span className="muted">{t('chain.loopsBackTo', { name: cycle[0]?.sender_secret_name })}</span>
-                  )}
-                </div>
-              ))}
+
+              {/* The ring first, because it is the thing that is true: every
+                  arrow points at the person that chef cooks for, and the fact
+                  that it closes is visible rather than asserted at the bottom
+                  of a list. */}
+              <ChainCircle cycle={cycle} />
+
+              {/* The same edges written out, kept because a name is easier to
+                  copy from a line than from a diagram, and because a screen
+                  reader gets a list rather than a picture. */}
+              <ol className="chainring__pairs">
+                {cycle.map((link) => (
+                  <li key={link.sender_member_id}>
+                    <span className="badge">{link.sender_secret_name}</span>
+                    <span aria-hidden="true"> → </span>
+                    <span className="badge">{link.cook_secret_name}</span>
+                  </li>
+                ))}
+              </ol>
             </div>
           ))}
         </div>
@@ -179,9 +194,22 @@ export function ChainPage() {
                     </option>
                   ))}
                 </select>
-                <button type="button" onClick={() => onSplice(false)} disabled={!spliceMemberId}>
-                  {t('chain.applySplice')}
-                </button>
+                {spliceNeedsOk ? (
+                  <InlineConfirm
+                    title={t('chain.applySplice')}
+                    onConfirm={() => {
+                      setSpliceNeedsOk(false)
+                      onSplice(true)
+                    }}
+                    onCancel={() => setSpliceNeedsOk(false)}
+                  >
+                    <p className="confirmbox__why">{t('chain.spliceConfirm')}</p>
+                  </InlineConfirm>
+                ) : (
+                  <button type="button" onClick={() => onSplice(false)} disabled={!spliceMemberId}>
+                    {t('chain.applySplice')}
+                  </button>
+                )}
               </div>
             </>
           )}

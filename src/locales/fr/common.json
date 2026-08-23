@@ -120,6 +120,9 @@
     "secretName": "Votre nom secret pour ce dîner",
     "roster": "Participants",
     "pendingApproval": "En attente d'approbation",
+    "youHost": "Vous êtes le chef exécutif de ce dîner",
+    "chefCovered": "Chef ——————",
+    "rosterCovered": "Les noms restent masqués jusqu'à la clôture des inscriptions, pour que l'ordre d'arrivée ne trahisse l'identité de personne.",
     "seatCount": "{{count}} participant",
     "seatCount_other": "{{count}} participants",
     "phase": {
@@ -155,7 +158,6 @@
       "phaseControl": "Statut",
       "currentPhase": "Phase actuelle",
       "stepBackTo": "Déverrouiller — revenir à « {{phase}} »",
-      "stepBackConfirm": "Ceci ramène le dîner à la phase « {{phase}} ». Continuer ?",
       "noStepBack": "Ce dîner est déjà à sa première phase.",
       "dangerZone": "Zone dangereuse",
       "cancelRound": "Annuler le dîner",
@@ -165,7 +167,20 @@
       "noExclusions": "Aucune exclusion configurée.",
       "courses": "Plats à remplir",
       "coursesHelp": "Ce dîner utilise des plats spécifiques — le nombre de créneaux ci-dessous doit être égal au nombre de participants actifs ({{count}}) avant de générer l'attribution.",
-      "filling": "Remplir la table"
+      "city": "Ville",
+      "notes": "Autres informations utiles",
+      "notesPlaceholder": "Code de la porte, quoi apporter, où se garer.",
+      "filling": "Remplir la table",
+      "stepBackWhat": {
+        "DRAFT": "Le code cesse de fonctionner : plus personne ne peut demander une place. Ceux qui sont déjà à table y restent.",
+        "OPEN": "La porte se rouvre : quiconque a le code peut redemander une place.",
+        "LOCKED": "Les attributions restent telles quelles — elles ne sont pas effacées. Les chefs ne peuvent simplement plus écrire leur recette tant que vous n'avancez pas.",
+        "ASSIGNED": "Les recettes redeviennent modifiables, et les cuisiniers ne voient plus celle qu'ils ont reçue tant que vous n'avancez pas. Ce qui est déjà envoyé le reste.",
+        "BRIEFS_CLOSED": "Le dîner n'est plus marqué comme en cours. Les recettes restent lisibles par les chefs qui les cuisinent.",
+        "DINNER": "Le vote se referme. Les bulletins déjà déposés sont conservés, et le vote reprend où il s'était arrêté si vous ré-avancez.",
+        "VOTING": "Les résultats redeviennent provisoires et seront recalculés quand vous avancerez. Tous les bulletins sont conservés."
+      },
+      "stepBackNothingLost": "Revenir en arrière n'efface rien — cela change seulement ce que chacun a le droit de faire maintenant."
     },
     "entryPoints": {
       "writeRecipe": "Écrire votre recette",
@@ -190,7 +205,7 @@
       "signup": "Inscription",
       "assign": "Rôles",
       "recipe": "Recette",
-      "vote": "Vote"
+      "vote": "Menu"
     },
     "drawers": {
       "chefs": "Chefs",
@@ -199,7 +214,7 @@
       "receivedMeta": "Ce que vous cuisinez",
       "messages": "Messages",
       "messagesMeta": "Tableau et conversations",
-      "vote": "Vote",
+      "vote": "Votez le menu",
       "results": "Résultats",
       "allergies": "Allergies",
       "info": "Le dîner"
@@ -210,6 +225,12 @@
       "vote": "S'ouvre quand l'Executive Chef lance le vote"
     },
     "info": {
+      "title": "Dîner",
+      "city": "Ville",
+      "address": "Adresse",
+      "date": "Date",
+      "time": "Heure",
+      "notes": "Bon à savoir",
       "noLocation": "Pas encore d'adresse",
       "noDate": "Pas encore de date"
     },
@@ -297,8 +318,13 @@
       "quick": "Rapide",
       "careful": "Détaillé"
     },
-    "everything": "La recette",
-    "everythingPlaceholder": "Les ingrédients et la façon de faire — écrivez comme vous voulez.",
+    "ingredientsPlaceholder": "Un par ligne — 200 g de farine, 3 œufs, une pincée de sel.",
+    "procedurePlaceholder": "La façon de faire. Comme vous voulez.",
+    "state": {
+      "blank": "○ Pas écrite",
+      "draft": "◐ Brouillon enregistré",
+      "sent": "● Envoyée à votre cuisinier"
+    },
     "assignedCourse": "La roulette vous a donné : {{course}}",
     "freeChoice": "Choix libre — le plat que vous voulez.",
     "labelDish": "Mettez un carton à côté de ce plat",
@@ -332,7 +358,8 @@
     }
   },
   "vote": {
-    "title": "Vote",
+    "title": "Votez le menu",
+    "theMenu": "Le menu de ce soir",
     "instructions": "Glissez pour classer chaque plat, du meilleur au moins bon. Optionnel : notez l'originalité et le respect de la recette.",
     "originality": "Originalité",
     "briefRespect": "Respect de la recette",
@@ -407,5 +434,17 @@
       "en": "English",
       "fr": "Français"
     }
+  },
+  "board": {
+    "pageTitle": "Messages",
+    "fridge": "Le Frigo",
+    "help": "Toute la table parle ici, et personne ne signe. Faites tourner le rouleau à pâtisserie pour trouver quoi dire, ou lancez l'œuf et laissez-le choisir.",
+    "empty": "Rien dans le frigo. Soyez le premier.",
+    "throwEgg": "Lancez l'œuf — dites quelque chose au hasard",
+    "rateLimit": "Ça suffit pour une heure. Laissez parler les autres.",
+    "yourChef": "Votre chef",
+    "yourChefHelp": "Vos deux conversations privées : le chef pour qui vous écrivez, et le chef qui écrit pour vous.",
+    "toYourCook": "Avec le chef pour qui vous écrivez",
+    "toYourSender": "Avec le chef qui écrit pour vous"
   }
 }

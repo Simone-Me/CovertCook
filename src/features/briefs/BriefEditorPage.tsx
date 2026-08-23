@@ -29,6 +29,17 @@ import {
 // which is what a cook reads anyway.
 type Mode = 'quick' | 'careful'
 
+// One ingredient per line. Quick mode stores the same rows careful mode
+// does — the cook must get a list either way — it just doesn't make anyone
+// tab through three inputs to produce one.
+function linesToIngredients(text: string): BriefIngredient[] {
+  return text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((name) => ({ name, quantity: null, unit: null }))
+}
+
 export function BriefEditorPage() {
   const { t } = useTranslation()
   const { roundId } = useParams()
@@ -53,6 +64,7 @@ export function BriefEditorPage() {
   const [mode, setMode] = useState<Mode>('quick')
   const [dishName, setDishName] = useState('')
   const [ingredients, setIngredients] = useState<BriefIngredient[]>([{ name: '', quantity: null, unit: null }])
+  const [quickIngredients, setQuickIngredients] = useState('')
   const [procedure, setProcedure] = useState('')
   const [externalUrl, setExternalUrl] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -64,11 +76,19 @@ export function BriefEditorPage() {
   useEffect(() => {
     if (draft && !loadedFromDraft) {
       setDishName(draft.dish_name)
-      setIngredients(draft.ingredients.length > 0 ? draft.ingredients : [{ name: '', quantity: null, unit: null }])
       setProcedure(draft.procedure)
       setExternalUrl(draft.external_url ?? '')
       setSubmitted(draft.status === 'SUBMITTED')
-      if (draft.ingredients.length > 0) setMode('careful')
+      // Quantities and units are the only thing careful mode adds. A list
+      // carrying none of them was typed as free text, so it comes back as
+      // the block it was written in instead of exploding into rows.
+      const itemised = draft.ingredients.some((i) => i.quantity !== null || (i.unit ?? '').trim() !== '')
+      if (draft.ingredients.length > 0 && itemised) {
+        setIngredients(draft.ingredients)
+        setMode('careful')
+      } else {
+        setQuickIngredients(draft.ingredients.map((i) => i.name).join('\n'))
+      }
       setLoadedFromDraft(true)
     }
   }, [draft, loadedFromDraft])
@@ -76,8 +96,11 @@ export function BriefEditorPage() {
   // Everything the sender wrote, as one searchable string. The quick mode
   // has no ingredient rows, so the block of text has to be scanned too.
   const written = useMemo(
-    () => [dishName, procedure, ...ingredients.map((i) => i.name)].join(' ').toLowerCase(),
-    [dishName, procedure, ingredients],
+    () =>
+      [dishName, procedure, quickIngredients, ...ingredients.map((i) => i.name)]
+        .join(' ')
+        .toLowerCase(),
+    [dishName, procedure, quickIngredients, ingredients],
   )
 
   // Allergen tags are found, not asked for.
@@ -102,8 +125,27 @@ export function BriefEditorPage() {
 
   const editingClosed = round.status !== 'ASSIGNED' || submitted
   const hasLink = externalUrl.trim().length > 0
-  const hasBody = procedure.trim().length >= 30 || ingredients.some((i) => i.name.trim())
+  const hasBody =
+    procedure.trim().length >= 30 || quickIngredients.trim().length > 0 || ingredients.some((i) => i.name.trim())
   const complete = dishName.trim().length >= 3 && (hasLink || hasBody)
+
+  // Switching modes must not throw away what's already typed — the two
+  // shapes hold the same list, so translate rather than reset.
+  function switchMode(next: Mode) {
+    if (next === mode) return
+    if (next === 'careful') {
+      const rows = linesToIngredients(quickIngredients)
+      if (rows.length > 0) setIngredients(rows)
+    } else {
+      setQuickIngredients(
+        ingredients
+          .map((i) => [i.quantity, i.unit, i.name].filter(Boolean).join(' ').trim())
+          .filter(Boolean)
+          .join('\n'),
+      )
+    }
+    setMode(next)
+  }
 
   function updateIngredient(i: number, patch: Partial<BriefIngredient>) {
     setIngredients((prev) => prev.map((ing, idx) => (idx === i ? { ...ing, ...patch } : ing)))
@@ -118,7 +160,10 @@ export function BriefEditorPage() {
       // either way it was never the sender's to pick, and offering a
       // dropdown invited people to contradict their own assignment.
       course: assignment?.course ?? 'OTHER',
-      ingredients: mode === 'careful' ? ingredients.filter((i) => i.name.trim().length > 0) : [],
+      ingredients:
+        mode === 'careful'
+          ? ingredients.filter((i) => i.name.trim().length > 0)
+          : linesToIngredients(quickIngredients),
       procedure,
       externalUrl: externalUrl.trim() || null,
       difficulty: null,
@@ -190,14 +235,14 @@ export function BriefEditorPage() {
           <button
             type="button"
             className={mode === 'quick' ? undefined : 'secondary'}
-            onClick={() => setMode('quick')}
+            onClick={() => switchMode('quick')}
           >
             {t('briefs.mode.quick')}
           </button>
           <button
             type="button"
             className={mode === 'careful' ? undefined : 'secondary'}
-            onClick={() => setMode('careful')}
+            onClick={() => switchMode('careful')}
           >
             {t('briefs.mode.careful')}
           </button>
@@ -267,15 +312,32 @@ export function BriefEditorPage() {
           </>
         )}
 
+        {mode === 'quick' && (
+          <div>
+            <label htmlFor="quick-ingredients">{t('briefs.ingredients')}</label>
+            {/* The wide block this mode was missing. One per line — itemising
+                with quantities and units is what careful mode is for, and
+                asking for it here is what sent people away in the first
+                place. */}
+            <textarea
+              id="quick-ingredients"
+              disabled={editingClosed}
+              rows={6}
+              placeholder={t('briefs.ingredientsPlaceholder')}
+              value={quickIngredients}
+              onChange={(e) => setQuickIngredients(e.target.value)}
+              maxLength={2000}
+            />
+          </div>
+        )}
+
         <div>
-          <label htmlFor="procedure">
-            {mode === 'quick' ? t('briefs.everything') : t('briefs.procedure')}
-          </label>
+          <label htmlFor="procedure">{t('briefs.procedure')}</label>
           <textarea
             id="procedure"
             disabled={editingClosed}
             rows={mode === 'quick' ? 8 : 6}
-            placeholder={mode === 'quick' ? t('briefs.everythingPlaceholder') : undefined}
+            placeholder={mode === 'quick' ? t('briefs.procedurePlaceholder') : undefined}
             value={procedure}
             onChange={(e) => setProcedure(e.target.value)}
             maxLength={5000}

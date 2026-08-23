@@ -17,8 +17,13 @@ export function AppHeader() {
 
   return (
     <header className="app-header">
-      <Link to="/" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600, flex: 1 }}>
-        {t('app.name')}
+      {/* The name was already a link home, but nothing said so — it read as
+          a title. The arrow slides out of the word on hover and the whole
+          thing lifts a little, the same gesture as picking an envelope off
+          the cloth, so the way back announces itself before it's clicked. */}
+      <Link to="/" className="app-logo" aria-label={t('rounds.myRounds')}>
+        <span className="app-logo__back" aria-hidden="true">←</span>
+        <span className="app-logo__name">{t('app.name')}</span>
       </Link>
       {session && (
         <Link to="/profile" className="badge" style={{ textDecoration: 'none' }}>

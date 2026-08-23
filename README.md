@@ -43,12 +43,25 @@ usable without instructions. When a feature could go either the simple
 route or the more powerful/configurable route, default to simple unless
 there's a concrete reason (e.g. dietary safety) to do otherwise.
 
-The round page's presentation (how the phase machine, host tools, and
-player tasks are laid out on screen) is being reworked from one flat page
-into a small set of collapsible drawers — see
-[`PRESENTATION.md`](./PRESENTATION.md) for the spec and open decisions.
-Not yet implemented. Kept out of this file so README stays limited to
-game logic and architecture, not UI/UX planning.
+The round page is a tablecloth with envelopes laid on it, and opening one
+takes over the screen rather than expanding a list.
+[`DESIGN.md`](./DESIGN.md) is the authority on that — palette, the rules
+that keep the table a table, and when the roster is allowed to be seen.
+[`PRESENTATION.md`](./PRESENTATION.md) holds the phase-by-phase spec.
+Both are kept out of this file so README stays limited to game logic and
+architecture, not UI/UX planning.
+
+Two conventions the interface now holds to, both recorded in
+[`DESIGN.md`](./DESIGN.md):
+
+- **No browser dialogs.** Confirmations appear on the page, beside the control
+  that raised them, and say what will actually change. `window.confirm` cannot
+  be formatted, cannot say more than one flat sentence, and gives the
+  destructive option a button identical in weight to the safe one.
+- **A warning must be true.** Stepping a dinner back deletes nothing —
+  `advance_phase` only updates `rounds.status` — so the warnings say what each
+  step actually changes (which phase-gated actions open or close), not what it
+  feels like it might destroy.
 
 Product and infrastructure questions that aren't about the interface —
 notifications, a paid tier, self-hosting, the Play Store — live in
@@ -202,9 +215,11 @@ round end to end directly in SQL (signup → dietary block → assignment →
 briefs → chat → voting → results → reveal) — useful for re-validating the
 backend after any migration change. `smoke_test3.sql` covers the
 host-tools RPCs that only got a frontend later (`splice_member`,
-`set_pairing`, `remove_member` post-assignment, `exclusion_pairs`/
-`slots` direct CRUD, `host_alerts` resolve). `smoke_test4.sql` covers
-pending-member identity, and `smoke_test5.sql` both removal modes.
+`set_pairing`, `remove_member` post-assignment, exclusion pairs, the menu
+RPCs, `host_alerts` resolve). `smoke_test4.sql` covers pending-member
+identity, `smoke_test5.sql` both removal modes, `smoke_test6.sql` round
+setup and invitations, and `smoke_test7.sql` the board plus allergens
+informing rather than blocking.
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -229,7 +244,7 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 ```
 
 Then `db reset` again before each of `smoke_test3.sql` through
-`smoke_test6.sql`.
+`smoke_test7.sql`.
 
 **Prefer `npx supabase migration up --local` over `db reset` while anyone
 is using the app.** It applies pending migrations against the existing
@@ -238,11 +253,7 @@ it, so anyone signed in loses their account mid-session. The app now
 detects such a session and signs out cleanly rather than failing on a
 foreign key, but they still have to sign up again.
 
-Two more things that look like failures and aren't. `smoke_test.sql`
-**ends** on a deliberate dietary-conflict error — it prints
-`--- expecting a hard-dietary-conflict error next ---` and the rejection
-is the assertion — so it has no `COMPLETE` marker and grepping for
-`ERROR` always "fails" it. And `smoke_test3.sql` picks its `set_pairing`
+One more thing that looks like a failure and isn't: `smoke_test3.sql` picks its `set_pairing`
 target with `limit 1` and no `order by`, so which member it lands on
 varies with the random assignment; if it ever fails, confirm the failure
 reproduces before believing it.
@@ -264,12 +275,31 @@ names, migration numbers, bugs found and fixed) see
   slots (starter/main/dessert/drink/other), with manual re-pairing and
   late-joiner handling if needed.
 - **Recipe briefs**: each player writes a recipe for their assigned cook,
-  quickly (a name and a link, or one block of text) or in detail (itemised
-  ingredients). Checked against the whole group's allergies and diets
-  before it can be submitted — a shared buffet means one dish reaches
-  everyone. The allergen tags are found in what was written rather than
-  ticked from a list, and anything that matches produces the instruction
-  that actually helps at a table: put a card next to the dish.
+  quickly (a name, ingredients one per line, the method, and optionally a
+  link) or in detail (itemised ingredients with quantities and units).
+  Both store the same list, so the cook reads the same thing either way.
+  Allergen tags are found in what was written rather than ticked from a
+  list.
+- **The roster is covered until sign-ups close** (`0032`). While a round is
+  `DRAFT` or `OPEN` nobody sees anyone's secret name but their own — the
+  server withholds it, rather than the interface hiding it — because names
+  appearing as people arrive would make join order a way to work out who is
+  who. Everyone is revealed at the same instant when the round locks. The
+  host still reads pending members' real names at the door (`0015`).
+- **Allergens inform rather than block.** A dish matching somebody's severe
+  allergy or diet is still served; what changes is that everyone who needs
+  to know is told. The sender is asked to put a card by the dish, the
+  Executive Chef gets a note naming the dish and the allergen so they can
+  say it when the food goes down, and any diner can look up which dishes
+  carry what. A card is what a host would actually do, and an adult with an
+  allergy is better served by knowing than by one dish silently never
+  existing.
+- **The board**: one channel the whole table reads and posts to, from a
+  short list of ready-made cheerful phrases. Nothing is attributed —
+  identical phrases collapse into one line with a count, so the board is
+  unattributable by construction rather than by omission. The author is
+  still stored and never sent, which is what lets a reported phrase be
+  acted on.
 - **Cooking**: each player sees the recipe written for them, with a
   canned-message chat to their pairing partner and a "can't cook this"
   quick action.
@@ -307,15 +337,10 @@ names, migration numbers, bugs found and fixed) see
 
 Ordered roughly by how much the product misses them.
 
-- **The board ("pozzo comune")** — a round-wide channel for the whole
-  table alongside the two private pairing threads, with a short list of
-  ready-made cheerful phrases. Specced in
-  [`PRESENTATION.md`](./PRESENTATION.md) drawer 4, phrases drafted, not
-  built. This is the last piece of the redesign's original scope.
-- **Free-text chat** — today the chat is canned templates only. Agreed to
+- **Free-text chat** — the chat is still canned templates only. Agreed to
   open it up (with the anonymity trade-off accepted knowingly), then
-  narrow back toward templates once there's real usage data. `PRESENTATION.md`
-  drawer 4.
+  narrow back toward templates once there's real usage data.
+  `PRESENTATION.md` drawer 4.
 - **Telling people the round moved** — nothing notifies anyone when the
   Executive Chef advances the dinner. Decided: email, not push, and why —
   see `PRESENTATION.md`, "Telling people the round moved". Needs the mail
@@ -323,11 +348,11 @@ Ordered roughly by how much the product misses them.
 - **Outbound email** — invitations already work in-app without it, so this
   is now only for reaching people who aren't looking at the app. Blocked
   on a provider key.
-- **Real table props** — the plate, glass and cutlery on the cloth are
-  placeholder drawings. The three rules the real renders must follow (one
-  camera angle, one light source, shadow baked in) are in `TableProps.tsx`.
-- **The settings page** — still a long flat list while the round page has
-  moved to folds and envelopes.
+- **Real table props** — the plate, glass, bowl, napkin, cutlery and bread
+  board on the cloth are drawings, not renders. They move correctly between
+  the three states; what's missing is the artwork. The three rules the real
+  ones must follow (one camera angle, one light source, shadow baked in) are
+  in `DESIGN.md` §4 and `TableProps.tsx`.
 - **Two recipes per brief** and **themed pseudonyms** — both shown in the
   creation form, both disabled, both v2.
 - **Dinner-day tools**: shopping list, printable buffet labels,

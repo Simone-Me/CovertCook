@@ -53,6 +53,10 @@
   /* the marker that covers what you're not meant to know yet */
   --marker: #17120e;
 
+  /* The rolling pin. The dark outline is the one thing that makes flat wood
+     read as a drawn object rather than a beige rectangle. */
+  --pin-line: #252850;
+
   --radius: 10px;
   --radius-paper: 4px;
   /* light only — tells the browser to paint its own chrome (scrollbars,
