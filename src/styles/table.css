@@ -1,0 +1,1128 @@
+/* The table: cloth, paper, envelopes.
+ *
+ * One rule holds this whole direction up and everything below follows from
+ * it: NOTHING READABLE EVER SITS ON THE CHECKS. Every block of text lives
+ * on a .paper or .env surface laid over the cloth with its own shadow. The
+ * cloth shows in the margins, the gaps and around the props — it is the
+ * room, not the background of the text.
+ */
+
+.cloth {
+  background-color: var(--cloth-ground);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      var(--cloth-check) 0 var(--cloth-square),
+      transparent var(--cloth-square) calc(var(--cloth-square) * 2)
+    ),
+    repeating-linear-gradient(
+      90deg,
+      var(--cloth-check) 0 var(--cloth-square),
+      transparent var(--cloth-square) calc(var(--cloth-square) * 2)
+    );
+}
+
+/* Anything laid on the cloth that has to be read. */
+.paper {
+  background: var(--paper);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--paper-shadow);
+  padding: 12px 14px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Envelope — a closed drawer. Flap folded down from the top edge, wax seal
+ * where its point lands. Slight rotations come from .tilt-* so a stack
+ * reads as objects someone put down rather than rows in a menu.
+ * ------------------------------------------------------------------------- */
+
+.env {
+  position: relative;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  text-align: left;
+  font: inherit;
+  color: inherit;
+  padding: 21px 14px 12px;
+  background: var(--env);
+  border: 1px solid var(--env-edge);
+  border-radius: 3px;
+  box-shadow: var(--env-shadow);
+  cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease;
+}
+
+.env::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 30px;
+  background: linear-gradient(178deg, var(--env-flap) 0%, var(--env-flap-end) 100%);
+  border-bottom: 1px solid var(--env-edge);
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+}
+
+.env::after {
+  content: '';
+  position: absolute;
+  top: 21px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, var(--wax-light), var(--wax) 70%);
+  box-shadow: 0 1px 2px rgba(90, 25, 20, 0.4);
+}
+
+.env:hover:not(:disabled),
+.env:focus-visible:not(:disabled) {
+  transform: translateY(-2px) rotate(0deg);
+  box-shadow: var(--env-shadow-lift);
+}
+
+/* Waiting on something, not broken: dimmed, and it says what it's waiting
+ * for. A drawer that will NEVER open in this round is not rendered at all
+ * — see PRESENTATION.md, "dimmed means not yet, never not at all". */
+.env:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.env:disabled::after {
+  background: var(--env-chip);
+  box-shadow: none;
+}
+
+.env__ico {
+  width: 28px;
+  height: 28px;
+  flex: none;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  border-radius: 3px;
+  background: var(--env-chip);
+  color: var(--env-ink);
+}
+
+.env__txt {
+  flex: 1;
+  min-width: 0;
+}
+
+.env__name {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.env__meta {
+  display: block;
+  font-size: 12px;
+  opacity: 0.7;
+  margin-top: 1px;
+}
+
+/* One badge type, never a dot competing with a count. Cleared on open,
+ * never on a timer — a badge that fades by itself stops meaning anything. */
+.env__pip {
+  flex: none;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  letter-spacing: 0.04em;
+}
+
+.tilt-1 { transform: rotate(-0.9deg); }
+.tilt-2 { transform: rotate(0.7deg); }
+.tilt-3 { transform: rotate(-0.4deg); }
+.tilt-4 { transform: rotate(1.1deg); }
+
+@media (prefers-reduced-motion: reduce) {
+  .env { transition: none; }
+  .env:hover:not(:disabled) { transform: none; }
+  .tilt-1, .tilt-2, .tilt-3, .tilt-4 { transform: none; }
+}
+
+/* ---------------------------------------------------------------------------
+ * Letter — what an opened envelope leaves behind. Not an envelope any more:
+ * the sheet that was inside, with the fold still showing.
+ * ------------------------------------------------------------------------- */
+
+.letter {
+  position: relative;
+  background: var(--paper-solid);
+  border: 1px solid var(--env-edge);
+  border-radius: 3px;
+  padding: 14px 16px 16px;
+  box-shadow: 0 1px 1px rgba(120, 60, 30, 0.12), 0 12px 26px rgba(120, 60, 30, 0.18);
+}
+
+/* The fold crease is opt-in, not automatic. On a short letter it reads as
+ * paper that was folded; across a live list of names it reads as a stray
+ * horizontal rule cutting through the content — which is exactly what it
+ * looked like in the roster. Kept for the takeover screens, where the page
+ * really is one sheet, and left off wherever a drawer holds a list. */
+.letter--creased::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 58%;
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(150, 120, 80, 0.28) 12%,
+    rgba(150, 120, 80, 0.28) 88%,
+    transparent
+  );
+}
+
+/* ---------------------------------------------------------------------------
+ * Redaction. A DRAWING, not a protection — the covered name must never have
+ * been sent to the browser in the first place (README: the browser is
+ * assumed hostile). This only ever covers a placeholder.
+ * ------------------------------------------------------------------------- */
+
+.redact {
+  display: inline-block;
+  background: var(--marker);
+  color: transparent;
+  border-radius: 2px;
+  padding: 0 8px;
+  user-select: none;
+  transform: rotate(-0.5deg);
+}
+
+.redact:nth-of-type(even) {
+  transform: rotate(0.4deg);
+}
+
+/* ---------------------------------------------------------------------------
+ * Progress. Three steps for a player, four for the Executive Chef — the
+ * nine database phases are the machine's business, not the diner's.
+ * ------------------------------------------------------------------------- */
+
+.prog__track {
+  display: flex;
+  gap: 5px;
+  margin-bottom: 8px;
+}
+
+.prog__seg {
+  height: 5px;
+  flex: 1;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--text) 16%, transparent);
+}
+
+.prog__seg--done { background: var(--accent); }
+.prog__seg--now { background: var(--accent); opacity: 0.45; }
+
+.prog__steps {
+  display: flex;
+  justify-content: space-between;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  color: var(--text-muted);
+}
+
+.prog__steps .now {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Props: objects cropped by the screen edge, so the page reads as a detail
+ * of a larger table. Placeholders until real top-down renders exist — one
+ * camera angle and one light source for all of them, or the table stops
+ * being a table. */
+.prop {
+  position: absolute;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Removing a chef is the rarest thing in the roster and used to be the
+   loudest. A small mark you have to aim at, with the choice it opens
+   serving as the confirmation. */
+.chef-remove {
+  flex: none;
+  padding: 2px 6px;
+  font-size: 16px;
+  line-height: 1;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 4px;
+  cursor: pointer;
+  opacity: 0.55;
+}
+
+.chef-remove:hover,
+.chef-remove:focus-visible {
+  opacity: 1;
+  border-color: var(--env-edge);
+}
+
+.chef-remove-choice {
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+/* Which one is you. A wine ring left by the bottom of a glass — the same
+   mark the tablecloth picks up as the evening goes on, so the way you find
+   yourself in the list belongs to the table rather than to a UI kit. */
+.chef-you {
+  position: relative;
+  display: inline-block;
+  padding: 2px 10px;
+}
+
+.chef-you::before {
+  content: '';
+  position: absolute;
+  inset: -3px -2px;
+  border: 2px solid rgba(122, 26, 48, 0.4);
+  border-radius: 50%;
+  transform: rotate(-2deg);
+  pointer-events: none;
+}
+
+/* Removing a link from a chain that already exists is a decision about the
+   chain, so it's drawn as one. Two options with the shape of the result
+   under each, because "collapse" and "leave" are words that mean nothing
+   until you can see what happens to the people either side. */
+.chain-choice {
+  padding: 12px;
+  background: var(--paper-solid);
+  border: 1px solid var(--env-edge);
+  border-radius: 4px;
+  gap: 8px;
+}
+
+.chain-option {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  text-align: left;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
+.chain-figure {
+  font-size: 13px;
+  letter-spacing: 0.06em;
+  color: var(--accent);
+}
+
+/* Back, drawn as a link rather than a button: it is a way out, not an
+   action, and giving it button weight on every screen would make leaving
+   look as important as doing. */
+.back-link {
+  align-self: flex-start;
+  padding: 4px 2px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.back-link:hover,
+.back-link:focus-visible {
+  color: var(--accent);
+}
+
+/* The cloth is under every screen, so nothing readable may sit directly on
+   it — that rule doesn't get an exception for the pages that aren't the
+   round page. .sheet is the paper those pages are written on. */
+.sheet {
+  background: var(--paper-solid);
+  border: 1px solid var(--paper-edge);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--paper-shadow);
+  padding: 16px;
+}
+
+/* An action the Executive Chef is being asked to take. Folds away, because
+   three of them stacked above the envelopes pushed the dinner itself off
+   the screen. */
+.action-fold summary {
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 14px;
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.action-fold summary::-webkit-details-marker { display: none; }
+
+.action-fold summary::before {
+  content: '▸';
+  color: var(--accent);
+  transition: transform 0.15s ease;
+}
+
+.action-fold[open] summary::before { transform: rotate(90deg); }
+
+.action-fold[open] summary { margin-bottom: 10px; }
+
+@media (prefers-reduced-motion: reduce) {
+  .action-fold summary::before { transition: none; }
+}
+
+/* Unanswered, and the Executive Chef is the only one who can answer it.
+   A soft knock rather than a shake: it repeats a few times and stops,
+   because something that never stops asking gets ignored. */
+.action-fold--waiting > summary {
+  color: var(--accent);
+  animation: knock 1.1s ease-in-out 3;
+}
+
+@keyframes knock {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-2px); }
+  40% { transform: translateX(2px); }
+  60% { transform: translateX(-1px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .action-fold--waiting > summary { animation: none; }
+}
+
+/* Sections inside the pass. Short lines, a rule between them, and anything
+   that needs a paragraph folded behind its own summary — a wall of prose
+   above the dinner is read by nobody. */
+.pass > * + * {
+  padding-top: 10px;
+  border-top: 1px dashed var(--env-edge);
+}
+
+.pass__note > summary {
+  cursor: pointer;
+  font-size: 13px;
+  list-style: none;
+}
+
+.pass__note > summary::-webkit-details-marker { display: none; }
+
+.pass__note > summary::after {
+  content: ' ⌄';
+  color: var(--accent);
+}
+
+.pass__note[open] > summary::after { content: ' ⌃'; }
+
+.pass__note p {
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+
+.pass__section-title {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+}
+
+/* The way home. The name is the logo and the logo is the exit, but a word
+   in a header row reads as a title — so it has to move to admit it's a
+   control. On hover the arrow unfolds out of the left edge and the whole
+   thing lifts, the same small rise as an envelope leaving the cloth. */
+.app-logo {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+  font-weight: 600;
+  transition: transform 0.18s ease, color 0.18s ease;
+}
+
+.app-logo__back {
+  display: inline-block;
+  width: 0;
+  opacity: 0;
+  transform: translateX(4px);
+  transition: width 0.18s ease, opacity 0.18s ease, transform 0.18s ease;
+}
+
+.app-logo:hover,
+.app-logo:focus-visible {
+  color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.app-logo:hover .app-logo__back,
+.app-logo:focus-visible .app-logo__back {
+  width: 1em;
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.app-logo:active {
+  transform: translateY(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .app-logo,
+  .app-logo__back {
+    transition: none;
+  }
+  .app-logo:hover,
+  .app-logo:focus-visible {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Folds. A settings page is a stack of decisions, and showing all of them at
+ * once is the same mistake as a menu that lists every dish on one page. The
+ * triangle is the only affordance needed: pointing right it's shut, pointing
+ * down it's open, and that convention costs nothing to learn.
+ * ------------------------------------------------------------------------- */
+
+.fold {
+  border-bottom: 1px solid var(--border);
+}
+
+.fold__summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 2px;
+  cursor: pointer;
+  font-weight: 600;
+  list-style: none;
+}
+
+/* Both spellings: WebKit still wants the pseudo-element, everyone else
+   honours list-style above. */
+.fold__summary::-webkit-details-marker {
+  display: none;
+}
+
+.fold__summary:hover .fold__title,
+.fold:focus-within .fold__title {
+  color: var(--accent);
+}
+
+.fold__tri {
+  display: inline-block;
+  font-size: 12px;
+  color: var(--text-muted);
+  transition: transform 0.15s ease;
+}
+
+.fold[open] > .fold__summary .fold__tri {
+  transform: rotate(90deg);
+}
+
+.fold__body {
+  padding: 0 2px 16px;
+}
+
+.fold__hint {
+  margin-top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fold__tri {
+    transition: none;
+  }
+}
+
+/* Whose dinner this is. Sits against the name, so it reads as part of the
+   title rather than as another badge in the row of badges opposite. */
+.toque {
+  margin-left: 6px;
+  font-size: 0.9em;
+}
+
+/* The answer, kept on the closed row. */
+.fold__aside {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-muted);
+  text-align: right;
+}
+
+
+/* ---------------------------------------------------------------------------
+ * Settings, drawn rather than written. Still by default and moving on hover:
+ * the movement IS the affordance, so it must not run unprompted — a header
+ * that animates on every screen is a distraction the whole page pays for.
+ * ------------------------------------------------------------------------- */
+
+.cutlery {
+  display: inline-flex;
+  flex: none;
+  padding: 2px;
+  border-radius: 4px;
+  line-height: 0;
+}
+
+.cutlery__anim {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.cutlery:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * The Fridge. The picture is the back of the compartment: painted on the
+ * container, at a fixed height, and it does not move. The conversation
+ * scrolls over it inside that window — growing the fridge to fit the messages
+ * would turn a room into a background.
+ * ------------------------------------------------------------------------- */
+
+.fridge {
+  position: relative;
+  height: 420px;
+  overflow: hidden;
+  border: 1px solid #c9d6dc;
+  border-radius: 6px;
+  background:
+    url('/inside_fridge.webp') center / cover no-repeat,
+    #e8f2f6;
+}
+
+/* A thin veil so an opaque bubble doesn't have to fight a fridge full of
+   groceries for contrast. Light enough that the picture still reads. */
+.fridge::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(255, 255, 255, 0.34);
+  pointer-events: none;
+}
+
+.fridge__stack {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 10px;
+  scrollbar-width: thin;
+}
+
+.fridge__empty {
+  margin: auto;
+  padding: 0 12px;
+  text-align: center;
+}
+
+/* Bubbles pared back to the text and nothing else: the border is gone, the
+   padding is as tight as it can be and still be a bubble, and the day is a
+   footnote rather than a second line of content. */
+.chat-bubble--food {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 82%;
+  padding: 4px 8px;
+  border: none;
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.35;
+  background: rgba(255, 253, 248, 0.97);
+  box-shadow: 0 1px 1px rgba(60, 90, 105, 0.16), 0 3px 8px rgba(60, 90, 105, 0.14);
+}
+
+.chat-bubble--food.mine {
+  flex-direction: row-reverse;
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.chat-bubble__food {
+  flex: none;
+  font-size: 15px;
+  line-height: 1.3;
+}
+
+.chat-bubble__body {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.chat-bubble__foot {
+  justify-content: space-between;
+  gap: 8px;
+  margin-top: 1px;
+}
+
+.chat-bubble__day {
+  font-size: 9px;
+  line-height: 1;
+  opacity: 0.45;
+}
+
+.chat-bubble--food .chef-remove {
+  padding: 0 2px;
+  font-size: 10px;
+  line-height: 1;
+  opacity: 0.55;
+}
+
+/* ---------------------------------------------------------------------------
+ * The rolling pin. It is horizontal and it is mostly handles — that is what
+ * makes a rolling pin recognisable, and leaving them off is why the first
+ * version read as a cropped list instead of an object.
+ *
+ * The phrases ride along the barrel with the ones either side showing at the
+ * edges: seeing that there is more to come is the reason it reads as
+ * something that turns. Underneath is a horizontal scroll container with snap
+ * points, so wheel, swipe, Tab and arrows all work — the barrel is shading,
+ * not a widget pretending to be 3D.
+ * ------------------------------------------------------------------------- */
+
+.pinrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.pin {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Turned wood: rounded, a shade darker than the barrel, with the groove rings
+   near the outer end that every rolling pin has. */
+/* Both handles sit BEHIND the barrel. Without this the left one was painted
+   under it and the right one over it — same markup, opposite result, because
+   paint order follows the DOM. That asymmetry was the broken-looking end. */
+.pin__handle {
+  position: relative;
+  z-index: 0;
+  flex: none;
+  width: 64px;
+  height: 28px;
+  border: 2px solid var(--pin-line);
+  border-radius: 14px;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent 0 5px,
+      rgba(120, 86, 44, 0.32) 5px 6.5px,
+      transparent 6.5px 11px
+    ),
+    linear-gradient(180deg, #f7e3bf 0%, #e9c99a 55%, #d9b17f 100%);
+  background-color: #eed3a8;
+}
+
+.pin__handle:first-child {
+  margin-right: -8px;
+}
+
+.pin__handle:last-child {
+  margin-left: -8px;
+}
+
+.pin__barrel {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+  height: 58px;
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  scroll-snap-type: y mandatory;
+  border: 2px solid var(--pin-line);
+  border-radius: 12px;
+  /* The light band across the middle is the whole illusion of a cylinder. */
+  background:
+    linear-gradient(
+      180deg,
+      rgba(120, 86, 44, 0.34) 0%,
+      rgba(120, 86, 44, 0.06) 22%,
+      rgba(255, 255, 255, 0.55) 48%,
+      rgba(120, 86, 44, 0.08) 76%,
+      rgba(120, 86, 44, 0.34) 100%
+    ),
+    #f2ddb8;
+  scrollbar-width: none;
+}
+
+.pin__barrel::-webkit-scrollbar {
+  display: none;
+}
+
+/* Short enough that the phrase above and the one below show at the edges of
+   the barrel — that is what says the thing turns, and it is what the first
+   version, with exactly one phrase and nothing either side, could not say. */
+.pin__slat {
+  flex: 0 0 34px;
+  scroll-snap-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 26px 2px 12px;
+  border: none;
+  border-top: 1px solid rgba(120, 86, 44, 0.18);
+  background: none;
+  font: inherit;
+  font-size: 12.5px;
+  line-height: 1.25;
+  color: #5b4423;
+  text-align: center;
+  cursor: pointer;
+}
+
+.pin__slat:first-child {
+  border-top: none;
+}
+
+.pin__slat:hover:not(:disabled),
+.pin__slat:focus-visible {
+  color: var(--accent);
+  background: rgba(255, 255, 255, 0.45);
+}
+
+.pin__slat:disabled {
+  cursor: default;
+  opacity: 0.55;
+}
+
+/* The die is an egg, so it is drawn as one: wider at the bottom than the top,
+   which is one radius pair rather than an image. */
+.egg {
+  flex: none;
+  width: 46px;
+  height: 58px;
+  padding: 0;
+  font-size: 21px;
+  line-height: 1;
+  border: 1px solid var(--env-edge);
+  background: linear-gradient(165deg, #fffdf7 0%, #f4e9d4 100%);
+  border-radius: 50% 50% 50% 50% / 62% 62% 38% 38%;
+  box-shadow: 0 1px 1px rgba(120, 60, 30, 0.14), 0 8px 18px rgba(120, 60, 30, 0.2);
+  cursor: pointer;
+  transition: transform 0.16s ease, box-shadow 0.16s ease;
+}
+
+.egg:hover:not(:disabled),
+.egg:focus-visible:not(:disabled) {
+  transform: translateY(-2px) rotate(-6deg);
+  box-shadow: 0 2px 3px rgba(120, 60, 30, 0.16), 0 14px 26px rgba(120, 60, 30, 0.24);
+}
+
+.egg:active:not(:disabled) {
+  transform: translateY(0) rotate(4deg);
+}
+
+.egg:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .egg {
+    transition: none;
+  }
+  .egg:hover:not(:disabled),
+  .egg:focus-visible:not(:disabled) {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * The dinner's details. A definition list, because that is what this is: a
+ * label and the one fact under it. Blank fields are omitted upstream rather
+ * than printed empty — an "Address: —" row is worse than no row.
+ * ------------------------------------------------------------------------- */
+
+.info {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 4px 14px;
+  margin: 0;
+  font-size: 14px;
+}
+
+.info dt {
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  align-self: center;
+}
+
+.info dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+/* ---------------------------------------------------------------------------
+ * The menu card. Used twice for the same reason: a meal reads better as a
+ * menu than as a status field. On the settings page the courses are the
+ * dinner's phases and the served ones are struck through; on the ballot they
+ * are the actual dishes.
+ * ------------------------------------------------------------------------- */
+
+.menucard {
+  padding: 16px 18px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+  box-shadow: var(--paper-shadow);
+}
+
+.menucard__head {
+  margin: 0 0 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--env-edge);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.menucard__list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.menucard__course {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 0;
+  font-size: 14px;
+}
+
+.menucard__row + .menucard__row .menucard__course {
+  border-top: 1px dashed var(--env-edge);
+}
+
+/* A confirmation that stays on the page, shown where the decision was taken.
+   Marked down the left so it reads as an aside to the control that raised it
+   rather than as more content. In the phase menu it lands in the gap it
+   describes: under the course you would go back to, above the one you leave. */
+.confirmbox {
+  margin: 2px 0 6px 14px;
+  padding: 10px 12px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  background: var(--bg-elevated);
+}
+
+.confirmbox__what {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.confirmbox__why {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.confirmbox__safe {
+  margin: 6px 0 8px;
+  font-size: 12px;
+  color: var(--ok);
+}
+
+/* Small. The action is one line of consequence away, not a commitment that
+   needs a button the width of the card. */
+.confirmbox__ok,
+.confirmbox__cancel {
+  width: auto;
+  padding: 4px 14px;
+  font-size: 13px;
+}
+
+.confirmbox__cancel {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+/* Served. Struck through and faded — the same mark you'd put on a paper
+   menu, and it survives being read without colour. */
+.menucard__course.is-done .menucard__name {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.menucard__course.is-now .menucard__name {
+  font-weight: 700;
+  color: var(--accent);
+}
+
+/* Still to come: present, but clearly not yet. */
+.menucard__course:not(.is-done):not(.is-now) .menucard__name {
+  opacity: 0.72;
+}
+
+.menucard__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.menucard__course-kind {
+  flex: none;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.menucard__note {
+  margin: 10px 0 0;
+  font-size: 13px;
+}
+
+/* The turn-back arrow. It only OFFERS — the button it reveals is what acts,
+   because stepping a dinner backwards can strand work people have already
+   done and should never be one mis-tap away. */
+.menucard__turn {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--env-edge);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.menucard__turn:hover,
+.menucard__turn:focus-visible {
+  color: var(--accent);
+  transform: rotate(-60deg);
+}
+
+.menucard__turn.is-open {
+  color: var(--accent);
+  border-color: var(--accent);
+  transform: rotate(-150deg);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menucard__turn {
+    transition: none;
+  }
+  .menucard__turn:hover,
+  .menucard__turn:focus-visible,
+  .menucard__turn.is-open {
+    transform: none;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * The chain, as the ring it is. A list of "A → B" rows could only assert that
+ * the chain closes; a circle shows it, and shows a split chain as two rings
+ * rather than as something the host has to trace by hand.
+ * ------------------------------------------------------------------------- */
+
+.chainring {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  margin: 0 auto;
+  height: auto;
+}
+
+.chainring__name {
+  font-size: 10px;
+  fill: var(--text);
+}
+
+.chainring__name.is-you {
+  font-weight: 700;
+  fill: var(--accent);
+}
+
+.chainring__pairs {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 12px;
+  font-size: 13px;
+}
+
+/* It has to say it turns. A cylinder drawn flat gives no hint that there is
+   anything above or below the phrase in the light, so a chevron sits at the
+   right-hand end of the barrel and bobs — the one moving thing on the page,
+   and only because standing still would be a lie about what this does. */
+.pin__wrap {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+}
+
+.pin__scroll {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  z-index: 2;
+  margin-top: -7px;
+  font-size: 13px;
+  line-height: 1;
+  color: var(--pin-line);
+  opacity: 0.5;
+  pointer-events: none;
+  animation: pin-bob 1.9s ease-in-out infinite;
+}
+
+@keyframes pin-bob {
+  0%,
+  100% {
+    transform: translateY(-3px);
+  }
+  50% {
+    transform: translateY(3px);
+  }
+}
+
+/* Once the pin has actually been turned the hint has done its job. */
+.pin__barrel:not([data-untouched='true']) + .pin__scroll {
+  opacity: 0;
+  animation: none;
+  transition: opacity 0.3s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .pin__scroll {
+    animation: none;
+  }
+}

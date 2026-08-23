@@ -26,7 +26,7 @@ export function ResetPasswordPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
       <h1>{t('auth.resetPassword')}</h1>
       {sent ? (
         <p>{t('auth.resetSent')}</p>

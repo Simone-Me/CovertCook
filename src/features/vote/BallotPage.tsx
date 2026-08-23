@@ -17,7 +17,8 @@ import {
   verticalListSortingStrategy,
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
-import { getBallotOptions, submitBallot, type BallotOption } from '../../lib/rpc'
+import { getBallotOptions, submitBallot, withdrawBallot, type BallotOption } from '../../lib/rpc'
+import { BackToTable } from '../../components/BackToTable'
 
 function RankedRow({
   option,
@@ -135,18 +136,42 @@ export function BallotPage() {
     }
   }
 
+  // "Ballots are final" is the right rule at the moment the count is taken
+  // and the wrong one for the twenty minutes before it: someone who ranked
+  // six dishes on a phone and spotted a mistake immediately had no way back.
+  // The deadline still closes the door — withdraw_ballot refuses once
+  // voting_closes_at has passed (0024).
+  async function onChange() {
+    if (!roundId) return
+    setError(null)
+    setBusy(true)
+    try {
+      await withdrawBallot(roundId)
+      setSubmitted(false)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   if (submitted) {
     return (
-      <div className="stack">
+      <div className="stack sheet">
+        <BackToTable />
         <h1>{t('vote.title')}</h1>
         <p className="muted">{t('vote.thanks')}</p>
+        {error && <div className="error">{error}</div>}
+        <button type="button" className="secondary" disabled={busy} onClick={onChange}>
+          {t('vote.change')}
+        </button>
       </div>
     )
   }
 
   if (options && options.length === 0) {
     return (
-      <div className="stack">
+      <div className="stack sheet">
         <h1>{t('vote.title')}</h1>
         <p className="muted">{t('vote.nothingToRank')}</p>
       </div>
@@ -154,8 +179,27 @@ export function BallotPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <h1>{t('vote.title')}</h1>
+
+      {/* The menu first, the ballot second. You are being asked to judge a
+          meal, and until now the only way to see what the meal WAS was to
+          read the thing you drag rows around in. A card you can read top to
+          bottom without touching anything separates "what was served" from
+          "what I thought of it". */}
+      <div className="menucard">
+        <p className="menucard__head">{t('vote.theMenu')}</p>
+        <ol className="menucard__list">
+          {options?.map((o) => (
+            <li key={o.brief_id} className="menucard__course">
+              <span className="menucard__name">{o.dish_name}</span>
+              <span className="menucard__course-kind">{t(`briefs.courseOption.${o.course}`)}</span>
+            </li>
+          ))}
+        </ol>
+      </div>
+
       <p className="muted">{t('vote.instructions')}</p>
       {error && <div className="error">{error}</div>}
 

@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "CovertCook",
-    "tagline": "Un dîner, une recette secrète, une seule chaîne."
+    "tagline": "Un dîner, une recette secrète, une seule chaîne.",
+    "language": "Langue"
   },
   "actions": {
     "submit": "Valider",
@@ -29,7 +30,8 @@
     "resetSent": "Si un compte existe pour cette adresse, un e-mail a été envoyé.",
     "noAccount": "Pas encore de compte ?",
     "hasAccount": "Déjà un compte ?",
-    "signOut": "Se déconnecter"
+    "signOut": "Se déconnecter",
+    "staleSession": "Cette session appartient à un compte qui n'existe plus. Déconnectez-vous et recréez le compte."
   },
   "dietary": {
     "title": "Vos restrictions alimentaires",
@@ -39,7 +41,7 @@
     "kind": {
       "ALLERGY_SEVERE": "Allergie sévère",
       "ALLERGY_MILD": "Allergie légère",
-      "DIET": "Régime (végétarien, végan, halal, casher, sans porc…)",
+      "DIET": "Régime",
       "DISLIKE": "Je n'aime juste pas"
     },
     "label": "Quoi",
@@ -55,18 +57,47 @@
     "join": "Rejoindre avec un code",
     "joining": "Adhésion au dîner…",
     "name": "Nom du dîner",
-    "visibility": {
-      "label": "Qui peut rejoindre",
-      "PUBLIC_LINK": "Lien public",
-      "PRIVATE_CODE": "Code privé"
+    "setup": {
+      "classic": "Classique",
+      "classicHint": "dîner couvert, une recette chacun, vote activé. Rien à décider.",
+      "custom": "Personnaliser",
+      "customHint": "choisissez qui entre, qui connaît qui, et comment on vote."
+    },
+    "comingSoon": "Bientôt disponible",
+    "access": {
+      "label": "Comment on entre",
+      "CODE": "Avec un code",
+      "CODEHint": "Vous recevez un code à partager comme vous voulez. Qui l'a peut demander une place.",
+      "INVITE": "Sur invitation",
+      "INVITEHint": "Vous ajoutez des chefs par l'adresse de leur compte. Ils acceptent ou refusent dans l'application — aucun code à mal taper ou à faire suivre."
     },
     "anonymity": {
-      "label": "Anonymat",
-      "ANONYMOUS": "Anonyme jusqu'à la révélation finale",
-      "OPEN": "Les noms restent visibles"
+      "label": "Qui connaît qui",
+      "ANONYMOUS": "Couverture — personne ne connaît personne",
+      "ANONYMOUSHint": "Chacun est un pseudonyme jusqu'à la révélation finale, vous compris.",
+      "SPY": "Espion — vous voyez tout le monde, eux personne",
+      "SPYHint": "Vous gardez le vrai nom de chaque chef à côté de son pseudonyme. Les autres ne voient que des pseudonymes. Il faudra toujours le demander pour voir qui cuisine pour qui.",
+      "OPEN": "Ouvert — tout le monde se connaît",
+      "OPENHint": "Les vrais noms restent visibles toute la soirée. Seul qui cuisine pour qui reste secret."
     },
-    "requiresApproval": "Le hôte doit approuver chaque participant",
-    "votingEnabled": "Activer le vote et les récompenses après le dîner",
+    "requiresApproval": "L'Executive Chef doit approuver chaque participant",
+    "voting": {
+      "label": "Vote",
+      "LIVE": "Pendant le dîner",
+      "LIVEHint": "Vous ouvrez le vote à table et voyez les résultats en premier, puis décidez comment les annoncer.",
+      "TIMED": "Après le dîner",
+      "TIMEDHint": "Vous fixez un délai et les résultats se publient tout seuls à son échéance.",
+      "DISABLED": "Pas de vote",
+      "DISABLEDHint": "Celui-ci est sans retour : le vote sera indisponible pour ce dîner et ne pourra pas être activé ensuite."
+    },
+    "nameTheme": {
+      "label": "Thème des pseudonymes",
+      "FOOD": "Herbes et épices"
+    },
+    "recipesPerBrief": {
+      "label": "Recettes par chef",
+      "one": "Une recette"
+    },
     "slotMode": {
       "label": "Plats",
       "FREE": "Libre (chacun apporte ce qu'il veut)",
@@ -75,6 +106,10 @@
     "remove": "Retirer",
     "removeConfirm": "Retirer ce participant du dîner ?",
     "removeDishConfirm": "Le plat reçu et le plat envoyé sont déjà soumis tous les deux ; retirer ce participant en supprime un. Continuer ?",
+    "removeCollapse": "Retirer et refermer la chaîne",
+    "removeLeave": "Retirer sans rien changer",
+    "removeCollapseConfirm": "Referme la chaîne autour de ce participant. Celui qui écrivait pour lui écrira pour le cuisinier suivant, donc chacun garde un plat à préparer — mais ce cuisinier reçoit une autre recette que celle qu'il avait déjà.",
+    "removeLeaveConfirm": "Laisse la chaîne telle quelle. Personne d'autre n'est dérangé, et le plat écrit pour ce participant ne sera simplement pas cuisiné.",
     "limitPlayers": "Limiter le nombre de participants",
     "maxPlayers": "Nombre maximum de participants",
     "joinCode": "Code du dîner",
@@ -85,6 +120,9 @@
     "secretName": "Votre nom secret pour ce dîner",
     "roster": "Participants",
     "pendingApproval": "En attente d'approbation",
+    "youHost": "Vous êtes le chef exécutif de ce dîner",
+    "chefCovered": "Chef ——————",
+    "rosterCovered": "Les noms restent masqués jusqu'à la clôture des inscriptions, pour que l'ordre d'arrivée ne trahisse l'identité de personne.",
     "seatCount": "{{count}} participant",
     "seatCount_other": "{{count}} participants",
     "phase": {
@@ -106,7 +144,8 @@
       "rerollConfirm": "Ceci remplace le tirage actuel de tout le monde par un nouveau, aléatoire. Continuer ?",
       "ready": "Attribution générée — prêt à passer à « Attribué ».",
       "needed": "Générez l'attribution ci-dessous avant de pouvoir passer à « Attribué ».",
-      "waitingForHost": "En attente que l'hôte génère l'attribution."
+      "waitingForHost": "En attente que l'Executive Chef lance la roulette.",
+      "explain": "Tout le monde est inscrit et la table est verrouillée. Lancez la roulette pour associer chaque chef à celui pour qui il cuisinera."
     },
     "settings": {
       "title": "Paramètres du dîner",
@@ -119,7 +158,6 @@
       "phaseControl": "Statut",
       "currentPhase": "Phase actuelle",
       "stepBackTo": "Déverrouiller — revenir à « {{phase}} »",
-      "stepBackConfirm": "Ceci ramène le dîner à la phase « {{phase}} ». Continuer ?",
       "noStepBack": "Ce dîner est déjà à sa première phase.",
       "dangerZone": "Zone dangereuse",
       "cancelRound": "Annuler le dîner",
@@ -128,14 +166,118 @@
       "exclusionsHelp": "Choisissez deux participants qui ne doivent pas être associés (ex. un couple qui préfère ne pas cuisiner l'un pour l'autre).",
       "noExclusions": "Aucune exclusion configurée.",
       "courses": "Plats à remplir",
-      "coursesHelp": "Ce dîner utilise des plats spécifiques — le nombre de créneaux ci-dessous doit être égal au nombre de participants actifs ({{count}}) avant de générer l'attribution."
+      "coursesHelp": "Ce dîner utilise des plats spécifiques — le nombre de créneaux ci-dessous doit être égal au nombre de participants actifs ({{count}}) avant de générer l'attribution.",
+      "city": "Ville",
+      "notes": "Autres informations utiles",
+      "notesPlaceholder": "Code de la porte, quoi apporter, où se garer.",
+      "filling": "Remplir la table",
+      "stepBackWhat": {
+        "DRAFT": "Le code cesse de fonctionner : plus personne ne peut demander une place. Ceux qui sont déjà à table y restent.",
+        "OPEN": "La porte se rouvre : quiconque a le code peut redemander une place.",
+        "LOCKED": "Les attributions restent telles quelles — elles ne sont pas effacées. Les chefs ne peuvent simplement plus écrire leur recette tant que vous n'avancez pas.",
+        "ASSIGNED": "Les recettes redeviennent modifiables, et les cuisiniers ne voient plus celle qu'ils ont reçue tant que vous n'avancez pas. Ce qui est déjà envoyé le reste.",
+        "BRIEFS_CLOSED": "Le dîner n'est plus marqué comme en cours. Les recettes restent lisibles par les chefs qui les cuisinent.",
+        "DINNER": "Le vote se referme. Les bulletins déjà déposés sont conservés, et le vote reprend où il s'était arrêté si vous ré-avancez.",
+        "VOTING": "Les résultats redeviennent provisoires et seront recalculés quand vous avancerez. Tous les bulletins sont conservés."
+      },
+      "stepBackNothingLost": "Revenir en arrière n'efface rien — cela change seulement ce que chacun a le droit de faire maintenant."
     },
     "entryPoints": {
       "writeRecipe": "Écrire votre recette",
       "yourRecipe": "Votre recette à cuisiner",
       "vote": "Voter",
       "results": "Voir les résultats"
-    }
+    },
+    "invitations": {
+      "title": "Invitations ({{count}})",
+      "accept": "Accepter",
+      "decline": "Refuser",
+      "invite": "Inviter un chef",
+      "inviteEmail": "L'adresse de son compte",
+      "inviteSent": "Invitation envoyée",
+      "noSuchChef": "Aucun chef inscrit avec cette adresse. Vérifiez l'orthographe, ou partagez plutôt le code."
+    },
+    "pastRounds": "Dîners passés ({{count}})",
+    "tooManyPlayers": "Trente, ça fait déjà beaucoup de cuisine. Où comptez-vous les asseoir — c'est un mariage ?",
+    "tooFewPlayers": "Il en faut au moins trois : à deux, vous sauriez chacun exactement qui a écrit votre recette.",
+    "backToTable": "Retour à la table",
+    "steps": {
+      "signup": "Inscription",
+      "assign": "Rôles",
+      "recipe": "Recette",
+      "vote": "Menu"
+    },
+    "drawers": {
+      "chefs": "Chefs",
+      "myRecipe": "Ma recette",
+      "received": "Recette reçue",
+      "receivedMeta": "Ce que vous cuisinez",
+      "messages": "Messages",
+      "messagesMeta": "Tableau et conversations",
+      "vote": "Votez le menu",
+      "results": "Résultats",
+      "allergies": "Allergies",
+      "info": "Le dîner"
+    },
+    "waiting": {
+      "assignment": "S'ouvre quand l'Executive Chef lance la roulette",
+      "briefs": "S'ouvre quand les recettes sont rentrées",
+      "vote": "S'ouvre quand l'Executive Chef lance le vote"
+    },
+    "info": {
+      "title": "Dîner",
+      "city": "Ville",
+      "address": "Adresse",
+      "date": "Date",
+      "time": "Heure",
+      "notes": "Bon à savoir",
+      "noLocation": "Pas encore d'adresse",
+      "noDate": "Pas encore de date"
+    },
+    "confirmJoin": "Vous avez été invité à un dîner avec ce code. Le rejoindre ?",
+    "confirmJoinYes": "Oui, rejoindre ce dîner",
+    "confirmJoinChange": "Utiliser un autre code",
+    "waitingForCaptcha": "Vérification en cours…",
+    "lateJoinerWarning": "Les inscriptions sont closes et la chaîne est faite. Vous pouvez encore ajouter quelqu'un — la chaîne est ouverte en un point pour l'insérer — mais les chefs autour de ce point changent de partenaire.",
+    "executiveChef": "Executive Chef",
+    "pendingJoinBanner": "Votre invitation est gardée — code du dîner",
+    "joinErrors": {
+      "INVALID_CODE": "Aucun dîner n'utilise ce code. Vérifiez l'orthographe.",
+      "ROUND_NOT_OPEN": "Ce dîner n'accepte pas de nouveaux chefs pour le moment.",
+      "ALREADY_MEMBER": "Vous êtes déjà à cette table.",
+      "AWAITING_APPROVAL": "Vous avez déjà demandé à rejoindre. L'Executive Chef n'a pas encore répondu — le dîner apparaîtra ici dès qu'il l'aura fait.",
+      "PREVIOUSLY_LEFT": "Vous avez quitté ce dîner. Demandez à l'Executive Chef de vous rajouter.",
+      "WAS_REMOVED": "L'Executive Chef vous a retiré de ce dîner.",
+      "ROUND_FULL": "Ce dîner est complet."
+    },
+    "chainChoice": {
+      "intro": "La chaîne est déjà faite. Retirer un maillon laisse deux extrémités libres — décidez ce qu'elles deviennent.",
+      "collapse": "Les deux extrémités sont rattachées. B écrit pour D à la place, donc chacun garde un plat à préparer — mais D reçoit une autre recette que celle qu'il avait déjà.",
+      "leave": "Les extrémités restent libres. Personne d'autre n'est dérangé, et le plat écrit pour le chef qui part n'est simplement pas cuisiné."
+    },
+    "actions": {
+      "fillTable": "Remplir la table",
+      "voting": "Le vote"
+    },
+    "menu": {
+      "title": "Composer le menu",
+      "free": "Libre",
+      "freeHint": "chacun apporte ce qu'il veut. Rien à prévoir.",
+      "composed": "Un menu composé",
+      "composedHint": "vous décidez les plats, et chaque chef en reçoit un à écrire.",
+      "balanced": "{{courses}} plats pour {{seats}} chefs — le menu est complet.",
+      "unbalanced": "{{courses}} plats pour {{seats}} chefs. Chaque chef cuisine exactement un plat, donc ces deux nombres doivent correspondre avant de lancer la roulette.",
+      "locked": "Le menu ne peut plus changer : les chefs écrivent déjà pour les plats qui leur ont été attribués.",
+      "errors": {
+        "MENU_LOCKED": "Le menu est arrêté — les chefs ont déjà leurs plats. Relancez la roulette pour le changer.",
+        "COURSE_IN_USE": "Quelqu'un cuisine déjà ce plat."
+      }
+    },
+    "pass": {
+      "title": "Le pass",
+      "nothing": "Rien ne vous attend pour le moment."
+    },
+    "lateJoinerShort": "Ajouter quelqu'un maintenant change les partenaires de deux chefs."
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
@@ -169,7 +311,29 @@
     "tagsConfirmed": "J'ai vérifié le panneau diététique ci-dessus et confirme que les étiquettes cochées sont exactes.",
     "noBriefYet": "Aucune recette à afficher pour l'instant.",
     "cannotCook": "Je ne peux finalement pas cuisiner ce plat",
-    "cannotCookSent": "Envoyé — l'hôte a été prévenu."
+    "cannotCookSent": "Envoyé — l'Executive Chef a été prévenu.",
+    "acknowledge": "Je peux cuisiner ça",
+    "acknowledged": "Vous avez confirmé pouvoir cuisiner ce plat.",
+    "mode": {
+      "quick": "Rapide",
+      "careful": "Détaillé"
+    },
+    "ingredientsPlaceholder": "Un par ligne — 200 g de farine, 3 œufs, une pincée de sel.",
+    "procedurePlaceholder": "La façon de faire. Comme vous voulez.",
+    "state": {
+      "blank": "○ Pas écrite",
+      "draft": "◐ Brouillon enregistré",
+      "sent": "● Envoyée à votre cuisinier"
+    },
+    "assignedCourse": "La roulette vous a donné : {{course}}",
+    "freeChoice": "Choix libre — le plat que vous voulez.",
+    "labelDish": "Mettez un carton à côté de ce plat",
+    "labelDishWhy": "Il contient {{items}}, et quelqu'un à cette table a dit que ça comptait pour lui. Un carton près du plat lui permet de décider lui-même.",
+    "needsMore": "Un nom, et soit un lien soit la recette écrite.",
+    "errors": {
+      "DISH_NAME_LENGTH": "Le plat a besoin d'un nom d'au moins trois caractères.",
+      "RECIPE_TOO_EMPTY": "Ajoutez un lien, ou écrivez la recette."
+    }
   },
   "chat": {
     "title": "Messages",
@@ -194,13 +358,24 @@
     }
   },
   "vote": {
-    "title": "Vote",
+    "title": "Votez le menu",
+    "theMenu": "Le menu de ce soir",
     "instructions": "Glissez pour classer chaque plat, du meilleur au moins bon. Optionnel : notez l'originalité et le respect de la recette.",
     "originality": "Originalité",
     "briefRespect": "Respect de la recette",
     "submitBallot": "Valider le vote",
     "thanks": "Merci — votre vote a été enregistré.",
-    "nothingToRank": "Rien à classer pour l'instant."
+    "nothingToRank": "Rien à classer pour l'instant.",
+    "openNow": "Ouvrir le vote maintenant",
+    "skip": "Passer le vote",
+    "deadline": "Clore le vote dans",
+    "noDeadline": "Sans limite de temps",
+    "progress": "{{voted}} sur {{eligible}} ont voté",
+    "publish": "Annoncer les résultats",
+    "published": "Les résultats sont sortis.",
+    "hostOnly": "Vous êtes le seul à les voir. Annoncez-les quand vous êtes prêt.",
+    "waitingPublish": "L'Executive Chef a les résultats et ne les a pas encore annoncés.",
+    "change": "Modifier mon vote"
   },
   "results": {
     "title": "Résultats",
@@ -232,7 +407,7 @@
     "spliceConfirm": "Tous les expéditeurs ont déjà soumis ; l'insertion remplace un plat déjà cuisiné. Continuer ?"
   },
   "alerts": {
-    "title": "Alertes de l'hôte",
+    "title": "Alertes de l'Executive Chef",
     "openAlerts": "Alertes ouvertes",
     "none": "Aucune alerte ouverte.",
     "resolve": "Résoudre",
@@ -249,5 +424,27 @@
   "errors": {
     "generic": "Une erreur est survenue. Réessayez.",
     "notAuthenticated": "Vous devez être connecté."
+  },
+  "profile": {
+    "title": "Profil",
+    "signedInAs": "Connecté en tant que",
+    "dietaryHelp": "Cette liste vous suit dans chaque dîner — les recettes écrites pour vous sont vérifiées contre elle, gardez-la à jour.",
+    "noRestrictions": "Rien pour l'instant. Ajoutez ce qu'un cuisinier doit savoir.",
+    "locale": {
+      "en": "English",
+      "fr": "Français"
+    }
+  },
+  "board": {
+    "pageTitle": "Messages",
+    "fridge": "Le Frigo",
+    "help": "Toute la table parle ici, et personne ne signe. Faites tourner le rouleau à pâtisserie pour trouver quoi dire, ou lancez l'œuf et laissez-le choisir.",
+    "empty": "Rien dans le frigo. Soyez le premier.",
+    "throwEgg": "Lancez l'œuf — dites quelque chose au hasard",
+    "rateLimit": "Ça suffit pour une heure. Laissez parler les autres.",
+    "yourChef": "Votre chef",
+    "yourChefHelp": "Vos deux conversations privées : le chef pour qui vous écrivez, et le chef qui écrit pour vous.",
+    "toYourCook": "Avec le chef pour qui vous écrivez",
+    "toYourSender": "Avec le chef qui écrit pour vous"
   }
 }

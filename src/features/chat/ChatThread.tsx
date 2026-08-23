@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
@@ -6,6 +6,7 @@ import {
   getMessageTemplates,
   getThread,
   reportMessage,
+  markThreadRead,
   sendMessage,
   type MessageCategory,
   type MessageTemplate,
@@ -39,7 +40,17 @@ export function ChatThread({ pairingId }: { pairingId: string }) {
     refetchInterval: 15000,
   })
 
-  const categories = Array.from(new Set(templates?.map((tpl) => tpl.category) ?? []))
+  // Clear the unread badge by opening the thread, not on a timer — a
+  // badge that fades by itself stops meaning anything (0022).
+  useEffect(() => {
+    markThreadRead(pairingId).catch(() => {})
+  }, [pairingId, thread?.length])
+
+  // BOARD phrases belong to the whole table and are posted through
+  // post_to_board, so they must not appear in a private thread's picker.
+  const categories = Array.from(
+    new Set(templates?.filter((tpl) => tpl.category !== 'BOARD').map((tpl) => tpl.category) ?? []),
+  )
   const templatesInCategory = templates?.filter((tpl) => tpl.category === category) ?? []
   const selectedTemplate = templates?.find((tpl) => tpl.id === templateId)
 

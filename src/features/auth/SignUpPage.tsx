@@ -75,7 +75,13 @@ export function SignUpPage() {
       await refreshProfile()
       navigate('/', { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      const message = err instanceof Error ? err.message : t('errors.generic')
+      // profiles.id references auth.users(id), so this particular violation
+      // means one thing: the signed-in token belongs to an account that no
+      // longer exists. AuthProvider clears such sessions on load, but a tab
+      // already open when the account vanished only finds out here. Say
+      // what happened instead of forwarding Postgres's constraint name.
+      setError(message.includes('profiles_id_fkey') ? t('auth.staleSession') : message)
     } finally {
       setSubmitting(false)
     }
@@ -83,7 +89,7 @@ export function SignUpPage() {
 
   if (step === 'confirm-email') {
     return (
-      <div className="stack">
+      <div className="stack sheet">
         <h1>{t('auth.signUp')}</h1>
         <p>{t('auth.resetSent')}</p>
       </div>
@@ -92,7 +98,7 @@ export function SignUpPage() {
 
   if (step === 'dietary') {
     return (
-      <div className="stack">
+      <div className="stack sheet">
         <h1>{t('dietary.title')}</h1>
         <p className="muted">{t('dietary.help')}</p>
         {error && <div className="error">{error}</div>}
@@ -168,7 +174,7 @@ export function SignUpPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
       <h1>{t('auth.signUp')}</h1>
       {error && <div className="error">{error}</div>}
       <form onSubmit={onAccountSubmit} className="stack">

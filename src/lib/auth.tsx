@@ -33,8 +33,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setProfile(data as Profile | null)
   }
 
+  // A stored token can outlive the account it belongs to: the user was
+  // deleted, or (constantly, in development) the database was reset while
+  // the tab kept its session. The JWT is still signed and unexpired, so
+  // nothing notices — until complete_signup tries to insert a profiles row
+  // pointing at an auth.users id that is gone and Postgres answers with a
+  // raw "violates foreign key constraint profiles_id_fkey", which tells a
+  // person nothing they can act on.
+  //
+  // Ask the server who this token belongs to; if it no longer knows, the
+  // session is a ghost and the honest thing is to clear it and let them
+  // sign in again.
+  async function discardGhostSession(): Promise<boolean> {
+    const { error } = await supabase.auth.getUser()
+    if (!error) return false
+    await supabase.auth.signOut()
+    setSession(null)
+    setProfile(null)
+    return true
+  }
+
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
+      if (data.session && (await discardGhostSession())) {
+        setLoading(false)
+        return
+      }
       setSession(data.session)
       if (data.session) await loadProfile(data.session.user.id)
       setLoading(false)

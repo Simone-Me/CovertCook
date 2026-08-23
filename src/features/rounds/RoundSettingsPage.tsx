@@ -4,9 +4,14 @@ import { useNavigate, useParams, Link, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
+import { BackToTable } from '../../components/BackToTable'
+import { Fold } from '../../components/Fold'
+import { PhaseMenu } from './PhaseMenu'
+import { InlineConfirm } from '../../components/InlineConfirm'
 import {
   advancePhase,
   previousPhaseFor,
+  ROUND_PHASE_ORDER,
   updateRoundDetails,
   getExclusionPairs,
   addExclusionPair,
@@ -48,12 +53,15 @@ export function RoundSettingsPage() {
   const { data: round, isLoading } = useRound(roundId)
   const { data: members } = useRoundMembers(roundId)
   const [location, setLocation] = useState<string | null>(null)
+  const [city, setCity] = useState<string | null>(null)
+  const [notes, setNotes] = useState<string | null>(null)
   const [dinnerAt, setDinnerAt] = useState<string | null>(null)
   const [timezone, setTimezone] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [saving, setSaving] = useState(false)
   const [stepping, setStepping] = useState(false)
+  const [cancelling, setCancelling] = useState(false)
   const [exclusionA, setExclusionA] = useState('')
   const [exclusionB, setExclusionB] = useState('')
   const [newSlotCourse, setNewSlotCourse] = useState<Course>('STARTER')
@@ -94,6 +102,8 @@ export function RoundSettingsPage() {
       await updateRoundDetails({
         roundId,
         location: location ?? round!.location,
+        city: city ?? round!.city,
+        notes: notes ?? round!.notes,
         dinnerAt: dinnerAt !== null ? new Date(dinnerAt).toISOString() : round!.dinner_at,
         timezone: timezone ?? round!.timezone,
       })
@@ -106,10 +116,12 @@ export function RoundSettingsPage() {
     }
   }
 
+  // No dialog here any more: PhaseMenu shows the warning in the gap between
+  // the two phases and carries its own OK, so by the time this runs the host
+  // has already read what changes. A browser confirm() on top of that would
+  // be a second question about the same decision, asked worse.
   async function onStepBack() {
     if (!roundId || !previousPhase) return
-    const confirmed = window.confirm(t('rounds.settings.stepBackConfirm', { phase: t(`rounds.phase.${previousPhase}`) }))
-    if (!confirmed) return
     setError(null)
     setStepping(true)
     try {
@@ -159,8 +171,6 @@ export function RoundSettingsPage() {
 
   async function onCancelRound() {
     if (!roundId) return
-    const confirmed = window.confirm(t('rounds.settings.cancelConfirm'))
-    if (!confirmed) return
     setError(null)
     try {
       await advancePhase(roundId, 'CANCELLED')
@@ -172,7 +182,8 @@ export function RoundSettingsPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <div className="row" style={{ justifyContent: 'space-between' }}>
         <h1>{t('rounds.settings.title')}</h1>
         <Link to={`/rounds/${roundId}`}>{t('actions.back')}</Link>
@@ -180,9 +191,48 @@ export function RoundSettingsPage() {
 
       {error && <div className="error">{error}</div>}
 
-      <h2>{t('rounds.settings.dinerInfo')}</h2>
-      {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}
-      <form onSubmit={onSaveDetails} className="stack card">
+      {/* Mirrors the panel on the round page. Filling the table is a thing
+          a host comes back to, and they don't always come back the same
+          way — so it lives in both places they'd look. */}
+      <Fold title={t('rounds.settings.filling')} defaultOpen>
+        <div className="card stack">
+        <label>{t('rounds.shareLink')}</label>
+        <div className="row">
+          <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() =>
+              navigator.clipboard.writeText(
+                `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`,
+              )
+            }
+          >
+            {t('actions.copy')}
+          </button>
+        </div>
+        {ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED') && (
+          <p className="muted">{t('rounds.lateJoinerWarning')}</p>
+        )}
+        </div>
+      </Fold>
+
+      <Fold title={t('rounds.settings.dinerInfo')}>
+        {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}
+        <form onSubmit={onSaveDetails} className="stack card">
+        <div>
+          <label htmlFor="city">{t('rounds.settings.city')}</label>
+          {/* Its own field because it is the one line the round page shows
+              on the closed envelope — a guest checking which town this is
+              shouldn't have to open anything (0034). */}
+          <input
+            id="city"
+            disabled={detailsLocked}
+            value={city ?? round.city ?? ''}
+            onChange={(e) => setCity(e.target.value)}
+          />
+        </div>
+
         <div>
           <label htmlFor="location">{t('rounds.settings.location')}</label>
           <input
@@ -221,31 +271,40 @@ export function RoundSettingsPage() {
           </select>
         </div>
 
+        <div>
+          <label htmlFor="notes">{t('rounds.settings.notes')}</label>
+          <textarea
+            id="notes"
+            rows={3}
+            disabled={detailsLocked}
+            placeholder={t('rounds.settings.notesPlaceholder')}
+            value={notes ?? round.notes ?? ''}
+            onChange={(e) => setNotes(e.target.value)}
+            maxLength={500}
+          />
+        </div>
+
         {!detailsLocked && (
           <button type="submit" disabled={saving}>
             {t('actions.save')}
           </button>
         )}
         {saved && <p className="muted">{t('rounds.settings.saved')}</p>}
-      </form>
+        </form>
+      </Fold>
 
-      <h2>{t('rounds.settings.phaseControl')}</h2>
-      <div className="card stack">
-        <p>
-          {t('rounds.settings.currentPhase')}: <span className="badge">{t(`rounds.phase.${round.status}`)}</span>
-        </p>
-        {previousPhase ? (
-          <button type="button" className="secondary" onClick={onStepBack} disabled={stepping}>
-            {t('rounds.settings.stepBackTo', { phase: t(`rounds.phase.${previousPhase}`) })}
-          </button>
-        ) : (
-          <p className="muted">{t('rounds.settings.noStepBack')}</p>
-        )}
-      </div>
+      <Fold title={t('rounds.settings.phaseControl')} defaultOpen>
+        <PhaseMenu
+          status={round.status}
+          votingEnabled={round.voting_enabled}
+          previousPhase={previousPhase}
+          stepping={stepping}
+          onStepBack={onStepBack}
+        />
+      </Fold>
 
-      <h2>{t('rounds.settings.exclusions')}</h2>
-      <p className="muted">{t('rounds.settings.exclusionsHelp')}</p>
-      <div className="stack card">
+      <Fold title={t('rounds.settings.exclusions')} hint={t('rounds.settings.exclusionsHelp')}>
+        <div className="stack card">
         {exclusions?.length === 0 && <p className="muted">{t('rounds.settings.noExclusions')}</p>}
         {exclusions?.map((ex) => (
           <div key={ex.id} className="row" style={{ justifyContent: 'space-between' }}>
@@ -282,12 +341,14 @@ export function RoundSettingsPage() {
             </button>
           </form>
         )}
-      </div>
+        </div>
+      </Fold>
 
       {round.slot_mode === 'CATEGORIES' && (
-        <>
-          <h2>{t('rounds.settings.courses')}</h2>
-          <p className="muted">{t('rounds.settings.coursesHelp', { count: activeApprovedCount })}</p>
+        <Fold
+          title={t('rounds.settings.courses')}
+          hint={t('rounds.settings.coursesHelp', { count: activeApprovedCount })}
+        >
           <div className="stack card">
             {slots?.map((slot) => (
               <div key={slot.id} className="row" style={{ justifyContent: 'space-between' }}>
@@ -314,18 +375,33 @@ export function RoundSettingsPage() {
               </div>
             )}
           </div>
-        </>
+        </Fold>
       )}
 
       {canCancel && (
-        <>
-          <h2>{t('rounds.settings.dangerZone')}</h2>
-          <div className="card">
-            <button type="button" className="secondary" onClick={onCancelRound}>
-              {t('rounds.settings.cancelRound')}
-            </button>
+        <Fold title={t('rounds.settings.dangerZone')}>
+          <div className="card stack">
+            {/* The consequence is read here, next to the button, rather than
+                in a dialog that has already covered the page it is about. */}
+            {cancelling ? (
+              <InlineConfirm
+                title={t('rounds.settings.cancelRound')}
+                confirmLabel={t('rounds.settings.cancelRound')}
+                onConfirm={() => {
+                  setCancelling(false)
+                  onCancelRound()
+                }}
+                onCancel={() => setCancelling(false)}
+              >
+                <p className="confirmbox__why">{t('rounds.settings.cancelConfirm')}</p>
+              </InlineConfirm>
+            ) : (
+              <button type="button" className="secondary" onClick={() => setCancelling(true)}>
+                {t('rounds.settings.cancelRound')}
+              </button>
+            )}
           </div>
-        </>
+        </Fold>
       )}
     </div>
   )

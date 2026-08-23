@@ -26,7 +26,7 @@ export function SignInPage() {
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
       <h1>{t('auth.signIn')}</h1>
       {error && <div className="error">{error}</div>}
       <form onSubmit={onSubmit} className="stack">

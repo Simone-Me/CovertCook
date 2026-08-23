@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useRound } from '../rounds/hooks'
 import { DietaryPanelGrid } from '../rounds/DietaryPanelGrid'
 import { ChatThread } from '../chat/ChatThread'
+import { BackToTable } from '../../components/BackToTable'
 import {
   getDietaryPanel,
   getMyAssignment,
@@ -12,10 +13,32 @@ import {
   saveBriefDraft,
   submitBrief,
   type BriefIngredient,
-  type Course,
 } from '../../lib/rpc'
 
-const COURSES: Course[] = ['STARTER', 'MAIN', 'DESSERT', 'DRINK', 'OTHER']
+// Two ways to write a recipe, because there are two kinds of person here and
+// the form was built for only one of them.
+//
+// Quick: a name, and either a link or everything typed into one block. Most
+// people will never itemise fourteen ingredients with quantities and units
+// on a phone, and a form that insists produces either abandonment or
+// nonsense in the fields.
+//
+// Careful: itemised ingredients, for whoever enjoys that.
+//
+// Both produce the same thing. The quick block is stored as the procedure,
+// which is what a cook reads anyway.
+type Mode = 'quick' | 'careful'
+
+// One ingredient per line. Quick mode stores the same rows careful mode
+// does — the cook must get a list either way — it just doesn't make anyone
+// tab through three inputs to produce one.
+function linesToIngredients(text: string): BriefIngredient[] {
+  return text
+    .split('\n')
+    .map((l) => l.trim())
+    .filter(Boolean)
+    .map((name) => ({ name, quantity: null, unit: null }))
+}
 
 export function BriefEditorPage() {
   const { t } = useTranslation()
@@ -38,18 +61,12 @@ export function BriefEditorPage() {
     queryFn: () => getDietaryPanel(roundId as string),
   })
 
+  const [mode, setMode] = useState<Mode>('quick')
   const [dishName, setDishName] = useState('')
-  const [course, setCourse] = useState<Course>('OTHER')
   const [ingredients, setIngredients] = useState<BriefIngredient[]>([{ name: '', quantity: null, unit: null }])
+  const [quickIngredients, setQuickIngredients] = useState('')
   const [procedure, setProcedure] = useState('')
   const [externalUrl, setExternalUrl] = useState('')
-  const [difficulty, setDifficulty] = useState<number | null>(null)
-  const [estCost, setEstCost] = useState('')
-  const [prepMinutes, setPrepMinutes] = useState<number | null>(null)
-  const [noteToCook, setNoteToCook] = useState('')
-  const [tags, setTags] = useState<string[]>([])
-  const [newTag, setNewTag] = useState('')
-  const [tagsConfirmed, setTagsConfirmed] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
   const [submitted, setSubmitted] = useState(false)
@@ -59,66 +76,112 @@ export function BriefEditorPage() {
   useEffect(() => {
     if (draft && !loadedFromDraft) {
       setDishName(draft.dish_name)
-      setCourse(draft.course)
-      setIngredients(draft.ingredients.length > 0 ? draft.ingredients : [{ name: '', quantity: null, unit: null }])
       setProcedure(draft.procedure)
       setExternalUrl(draft.external_url ?? '')
-      setDifficulty(draft.difficulty)
-      setEstCost(draft.est_cost ?? '')
-      setPrepMinutes(draft.prep_minutes)
-      setNoteToCook(draft.note_to_cook ?? '')
-      setTags(draft.contains_tags)
-      setTagsConfirmed(draft.contains_tags_confirmed)
       setSubmitted(draft.status === 'SUBMITTED')
-      setLoadedFromDraft(true)
-    } else if (assignment && !draft && !loadedFromDraft) {
-      setCourse(assignment.course)
+      // Quantities and units are the only thing careful mode adds. A list
+      // carrying none of them was typed as free text, so it comes back as
+      // the block it was written in instead of exploding into rows.
+      const itemised = draft.ingredients.some((i) => i.quantity !== null || (i.unit ?? '').trim() !== '')
+      if (draft.ingredients.length > 0 && itemised) {
+        setIngredients(draft.ingredients)
+        setMode('careful')
+      } else {
+        setQuickIngredients(draft.ingredients.map((i) => i.name).join('\n'))
+      }
       setLoadedFromDraft(true)
     }
-  }, [draft, assignment, loadedFromDraft])
+  }, [draft, loadedFromDraft])
+
+  // Everything the sender wrote, as one searchable string. The quick mode
+  // has no ingredient rows, so the block of text has to be scanned too.
+  const written = useMemo(
+    () =>
+      [dishName, procedure, quickIngredients, ...ingredients.map((i) => i.name)]
+        .join(' ')
+        .toLowerCase(),
+    [dishName, procedure, quickIngredients, ingredients],
+  )
+
+  // Allergen tags are found, not asked for.
+  //
+  // They used to be a row of checkboxes plus an "I confirm" tick — which is
+  // a chore that means nothing, because a tick nobody understands is an
+  // obstacle people learn to click through rather than consent. The labels
+  // are already known (they come from the table's own restrictions), so the
+  // honest thing is to look for them in what was written.
+  //
+  // Whole-word matching: "nuts" must not fire on "doughnuts", and "egg"
+  // must not fire on "eggplant".
+  const matched = useMemo(() => {
+    const labels = Array.from(new Set(dietaryPanel?.map((d) => d.label) ?? []))
+    return labels.filter((label) => {
+      const escaped = label.toLowerCase().replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      return new RegExp(`(^|[^\\p{L}])${escaped}([^\\p{L}]|$)`, 'iu').test(written)
+    })
+  }, [dietaryPanel, written])
 
   if (roundLoading || draftLoading || !round) return <p className="muted">…</p>
 
   const editingClosed = round.status !== 'ASSIGNED' || submitted
-  const panelLabels = Array.from(new Set(dietaryPanel?.map((d) => d.label) ?? []))
+  const hasLink = externalUrl.trim().length > 0
+  const hasBody =
+    procedure.trim().length >= 30 || quickIngredients.trim().length > 0 || ingredients.some((i) => i.name.trim())
+  const complete = dishName.trim().length >= 3 && (hasLink || hasBody)
 
-  function toggleTag(label: string) {
-    setTags((prev) => (prev.includes(label) ? prev.filter((t) => t !== label) : [...prev, label]))
-    setTagsConfirmed(false)
-  }
-
-  function addCustomTag() {
-    const label = newTag.trim()
-    if (!label || tags.includes(label)) return
-    setTags((prev) => [...prev, label])
-    setNewTag('')
-    setTagsConfirmed(false)
+  // Switching modes must not throw away what's already typed — the two
+  // shapes hold the same list, so translate rather than reset.
+  function switchMode(next: Mode) {
+    if (next === mode) return
+    if (next === 'careful') {
+      const rows = linesToIngredients(quickIngredients)
+      if (rows.length > 0) setIngredients(rows)
+    } else {
+      setQuickIngredients(
+        ingredients
+          .map((i) => [i.quantity, i.unit, i.name].filter(Boolean).join(' ').trim())
+          .filter(Boolean)
+          .join('\n'),
+      )
+    }
+    setMode(next)
   }
 
   function updateIngredient(i: number, patch: Partial<BriefIngredient>) {
     setIngredients((prev) => prev.map((ing, idx) => (idx === i ? { ...ing, ...patch } : ing)))
   }
 
-  async function onSave() {
+  async function save() {
     if (!roundId) return
+    await saveBriefDraft({
+      roundId,
+      dishName,
+      // The roulette decides the course, or the round is free-for-all —
+      // either way it was never the sender's to pick, and offering a
+      // dropdown invited people to contradict their own assignment.
+      course: assignment?.course ?? 'OTHER',
+      ingredients:
+        mode === 'careful'
+          ? ingredients.filter((i) => i.name.trim().length > 0)
+          : linesToIngredients(quickIngredients),
+      procedure,
+      externalUrl: externalUrl.trim() || null,
+      difficulty: null,
+      estCost: null,
+      prepMinutes: null,
+      noteToCook: null,
+      containsTags: matched,
+      // Derived rather than ticked, so there is nothing left to confirm.
+      containsTagsConfirmed: true,
+    })
+  }
+
+  async function onSave() {
     setError(null)
     setSaved(false)
     setBusy(true)
     try {
-      await saveBriefDraft({
-        roundId,
-        dishName,
-        course,
-        ingredients: ingredients.filter((i) => i.name.trim().length > 0),
-        procedure,
-        externalUrl: externalUrl.trim() || null,
-        difficulty,
-        estCost: estCost.trim() || null,
-        prepMinutes,
-        noteToCook: noteToCook.trim() || null,
-        containsTags: tags,
-        containsTagsConfirmed: tagsConfirmed,
-      })
+      await save()
       setSaved(true)
       await refetchDraft()
     } catch (err) {
@@ -133,87 +196,139 @@ export function BriefEditorPage() {
     setError(null)
     setBusy(true)
     try {
-      await onSave()
+      await save()
       await submitBrief(roundId)
       setSubmitted(true)
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      const raw = err instanceof Error ? err.message : ''
+      const known = t(`briefs.errors.${raw}`, { defaultValue: '' })
+      setError(known || raw || t('errors.generic'))
     } finally {
       setBusy(false)
     }
   }
 
   return (
-    <div className="stack">
+    <div className="stack sheet">
+      <BackToTable />
       <h1>{t('briefs.editorTitle')}</h1>
+
       {assignment && (
-        <p className="muted">{t('briefs.writingFor', { name: assignment.cook_display_name ?? assignment.cook_secret_name })}</p>
+        <p className="muted">
+          {t('briefs.writingFor', { name: assignment.cook_display_name ?? assignment.cook_secret_name })}
+        </p>
       )}
+
+      {/* Informative, never a choice: this is what the roulette handed you. */}
+      <p className="muted">
+        {assignment && round.slot_mode === 'CATEGORIES'
+          ? t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })
+          : t('briefs.freeChoice')}
+      </p>
 
       {editingClosed && <p className="muted">{submitted ? t('briefs.alreadySubmitted') : t('briefs.editingClosed')}</p>}
       {error && <div className="error">{error}</div>}
       {saved && !editingClosed && <p className="muted">{t('rounds.settings.saved')}</p>}
 
-      <h2>{t('dietary.panelTitle')}</h2>
-      <DietaryPanelGrid entries={dietaryPanel} />
+      {!editingClosed && (
+        <div className="row">
+          <button
+            type="button"
+            className={mode === 'quick' ? undefined : 'secondary'}
+            onClick={() => switchMode('quick')}
+          >
+            {t('briefs.mode.quick')}
+          </button>
+          <button
+            type="button"
+            className={mode === 'careful' ? undefined : 'secondary'}
+            onClick={() => switchMode('careful')}
+          >
+            {t('briefs.mode.careful')}
+          </button>
+        </div>
+      )}
 
       <div className="stack card">
         <div>
           <label htmlFor="dish-name">{t('briefs.dishName')}</label>
-          <input id="dish-name" disabled={editingClosed} value={dishName} onChange={(e) => setDishName(e.target.value)} maxLength={80} />
+          <input
+            id="dish-name"
+            disabled={editingClosed}
+            value={dishName}
+            onChange={(e) => setDishName(e.target.value)}
+            maxLength={80}
+          />
         </div>
 
-        <div>
-          <label htmlFor="course">{t('briefs.course')}</label>
-          <select id="course" disabled={editingClosed} value={course} onChange={(e) => setCourse(e.target.value as Course)}>
-            {COURSES.map((c) => (
-              <option key={c} value={c}>
-                {t(`briefs.courseOption.${c}`)}
-              </option>
+        {mode === 'careful' && (
+          <>
+            <label>{t('briefs.ingredients')}</label>
+            {ingredients.map((ing, i) => (
+              <div key={i} className="row">
+                <input
+                  disabled={editingClosed}
+                  placeholder={t('briefs.ingredientName')}
+                  value={ing.name}
+                  onChange={(e) => updateIngredient(i, { name: e.target.value })}
+                  style={{ flex: 2 }}
+                />
+                <input
+                  disabled={editingClosed}
+                  type="number"
+                  placeholder={t('briefs.quantity')}
+                  value={ing.quantity ?? ''}
+                  onChange={(e) => updateIngredient(i, { quantity: e.target.value ? Number(e.target.value) : null })}
+                  style={{ flex: 1 }}
+                />
+                <input
+                  disabled={editingClosed}
+                  placeholder={t('briefs.unit')}
+                  value={ing.unit ?? ''}
+                  onChange={(e) => updateIngredient(i, { unit: e.target.value })}
+                  style={{ flex: 1 }}
+                />
+                {!editingClosed && (
+                  <button
+                    type="button"
+                    className="chef-remove"
+                    aria-label={t('actions.remove')}
+                    onClick={() => setIngredients((prev) => prev.filter((_, idx) => idx !== i))}
+                  >
+                    🍌
+                  </button>
+                )}
+              </div>
             ))}
-          </select>
-        </div>
-
-        <label>{t('briefs.ingredients')}</label>
-        {ingredients.map((ing, i) => (
-          <div key={i} className="row">
-            <input
-              disabled={editingClosed}
-              placeholder={t('briefs.ingredientName')}
-              value={ing.name}
-              onChange={(e) => updateIngredient(i, { name: e.target.value })}
-              style={{ flex: 2 }}
-            />
-            <input
-              disabled={editingClosed}
-              type="number"
-              placeholder={t('briefs.quantity')}
-              value={ing.quantity ?? ''}
-              onChange={(e) => updateIngredient(i, { quantity: e.target.value ? Number(e.target.value) : null })}
-              style={{ flex: 1 }}
-            />
-            <input
-              disabled={editingClosed}
-              placeholder={t('briefs.unit')}
-              value={ing.unit ?? ''}
-              onChange={(e) => updateIngredient(i, { unit: e.target.value })}
-              style={{ flex: 1 }}
-            />
             {!editingClosed && (
-              <button type="button" className="secondary" onClick={() => setIngredients((prev) => prev.filter((_, idx) => idx !== i))}>
-                {t('actions.remove')}
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => setIngredients((prev) => [...prev, { name: '', quantity: null, unit: null }])}
+              >
+                {t('briefs.addIngredient')}
               </button>
             )}
+          </>
+        )}
+
+        {mode === 'quick' && (
+          <div>
+            <label htmlFor="quick-ingredients">{t('briefs.ingredients')}</label>
+            {/* The wide block this mode was missing. One per line — itemising
+                with quantities and units is what careful mode is for, and
+                asking for it here is what sent people away in the first
+                place. */}
+            <textarea
+              id="quick-ingredients"
+              disabled={editingClosed}
+              rows={6}
+              placeholder={t('briefs.ingredientsPlaceholder')}
+              value={quickIngredients}
+              onChange={(e) => setQuickIngredients(e.target.value)}
+              maxLength={2000}
+            />
           </div>
-        ))}
-        {!editingClosed && (
-          <button
-            type="button"
-            className="secondary"
-            onClick={() => setIngredients((prev) => [...prev, { name: '', quantity: null, unit: null }])}
-          >
-            {t('briefs.addIngredient')}
-          </button>
         )}
 
         <div>
@@ -221,119 +336,50 @@ export function BriefEditorPage() {
           <textarea
             id="procedure"
             disabled={editingClosed}
-            rows={6}
+            rows={mode === 'quick' ? 8 : 6}
+            placeholder={mode === 'quick' ? t('briefs.procedurePlaceholder') : undefined}
             value={procedure}
             onChange={(e) => setProcedure(e.target.value)}
             maxLength={5000}
           />
-          <p className="muted">{t('briefs.procedureMinLength', { count: procedure.length })}</p>
         </div>
 
         <div>
           <label htmlFor="external-url">{t('briefs.externalUrl')}</label>
-          <input id="external-url" disabled={editingClosed} value={externalUrl} onChange={(e) => setExternalUrl(e.target.value)} />
-        </div>
-
-        <div className="row">
-          <div style={{ flex: 1 }}>
-            <label htmlFor="difficulty">{t('briefs.difficulty')}</label>
-            <select
-              id="difficulty"
-              disabled={editingClosed}
-              value={difficulty ?? ''}
-              onChange={(e) => setDifficulty(e.target.value ? Number(e.target.value) : null)}
-            >
-              <option value="">—</option>
-              {[1, 2, 3, 4, 5].map((n) => (
-                <option key={n} value={n}>
-                  {n}
-                </option>
-              ))}
-            </select>
-          </div>
-          <div style={{ flex: 1 }}>
-            <label htmlFor="prep-minutes">{t('briefs.prepMinutes')}</label>
-            <input
-              id="prep-minutes"
-              disabled={editingClosed}
-              type="number"
-              value={prepMinutes ?? ''}
-              onChange={(e) => setPrepMinutes(e.target.value ? Number(e.target.value) : null)}
-            />
-          </div>
-          <div style={{ flex: 1 }}>
-            <label htmlFor="est-cost">{t('briefs.estCost')}</label>
-            <input id="est-cost" disabled={editingClosed} value={estCost} onChange={(e) => setEstCost(e.target.value)} />
-          </div>
-        </div>
-
-        <div>
-          <label htmlFor="note-to-cook">{t('briefs.noteToCook')}</label>
-          <textarea id="note-to-cook" disabled={editingClosed} rows={3} value={noteToCook} onChange={(e) => setNoteToCook(e.target.value)} />
-        </div>
-
-        <label>{t('briefs.containsTags')}</label>
-        <div className="row" style={{ flexWrap: 'wrap' }}>
-          {panelLabels.map((label) => (
-            <label key={label} className="row" style={{ width: 'auto' }}>
-              <input
-                type="checkbox"
-                style={{ width: 'auto' }}
-                disabled={editingClosed}
-                checked={tags.includes(label)}
-                onChange={() => toggleTag(label)}
-              />
-              {label}
-            </label>
-          ))}
-        </div>
-        {tags.filter((tag) => !panelLabels.includes(tag)).length > 0 && (
-          <div className="row" style={{ flexWrap: 'wrap' }}>
-            {tags
-              .filter((tag) => !panelLabels.includes(tag))
-              .map((tag) => (
-                <span key={tag} className="badge">
-                  {tag}
-                  {!editingClosed && (
-                    <button type="button" className="secondary" onClick={() => toggleTag(tag)} style={{ padding: '0 6px' }}>
-                      ×
-                    </button>
-                  )}
-                </span>
-              ))}
-          </div>
-        )}
-        {!editingClosed && (
-          <div className="row">
-            <input placeholder={t('briefs.addTagPlaceholder')} value={newTag} onChange={(e) => setNewTag(e.target.value)} />
-            <button type="button" className="secondary" onClick={addCustomTag}>
-              {t('briefs.addTag')}
-            </button>
-          </div>
-        )}
-
-        <label className="row">
           <input
-            type="checkbox"
-            style={{ width: 'auto' }}
+            id="external-url"
             disabled={editingClosed}
-            checked={tagsConfirmed}
-            onChange={(e) => setTagsConfirmed(e.target.checked)}
+            value={externalUrl}
+            onChange={(e) => setExternalUrl(e.target.value)}
           />
-          {t('briefs.tagsConfirmed')}
-        </label>
-
-        {!editingClosed && (
-          <div className="row">
-            <button type="button" className="secondary" onClick={onSave} disabled={busy}>
-              {t('actions.save')}
-            </button>
-            <button type="button" onClick={onSubmit} disabled={busy}>
-              {t('actions.submit')}
-            </button>
-          </div>
-        )}
+        </div>
       </div>
+
+      {/* Found in what was written, and turned into the one instruction that
+          actually helps at a shared table: put a card next to the dish. */}
+      {matched.length > 0 && (
+        <div className="paper stack">
+          <strong>{t('briefs.labelDish')}</strong>
+          <p className="muted" style={{ margin: 0 }}>
+            {t('briefs.labelDishWhy', { items: matched.join(', ') })}
+          </p>
+        </div>
+      )}
+
+      <h2>{t('dietary.panelTitle')}</h2>
+      <DietaryPanelGrid entries={dietaryPanel} />
+
+      {!editingClosed && (
+        <div className="row">
+          <button type="button" className="secondary" onClick={onSave} disabled={busy}>
+            {t('actions.save')}
+          </button>
+          <button type="button" onClick={onSubmit} disabled={busy || !complete}>
+            {t('actions.submit')}
+          </button>
+        </div>
+      )}
+      {!editingClosed && !complete && <p className="muted">{t('briefs.needsMore')}</p>}
 
       {assignment && (
         <>

@@ -29,7 +29,7 @@ table profiles;
 
 -- Alice creates a round
 select _as('00000000-0000-0000-0000-000000000001');
-select create_round('Test Dinner', 'PRIVATE_CODE', 'ANONYMOUS', 'FREE', null, null, 'Europe/Paris', null, false, false) as round_id \gset
+select create_round('Test Dinner', 'CODE', 'ANONYMOUS', 'FREE', null, null, 'Europe/Paris', null, false, false) as round_id \gset
 
 \echo '--- round ---'
 select id, name, status, join_code, accent_color, accent_emoji from rounds;
@@ -79,6 +79,18 @@ select submit_brief(:'round_id'::uuid);
 select _as('00000000-0000-0000-0000-000000000003');
 select save_brief_draft(:'round_id'::uuid, 'Poulet roti', 'MAIN', '[{"name":"chicken","quantity":1,"unit":"whole"}]'::jsonb, repeat('Season the chicken generously, roast at high heat with root vegetables until the skin is crisp. ', 1), null, 2, '15€', 90, null, '{"nuts"}', true);
 
--- this one SHOULD fail: contains a tag that conflicts with Bob's severe allergy
-\echo '--- expecting a hard-dietary-conflict error next ---'
+-- This dish carries a tag matching Bob's severe allergy. It used to be
+-- refused outright; since 0029 it is served and everyone is told instead —
+-- a card by the dish is what a host would actually do, and the guest gets
+-- to decide for themselves rather than the dish silently never existing.
+\echo '--- an allergen no longer blocks: expect this to succeed ---'
 select submit_brief(:'round_id'::uuid);
+
+\echo '--- and the Executive Chef was told, by dish and by allergen ---'
+reset role;
+select payload->>'dish_name' as dish, payload->'labels' as labels
+from host_alerts
+where round_id = :'round_id'::uuid and payload->>'type' = 'ALLERGEN_ON_TABLE';
+set role authenticated;
+
+\echo 'SMOKE TEST 1 COMPLETE'

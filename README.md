@@ -43,6 +43,31 @@ usable without instructions. When a feature could go either the simple
 route or the more powerful/configurable route, default to simple unless
 there's a concrete reason (e.g. dietary safety) to do otherwise.
 
+The round page is a tablecloth with envelopes laid on it, and opening one
+takes over the screen rather than expanding a list.
+[`DESIGN.md`](./DESIGN.md) is the authority on that — palette, the rules
+that keep the table a table, and when the roster is allowed to be seen.
+[`PRESENTATION.md`](./PRESENTATION.md) holds the phase-by-phase spec.
+Both are kept out of this file so README stays limited to game logic and
+architecture, not UI/UX planning.
+
+Two conventions the interface now holds to, both recorded in
+[`DESIGN.md`](./DESIGN.md):
+
+- **No browser dialogs.** Confirmations appear on the page, beside the control
+  that raised them, and say what will actually change. `window.confirm` cannot
+  be formatted, cannot say more than one flat sentence, and gives the
+  destructive option a button identical in weight to the safe one.
+- **A warning must be true.** Stepping a dinner back deletes nothing —
+  `advance_phase` only updates `rounds.status` — so the warnings say what each
+  step actually changes (which phase-gated actions open or close), not what it
+  feels like it might destroy.
+
+Product and infrastructure questions that aren't about the interface —
+notifications, a paid tier, self-hosting, the Play Store — live in
+[`ROADMAP.md`](./ROADMAP.md). Nothing there is decided; it exists so each
+question gets answered once instead of re-argued.
+
 ## Key characteristics (the decisions that shape everything else)
 
 - **Game logic lives in Postgres**, not the frontend. Assignment, phase
@@ -71,9 +96,11 @@ there's a concrete reason (e.g. dietary safety) to do otherwise.
   only warn.
 - **Anonymity is layered**: secret names are assigned randomly (never in
   join order — that would leak identity), canned-template-only chat (no
-  free text, so writing style can't out someone), day-granularity timestamps
-  only, and the Host can optionally stay "blind" to the chain until they
-  explicitly ask to see it (`host_saw_chain_at` records if they looked).
+  free text, so writing style can't out someone — planned to change, see
+  `PRESENTATION.md` drawer 4; update this bullet once that ships), day-
+  granularity timestamps only, and the Host can optionally stay "blind" to
+  the chain until they explicitly ask to see it (`host_saw_chain_at`
+  records if they looked).
 - **Round-membership approval is a real feature**: `rounds.requires_approval`
   + `round_members.approved`, with dedicated `approve_member`/
   `reject_member` RPCs. Unapproved members occupy no seat.
@@ -150,6 +177,27 @@ build and the keep-alive ping now run in two different places.
 
 ## Running locally
 
+**Check what `.env.local` points at before debugging anything.** It's the
+single most misleading failure mode here: with production values in it,
+`npm run dev` runs your local code against the *deployed* database, so
+any migration you haven't pushed simply isn't there and the app fails
+with `Could not find the function public.…` — which reads like a code
+bug and isn't. Look at `VITE_SUPABASE_URL` specifically; `VITE_APP_BASE_URL`
+says `localhost` in both setups and will happily fool a quick grep.
+
+For local development it should read `http://127.0.0.1:54321`. Keep the
+production values in a second gitignored file (`.env.production-backup.local`)
+and swap when you actually mean to talk to the real project.
+
+**`npx supabase db reset` deletes accounts, including yours.** It drops
+and rebuilds everything, `auth.users` included — so any account created
+by clicking through the local app disappears, while the browser keeps its
+token. The app now detects that (`AuthProvider` asks the server who the
+token belongs to and signs out cleanly if the answer is "nobody"), so it
+appears as a normal sign-out rather than a foreign-key error. Still worth
+knowing before resetting while someone is mid-test: they'll have to sign
+up again.
+
 ```bash
 npm install
 cp .env.example .env.local   # fill in real values once you have a Supabase project
@@ -165,133 +213,165 @@ npm run dev
 `supabase/smoke_test.sql` + `supabase/smoke_test2.sql` play a full 4-player
 round end to end directly in SQL (signup → dietary block → assignment →
 briefs → chat → voting → results → reveal) — useful for re-validating the
-backend after any migration change. `supabase/smoke_test3.sql` covers the
+backend after any migration change. `smoke_test3.sql` covers the
 host-tools RPCs that only got a frontend later (`splice_member`,
-`set_pairing`, `remove_member` post-assignment, `exclusion_pairs`/
-`slots` direct CRUD, `host_alerts` resolve) — all three are independent
-and self-contained, each starting from its own `db reset`:
+`set_pairing`, `remove_member` post-assignment, exclusion pairs, the menu
+RPCs, `host_alerts` resolve). `smoke_test4.sql` covers pending-member
+identity, `smoke_test5.sql` both removal modes, `smoke_test6.sql` round
+setup and invitations, and `smoke_test7.sql` the board plus allergens
+informing rather than blocking.
+
+**They cover less of the join path than they appear to.** Every one of
+them seeds its `turnstile_tickets` row by hand as the postgres superuser
+before calling `join_round`, so the `verify-turnstile` Edge Function is
+never exercised — which is exactly how a permission bug that made joining
+impossible survived six green runs (see `CHANGELOG.md` 2026-08-22 (5)).
+Anything that only works through an Edge Function needs driving in a
+browser, not in SQL.
+
+**They are not all independent, and getting this wrong looks like a test
+failure.** `smoke_test2.sql` is literally part 2 of `smoke_test.sql` — it
+opens by looking up the round part 1 created, so run on a fresh database
+it dies immediately with `no rows returned for \gset`. The other three
+seed their own fixtures and each need their own reset, since they'd
+collide on duplicate keys otherwise:
 
 ```bash
 npx supabase db reset
 CID=$(docker ps --filter "name=supabase_db" --format "{{.Names}}")
 docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test.sql
 docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
-docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test3.sql
 ```
+
+Then `db reset` again before each of `smoke_test3.sql` through
+`smoke_test7.sql`.
+
+**Prefer `npx supabase migration up --local` over `db reset` while anyone
+is using the app.** It applies pending migrations against the existing
+database; `db reset` rebuilds it from scratch and takes `auth.users` with
+it, so anyone signed in loses their account mid-session. The app now
+detects such a session and signs out cleanly rather than failing on a
+foreign key, but they still have to sign up again.
+
+One more thing that looks like a failure and isn't: `smoke_test3.sql` picks its `set_pairing`
+target with `limit 1` and no `order by`, so which member it lands on
+varies with the random assignment; if it ever fails, confirm the failure
+reproduces before believing it.
 
 ---
 
 ## Status
 
-### Done and validated against real Postgres
-- Full schema + RLS + grants (`supabase/migrations/0001`–`0002`).
-- Turnstile ticket handshake, signup, round CRUD, join/approve/reject, host
-  transfer (`0003`–`0004`).
-- Assignment (generate/re-roll/splice/manual-edit/remove), phase state
-  machine with on-read deadline checks (`0005`–`0006`).
-- Brief drafting/submission with round-wide dietary enforcement (`0007`).
-- Canned chat with rate limits, report/reported-message flow (`0008`).
-- Voting, Borda scoring, awards, `get_ballot_options`/`get_results` (`0009`).
-- Message templates + secret-name word lists, FR + EN (`0010`).
-- Frontend: auth (sign in/up with mandatory dietary step, reset), round
-  create/join/roster/approval, round-switcher header, i18n scaffold, PWA
-  config, `verify-turnstile` Edge Function.
-- Netlify deploy (builds directly from Git — see "Deploying the
-  frontend" above) + GitHub Actions keep-alive ping and nightly `pg_dump`
-  backup (14-day rotation via artifact expiry).
-- Host round-settings page (`/rounds/:roundId/settings`): editable diner
-  info (location/date-time/timezone via `update_round_details`, blocked
-  once `DINNER` phase starts), one-step-back "unlock" control, cancel round
-  (`0012_round_settings.sql`).
-- Assignment-generation UI on the round page: `LOCKED`-phase host action
-  that calls `generate_assignment` (previously backend-only — the frontend
-  had no way to trigger it, which is what made "Next → Assigned" dead-end
-  with a raw Postgres error; the "Next" button is now disabled with an
-  explanation until an assignment exists, using the new
-  `assignment_exists` RPC to know on load without spoiling the chain).
-- Dietary panel rendered as a placeholder image grid (per-entry square
-  placeholder + label), ready to swap in real allergen icons later.
-- Round-page timeline: a bulleted progress stepper (every phase, current
-  one highlighted) so any player — not just the host — can see at a glance
-  where the round stands, since the single phase badge alone doesn't
-  convey the sequence.
-- Optional voting: a host can disable voting at round creation
-  (`rounds.voting_enabled`, `0013_optional_voting.sql`). Such a round skips
-  `VOTING` entirely — `advance_phase` moves it `DINNER → RESULTS` directly
-  and now explicitly rejects any attempt to enter `VOTING` at all for that
-  round. `compute_results` already tolerated zero ballots, so results still
-  publish (dishes listed, no meaningful ranking beyond the disclosed random
-  tiebreak). Matches how every other round-configuration setting
-  (`slot_mode`, `allow_mutual_pairs`, `requires_approval`, …) already
-  works: set once at creation, no update RPC.
-- The full player-facing game loop: brief editor (`/rounds/:roundId/brief`,
-  ingredients list, dietary-panel cross-reference, contains-tags
-  confirmation, round-wide dietary-conflict errors surfaced plainly), Cook
-  view (`/recipe`, recipe card + "can't cook this" quick action), a shared
-  canned-chat `ChatThread` component embedded in both (and in Results,
-  where each player's own two threads unmask automatically once
-  `RESULTS`/`ARCHIVED` — that's the actual identity reveal moment, per
-  `get_thread`), ballot voting (`/ballot`, drag-and-drop ranking via
-  `@dnd-kit`, optional originality/brief-respect scores), and
-  results/awards (`/results`). `RoundHomePage` now surfaces one
-  phase-appropriate entry point at a time into this loop instead of
-  requiring players to know the URLs.
-- Host tools: chain view (`/chain`, spoiler-gated behind an explicit
-  "Reveal" click, never auto-fetched — matches the existing
-  `host_saw_chain_at` design) rendered as the grid-of-chefs-with-arrows
-  layout, handling the case where a manual swap has split the assignment
-  into more than one cycle (see `0014`'s notes below); manual pairing
-  swap (`set_pairing`) and late-joiner splice (`splice_member`) from that
-  same page; a "Remove" action on the roster (`remove_member`, handling
-  its confirmation-required branch); host alerts inbox (`/alerts`,
-  `host_alerts` + `get_reported_messages`, resolve action); exclusion
-  pairs and (for `CATEGORIES`-mode rounds) course-slot configuration on
-  the settings page, both direct-`supabase-js` CRUD against existing
-  host-write RLS policies — no RPC needed for either.
-- `0014_brief_pairing_and_alerts.sql`: `get_my_brief` now returns
-  `pairing_id` (the Cook had no way to open their chat thread without
-  it); new `get_my_brief_draft` so a Sender can re-fetch their own
-  in-progress brief (`save_brief_draft` was write-only before); a
-  host-scoped update policy so alerts can actually be resolved (was
-  select-only); and `host_alerts.pairing_id`'s foreign key now
-  `ON DELETE SET NULL` instead of the implicit `NO ACTION` — the old
-  default made `remove_member` crash with a raw constraint violation the
-  instant the pairing being removed already had a `CANNOT_COOK` alert
-  against it, which is the single most natural sequence that alert exists
-  to prompt. Found and fixed via `supabase/smoke_test3.sql`, not by
-  inspection.
-- Simple placeholder icons: PWA install icons (`public/pwa-*.png` —
-  `vite.config.ts` referenced these before they existed, so installability
-  was silently broken) and per-`dietary_kind` inline SVG glyphs in the
-  allergy grid (shape-distinguished, not just color, for colorblind-safe
-  legibility) — functional, not final branding.
-- `CreateRoundPage` gained a slot-mode choice (Free-for-all / Specific
-  courses); previously nothing in the UI ever set `CATEGORIES`, so the
-  courses-configuration UI above would have been unreachable dead code.
+For the detailed, dated history of how each piece below was built (RPC
+names, migration numbers, bugs found and fixed) see
+[`CHANGELOG.md`](./CHANGELOG.md). This section only says what exists today.
+
+### Done — playable end to end
+- **Sign-up & join**: account creation with a mandatory allergy/diet step;
+  create a round or join one via code, with optional host approval before
+  a joiner counts as a real seat.
+- **Assignment**: the host runs a lottery that gives every player exactly
+  one other player to secretly cook for — free-for-all or fixed course
+  slots (starter/main/dessert/drink/other), with manual re-pairing and
+  late-joiner handling if needed.
+- **Recipe briefs**: each player writes a recipe for their assigned cook,
+  quickly (a name, ingredients one per line, the method, and optionally a
+  link) or in detail (itemised ingredients with quantities and units).
+  Both store the same list, so the cook reads the same thing either way.
+  Allergen tags are found in what was written rather than ticked from a
+  list.
+- **The roster is covered until sign-ups close** (`0032`). While a round is
+  `DRAFT` or `OPEN` nobody sees anyone's secret name but their own — the
+  server withholds it, rather than the interface hiding it — because names
+  appearing as people arrive would make join order a way to work out who is
+  who. Everyone is revealed at the same instant when the round locks. The
+  host still reads pending members' real names at the door (`0015`).
+- **Allergens inform rather than block.** A dish matching somebody's severe
+  allergy or diet is still served; what changes is that everyone who needs
+  to know is told. The sender is asked to put a card by the dish, the
+  Executive Chef gets a note naming the dish and the allergen so they can
+  say it when the food goes down, and any diner can look up which dishes
+  carry what. A card is what a host would actually do, and an adult with an
+  allergy is better served by knowing than by one dish silently never
+  existing.
+- **The board**: one channel the whole table reads and posts to, from a
+  short list of ready-made cheerful phrases. Nothing is attributed —
+  identical phrases collapse into one line with a count, so the board is
+  unattributable by construction rather than by omission. The author is
+  still stored and never sent, which is what lets a reported phrase be
+  acted on.
+- **Cooking**: each player sees the recipe written for them, with a
+  canned-message chat to their pairing partner and a "can't cook this"
+  quick action.
+- **Voting**: drag-and-drop dish ranking (Borda count) plus separate
+  originality/brief-respect scores, with awards computed from the results.
+- **Results & reveal**: scores, awards, and — the actual twist — each
+  player's two chats unmask automatically, revealing who cooked for whom.
+- **Host tools**: round settings (venue/date/time), pause or cancel a
+  round, a roster with approve/reject/remove, a spoiler-gated view of the
+  whole assignment chain, and an inbox for player-reported issues.
+  Approvals show the real name of whoever is asking to join — a decision
+  about a pseudonym is a decision about nobody — and the name gives way to
+  the pseudonym the moment they're in.
+- **When someone drops out**: removing a cook after the lottery has run is
+  a choice, not an automatic repair. *Reconnect* closes the chain so
+  everyone still has a dish to make, at the cost of handing one cook a
+  different recipe than the one they already have; *leave as is* disturbs
+  nobody and the buffet is simply one dish shorter. A dish whose cook has
+  gone is excluded from voting rather than listed for a rank nobody can
+  give it.
+- **Setting a dinner up**: one click for a classic dinner, or open the
+  custom panel to choose how people get in (a code, or in-app invitations
+  by account address), who knows whom (undercover / spy / open), how you
+  vote (during dinner, after dinner on a timer, or not at all), and
+  whether the menu is free-for-all or composed course by course.
+- **The round page**: a table seen from above, with each section drawn as
+  a sealed envelope laid on the cloth. The Executive Chef's actions all go
+  through one panel — the pass — which shows only what's up right now and
+  opens itself when the round is blocked on them.
+- **Platform**: French/English with a working switcher, installable as a
+  PWA, deployed on Netlify (frontend) + Supabase (backend), with automated
+  keep-alive pings and nightly database backups.
 
 ### Not built yet
-- Dinner-day screens: shopping list, printable buffet label cards, offline
-  cache verification.
-- `send-email` and `send-invite` Edge Functions (folders exist, empty) —
-  blocked on a real Brevo API key and email copy, neither fabricated here.
-- Legal pages (privacy/terms; won't draft real legal text), info & help
-  layer, first-run tour.
-- Real allergen icons and PWA icons — see "Simple placeholder icons" above;
-  current ones are functional stand-ins, not final design.
-- Security pass against the full checklist (RLS-missing-policy CI check,
-  password-list check, session/re-auth rules) and the manual pen-test pass
-  (the pen-test specifically needs a human, not just more automation).
-- 1000-run assignment fuzz test, splice/remove property tests, Borda
-  tie-break tests as an actual automated suite — `smoke_test.sql`–
-  `smoke_test3.sql` currently cover this by manual re-run, not CI.
+
+Ordered roughly by how much the product misses them.
+
+- **Free-text chat** — the chat is still canned templates only. Agreed to
+  open it up (with the anonymity trade-off accepted knowingly), then
+  narrow back toward templates once there's real usage data.
+  `PRESENTATION.md` drawer 4.
+- **Telling people the round moved** — nothing notifies anyone when the
+  Executive Chef advances the dinner. Decided: email, not push, and why —
+  see `PRESENTATION.md`, "Telling people the round moved". Needs the mail
+  provider below.
+- **Outbound email** — invitations already work in-app without it, so this
+  is now only for reaching people who aren't looking at the app. Blocked
+  on a provider key.
+- **Real table props** — the plate, glass, bowl, napkin, cutlery and bread
+  board on the cloth are drawings, not renders. They move correctly between
+  the three states; what's missing is the artwork. The three rules the real
+  ones must follow (one camera angle, one light source, shadow baked in) are
+  in `DESIGN.md` §4 and `TableProps.tsx`.
+- **Two recipes per brief** and **themed pseudonyms** — both shown in the
+  creation form, both disabled, both v2.
+- **Dinner-day tools**: shopping list, printable buffet labels,
+  offline-cache verification.
+- **Legal pages**, an in-app help layer, a first-run tour.
+- **Final allergen and app icons** — current ones are functional
+  placeholders.
+- **A full security pass** (checklist + manual pen-test) and an automated
+  test suite — today's coverage is manual SQL smoke tests, re-run by hand.
+- **Nothing has been deployed.** Production is still on migration `0014`;
+  everything from `0015` on exists only locally. See "Deploying" above
+  before pushing.
 
 ### Known simplifications (deliberate, not oversights)
-- The round-wide dietary check matches `dietary_entries.label` against
-  `briefs.contains_tags` by exact string equality — it assumes both use the
-  same tag vocabulary. A diet like "vegan" that implies several tags at
-  once needs the user to add each conflicting tag as its own entry until a
-  label→tags mapping table is built.
-- Turnstile has a dev-only bypass (both the frontend widget and the
-  `verify-turnstile` edge function recognise a placeholder token) that's
-  inert the moment real site/secret keys are configured — remove the
-  bypass path entirely once this ships past local dev.
+- Allergy/diet matching is exact-string, not semantic: a diet like
+  "vegan" needs every conflicting ingredient added by hand as its own tag,
+  until a proper label→tags mapping exists.
+- Bot protection (Turnstile) has a dev-only bypass (both the frontend
+  widget and the `verify-turnstile` edge function recognise a placeholder
+  token) — inert the moment real site/secret keys are configured, but
+  must be removed entirely before this is used by anyone outside local
+  development.

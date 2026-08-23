@@ -1,7 +1,8 @@
 {
   "app": {
     "name": "CovertCook",
-    "tagline": "One dinner, one secret recipe, one chain."
+    "tagline": "One dinner, one secret recipe, one chain.",
+    "language": "Language"
   },
   "actions": {
     "submit": "Submit",
@@ -29,7 +30,8 @@
     "resetSent": "If an account exists for that address, an email has been sent.",
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "staleSession": "This session belongs to an account that no longer exists. Sign out and create the account again."
   },
   "dietary": {
     "title": "Your dietary restrictions",
@@ -39,7 +41,7 @@
     "kind": {
       "ALLERGY_SEVERE": "Severe allergy",
       "ALLERGY_MILD": "Mild allergy",
-      "DIET": "Diet (vegetarian, vegan, halal, kosher, no pork…)",
+      "DIET": "Diet",
       "DISLIKE": "Just don't like it"
     },
     "label": "What",
@@ -55,18 +57,47 @@
     "join": "Join with a code",
     "joining": "Joining the round…",
     "name": "Round name",
-    "visibility": {
-      "label": "Who can join",
-      "PUBLIC_LINK": "Public link",
-      "PRIVATE_CODE": "Private code"
+    "setup": {
+      "classic": "Classic",
+      "classicHint": "covered dinner, one recipe each, voting on. Nothing to decide.",
+      "custom": "Customise",
+      "customHint": "choose who gets in, who knows whom, and how you vote."
+    },
+    "comingSoon": "Coming soon",
+    "access": {
+      "label": "How people get in",
+      "CODE": "With a code",
+      "CODEHint": "You get a code to share however you like. Anyone holding it can ask for a seat.",
+      "INVITE": "By invitation",
+      "INVITEHint": "You add chefs by the address they signed up with. They accept or decline in the app — no code to mistype or forward."
     },
     "anonymity": {
-      "label": "Anonymity",
-      "ANONYMOUS": "Anonymous until the final reveal",
-      "OPEN": "Names stay visible"
+      "label": "Who knows whom",
+      "ANONYMOUS": "Undercover — nobody knows anybody",
+      "ANONYMOUSHint": "Everyone is a pseudonym until the final reveal, you included.",
+      "SPY": "Spy — you see everyone, they see nobody",
+      "SPYHint": "You keep each chef's real name beside their pseudonym. Everyone else sees pseudonyms only. You'll still have to ask before you can see who cooks for whom.",
+      "OPEN": "Open — everyone knows everyone",
+      "OPENHint": "Real names stay visible all evening. Only who cooks for whom stays secret."
     },
-    "requiresApproval": "Host must approve each player",
-    "votingEnabled": "Enable voting & awards after dinner",
+    "requiresApproval": "The Executive Chef must approve each player",
+    "voting": {
+      "label": "Voting",
+      "LIVE": "During dinner",
+      "LIVEHint": "You open the vote at the table and see the results first, then decide how to announce them.",
+      "TIMED": "After dinner",
+      "TIMEDHint": "You set a deadline and the results publish themselves when it runs out.",
+      "DISABLED": "No voting",
+      "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later."
+    },
+    "nameTheme": {
+      "label": "Pseudonym theme",
+      "FOOD": "Herbs & spices"
+    },
+    "recipesPerBrief": {
+      "label": "Recipes per chef",
+      "one": "One recipe"
+    },
     "slotMode": {
       "label": "Courses",
       "FREE": "Free-for-all (everyone brings any dish)",
@@ -75,6 +106,10 @@
     "remove": "Remove",
     "removeConfirm": "Remove this player from the round?",
     "removeDishConfirm": "Both the incoming and outgoing dish are already submitted; removing this member discards one of them. Continue?",
+    "removeCollapse": "Remove and reconnect",
+    "removeLeave": "Remove and leave as is",
+    "removeCollapseConfirm": "Reconnect the chain around this player. Whoever was writing for them will write for the next cook instead, so everyone still has a dish to make — but that cook gets a different recipe than the one they already have.",
+    "removeLeaveConfirm": "Leave the chain exactly as it is. Nobody else is disturbed, and the dish written for this player simply won't be cooked.",
     "limitPlayers": "Limit the number of players",
     "maxPlayers": "Maximum players",
     "joinCode": "Round code",
@@ -85,6 +120,9 @@
     "secretName": "Your secret name for this round",
     "roster": "Players",
     "pendingApproval": "Awaiting approval",
+    "youHost": "You are the Executive Chef of this dinner",
+    "chefCovered": "Chef ——————",
+    "rosterCovered": "Names stay covered until sign-ups close, so nobody can tell who is who from the order people arrived in.",
     "seatCount": "{{count}} player",
     "seatCount_other": "{{count}} players",
     "phase": {
@@ -106,7 +144,8 @@
       "rerollConfirm": "This replaces everyone's current pairing with a new random one. Continue?",
       "ready": "Assignment generated — ready to move to \"Assigned\".",
       "needed": "Generate the assignment below before you can move to \"Assigned\".",
-      "waitingForHost": "Waiting for the host to generate the assignment."
+      "waitingForHost": "Waiting for the Executive Chef to spin the roulette.",
+      "explain": "Everyone is signed up and the table is locked. Spin the roulette to pair each chef with the one they will cook for."
     },
     "settings": {
       "title": "Round settings",
@@ -119,7 +158,6 @@
       "phaseControl": "Status",
       "currentPhase": "Current phase",
       "stepBackTo": "Unlock — go back to \"{{phase}}\"",
-      "stepBackConfirm": "This moves the round back to \"{{phase}}\". Continue?",
       "noStepBack": "This round is at its earliest phase.",
       "dangerZone": "Danger zone",
       "cancelRound": "Cancel round",
@@ -128,14 +166,118 @@
       "exclusionsHelp": "Pick two players who must not be paired together (e.g. a couple who'd rather not cook for each other).",
       "noExclusions": "No exclusions configured.",
       "courses": "Courses to fill",
-      "coursesHelp": "This round uses specific courses — the number of slots below must equal the number of active players ({{count}}) before you can generate the assignment."
+      "coursesHelp": "This round uses specific courses — the number of slots below must equal the number of active players ({{count}}) before you can generate the assignment.",
+      "city": "City",
+      "notes": "Anything else guests should know",
+      "notesPlaceholder": "Door code, what to bring, where to park.",
+      "filling": "Filling the table",
+      "stepBackWhat": {
+        "DRAFT": "The join code stops working, so nobody new can ask for a seat. Everyone already at the table stays.",
+        "OPEN": "The door reopens: anyone holding the code can ask for a seat again.",
+        "LOCKED": "The pairings stay exactly as they are — they are not thrown away. Chefs simply cannot write their recipe again until you move forward.",
+        "ASSIGNED": "Recipes become editable again, and the cooks stop seeing the one they received until you move forward. Anything already submitted stays submitted.",
+        "BRIEFS_CLOSED": "The dinner stops being marked as happening. The recipes stay readable to the chefs cooking them.",
+        "DINNER": "Voting closes. Ballots already cast are kept, and voting picks up where it left off if you move forward again.",
+        "VOTING": "The results go back to provisional and are recalculated when you move forward. Every ballot is kept."
+      },
+      "stepBackNothingLost": "Nothing is deleted by stepping back — only what people are allowed to do right now changes."
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
       "yourRecipe": "Your recipe to cook",
       "vote": "Vote",
       "results": "See results"
-    }
+    },
+    "invitations": {
+      "title": "Invitations ({{count}})",
+      "accept": "Accept",
+      "decline": "Decline",
+      "invite": "Invite a chef",
+      "inviteEmail": "Their account address",
+      "inviteSent": "Invitation sent",
+      "noSuchChef": "No chef signed up with that address. Check the spelling, or share the code instead."
+    },
+    "pastRounds": "Past dinners ({{count}})",
+    "tooManyPlayers": "Thirty is already a lot of cooking. Where were you planning to seat them all — is this a wedding?",
+    "tooFewPlayers": "It takes at least three: with two, you would both know exactly who wrote your recipe.",
+    "backToTable": "Back to the table",
+    "steps": {
+      "signup": "Sign-up",
+      "assign": "Roles",
+      "recipe": "Recipe",
+      "vote": "Menu"
+    },
+    "drawers": {
+      "chefs": "Chefs",
+      "myRecipe": "My recipe",
+      "received": "Recipe received",
+      "receivedMeta": "What you are cooking",
+      "messages": "Messages",
+      "messagesMeta": "Board and conversations",
+      "vote": "Vote the menu",
+      "results": "Results",
+      "allergies": "Allergies",
+      "info": "The dinner"
+    },
+    "waiting": {
+      "assignment": "Opens once the Executive Chef spins the roulette",
+      "briefs": "Opens once the recipes are in",
+      "vote": "Opens when the Executive Chef starts the vote"
+    },
+    "info": {
+      "title": "Dinner",
+      "city": "City",
+      "address": "Address",
+      "date": "Date",
+      "time": "Time",
+      "notes": "Good to know",
+      "noLocation": "No address yet",
+      "noDate": "No date yet"
+    },
+    "confirmJoin": "You were invited to a dinner with this code. Join it?",
+    "confirmJoinYes": "Yes, join this dinner",
+    "confirmJoinChange": "Use a different code",
+    "waitingForCaptcha": "Checking you are human…",
+    "lateJoinerWarning": "Sign-ups are closed and the chain is set. You can still add someone — the chain is opened at one point to fit them in — but everyone around that point gets a different partner than the one they had.",
+    "executiveChef": "Executive Chef",
+    "pendingJoinBanner": "Your invitation is being held — dinner code",
+    "joinErrors": {
+      "INVALID_CODE": "No dinner uses that code. Check the spelling.",
+      "ROUND_NOT_OPEN": "That dinner is not taking new chefs right now.",
+      "ALREADY_MEMBER": "You are already at this table.",
+      "AWAITING_APPROVAL": "You have already asked to join. The Executive Chef has not answered yet — you will see the dinner here as soon as they do.",
+      "PREVIOUSLY_LEFT": "You left this dinner. Ask the Executive Chef to add you back.",
+      "WAS_REMOVED": "The Executive Chef removed you from this dinner.",
+      "ROUND_FULL": "This dinner is full."
+    },
+    "chainChoice": {
+      "intro": "The chain is already built. Taking a link out leaves two loose ends — decide what happens to them.",
+      "collapse": "The two ends are joined. B writes for D instead, so everyone still has a dish to make — but D is handed a different recipe than the one they already have.",
+      "leave": "The ends stay loose. Nobody else is disturbed, and the dish written for the departing chef simply is not cooked."
+    },
+    "actions": {
+      "fillTable": "Fill the table",
+      "voting": "The vote"
+    },
+    "menu": {
+      "title": "Compose the menu",
+      "free": "Free-for-all",
+      "freeHint": "everyone brings whatever they like. Nothing to plan.",
+      "composed": "A composed menu",
+      "composedHint": "you decide the courses, and each chef is given one to write.",
+      "balanced": "{{courses}} courses for {{seats}} chefs — the menu is complete.",
+      "unbalanced": "{{courses}} courses for {{seats}} chefs. Every chef cooks exactly one dish, so these two have to match before the roulette can run.",
+      "locked": "The menu can no longer change: the chefs are already writing for the courses they were given.",
+      "errors": {
+        "MENU_LOCKED": "The menu is set — the chefs already have their courses. Re-roll the roulette to change it.",
+        "COURSE_IN_USE": "Somebody is already cooking that course."
+      }
+    },
+    "pass": {
+      "title": "The pass",
+      "nothing": "Nothing needs you right now."
+    },
+    "lateJoinerShort": "Adding someone now changes two chefs' partners."
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",
@@ -169,7 +311,29 @@
     "tagsConfirmed": "I've reviewed the dietary panel above and confirmed the tags I've checked are accurate.",
     "noBriefYet": "No recipe to show yet.",
     "cannotCook": "I can't cook this after all",
-    "cannotCookSent": "Sent — the host has been notified."
+    "cannotCookSent": "Sent — the Executive Chef has been notified.",
+    "acknowledge": "I can cook this",
+    "acknowledged": "You confirmed you can cook this.",
+    "mode": {
+      "quick": "Quick",
+      "careful": "Detailed"
+    },
+    "ingredientsPlaceholder": "One per line — 200 g flour, 3 eggs, a pinch of salt.",
+    "procedurePlaceholder": "How to make it. However you like.",
+    "state": {
+      "blank": "○ Not written",
+      "draft": "◐ Draft saved",
+      "sent": "● Sent to your cook"
+    },
+    "assignedCourse": "The roulette gave you: {{course}}",
+    "freeChoice": "Free choice — any dish you like.",
+    "labelDish": "Put a card next to this dish",
+    "labelDishWhy": "It contains {{items}}, and somebody at this table has said that matters to them. A card by the dish is what lets them decide for themselves.",
+    "needsMore": "A name, and either a link or the recipe written out.",
+    "errors": {
+      "DISH_NAME_LENGTH": "The dish needs a name of at least three characters.",
+      "RECIPE_TOO_EMPTY": "Add a link, or write out the recipe."
+    }
   },
   "chat": {
     "title": "Messages",
@@ -194,13 +358,24 @@
     }
   },
   "vote": {
-    "title": "Vote",
+    "title": "Vote the menu",
+    "theMenu": "Tonight's menu",
     "instructions": "Drag to rank every dish, best first. Optional: rate originality and how closely the brief was followed.",
     "originality": "Originality",
     "briefRespect": "Brief respect",
     "submitBallot": "Submit ballot",
     "thanks": "Thanks — your ballot has been recorded.",
-    "nothingToRank": "Nothing to rank yet."
+    "nothingToRank": "Nothing to rank yet.",
+    "openNow": "Open the vote now",
+    "skip": "Skip the vote",
+    "deadline": "Close voting in",
+    "noDeadline": "No time limit",
+    "progress": "{{voted}} of {{eligible}} have voted",
+    "publish": "Announce the results",
+    "published": "The results are out.",
+    "hostOnly": "You are the only one who can see these. Announce them when you are ready.",
+    "waitingPublish": "The Executive Chef has the results and has not announced them yet.",
+    "change": "Change my vote"
   },
   "results": {
     "title": "Results",
@@ -232,7 +407,7 @@
     "spliceConfirm": "Every sender has already submitted; splicing replaces one already-cooked dish. Continue?"
   },
   "alerts": {
-    "title": "Host alerts",
+    "title": "Executive Chef alerts",
     "openAlerts": "Open alerts",
     "none": "No open alerts.",
     "resolve": "Resolve",
@@ -249,5 +424,27 @@
   "errors": {
     "generic": "Something went wrong. Please try again.",
     "notAuthenticated": "You must be signed in."
+  },
+  "profile": {
+    "title": "Profile",
+    "signedInAs": "Signed in as",
+    "dietaryHelp": "This list follows you into every dinner — recipes written for you are checked against it, so keep it accurate.",
+    "noRestrictions": "Nothing listed. Add anything a cook would need to know.",
+    "locale": {
+      "en": "English",
+      "fr": "Français"
+    }
+  },
+  "board": {
+    "pageTitle": "Messages",
+    "fridge": "The Fridge",
+    "help": "The whole table talks here, and nobody signs it. Turn the rolling pin for something to say, or throw the egg and let it choose.",
+    "empty": "Nothing in the fridge yet. Be the first.",
+    "throwEgg": "Throw the egg — say something at random",
+    "rateLimit": "That is plenty for one hour. Let somebody else talk.",
+    "yourChef": "Your Chef",
+    "yourChefHelp": "Your two private conversations: the chef you write for, and the chef who writes for you.",
+    "toYourCook": "With the chef you write for",
+    "toYourSender": "With the chef who writes for you"
   }
 }

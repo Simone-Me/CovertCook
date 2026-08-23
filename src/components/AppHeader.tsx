@@ -1,61 +1,35 @@
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../lib/auth'
-import { useMyRounds } from '../features/rounds/hooks'
-import { supabase } from '../lib/supabase'
 
-// Pinned in the header on every screen once signed in: a user can be in
-// several rounds at once, and mixing them up is the main confusion risk in
-// the product (§13) — so the current round's name/colour/emoji and a way
-// to jump to another round must always be one glance away, not buried in a
-// menu.
+// The round switcher that used to live here is gone. It solved a problem
+// this product doesn't have: people run one dinner at a time, and every
+// round they're in is already listed on the home screen — so a dropdown
+// duplicating that list earned its place in the one row visible on every
+// single screen without giving anything back.
+//
+// What belongs in that row instead is the way back to yourself: the
+// account, the language, and the allergy list every brief in every round
+// gets validated against.
 export function AppHeader() {
   const { t } = useTranslation()
   const { session, profile } = useAuth()
-  const navigate = useNavigate()
-  const { roundId } = useParams()
-  const { data: rounds } = useMyRounds(profile?.id)
-
-  if (!session) {
-    return (
-      <header className="app-header">
-        <strong>{t('app.name')}</strong>
-      </header>
-    )
-  }
-
-  const current = rounds?.find((r) => r.id === roundId)
 
   return (
     <header className="app-header">
-      <a href="/" style={{ textDecoration: 'none', color: 'inherit', fontWeight: 600 }}>
-        {t('app.name')}
-      </a>
-      {rounds && rounds.length > 0 && (
-        <select
-          aria-label={t('rounds.myRounds')}
-          value={roundId ?? ''}
-          onChange={(e) => e.target.value && navigate(`/rounds/${e.target.value}`)}
-          style={{ marginBottom: 0, flex: 1, borderColor: current?.accent_color }}
-        >
-          <option value="" disabled>
-            {t('rounds.myRounds')}
-          </option>
-          {rounds.map((r) => (
-            <option key={r.id} value={r.id}>
-              {r.accent_emoji} {r.name}
-            </option>
-          ))}
-        </select>
+      {/* The name was already a link home, but nothing said so — it read as
+          a title. The arrow slides out of the word on hover and the whole
+          thing lifts a little, the same gesture as picking an envelope off
+          the cloth, so the way back announces itself before it's clicked. */}
+      <Link to="/" className="app-logo" aria-label={t('rounds.myRounds')}>
+        <span className="app-logo__back" aria-hidden="true">←</span>
+        <span className="app-logo__name">{t('app.name')}</span>
+      </Link>
+      {session && (
+        <Link to="/profile" className="badge" style={{ textDecoration: 'none' }}>
+          {profile?.display_name ?? t('profile.title')}
+        </Link>
       )}
-      <button
-        type="button"
-        className="secondary"
-        onClick={() => supabase.auth.signOut()}
-        style={{ padding: '8px 10px', fontSize: 13 }}
-      >
-        {t('auth.signOut')}
-      </button>
     </header>
   )
 }
