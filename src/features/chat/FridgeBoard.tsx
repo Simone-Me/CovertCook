@@ -19,16 +19,17 @@ import {
 // The phrases are still canned (README §"Anonymity is layered"): no free
 // text, so writing style can't out anyone before the reveal.
 
-// Nothing here identifies anybody. The icon is drawn from the message id,
-// which is random per row — so the same person gets a different one every
-// time they speak, on purpose. An icon that stayed with a person would be a
-// pseudonym you could follow all evening, which is exactly what the board
-// has always refused to hand out (0031, 0033).
+// The icon is drawn from the author's secret name, so it stays with them for
+// the whole evening: Chef Persil is always the carrot. That is the point now —
+// you can see who said what and answer them (0037). It was deliberately the
+// opposite before, keyed to the message id so nobody could be followed; that
+// anonymity was given up knowingly, and real identities are still the game's
+// secret.
 const FOODS = ['🥕', '🍅', '🧄', '🧅', '🥦', '🍆', '🌽', '🥑', '🍋', '🍇', '🍒', '🧀', '🥐', '🍄', '🌶️', '🥬', '🍐', '🥝']
 
-function foodFor(id: string) {
+function foodFor(name: string) {
   let h = 0
-  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
   return FOODS[h % FOODS.length]
 }
 
@@ -122,7 +123,7 @@ function RollingPin({
   )
 }
 
-export function FridgeBoard({ roundId }: { roundId: string }) {
+export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinnerDay: boolean }) {
   const { t } = useTranslation()
   const { profile } = useAuth()
   const queryClient = useQueryClient()
@@ -150,7 +151,12 @@ export function FridgeBoard({ roundId }: { roundId: string }) {
       .catch(() => {})
   }, [roundId, board?.length, queryClient])
 
-  const phrases = templates?.filter((tpl) => tpl.category === 'BOARD') ?? []
+  // The roller swaps its contents on the day, it does not grow. "What a
+  // lovely day!" is not what anybody needs to say at 19:40 with a dish in the
+  // oven, and "I'm running 30 minutes late" means nothing the week before.
+  // Two sets, one at a time.
+  const phrases =
+    templates?.filter((tpl) => tpl.category === 'BOARD' && tpl.day_of === isDinnerDay) ?? []
 
   async function onPost(templateId: string) {
     setError(null)
@@ -185,9 +191,11 @@ export function FridgeBoard({ roundId }: { roundId: string }) {
           {board?.map((m) => (
             <div key={m.message_id} className={`chat-bubble chat-bubble--food${m.is_mine ? ' mine' : ''}`}>
               <span className="chat-bubble__food" aria-hidden="true">
-                {foodFor(m.message_id)}
+                {foodFor(m.author_name)}
               </span>
               <span className="chat-bubble__body">
+                {/* Your own name would be telling you something you know. */}
+                {!m.is_mine && <span className="chat-bubble__who">{m.author_name}</span>}
                 <span>{m.body}</span>
                 <span className="row chat-bubble__foot">
                   {m.reported ? (

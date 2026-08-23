@@ -132,6 +132,10 @@ export function CookViewPage() {
             {t('briefs.acknowledge')}
           </button>
         )}
+        {/* Two answers and no more. A row of variations made the choice look
+            like a personality quiz, when it is really one bit: can you cook
+            this or not. Whatever the problem actually is gets said in the
+            conversation underneath, where the sender can answer. */}
         {!cannotCookSent ? (
           <button type="button" className="secondary" onClick={onCannotCook}>
             {t('briefs.cannotCook')}

@@ -57,6 +57,13 @@
      read as a drawn object rather than a beige rectangle. */
   --pin-line: #252850;
 
+  /* The pass. The only envelope addressed to one person, so it wears the wax
+     red the rest of the table keeps for seals — a warm tint, not the full
+     accent, which would shout over the dinner it is supposed to serve. */
+  --pass-env: #f7ded9;
+  --pass-edge: #dda79c;
+  --pass-ink: #6b241d;
+
   --radius: 10px;
   --radius-paper: 4px;
   /* light only — tells the browser to paint its own chrome (scrollbars,

@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { Turnstile } from '../../components/Turnstile'
@@ -27,6 +28,7 @@ export function ResetPasswordPage() {
 
   return (
     <div className="stack sheet">
+      <LanguageSwitch />
       <h1>{t('auth.resetPassword')}</h1>
       {sent ? (
         <p>{t('auth.resetSent')}</p>

@@ -856,25 +856,81 @@
  * than printed empty — an "Address: —" row is worse than no row.
  * ------------------------------------------------------------------------- */
 
+/* Written like a menu, not tabulated like a spreadsheet. Two columns meant
+   the widest label set the gutter and every value was squeezed into what was
+   left — worst on a phone, where "Timezone" alone ate a third of the line.
+   Label above, value under it, full width for both. */
 .info {
-  display: grid;
-  grid-template-columns: auto 1fr;
-  gap: 4px 14px;
+  display: block;
   margin: 0;
   font-size: 14px;
 }
 
 .info dt {
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
-  align-self: center;
 }
 
-.info dd {
-  margin: 0;
+.info dt + dd {
+  margin: 1px 0 0;
   overflow-wrap: anywhere;
+}
+
+/* The gap belongs between entries, not inside them: the label has to read as
+   attached to the line under it and separate from the one above. */
+.info dd + dt {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--env-edge);
+}
+
+/* ---------------------------------------------------------------------------
+ * A short set of instructions. Numbered, with room to breathe — the same
+ * content as one dense paragraph is unreadable when what it describes is a
+ * sequence you have to carry out.
+ * ------------------------------------------------------------------------- */
+
+.howto__lead {
+  margin: 0 0 12px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.howto__steps {
+  margin: 0 0 14px;
+  padding-left: 22px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.howto__note {
+  margin: 0 0 8px;
+  padding-left: 12px;
+  border-left: 3px solid var(--border);
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.howto__note:last-child {
+  margin-bottom: 0;
+}
+
+.howto__note.is-good {
+  border-left-color: var(--ok);
+}
+
+.howto__note.is-warn {
+  border-left-color: var(--accent);
+}
+
+/* The course currently armed for replacement. */
+.menu-slot.is-swapping {
+  font-weight: 700;
+  color: var(--accent);
 }
 
 /* ---------------------------------------------------------------------------
@@ -1125,4 +1181,480 @@
   .pin__scroll {
     animation: none;
   }
+}
+
+/* ---------------------------------------------------------------------------
+ * The two conversations, in two cases. They look alike and are not alike: one
+ * is with the chef you write FOR, the other with the chef writing for you.
+ * Under two plain headings they blurred together.
+ * ------------------------------------------------------------------------- */
+
+.threadbox {
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+  box-shadow: var(--paper-shadow);
+  padding: 0 14px 14px;
+  overflow: hidden;
+}
+
+.threadbox + .threadbox {
+  margin-top: 18px;
+}
+
+.threadbox__lid {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 -14px 12px;
+  padding: 10px 14px;
+  background: var(--env);
+  border-bottom: 1px solid var(--env-edge);
+}
+
+.threadbox__who {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.threadbox__what {
+  margin-left: auto;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+ * How far the writing has got. "5 of 8" is the fact and the bar is the
+ * feeling; the host wants both, so they sit together.
+ * ------------------------------------------------------------------------- */
+
+.meter {
+  height: 8px;
+  border-radius: 4px;
+  background: rgba(46, 38, 34, 0.14);
+  overflow: hidden;
+}
+
+.meter__fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+  transition: width 0.4s ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .meter__fill {
+    transition: none;
+  }
+}
+
+/* Everyone's clock. Tabular figures so the last digit ticking doesn't shove
+   the rest of the line sideways once a second. */
+.countdown {
+  margin: 0;
+  font-size: 14px;
+}
+
+.countdown__clock {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+}
+
+.countdown.is-soon {
+  color: var(--accent);
+}
+
+.countdown.is-out {
+  color: var(--text-muted);
+}
+
+/* A note next to a setting saying whether it is still yours to change. */
+.fixed-note {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+ * Pro, said honestly. This block only ever appears beside switched-off
+ * controls, which is exactly where somebody starts wondering whether the free
+ * app is a demo — so the first thing it says is that it isn't.
+ * ------------------------------------------------------------------------- */
+
+.profree {
+  margin-top: 16px;
+  padding: 12px 14px;
+  border: 1px dashed var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+}
+
+.profree__head {
+  margin: 0 0 6px;
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.profree__free {
+  margin: 0 0 6px;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.profree__what {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Who said it, above what they said. Small, because the name is context and
+   the phrase is the content. */
+.chat-bubble__who {
+  font-size: 10.5px;
+  font-weight: 700;
+  opacity: 0.62;
+}
+
+/* A thing to look at, not a thing to do — so it is a line with a link, not a
+   button the width of the pass. */
+.pass__link {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  font-size: 13px;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.pass__link:hover,
+.pass__link:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Counting a show of hands. The host is holding the phone in one hand and
+ * pointing at the room with the other, so the targets are big and the number
+ * between them is the biggest thing on the row.
+ * ------------------------------------------------------------------------- */
+
+.tallysteps {
+  display: flex;
+  gap: 6px;
+  font-size: 11px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tallystep {
+  flex: 1;
+  padding: 6px 4px;
+  text-align: center;
+  border-radius: 3px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.tallystep.is-done {
+  color: var(--ok);
+}
+
+.tallystep.is-now {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
+}
+
+.tally__cook {
+  display: block;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.tally__counter {
+  flex: none;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tally__step {
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  font-size: 19px;
+  line-height: 1;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--bg-elevated);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.tally__step:hover,
+.tally__step:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.tally__n {
+  min-width: 30px;
+  text-align: center;
+  font-size: 18px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.tally__rank {
+  flex: none;
+  width: 22px;
+  font-family: 'Courier Prime', monospace;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.tally__points {
+  flex: none;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * A dish on the ballot. Name above, the two scores under it — four things on
+ * one line squeezed the dish name, which is the only part being judged.
+ * ------------------------------------------------------------------------- */
+
+.ballotrow {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ballotrow__head {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+}
+
+.ballotrow__rank {
+  flex: none;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-muted);
+}
+
+.ballotrow__dish {
+  min-width: 0;
+}
+
+.ballotrow__name {
+  font-size: 16px;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+.ballotrow__scores {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+@media (max-width: 400px) {
+  .ballotrow__scores {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Real icons in place of emoji: the envelope chip stops being a coloured
+   square with a glyph in it and becomes a slot the picture sits in.
+
+   No width/height here on purpose. They used to be 100%, which is correct
+   inside a fixed chip and catastrophic anywhere else — the icon simply grew
+   to whatever it was sitting in. The component sets its own size inline. */
+.icon {
+  display: block;
+  flex: none;
+  object-fit: contain;
+}
+
+.env__ico {
+  padding: 3px;
+  background: none;
+}
+
+/* A pip holding a picture needs no fill behind it — the icon is the mark. */
+.env__pip:has(.icon) {
+  padding: 0;
+  background: none;
+}
+
+.env__pip .icon {
+  width: 18px;
+  height: 18px;
+}
+
+/* ---------------------------------------------------------------------------
+ * The footer. Every screen sits on a tablecloth, so this is written on the
+ * hem: quiet, small, and out of the way of the dinner.
+ * ------------------------------------------------------------------------- */
+
+.app-foot {
+  margin-top: 40px;
+  padding: 18px 16px 26px;
+  border-top: 1px solid var(--border);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.app-foot__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  justify-content: center;
+  margin: 0;
+}
+
+.app-foot a {
+  color: inherit;
+}
+
+.app-foot a:hover,
+.app-foot a:focus-visible {
+  color: var(--accent);
+}
+
+.app-foot__credit {
+  margin: 8px 0 0;
+  opacity: 0.8;
+}
+
+/* ---------------------------------------------------------------------------
+ * The pass, as an envelope. Same object as every other drawer — laid on the
+ * cloth, opens — but it is the only one addressed to one person, so it takes
+ * the wax red the rest of the table keeps for seals. Colour, not shape: a
+ * different shape would make it a different kind of thing.
+ * ------------------------------------------------------------------------- */
+
+.env--pass {
+  display: block;
+  padding: 0;
+  background: var(--pass-env);
+  border-color: var(--pass-edge);
+}
+
+.env--pass::before,
+.env--pass::after {
+  content: none;
+}
+
+.env__face {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.env__face::-webkit-details-marker {
+  display: none;
+}
+
+.env--pass .env__name {
+  color: var(--pass-ink);
+}
+
+.env--pass .env__meta {
+  color: var(--pass-ink);
+  opacity: 0.75;
+}
+
+.env--pass .env__ico {
+  background: rgba(255, 255, 255, 0.55);
+}
+
+/* Knocks a few times when the evening is genuinely stuck on the host, then
+   stops. Something that never stops asking is something people learn to
+   ignore. */
+.env--pass.is-waiting {
+  border-color: var(--accent);
+  box-shadow: var(--env-shadow), 0 0 0 2px rgba(198, 32, 44, 0.18);
+}
+
+.env__pip--pass {
+  background: none;
+  padding: 0;
+}
+
+.env--pass .pass {
+  padding: 0 14px 14px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .env--pass.is-waiting {
+    animation: pass-knock 1.1s ease-in-out 3;
+  }
+}
+
+@keyframes pass-knock {
+  0%, 100% { transform: rotate(0.7deg) translateY(0); }
+  50% { transform: rotate(0.7deg) translateY(-3px); }
+}
+
+/* The allergy undertaking. Given weight because it is the one box on this
+   form where ticking without reading can hurt somebody other than you. */
+.signup__allergy {
+  align-items: flex-start;
+  gap: 10px;
+  padding: 12px 14px;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-elevated);
+  border-radius: 0 4px 4px 0;
+  font-size: 13px;
+  line-height: 1.55;
+}
+
+/* Language, on the pages that come before an account exists. The only switch
+   used to be in the profile — behind the sign-in form somebody might not be
+   able to read. */
+.langswitch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-end;
+  font-size: 12px;
+}
+
+.langswitch__label {
+  color: var(--text-muted);
+  margin-right: 2px;
+}
+
+.langswitch__opt {
+  width: auto;
+  padding: 3px 10px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.langswitch__opt.is-on {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-contrast);
+  font-weight: 700;
 }

@@ -24,10 +24,10 @@ export function Envelope({
   tilt = 1,
   children,
 }: {
-  icon: string
+  icon: ReactNode
   name: string
   meta?: string
-  badge?: number | string
+  badge?: ReactNode
   waitingFor?: string
   to?: string
   onOpen?: () => void

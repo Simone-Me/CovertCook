@@ -38,12 +38,19 @@ function RankedRow({
   const style = { transform: CSS.Transform.toString(transform), transition }
 
   return (
-    <div ref={setNodeRef} style={style} className="card row" {...attributes} {...listeners}>
-      <strong style={{ width: 24 }}>#{rank}</strong>
-      <div style={{ flex: 1 }}>
-        <div>{option.dish_name}</div>
-        <div className="muted">{t(`briefs.courseOption.${option.course}`)}</div>
+    // Dish above, scores below. Four things on one line meant the dish name —
+    // the only part you are actually judging — was squeezed between a rank and
+    // two dropdowns, and on a phone it wrapped to nothing.
+    <div ref={setNodeRef} style={style} className="card ballotrow" {...attributes} {...listeners}>
+      <div className="ballotrow__head">
+        <strong className="ballotrow__rank">#{rank}</strong>
+        <div className="ballotrow__dish">
+          <div className="ballotrow__name">{option.dish_name}</div>
+          <div className="muted">{t(`briefs.courseOption.${option.course}`)}</div>
+        </div>
       </div>
+
+      <div className="ballotrow__scores">
       <select
         aria-label={t('vote.originality')}
         value={originality ?? ''}
@@ -72,6 +79,7 @@ function RankedRow({
           </option>
         ))}
       </select>
+      </div>
     </div>
   )
 }

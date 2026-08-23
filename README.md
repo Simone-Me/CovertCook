@@ -110,6 +110,29 @@ question gets answered once instead of re-argued.
 
 ---
 
+## Security posture
+
+Checked, not assumed — the audit that produced this list is in `CHANGELOG.md`
+under 2026-08-24 (4).
+
+- **Row Level Security is on every table**, with no exceptions.
+- **Every `SECURITY DEFINER` function pins `search_path`**, which is what stops
+  a hijacked schema turning a privileged function into someone else's code.
+- **The service-role key never reaches the frontend.** It lives only in Edge
+  Function secrets; the browser gets the anon key, which is useless without a
+  policy that admits it.
+- **Secrets are not in the bundle.** `VITE_*` is compiled into the client and
+  is treated as public by definition — `.env.example` says so at the top.
+- **Security headers** ship in `public/_headers`: CSP without `unsafe-inline`
+  or `unsafe-eval` for scripts, `frame-ancestors 'none'`, HSTS, nosniff, a
+  referrer policy (join codes travel in query strings), and a Permissions
+  Policy denying hardware the app never uses.
+- **Captcha before sign-up and before joining**, verified server-side; the
+  Turnstile secret never leaves the Edge Function.
+- **Sensitive tables are unreachable except through RPCs.** `manual_tally` has
+  RLS on and no policies and no grants, so it can only be touched by the
+  `SECURITY DEFINER` functions that own it.
+
 ## Stack
 
 React 18 + TypeScript + Vite → Netlify (PWA, builds directly from Git —
@@ -357,14 +380,39 @@ Ordered roughly by how much the product misses them.
   creation form, both disabled, both v2.
 - **Dinner-day tools**: shopping list, printable buffet labels,
   offline-cache verification.
-- **Legal pages**, an in-app help layer, a first-run tour.
+- **An in-app help layer** and a first-run tour. (Terms and Privacy now exist
+  as drafts at `/legal/*`, accepted at sign-up — but they have not been read by
+  a lawyer, and they must be before any money changes hands.)
 - **Final allergen and app icons** — current ones are functional
   placeholders.
-- **A full security pass** (checklist + manual pen-test) and an automated
-  test suite — today's coverage is manual SQL smoke tests, re-run by hand.
-- **Nothing has been deployed.** Production is still on migration `0014`;
-  everything from `0015` on exists only locally. See "Deploying" above
-  before pushing.
+- **A manual pen-test** and an automated test suite — today's coverage is
+  manual SQL smoke tests, re-run by hand. A checklist pass was done on
+  2026-08-24: RLS is on every table, every `SECURITY DEFINER` function pins
+  its `search_path`, no secret reaches the bundle, security headers are now
+  served from `public/_headers`, and production dependencies audit clean. What
+  it did *not* cover is anything adversarial — nobody has actually tried to
+  break in.
+- **Production is broken, and this is why.** It is still on migration `0014`
+  while the client has been calling the `0018` signature of `create_round`
+  since then. PostgREST matches RPCs by argument name, so it reports
+  `Could not find the function public.create_round(p_access, …) in the schema
+  cache` — the function exists, under different argument names. Every RPC
+  added since `0015` is missing too; `create_round` is just the first one a
+  session hits. Nothing to fix in code: `0015` → `0039` need to go up. See
+  "Deploying" above, and note `0032` revokes a table grant and `0037` changes
+  the board's shape, so deploy in order and in one go.
+
+### The paid tier, in one line
+
+Nothing is built. The decision is: **free stays a whole product** — unlimited
+dinners, any number of guests, every feature that changes how the game is
+played. Pro sells flavour only (tables, themed evenings) as a per-dinner
+unlock bought by the host, so a table is never split into paying and
+non-paying players. Reasoning in [`ROADMAP.md`](./ROADMAP.md) §2.
+
+The line in practice: the kitchen-brigade pseudonym set shipped **free**,
+because a second word list changes nothing about how the game is played. Table
+themes are the paid side, because they are purely how the evening looks.
 
 ### Known simplifications (deliberate, not oversights)
 - Allergy/diet matching is exact-string, not semantic: a diet like

@@ -11,7 +11,6 @@ import { InlineConfirm } from '../../components/InlineConfirm'
 import {
   advancePhase,
   previousPhaseFor,
-  ROUND_PHASE_ORDER,
   updateRoundDetails,
   getExclusionPairs,
   addExclusionPair,
@@ -88,6 +87,14 @@ export function RoundSettingsPage() {
   const previousPhase = previousPhaseFor(round.status, round.voting_enabled)
   const canCancel = !['RESULTS', 'ARCHIVED', 'CANCELLED'].includes(round.status)
   const preAssignment = ['DRAFT', 'OPEN', 'LOCKED'].includes(round.status)
+  // "Classic" is not stored — it is what the creation form produces when the
+  // host changes nothing, so it is derived from the same four defaults rather
+  // than from a flag that could drift out of step with them.
+  const isClassic =
+    round.access === 'CODE' &&
+    round.anonymity === 'ANONYMOUS' &&
+    round.voting_mode === 'LIVE' &&
+    round.slot_mode === 'FREE'
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved) ?? []
   const activeApprovedCount = activeMembers.length
   const memberName = (id: string) => activeMembers.find((m) => m.id === id)?.secret_name ?? id
@@ -194,8 +201,26 @@ export function RoundSettingsPage() {
       {/* Mirrors the panel on the round page. Filling the table is a thing
           a host comes back to, and they don't always come back the same
           way — so it lives in both places they'd look. */}
-      <Fold title={t('rounds.settings.filling')} defaultOpen>
+      <Fold title={t('rounds.settings.filling')} defaultOpen={round.status === 'OPEN'}>
         <div className="card stack">
+        {/* The code is only a way in while join_round will accept it, which is
+            only in OPEN. Showing it at every other phase invited the host to
+            hand out something that would be refused, and then to wonder why.
+            What replaces it is the actual route: reopen sign-ups first. */}
+        {round.status !== 'OPEN' ? (
+          <div className="howto">
+            <p className="howto__lead">{t('rounds.lateJoin.short')}</p>
+            <ol className="howto__steps">
+              {(t('rounds.lateJoin.steps', { returnObjects: true }) as string[]).map((step) => (
+                <li key={step}>{step}</li>
+              ))}
+            </ol>
+            <p className="howto__note is-good">{t('rounds.lateJoin.keeps')}</p>
+            <p className="howto__note">{t('rounds.lateJoin.pauses')}</p>
+            <p className="howto__note is-warn">{t('rounds.lateJoin.changes')}</p>
+          </div>
+        ) : (
+        <>
         <label>{t('rounds.shareLink')}</label>
         <div className="row">
           <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
@@ -211,9 +236,82 @@ export function RoundSettingsPage() {
             {t('actions.copy')}
           </button>
         </div>
-        {ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED') && (
-          <p className="muted">{t('rounds.lateJoinerWarning')}</p>
+        </>
         )}
+        </div>
+      </Fold>
+
+      {/* What kind of dinner this is, in one place. The choices were made once
+          in the creation form and then never shown again, so a host coming
+          back weeks later had no way to remember whether they had turned
+          voting off, or whether they were the one approving people — and no
+          way to tell which of it is still changeable. */}
+      <Fold title={t('rounds.settings.overview')} hint={t('rounds.settings.overviewHelp')}>
+        <div className="card">
+          <dl className="info">
+            <dt>{t('rounds.settings.setupKind')}</dt>
+            <dd>{isClassic ? t('rounds.setup.classic') : t('rounds.setup.custom')}</dd>
+
+            <dt>{t('rounds.access.label')}</dt>
+            <dd>
+              {t(`rounds.access.${round.access}`)}
+              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
+            </dd>
+
+            <dt>{t('rounds.anonymity.label')}</dt>
+            <dd>
+              {t(`rounds.anonymity.${round.anonymity}`)}
+              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
+            </dd>
+
+            <dt>{t('rounds.voting.label')}</dt>
+            <dd>
+              {t(`rounds.voting.${round.voting_mode}`)}
+              {round.voting_mode === 'DISABLED' && (
+                <span className="fixed-note">{t('rounds.settings.votingNeverOn')}</span>
+              )}
+            </dd>
+
+            <dt>{t('rounds.slotMode.label')}</dt>
+            <dd>
+              {t(`rounds.slotMode.${round.slot_mode}`)}
+              <span className="fixed-note">
+                {preAssignment ? t('rounds.settings.changeableNow') : t('rounds.settings.fixedNow')}
+              </span>
+            </dd>
+
+            <dt>{t('rounds.requiresApproval')}</dt>
+            <dd>{round.requires_approval ? t('rounds.settings.yes') : t('rounds.settings.no')}</dd>
+
+            <dt>{t('rounds.maxPlayers')}</dt>
+            <dd>{round.max_players ?? t('rounds.settings.noLimit')}</dd>
+
+            <dt>{t('rounds.nameTheme.label')}</dt>
+            <dd>
+              {t(`rounds.nameTheme.${round.name_theme}`)}
+              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
+            </dd>
+
+            {/* The one thing here that is genuinely for sale, and it is a
+                look — said next to everything that isn't, so the difference
+                is visible rather than asserted. */}
+            <dt>{t('rounds.settings.themes')}</dt>
+            <dd>
+              {t('rounds.comingSoon')} · {t('pro.badge')}
+              <span className="fixed-note">{t('rounds.settings.themesSoon')}</span>
+            </dd>
+
+            <dt>{t('rounds.settings.dinerInfo')}</dt>
+            <dd>{detailsLocked ? t('rounds.settings.fixedNow') : t('rounds.settings.changeableNow')}</dd>
+          </dl>
+
+          {/* Pro is flavour, never access. Saying so where the switched-off
+              options live is the only place a host would ask the question. */}
+          <div className="profree">
+            <p className="profree__head">{t('pro.title')}</p>
+            <p className="profree__free">{t('pro.freeForever')}</p>
+            <p className="profree__what">{t('pro.what')}</p>
+          </div>
         </div>
       </Fold>
 

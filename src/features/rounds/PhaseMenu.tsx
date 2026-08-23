@@ -76,7 +76,14 @@ export function PhaseMenu({
                 <InlineConfirm
                   title={t('rounds.settings.stepBackTo', { phase: t(`rounds.phase.${previousPhase}`) })}
                   busy={stepping}
-                  onConfirm={onStepBack}
+                  onConfirm={() => {
+                    // Close first. The component is not unmounted by the phase
+                    // change, so leaving this open left the card showing a
+                    // fresh offer to step back AGAIN — which read as though
+                    // the first one had not worked.
+                    setOffering(false)
+                    onStepBack()
+                  }}
                   onCancel={() => setOffering(false)}
                 >
                   {/* What actually changes, per destination. Written from the

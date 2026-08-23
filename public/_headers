@@ -1,0 +1,42 @@
+# Security headers, served by Netlify on every response.
+#
+# There were none at all before this file: no CSP, no clickjacking defence, no
+# MIME-sniffing defence, no referrer policy. Each line below closes a specific,
+# well-known class of attack rather than being copied in for completeness.
+
+/*
+  # Clickjacking. The app has no reason to be framed by anybody, and being
+  # framed is how a login form gets overlaid with an invisible one.
+  X-Frame-Options: DENY
+
+  # MIME sniffing. Stops a browser deciding that an uploaded file is really a
+  # script because its first bytes look like one.
+  X-Content-Type-Options: nosniff
+
+  # Referrer. Join links carry a round code in the query string, so a full
+  # referrer would hand that code to every third-party host a page touches.
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # HSTS. A year, subdomains included. Only safe once HTTPS works everywhere,
+  # which it does on Netlify.
+  Strict-Transport-Security: max-age=31536000; includeSubDomains
+
+  # Hardware this app never uses. Denying them means a compromised dependency
+  # cannot quietly ask for them either.
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+
+  # Content Security Policy — the one that actually stops injected script.
+  #
+  #   script-src   self plus Cloudflare Turnstile, which is the captcha. No
+  #                'unsafe-inline' and no 'unsafe-eval': Vite emits real files.
+  #   connect-src  Supabase over https and wss (realtime), and Turnstile.
+  #   frame-src    Turnstile renders its challenge in an iframe.
+  #   style-src    'unsafe-inline' is unavoidable while React sets style props
+  #                as attributes; scripts stay locked down, which is what
+  #                matters.
+  #   img-src      data: and blob: for the share-sheet and generated assets.
+  #   object-src   nothing. <object> and <embed> have no use here and are a
+  #                classic bypass.
+  #   frame-ancestors  the modern X-Frame-Options, kept alongside it for
+  #                older browsers.
+  Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'

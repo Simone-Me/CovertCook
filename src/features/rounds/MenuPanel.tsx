@@ -2,7 +2,18 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
-import { addCourse, getMenuStatus, removeCourse, setSlotMode, type Course, type SlotMode } from '../../lib/rpc'
+import {
+  addCourse,
+  changeCourse,
+  clearAssignment,
+  BRIEFS_EXIST,
+  COURSE_IN_USE,
+  getMenuStatus,
+  removeCourse,
+  setSlotMode,
+  type Course,
+  type SlotMode,
+} from '../../lib/rpc'
 import { HostAction } from './HostAction'
 
 const COURSES: Course[] = ['STARTER', 'MAIN', 'DESSERT', 'DRINK', 'OTHER']
@@ -18,6 +29,17 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [newCourse, setNewCourse] = useState<Course>('MAIN')
+  // Which course the picker below is about to replace. Null means the picker
+  // adds a new one — same control, two jobs, and the turning arrow is what
+  // says which job it is doing.
+  const [swapping, setSwapping] = useState<string | null>(null)
+  // A change the roulette refused. Held so the offer below can carry it out
+  // for real instead of only apologising.
+  const [blocked, setBlocked] = useState<{ slotId: string; course: Course } | null>(null)
+  // The last door, and the only destructive one in the app: clearing the
+  // roulette when recipes already exist takes those recipes and their private
+  // messages with it. Held separately so it can be asked for on its own.
+  const [discardAsk, setDiscardAsk] = useState<{ slotId: string; course: Course } | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   const { data: slots } = useQuery({
@@ -47,13 +69,44 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
   // wrong here can be said in words. Before this, deleting a course the
   // roulette had already assigned surfaced the raw foreign-key constraint
   // name, and everything else became "something went wrong".
-  async function run(fn: () => Promise<unknown>) {
+  async function run(fn: () => Promise<unknown>, onBlocked?: () => void) {
     setError(null)
     try {
       await fn()
       refresh()
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''
+      if (raw === COURSE_IN_USE && onBlocked) onBlocked()
+      const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
+      setError(known || raw || t('errors.generic'))
+    }
+  }
+
+  // The way through a COURSE_IN_USE: the course is frozen because the
+  // roulette has already dealt it, so undo the roulette and deal again. Safe
+  // because clear_assignment refuses once anybody has written (0037) — this
+  // can only ever throw away a shuffle.
+  async function forceChange(discardBriefs = false) {
+    const target = discardBriefs ? discardAsk : blocked
+    if (!target) return
+    const { slotId, course } = target
+    setBlocked(null)
+    setDiscardAsk(null)
+    setError(null)
+    try {
+      await clearAssignment(roundId, discardBriefs)
+      await changeCourse(roundId, slotId, course)
+      setSwapping(null)
+      refresh()
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : ''
+      // Recipes are already written. Not a refusal to work around silently —
+      // the next offer says exactly what it would cost.
+      if (raw === BRIEFS_EXIST) {
+        setDiscardAsk({ slotId, course })
+        setError(t('rounds.menu.errors.BRIEFS_EXIST'))
+        return
+      }
       const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
       setError(known || raw || t('errors.generic'))
     }
@@ -68,7 +121,70 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
       title={t('rounds.menu.title')}
       waiting={slotMode === 'CATEGORIES' && !balanced}
     >
-      {error && <div className="error">{error}</div>}
+      {/* An error with no way out is a dead end: the arrow stayed armed, the
+          message stayed on screen, and the only escape was leaving the page.
+          The OK clears both the message and the half-made swap. */}
+      {error && (
+        <div className="error stack">
+          <span>{error}</span>
+          {discardAsk ? (
+            <>
+              <span className="muted">{t('rounds.menu.discardWarning')}</span>
+              <div className="row">
+                <button
+                  type="button"
+                  className="confirmbox__ok"
+                  onClick={() => forceChange(true)}
+                >
+                  {t('rounds.menu.discardConfirm')}
+                </button>
+                <button
+                  type="button"
+                  className="confirmbox__cancel"
+                  onClick={() => {
+                    setError(null)
+                    setDiscardAsk(null)
+                    setSwapping(null)
+                  }}
+                >
+                  {t('actions.no')}
+                </button>
+              </div>
+            </>
+          ) : blocked ? (
+            <>
+              <span className="muted">{t('rounds.menu.clearToChange')}</span>
+              <div className="row">
+                <button type="button" className="confirmbox__ok" onClick={() => forceChange(false)}>
+                  {t('actions.ok')}
+                </button>
+                <button
+                  type="button"
+                  className="confirmbox__cancel"
+                  onClick={() => {
+                    setError(null)
+                    setBlocked(null)
+                    setSwapping(null)
+                  }}
+                >
+                  {t('actions.no')}
+                </button>
+              </div>
+            </>
+          ) : (
+            <button
+              type="button"
+              className="confirmbox__ok"
+              onClick={() => {
+                setError(null)
+                setSwapping(null)
+              }}
+            >
+              {t('actions.ok')}
+            </button>
+          )}
+        </div>
+      )}
 
       <label className="row">
         <input
@@ -107,15 +223,34 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
           <div className="stack">
             {slots?.map((slot) => (
               <div key={slot.id} className="row" style={{ justifyContent: 'space-between' }}>
-                <span>{t(`briefs.courseOption.${slot.course}`)}</span>
-                <button
-                  type="button"
-                  className="chef-remove"
-                  aria-label={t('actions.remove')}
-                  onClick={() => run(() => removeCourse(roundId, slot.id))}
-                >
-                  🍌
-                </button>
+                <span className={swapping === slot.id ? 'menu-slot is-swapping' : 'menu-slot'}>
+                  {t(`briefs.courseOption.${slot.course}`)}
+                </span>
+                <span className="row">
+                  {/* Same gesture as the status arrow: it turns, and it only
+                      arms the picker below — the button down there is what
+                      acts. Removing and re-adding left the menu one course
+                      short of the table in between, which is the exact state
+                      the roulette refuses on. */}
+                  <button
+                    type="button"
+                    className={`menucard__turn${swapping === slot.id ? ' is-open' : ''}`}
+                    aria-pressed={swapping === slot.id}
+                    title={t('rounds.menu.swap')}
+                    aria-label={t('rounds.menu.swap')}
+                    onClick={() => setSwapping((cur) => (cur === slot.id ? null : slot.id))}
+                  >
+                    ↺
+                  </button>
+                  <button
+                    type="button"
+                    className="chef-remove"
+                    aria-label={t('actions.remove')}
+                    onClick={() => run(() => removeCourse(roundId, slot.id))}
+                  >
+                    🍌
+                  </button>
+                </span>
               </div>
             ))}
           </div>
@@ -130,9 +265,24 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
             </select>
             <button
               type="button"
-              onClick={() => run(() => addCourse(roundId, newCourse))}
+              onClick={() =>
+                run(async () => {
+                  if (swapping) {
+                    const slotId = swapping
+                    await run(
+                      async () => {
+                        await changeCourse(roundId, slotId, newCourse)
+                        setSwapping(null)
+                      },
+                      () => setBlocked({ slotId, course: newCourse }),
+                    )
+                  } else {
+                    await addCourse(roundId, newCourse)
+                  }
+                })
+              }
             >
-              {t('actions.add')}
+              {swapping ? t('rounds.menu.change') : t('actions.add')}
             </button>
           </div>
         </>

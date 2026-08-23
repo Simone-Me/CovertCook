@@ -8,6 +8,7 @@ import {
   type RoundAnonymity,
   type SlotMode,
   type VotingMode,
+  type NameTheme,
 } from '../../lib/rpc'
 
 // Classic is the whole product with nothing to decide: a covered dinner,
@@ -34,6 +35,7 @@ export function CreateRoundPage() {
 
   const [name, setName] = useState('')
   const [custom, setCustom] = useState(false)
+  const [nameTheme, setNameTheme] = useState<NameTheme>('FOOD')
   const [access, setAccess] = useState<RoundAccess>(CLASSIC.access)
   const [anonymity, setAnonymity] = useState<RoundAnonymity>(CLASSIC.anonymity)
   const [requiresApproval, setRequiresApproval] = useState(CLASSIC.requiresApproval)
@@ -52,7 +54,7 @@ export function CreateRoundPage() {
       const roundId = await createRound({
         name,
         ...(custom
-          ? { access, anonymity, slotMode, votingMode, requiresApproval }
+          ? { access, anonymity, slotMode, votingMode, requiresApproval, nameTheme }
           : CLASSIC),
         maxPlayers: limitPlayers ? maxPlayers : null,
       })
@@ -132,7 +134,10 @@ export function CreateRoundPage() {
               <p className="muted">{t(`rounds.anonymity.${anonymity}Hint`)}</p>
             </Fold>
 
-            <Fold title={t('rounds.voting.label')} aside={t(`rounds.voting.${votingMode}`)}>
+            <Fold
+              title={t('rounds.voting.label')}
+              aside={votingMode === 'MANUAL' ? t('vote.MANUAL') : t(`rounds.voting.${votingMode}`)}
+            >
               <select
                 aria-label={t('rounds.voting.label')}
                 value={votingMode}
@@ -140,13 +145,14 @@ export function CreateRoundPage() {
               >
                 <option value="LIVE">{t('rounds.voting.LIVE')}</option>
                 <option value="TIMED">{t('rounds.voting.TIMED')}</option>
+                <option value="MANUAL">{t('vote.MANUAL')}</option>
                 <option value="DISABLED">{t('rounds.voting.DISABLED')}</option>
               </select>
               {/* The one setting with no way back: advance_phase refuses to
                   enter VOTING at all on a DISABLED round, on purpose. Saying
                   so here is cheaper than a support question later. */}
               <p className={votingMode === 'DISABLED' ? 'error' : 'muted'}>
-                {t(`rounds.voting.${votingMode}Hint`)}
+                {votingMode === 'MANUAL' ? t('vote.MANUALHint') : t(`rounds.voting.${votingMode}Hint`)}
               </p>
             </Fold>
 
@@ -161,19 +167,33 @@ export function CreateRoundPage() {
               </select>
             </Fold>
 
-            {/* Shown so the shape of the product is legible, disabled because
-                neither is built — see PRESENTATION.md, both are v2. */}
-            <Fold title={t('rounds.nameTheme.label')} aside={t('rounds.comingSoon')}>
-              <select aria-label={t('rounds.nameTheme.label')} disabled value="FOOD" onChange={() => {}}>
+            {/* Live, and free: a second word list costs nothing to ship and
+                changes nothing about how the game is played. What stays paid
+                is the *look* of an evening, not the words in it. */}
+            <Fold title={t('rounds.nameTheme.label')} aside={t(`rounds.nameTheme.${nameTheme}`)}>
+              <select
+                aria-label={t('rounds.nameTheme.label')}
+                value={nameTheme}
+                onChange={(e) => setNameTheme(e.target.value as NameTheme)}
+              >
                 <option value="FOOD">{t('rounds.nameTheme.FOOD')}</option>
+                <option value="BRIGADE">{t('rounds.nameTheme.BRIGADE')}</option>
               </select>
+              <p className="muted">{t(`rounds.nameTheme.${nameTheme}Hint`)}</p>
             </Fold>
 
-            <Fold title={t('rounds.recipesPerBrief.label')} aside={t('rounds.comingSoon')}>
+            <Fold title={t('rounds.recipesPerBrief.label')} aside={t('pro.badge')}>
               <select aria-label={t('rounds.recipesPerBrief.label')} disabled value="1" onChange={() => {}}>
                 <option value="1">{t('rounds.recipesPerBrief.one')}</option>
               </select>
+              <p className="muted">{t('rounds.comingSoon')}</p>
             </Fold>
+
+            <div className="profree">
+              <p className="profree__head">{t('pro.title')}</p>
+              <p className="profree__free">{t('pro.freeForever')}</p>
+              <p className="profree__what">{t('pro.what')}</p>
+            </div>
 
             <label className="row">
               <input

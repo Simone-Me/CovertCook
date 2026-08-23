@@ -12,12 +12,16 @@ export type RoundAccess = 'CODE' | 'INVITE'
 
 // What members know about each other once seated. SPY sits between the
 // other two: the host sees real names, nobody else does.
+// The two pseudonym sets a dinner can draw from (0038). FOOD is herbs and
+// spices; BRIGADE is the kitchen's own stations — saucier, pâtissier, aboyeur.
+export type NameTheme = 'FOOD' | 'BRIGADE'
+
 export type RoundAnonymity = 'ANONYMOUS' | 'SPY' | 'OPEN'
 
 // Not whether voting happens, but how. LIVE = the host opens it during
 // dinner and publishes results when ready; TIMED = a deadline publishes
 // them itself; DISABLED = no voting, and that choice is final.
-export type VotingMode = 'LIVE' | 'TIMED' | 'DISABLED'
+export type VotingMode = 'LIVE' | 'TIMED' | 'DISABLED' | 'MANUAL'
 export type SlotMode = 'FREE' | 'CATEGORIES'
 export type RoundStatus =
   | 'DRAFT' | 'OPEN' | 'LOCKED' | 'ASSIGNED' | 'BRIEFS_CLOSED'
@@ -63,6 +67,7 @@ export async function createRound(input: {
   allowMutualPairs?: boolean
   requiresApproval?: boolean
   votingMode?: VotingMode
+  nameTheme?: NameTheme
 }) {
   const res = await supabase.rpc('create_round', {
     p_name: input.name,
@@ -76,6 +81,7 @@ export async function createRound(input: {
     p_allow_mutual_pairs: input.allowMutualPairs ?? false,
     p_requires_approval: input.requiresApproval ?? true,
     p_voting_mode: input.votingMode ?? 'LIVE',
+    p_name_theme: input.nameTheme ?? 'FOOD',
   })
   return unwrap<string>(res) // round id
 }
@@ -134,20 +140,50 @@ export const ROUND_PHASE_ORDER: RoundStatus[] = [
   'DRAFT', 'OPEN', 'LOCKED', 'ASSIGNED', 'BRIEFS_CLOSED', 'DINNER', 'VOTING', 'RESULTS', 'ARCHIVED',
 ]
 
+// BRIEFS_CLOSED is gone from the journey (0035): a recipe reaches its cook the
+// moment it is submitted, so a phase whose only job was "everyone has finished
+// writing" was making the whole table wait for the slowest writer and then for
+// the host to notice. The enum value survives in Postgres so rounds already
+// parked there keep working; it is simply never somewhere new rounds are sent,
+// and advance_phase steps over it in both directions.
+const SKIPPED_PHASES: RoundStatus[] = ['BRIEFS_CLOSED']
+
 export function visiblePhaseOrder(votingEnabled: boolean): RoundStatus[] {
-  return votingEnabled ? ROUND_PHASE_ORDER : ROUND_PHASE_ORDER.filter((p) => p !== 'VOTING')
+  return ROUND_PHASE_ORDER.filter(
+    (p) => !SKIPPED_PHASES.includes(p) && (votingEnabled || p !== 'VOTING'),
+  )
+}
+
+// A round already parked in a skipped phase is not on the visible list, so
+// indexOf would say -1 and strand it. Fall back to its position in the full
+// order and pick the nearest visible neighbour in the direction asked for.
+function neighbourPhase(
+  status: RoundStatus,
+  votingEnabled: boolean,
+  direction: 1 | -1,
+): RoundStatus | null {
+  const order = visiblePhaseOrder(votingEnabled)
+  const idx = order.indexOf(status)
+  if (idx >= 0) {
+    const next = idx + direction
+    return next >= 0 && next < order.length ? order[next] : null
+  }
+
+  const full = ROUND_PHASE_ORDER.indexOf(status)
+  if (full < 0) return null
+  return (
+    (direction === 1
+      ? order.find((p) => ROUND_PHASE_ORDER.indexOf(p) > full)
+      : [...order].reverse().find((p) => ROUND_PHASE_ORDER.indexOf(p) < full)) ?? null
+  )
 }
 
 export function nextPhaseFor(status: RoundStatus, votingEnabled: boolean): RoundStatus | null {
-  const order = visiblePhaseOrder(votingEnabled)
-  const idx = order.indexOf(status)
-  return idx >= 0 && idx < order.length - 1 ? order[idx + 1] : null
+  return neighbourPhase(status, votingEnabled, 1)
 }
 
 export function previousPhaseFor(status: RoundStatus, votingEnabled: boolean): RoundStatus | null {
-  const order = visiblePhaseOrder(votingEnabled)
-  const idx = order.indexOf(status)
-  return idx > 0 ? order[idx - 1] : null
+  return neighbourPhase(status, votingEnabled, -1)
 }
 
 export async function joinRound(input: { code: string; turnstileTicket: string }) {
@@ -398,12 +434,15 @@ export interface MessageTemplate {
   locale: string
   body: string
   slot_type: MessageSlotType
+  // Only offered on the day itself (0037). "I'm running 30 minutes late" is
+  // useless in the week before and would only lengthen the roller.
+  day_of: boolean
 }
 
 export async function getMessageTemplates(locale: string) {
   const { data, error } = await supabase
     .from('message_templates')
-    .select('id,category,locale,body,slot_type')
+    .select('id,category,locale,body,slot_type,day_of')
     .eq('locale', locale)
     .eq('active', true)
   if (error) throw new Error(error.message)
@@ -674,7 +713,31 @@ export const RESULTS_NOT_READY = 'RESULTS_NOT_READY'
 
 // Fixed choices, not a free datetime: this is decided at a table with a
 // glass in hand. null clears the deadline.
-export type DeadlineMinutes = 5 | 10 | 60 | 180 | 1440
+// Hours, not minutes. A vote that closes in five minutes is a vote nobody
+// who stepped out to the kitchen gets to cast, and the deadline is only worth
+// setting at all when it spans the part of the evening people are not looking
+// at their phones.
+export type DeadlineMinutes = 60 | 180 | 720 | 1440 | 2880
+
+// Raised when a live deadline already exists. A deadline is a promise, so the
+// first one sticks — clearing it is allowed, moving it is not (0043).
+export const DEADLINE_ALREADY_SET = 'DEADLINE_ALREADY_SET'
+
+// The style of the vote is decided when it is opened, not at creation — the
+// host naming a dinner three weeks out has no idea yet whether everyone will
+// be round a table with phones away (0043).
+export async function setVotingMode(roundId: string, mode: VotingMode) {
+  const res = await supabase.rpc('set_voting_mode', { p_round_id: roundId, p_mode: mode })
+  return unwrap(res)
+}
+
+// Does nothing unless everyone has actually voted, which is why anybody in the
+// round may call it: the last person to vote should not have to find the host
+// to end a vote that is already over.
+export async function closeVotingIfComplete(roundId: string) {
+  const res = await supabase.rpc('close_voting_if_complete', { p_round_id: roundId })
+  return unwrap<boolean>(res)
+}
 
 export async function setVotingDeadline(roundId: string, minutes: DeadlineMinutes | null) {
   const res = await supabase.rpc('set_voting_deadline', { p_round_id: roundId, p_minutes: minutes })
@@ -717,6 +780,97 @@ export async function skipVoting(roundId: string) {
 // round existed and never again; it is now changeable until the table locks,
 // because CATEGORIES only needs to be settled before briefs are written.
 // ---------------------------------------------------------------------------
+
+// Swapping one course for another in a single statement. The delete-then-add
+// version left the menu one course short of the table between the two calls —
+// exactly the condition generate_assignment refuses on (0036).
+export async function changeCourse(roundId: string, slotId: string, course: Course) {
+  const res = await supabase.rpc('change_course', {
+    p_round_id: roundId,
+    p_slot_id: slotId,
+    p_course: course,
+  })
+  return unwrap(res)
+}
+
+// Raised by clear_assignment when somebody has already written. The roulette
+// is a shuffle and a shuffle can be redone; a brief is work and is not thrown
+// away by a button (0037).
+export const BRIEFS_EXIST = 'BRIEFS_EXIST'
+
+// Returns how many briefs it discarded, so the caller can tell the host what
+// it cost. Without discardBriefs it raises BRIEFS_EXIST instead of deleting
+// anything (0041).
+export async function clearAssignment(roundId: string, discardBriefs = false) {
+  const res = await supabase.rpc('clear_assignment', {
+    p_round_id: roundId,
+    p_discard_briefs: discardBriefs,
+  })
+  return unwrap<number>(res)
+}
+
+// ---------------------------------------------------------------------------
+// Counting hands (0040 / 0041). Three passes — thirds, then seconds, then
+// firsts — each recording how many hands went up for a dish, never whose.
+// Points follow the places: 3rd = 1, 2nd = 2, 1st = 3, and the totals land in
+// the same `results` table the online vote fills, so every screen after this
+// is unchanged.
+// ---------------------------------------------------------------------------
+
+// Host-only, and only on a MANUAL round. The online ballot withholds who
+// cooked what because that vote is blind; a show of hands is not — everyone
+// watched that person carry the dish in (0042).
+export interface ManualMenuRow {
+  brief_id: string
+  dish_name: string
+  course: Course
+  cook_name: string
+}
+
+export async function getManualMenu(roundId: string) {
+  const res = await supabase.rpc('get_manual_menu', { p_round_id: roundId })
+  return unwrap<ManualMenuRow[]>(res)
+}
+
+export interface ManualTallyRow {
+  brief_id: string
+  place: number
+  voters: number
+}
+
+// A dish cannot get more hands than there are hands in the room, and one place
+// cannot be handed out more times than there are people — everybody has
+// exactly one third place to give. Both are typos rather than opinions (0045).
+export const TOO_MANY_FOR_DISH = 'TOO_MANY_FOR_DISH'
+export const TOO_MANY_FOR_PLACE = 'TOO_MANY_FOR_PLACE'
+export const VOTES_ALREADY_CAST = 'VOTES_ALREADY_CAST'
+
+// Asked, not derived from the member count: somebody who turned up without
+// cooking still ate, and still gets a say.
+export async function setManualVoters(roundId: string, voters: number | null) {
+  const res = await supabase.rpc('set_manual_voters', { p_round_id: roundId, p_voters: voters })
+  return unwrap(res)
+}
+
+export async function getManualTally(roundId: string) {
+  const res = await supabase.rpc('get_manual_tally', { p_round_id: roundId })
+  return unwrap<ManualTallyRow[]>(res)
+}
+
+export async function setManualTally(roundId: string, briefId: string, place: number, voters: number) {
+  const res = await supabase.rpc('set_manual_tally', {
+    p_round_id: roundId,
+    p_brief_id: briefId,
+    p_place: place,
+    p_voters: voters,
+  })
+  return unwrap(res)
+}
+
+export async function closeManualVote(roundId: string) {
+  const res = await supabase.rpc('close_manual_vote', { p_round_id: roundId })
+  return unwrap(res)
+}
 
 export const MENU_LOCKED = 'MENU_LOCKED'
 
@@ -765,6 +919,11 @@ export async function removeCourse(roundId: string, slotId: string) {
 export interface BoardMessage {
   message_id: string
   body: string
+  // The author's secret name (0037). A deliberate reversal of the board's
+  // original unattributability: you can see who said what and pick the
+  // conversation up later, at the cost of a pseudonym being followable
+  // across an evening. Real identities are still the game's secret.
+  author_name: string
   is_mine: boolean
   reported: boolean
 }

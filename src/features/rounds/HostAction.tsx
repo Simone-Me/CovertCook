@@ -1,5 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import type { ReactNode } from 'react'
+import type { RoundStatus } from '../../lib/rpc'
+import { Icon } from '../../components/Icon'
 
 // Everything the Executive Chef is being *asked* to do lives above the
 // envelopes, because burying the round's next move inside a drawer made the
@@ -32,15 +34,44 @@ export function HostAction({
 // the counter a real kitchen calls orders across, where everything goes
 // through one person.
 //
-// Several separate panels each explaining themselves in a paragraph filled
-// the screen before the dinner appeared, and long explanations stacked
-// vertically are read by nobody. Here the sections are short, and anything
-// that needs a paragraph is a `note` you open rather than a wall you scroll.
-export function HostPass({ waiting, children }: { waiting: boolean; children: ReactNode }) {
+// Drawn as an envelope like every other drawer, because it IS one: a thing
+// laid on the cloth that opens. What sets it apart is colour, not shape — it
+// is the only envelope addressed to one person, so it takes the wax red the
+// rest of the table only uses for seals. A different shape would have made it
+// a different kind of object; a different colour makes it the same object with
+// a different job.
+//
+// The meta line changes with the phase, because "what the pass is for" is a
+// different sentence at every stage and a fixed subtitle would be wrong at
+// most of them.
+export function HostPass({
+  status,
+  waiting,
+  children,
+}: {
+  status: RoundStatus
+  waiting: boolean
+  children: ReactNode
+}) {
   const { t } = useTranslation()
   return (
-    <details className={`paper action-fold${waiting ? ' action-fold--waiting' : ''}`} open={waiting}>
-      <summary>{t('rounds.pass.title')}</summary>
+    <details className={`env env--pass tilt-2${waiting ? ' is-waiting' : ''}`} open={waiting}>
+      <summary className="env__face">
+        <span className="env__ico" aria-hidden="true">
+          <Icon name="pass" size={26} />
+        </span>
+        <span className="env__txt">
+          <span className="env__name">{t('rounds.pass.title')}</span>
+          <span className="env__meta">{t(`rounds.pass.phase.${status}`)}</span>
+        </span>
+        {/* Only when the evening is actually stuck on them. A mark that is
+            always there is a mark nobody looks at. */}
+        {waiting && (
+          <span className="env__pip env__pip--pass" aria-label={t('rounds.pass.needsYou')}>
+            <Icon name="chefWrote" size={18} />
+          </span>
+        )}
+      </summary>
       <div className="stack pass">{children}</div>
     </details>
   )

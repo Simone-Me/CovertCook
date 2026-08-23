@@ -17,7 +17,9 @@
     "approve": "Approve",
     "reject": "Reject",
     "add": "Add",
-    "remove": "Remove"
+    "remove": "Remove",
+    "ok": "OK",
+    "no": "No, leave it"
   },
   "auth": {
     "signIn": "Sign in",
@@ -31,7 +33,25 @@
     "noAccount": "Don't have an account?",
     "hasAccount": "Already have an account?",
     "signOut": "Sign out",
-    "staleSession": "This session belongs to an account that no longer exists. Sign out and create the account again."
+    "staleSession": "This session belongs to an account that no longer exists. Sign out and create the account again.",
+    "confirm": {
+      "title": "Confirm your email",
+      "sentTo": "We sent a confirmation link to {{email}}. Open it and you are in.",
+      "nothingLead": "Nothing arrived?",
+      "steps": [
+        "Give it a minute — mail is rarely instant.",
+        "Check the address above is the one you meant to use.",
+        "Search your mailbox for \"CovertCook\" rather than scrolling."
+      ],
+      "spam": "Look in spam or junk. CovertCook is a new sender, and new senders land there more often than not — marking the mail as \"not spam\" once fixes it for good.",
+      "resend": "Send it again",
+      "wait": "You can resend in",
+      "sentAgain": "Sent. Check the same mailbox, spam included."
+    },
+    "acceptTerms": "I have read and accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>.",
+    "mustAcceptTerms": "You have to accept the terms and the privacy policy to create an account.",
+    "acceptAllergies": "I understand that CovertCook holds the allergies and diets I enter, that this is health data, and I agree to it being shown to the people in my dinners so they can cook for me safely. I will read the dietary panel before writing a recipe for somebody, and I will not send a dish I know they cannot safely eat.",
+    "mustAcceptAllergies": "This one is not optional: a dinner where nobody reads the allergies is genuinely dangerous."
   },
   "dietary": {
     "title": "Your dietary restrictions",
@@ -92,7 +112,10 @@
     },
     "nameTheme": {
       "label": "Pseudonym theme",
-      "FOOD": "Herbs & spices"
+      "FOOD": "Herbs & spices",
+      "FOODHint": "Chef Basil, Chef Saffron, Chef Clove.",
+      "BRIGADE": "Kitchen brigade",
+      "BRIGADEHint": "Chef Saucier, Chef Pâtissier, Chef Aboyeur — the 24 real stations of a kitchen."
     },
     "recipesPerBrief": {
       "label": "Recipes per chef",
@@ -128,8 +151,8 @@
     "phase": {
       "DRAFT": "Draft",
       "OPEN": "Registration open",
-      "LOCKED": "Locked",
-      "ASSIGNED": "Assigned",
+      "LOCKED": "Assignment",
+      "ASSIGNED": "Preparation",
       "BRIEFS_CLOSED": "Briefs closed",
       "DINNER": "Dinner day",
       "VOTING": "Voting",
@@ -145,7 +168,9 @@
       "ready": "Assignment generated — ready to move to \"Assigned\".",
       "needed": "Generate the assignment below before you can move to \"Assigned\".",
       "waitingForHost": "Waiting for the Executive Chef to spin the roulette.",
-      "explain": "Everyone is signed up and the table is locked. Spin the roulette to pair each chef with the one they will cook for."
+      "explain": "Everyone is signed up and the table is locked. Spin the roulette to pair each chef with the one they will cook for.",
+      "clear": "Clear the assignment",
+      "clearBlocked": "Recipes have already been written, so the assignment cannot be cleared. Their work would go with it."
     },
     "settings": {
       "title": "Round settings",
@@ -180,7 +205,19 @@
         "DINNER": "Voting closes. Ballots already cast are kept, and voting picks up where it left off if you move forward again.",
         "VOTING": "The results go back to provisional and are recalculated when you move forward. Every ballot is kept."
       },
-      "stepBackNothingLost": "Nothing is deleted by stepping back — only what people are allowed to do right now changes."
+      "stepBackNothingLost": "Nothing is deleted by stepping back — only what people are allowed to do right now changes.",
+      "overview": "This dinner at a glance",
+      "overviewHelp": "What was chosen when the dinner was created, and what can still be changed.",
+      "setupKind": "Setup",
+      "fixedAtCreation": "chosen at creation, fixed",
+      "fixedNow": "no longer changeable",
+      "changeableNow": "changeable now",
+      "votingNeverOn": "cannot be turned on later",
+      "yes": "Yes",
+      "no": "No",
+      "noLimit": "No limit",
+      "themes": "Table theme",
+      "themesSoon": "Christmas, midsummer, and others to come. Pro — the look of the evening only; nothing about how the game is played."
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
@@ -257,7 +294,8 @@
     },
     "actions": {
       "fillTable": "Fill the table",
-      "voting": "The vote"
+      "voting": "The vote",
+      "writing": "Recipes"
     },
     "menu": {
       "title": "Compose the menu",
@@ -270,14 +308,49 @@
       "locked": "The menu can no longer change: the chefs are already writing for the courses they were given.",
       "errors": {
         "MENU_LOCKED": "The menu is set — the chefs already have their courses. Re-roll the roulette to change it.",
-        "COURSE_IN_USE": "Somebody is already cooking that course."
-      }
+        "COURSE_IN_USE": "Somebody is already cooking that course.",
+        "BRIEFS_EXIST": "Recipes have already been written for this assignment."
+      },
+      "swap": "Replace this course",
+      "change": "Change",
+      "clearToChange": "To change it, the roulette has to be cleared and spun again. Nobody has written yet, so nothing is lost.",
+      "discardWarning": "Changing the menu now means dealing the roulette again, and there is no way to do that without throwing away every recipe already written and every private message sent about them. This cannot be undone.",
+      "discardConfirm": "Delete the recipes and change the menu"
     },
     "pass": {
       "title": "The pass",
-      "nothing": "Nothing needs you right now."
+      "nothing": "Nothing needs you right now.",
+      "whatIsIt": "What the pass is",
+      "explain": "The pass is the counter a kitchen calls orders across — everything goes through one person. Yours works the same way: it only ever shows what the dinner is waiting on you for right now, and it opens by itself when the evening is stuck on you. Nothing else lives here, so an empty pass means there is nothing to do.",
+      "needsYou": "The dinner is waiting on you",
+      "phase": {
+        "DRAFT": "Open the door when you are ready",
+        "OPEN": "Share the code, fill the table",
+        "LOCKED": "Compose the menu, then spin the roulette",
+        "ASSIGNED": "Watch the recipes come in",
+        "BRIEFS_CLOSED": "Everything is written",
+        "DINNER": "Open the vote when the plates are down",
+        "VOTING": "Close it when the table has finished",
+        "RESULTS": "Announce the result",
+        "ARCHIVED": "Nothing left to do",
+        "CANCELLED": "This dinner was called off"
+      }
     },
-    "lateJoinerShort": "Adding someone now changes two chefs' partners."
+    "lateJoinerShort": "Adding someone now changes two chefs' partners.",
+    "briefProgress": "{{done}} of {{total}} recipes written",
+    "lateJoin": {
+      "title": "Adding somebody now",
+      "short": "Sign-ups are closed, so the code will be refused. Here is the way in.",
+      "steps": [
+        "Step the dinner back to \"Registration open\".",
+        "Let the new chef join with the code.",
+        "Move the dinner forward again.",
+        "On the chain page, use \"Add to the chain\" to fit them in."
+      ],
+      "keeps": "Nothing is deleted. Every recipe already written and every message already sent is kept, and comes back the moment sign-ups close again.",
+      "pauses": "While the door is open, chefs cannot write or read recipes. That resumes as soon as you move forward.",
+      "changes": "Two things do change: if you chose specific courses, their number has to match the new number of chefs — and fitting the newcomer into the chain means one chef ends up cooking a different recipe than the one they had."
+    }
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",
@@ -310,9 +383,9 @@
     "addTag": "Add",
     "tagsConfirmed": "I've reviewed the dietary panel above and confirmed the tags I've checked are accurate.",
     "noBriefYet": "No recipe to show yet.",
-    "cannotCook": "I can't cook this after all",
-    "cannotCookSent": "Sent — the Executive Chef has been notified.",
-    "acknowledge": "I can cook this",
+    "cannotCook": "I have a problem",
+    "cannotCookSent": "The chef who wrote it has been told. Explain below — they can help, or send something else.",
+    "acknowledge": "Yes, chef!",
     "acknowledged": "You confirmed you can cook this.",
     "mode": {
       "quick": "Quick",
@@ -375,7 +448,53 @@
     "published": "The results are out.",
     "hostOnly": "You are the only one who can see these. Announce them when you are ready.",
     "waitingPublish": "The Executive Chef has the results and has not announced them yet.",
-    "change": "Change my vote"
+    "change": "Change my vote",
+    "timeLeft": "Voting closes in",
+    "closing": "Voting is closing…",
+    "points": "pts",
+    "MANUAL": "By show of hands",
+    "MANUALHint": "No phones. You read the dishes out at the table, count the hands, and enter the totals. The app does the arithmetic and shows the winner.",
+    "manual": {
+      "title": "Counting the hands",
+      "chosen": "This dinner votes by show of hands.",
+      "open": "Count the hands",
+      "progress": "Which pass you are on",
+      "howLead": "Three rounds of hands. Suggested order: last place first.",
+      "howSteps": [
+        "Before anything: everyone decides their own top three, silently. Deciding while the hands go up is how a table ends up voting for whatever the loudest person liked.",
+        "One hand per round, and never the same dish twice — you have one third place, one second and one first.",
+        "Not your own dish either. You know which one it is; everybody else is guessing.",
+        "Read the dishes out, ask who put each one in third place, count the hands and enter them. Then second, then first.",
+        "The app adds it up: third = 1 point, second = 2, first = 3."
+      ],
+      "place": {
+        "1": "First",
+        "2": "Second",
+        "3": "Third"
+      },
+      "askFor": "Hands for {{place}} place — {{points}} point(s) each",
+      "more": "One more hand",
+      "fewer": "One fewer hand",
+      "result": "Result",
+      "finalTitle": "Final standings",
+      "share": "Share the result",
+      "shareTitle": "Results — {{name}}",
+      "close": "Close the vote and publish",
+      "closeWhy": "This writes these totals in as the dinner’s results and moves it on. The counts can no longer be changed.",
+      "handsCounted": "{{count}} hands",
+      "howMany": "How many people are voting?",
+      "howManyHint": "Count everyone at the table, not just the chefs — somebody who turned up without cooking still ate, and still gets a say.",
+      "tooManyForDish": "That is more hands than there are people. There are {{n}} voting.",
+      "tooManyForPlace": "That place has been given out {{n}} times already — everybody has exactly one to give.",
+      "atTheTable": "Counted at the table — raise your hand when the Executive Chef asks"
+    },
+    "style": "How this vote runs",
+    "deadlineSet": "Closes at {{time}}. A deadline is a promise, so it stays put.",
+    "deadlineClear": "Remove the deadline",
+    "turnout": "{{voted}} of {{eligible}} have voted ({{percent}}%)",
+    "allVoted": "Everybody has voted. Closing the vote…",
+    "deadlineSetAlready": "This vote already has a closing time, and it does not move. Remove it first if it has to change.",
+    "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else."
   },
   "results": {
     "title": "Results",
@@ -404,7 +523,8 @@
     "applySwap": "Apply swap",
     "spliceTitle": "Add a late joiner into the chain",
     "applySplice": "Splice in",
-    "spliceConfirm": "Every sender has already submitted; splicing replaces one already-cooked dish. Continue?"
+    "spliceConfirm": "Every sender has already submitted; splicing replaces one already-cooked dish. Continue?",
+    "open": "See who cooks for whom"
   },
   "alerts": {
     "title": "Executive Chef alerts",
@@ -445,6 +565,139 @@
     "yourChef": "Your Chef",
     "yourChefHelp": "Your two private conversations: the chef you write for, and the chef who writes for you.",
     "toYourCook": "With the chef you write for",
-    "toYourSender": "With the chef who writes for you"
+    "toYourSender": "With the chef who writes for you",
+    "myRecipe": "My recipe",
+    "recipeReceived": "Recipe received"
+  },
+  "pro": {
+    "badge": "Pro",
+    "title": "About Pro",
+    "freeForever": "The whole app stays free. Every dinner, every number of guests, every feature that changes how the game is played — the point is that everyone can do everything.",
+    "what": "Pro only sells flavour: better-looking tables, themed evenings (a Christmas one, a midsummer one), and — an idea still being worked out — letting a host share what they have bought with the guests at their table."
+  },
+  "legal": {
+    "terms": "Terms",
+    "privacy": "Privacy",
+    "contact": "Contact",
+    "iconsBy": "Icons by",
+    "soon": "This page is not written yet. It has to exist before CovertCook takes any money — see ROADMAP.md.",
+    "company": "Company",
+    "updated": "Last updated",
+    "termsDoc": {
+      "title": "Terms of use",
+      "updated": "2026-08-24",
+      "sections": [
+        {
+          "heading": "Who you are agreeing with",
+          "body": [
+            "CovertCook is operated by Opus35 (opus35.fr). Writing to contact@opus35.fr reaches a person.",
+            "Using the app means accepting what is written here. If you do not accept it, do not use the app — there is no version of this where you are bound by something you never saw."
+          ]
+        },
+        {
+          "heading": "What the app is for",
+          "body": [
+            "CovertCook organises a dinner where each guest secretly writes a recipe for another guest to cook. That is the whole product. It is not a marketplace, it handles no payments between guests, and it does not deliver food.",
+            "You need an account, and you must be old enough to hold one where you live — 15 in France, 16 in much of the EU, 13 in the UK and the US."
+          ]
+        },
+        {
+          "heading": "What you agree not to do",
+          "body": [
+            "Do not use CovertCook to harass anybody, to send anything unlawful, or to get around the anonymity the game is built on. Trying to work out who wrote for whom before the reveal spoils the only thing the app is protecting.",
+            "Do not write a recipe you know somebody at that table cannot safely eat. The dietary panel exists so this is knowable; ignoring it is the one thing here that can actually hurt somebody.",
+            "The Executive Chef of a dinner can remove anybody from it. We can suspend an account used to harm people, and we will say why."
+          ]
+        },
+        {
+          "heading": "Your content",
+          "body": [
+            "Your recipes, messages and dinner names stay yours. You give us only what is needed to run the app: storing them, showing them to the people in your dinner, and backing them up.",
+            "Delete your account and that content goes with it, except where removing it would break a dinner somebody else organised. What remains is then stripped of anything identifying you."
+          ]
+        },
+        {
+          "heading": "Free, and paid",
+          "body": [
+            "Every part of the game is free and stays free: unlimited dinners, any number of guests, every feature that changes how the game is played.",
+            "A paid tier is planned for appearance only — tablecloths, themed evenings. Nothing is on sale yet. When it is, EU VAT rules and a statutory right of withdrawal apply, and these terms will say exactly how before anything is charged."
+          ]
+        },
+        {
+          "heading": "No promises we cannot keep",
+          "body": [
+            "The app is provided as it is. We do not promise it will be available at a particular moment, that a dinner will go well, or that nobody will guess who wrote their recipe.",
+            "We are liable for what the law makes us liable for and no less — but not for a burnt dish, a guest who does not turn up, or an evening that did not go the way you hoped."
+          ]
+        },
+        {
+          "heading": "Changes, and the law that applies",
+          "body": [
+            "If these terms change in a way that matters, the app will say so rather than updating a date quietly.",
+            "French law applies. If you are a consumer this does not remove the protections of the law where you live, and you keep the right to bring a dispute before the courts there."
+          ]
+        }
+      ]
+    },
+    "privacyDoc": {
+      "title": "Privacy",
+      "updated": "2026-08-24",
+      "sections": [
+        {
+          "heading": "Who holds your data",
+          "body": [
+            "Opus35 (opus35.fr) is the data controller. contact@opus35.fr reaches a person, and questions about your data are answered there."
+          ]
+        },
+        {
+          "heading": "What is collected, and why",
+          "body": [
+            "Your email address and password, to have an account at all. The password is never visible to us — it is hashed by our authentication provider.",
+            "A display name, which is what people who invite you see.",
+            "Your dietary restrictions, so that a dinner does not serve you something you cannot eat.",
+            "What you write in the app: recipes, the canned messages you send, the phrases you post to the fridge, and how you voted.",
+            "Nothing is collected for advertising. There is no advertising, no tracking across other sites, and no analytics profile of you."
+          ]
+        },
+        {
+          "heading": "Health data, said plainly",
+          "body": [
+            "A severe allergy is health data. Under Article 9 of the GDPR that is a special category, and it is the most sensitive thing this app holds.",
+            "We ask for it because a dinner where nobody knows is genuinely dangerous, and we process it on the basis of your explicit consent — you type it in yourself, and you can remove it at any time from your profile.",
+            "It is shown to the people in your dinners as a list of restrictions with no name attached, so a cook knows what to avoid without knowing whose allergy it is."
+          ]
+        },
+        {
+          "heading": "Who else touches it",
+          "body": [
+            "Supabase hosts the database and the accounts. Netlify serves the app. Cloudflare Turnstile checks that a sign-up comes from a person, and sees only what it needs to answer that. Resend sends email.",
+            "Each is a processor acting on our instructions. Nothing is sold, and nothing is shared with anybody not needed to make the app work."
+          ]
+        },
+        {
+          "heading": "How long it is kept",
+          "body": [
+            "Your account and its content are kept while the account exists.",
+            "Fridge messages are deleted after 24 hours — they are small talk for one evening and worth nothing after it.",
+            "Delete your account and the rest goes with it, except where removing it would break a dinner somebody else organised; what stays is stripped of anything identifying you."
+          ]
+        },
+        {
+          "heading": "What you can ask for",
+          "body": [
+            "Access to what we hold, correction of what is wrong, deletion, a copy in a portable form, and the right to object to processing or withdraw consent. For the dietary data, withdrawing consent means deleting it, which you can do yourself.",
+            "Write to contact@opus35.fr. If the answer does not satisfy you, you can complain to the CNIL in France, or to your own country's data protection authority."
+          ]
+        },
+        {
+          "heading": "Cookies",
+          "body": [
+            "CovertCook stores a session token so you stay signed in, and your language choice. Both are necessary for the app to work, neither follows you anywhere, and there are no advertising or analytics cookies."
+          ]
+        }
+      ]
+    },
+    "draftNote": "A draft, written from what the app actually does. It has not been reviewed by a lawyer, and it must be before CovertCook charges anybody — the dietary panel holds health data, and selling anything brings EU VAT and a right of withdrawal with it.",
+    "by": "by"
   }
 }

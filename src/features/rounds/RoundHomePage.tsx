@@ -8,10 +8,12 @@ import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { Envelope } from './Envelope'
 import { CutleryLink } from '../../components/CutleryLink'
+import { Icon } from '../../components/Icon'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
 import { MenuPanel } from './MenuPanel'
+import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import {
   advancePhase,
@@ -21,28 +23,34 @@ import {
   REMOVE_REQUIRES_CONFIRMATION,
   assignmentExists,
   generateAssignment,
+  clearAssignment,
+  BRIEFS_EXIST,
   nextPhaseFor,
   getDietaryPanel,
   getPendingMembers,
   getBoardUnread,
+  getRoundProgress,
   getMyBriefDraft,
   getUnreadCount,
   getVoteProgress,
   inviteMember,
   publishResults,
   setVotingDeadline,
+  setVotingMode,
+  closeVotingIfComplete,
+  DEADLINE_ALREADY_SET,
   skipVoting,
   type DeadlineMinutes,
   NO_SUCH_CHEF,
   ROUND_PHASE_ORDER,
   type RemovalMode,
+  type VotingMode,
 } from '../../lib/rpc'
 
 type OpenDrawer = 'chefs' | 'allergies' | 'info' | null
 
-// The two marks the Messages envelope can carry, in rank order.
-const CHEF_MARK = '🧑‍🍳'
-const FRIDGE_MARK = '🧊'
+// The two marks the Messages envelope can carry, in rank order — see
+// messageMark below for which wins.
 
 export function RoundHomePage() {
   const { t } = useTranslation()
@@ -99,6 +107,16 @@ export function RoundHomePage() {
     refetchInterval: 10000,
   })
 
+  // How far the table has got with its recipes. Back after the "1 / 3" on the
+  // My recipe envelope was replaced by a glyph: the tally was the wrong thing
+  // on a personal drawer, but it is exactly the right thing on the pass.
+  const { data: progress } = useQuery({
+    queryKey: ['rounds', roundId, 'progress'],
+    enabled: !!roundId && !!round && round.status === 'ASSIGNED',
+    queryFn: () => getRoundProgress(roundId as string),
+    refetchInterval: 30000,
+  })
+
   // The fridge half of the Messages mark. Chef outranks fridge, so this is
   // only ever consulted when no chef is waiting — see messageMark below.
   const { data: boardUnread } = useQuery({
@@ -106,6 +124,21 @@ export function RoundHomePage() {
     enabled: !!roundId && !!round && ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED'),
     queryFn: () => getBoardUnread(roundId as string),
     refetchInterval: 30000,
+  })
+
+  // Ends a vote that is already over. Runs for everyone in the round, not the
+  // host alone, and the RPC does nothing unless every eligible member has
+  // actually voted — so the last person to vote does not have to go and find
+  // the host to stop the waiting (0043).
+  useQuery({
+    queryKey: ['rounds', roundId, 'vote-autoclose'],
+    enabled: !!roundId && !!round && round.status === 'VOTING' && round.voting_mode !== 'MANUAL',
+    queryFn: async () => {
+      const closed = await closeVotingIfComplete(roundId as string)
+      if (closed) await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
+      return closed
+    },
+    refetchInterval: 15000,
   })
 
   // Source for the Messaggi badge. Only once there is a chain to talk
@@ -160,7 +193,12 @@ export function RoundHomePage() {
   // personally always outranks the table being cheerful in the fridge — the
   // chef stays even when new fridge lines land on top of it. Only when
   // nobody has written to you does the fridge get the envelope.
-  const messageMark = unread && unread > 0 ? CHEF_MARK : boardUnread && boardUnread > 0 ? FRIDGE_MARK : undefined
+  const messageMark =
+    unread && unread > 0 ? (
+      <Icon name="chefWrote" size={18} />
+    ) : boardUnread && boardUnread > 0 ? (
+      <Icon name="fridge" size={18} />
+    ) : undefined
 
   // Three states, one glyph each: nothing written, saved but still yours,
   // gone to the cook. A draft counts as started only if something is
@@ -181,7 +219,11 @@ export function RoundHomePage() {
   // One reason per envelope for why it can't be opened yet, so a dimmed
   // drawer explains itself instead of just being unavailable.
   const waitBrief = !assigned ? t('rounds.waiting.assignment') : undefined
-  const waitRecipe = phaseIdx < ROUND_PHASE_ORDER.indexOf('BRIEFS_CLOSED') ? t('rounds.waiting.briefs') : undefined
+  // A recipe now lands the moment its author submits it (0035), so the drawer
+  // opens as soon as the roulette has run. Waiting for BRIEFS_CLOSED here was
+  // the last place still holding recipes back a whole phase — the server had
+  // already stopped doing it.
+  const waitRecipe = !assigned ? t('rounds.waiting.assignment') : undefined
   const waitVote =
     phaseIdx < ROUND_PHASE_ORDER.indexOf('VOTING') ? t('rounds.waiting.vote') : undefined
 
@@ -210,6 +252,25 @@ export function RoundHomePage() {
       queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
+    }
+  }
+
+  // Undo for the roulette. Re-roll refuses once anyone has written, which is
+  // right, but it left a host who wanted different courses stuck: the menu is
+  // frozen while any pairing uses a course, so there was a button saying no
+  // and none saying undo (0037).
+  async function onClearAssignment() {
+    if (!roundId) return
+    setError(null)
+    setGenerating(true)
+    try {
+      await clearAssignment(roundId)
+      await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : ''
+      setError(raw === BRIEFS_EXIST ? t('rounds.assignment.clearBlocked') : raw || t('errors.generic'))
+    } finally {
+      setGenerating(false)
     }
   }
 
@@ -244,6 +305,18 @@ export function RoundHomePage() {
     try {
       await setVotingDeadline(roundId, value ? (Number(value) as DeadlineMinutes) : null)
       queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : ''
+      setError(raw === DEADLINE_ALREADY_SET ? t('vote.deadlineSetAlready') : raw || t('errors.generic'))
+    }
+  }
+
+  async function onVotingMode(mode: VotingMode) {
+    if (!roundId) return
+    setError(null)
+    try {
+      await setVotingMode(roundId, mode)
+      await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
     }
@@ -347,15 +420,28 @@ export function RoundHomePage() {
 
         {error && <div className="error">{error}</div>}
 
+        {/* Everyone's clock, not the host's. A deadline only the Executive
+            Chef could see was timing people out of a vote they had no reason
+            to think was closing. */}
+        {round.status === 'VOTING' && round.voting_closes_at && (
+          <div className="paper">
+            <VoteCountdown closesAt={round.voting_closes_at} />
+          </div>
+        )}
+
         {/* One pass, not a column of panels. Everything the Executive Chef
             is asked to do goes through here, and what shows depends on where
             the evening is — the same way a real pass only carries the orders
             that are up right now. It opens by itself when the round is
             actually blocked on them. */}
         {isHost && (
-          <HostPass waiting={passWaiting}>
+          <HostPass status={round.status} waiting={passWaiting}>
 
-        {(round.status === 'DRAFT' || round.status === 'OPEN') && (
+        {/* Not in DRAFT: a code handed out before the door is open produces
+            people knocking at a dinner that does not accept them yet
+            (join_round requires OPEN). The pass offers it the moment sign-ups
+            actually start, and stops offering it the moment they close. */}
+        {round.status === 'OPEN' && (
           <div className="stack">
             <span className="pass__section-title">{t('rounds.actions.fillTable')}</span>
             <label>{t('rounds.shareLink')}</label>
@@ -388,46 +474,188 @@ export function RoundHomePage() {
           </div>
         )}
 
-        {/* Adding someone after the roulette has run isn't forbidden, just
-            expensive — the chain is opened at one point to fit them in.
-            One line, with the rest folded behind it. */}
+        {/* Second in the pass, and only a line: it is a thing to look at, not
+            a thing to do, so it should not carry the weight of a button the
+            width of the card. */}
         {assigned && (
-          <PassNote short={t('rounds.lateJoinerShort')} long={t('rounds.lateJoinerWarning')} />
+          <Link to={`/rounds/${roundId}/chain`} className="pass__link">
+            <Icon name="chain" size={22} />
+            <span>
+              <strong>{t('chain.title')}</strong> — {t('chain.open')}
+            </span>
+          </Link>
         )}
 
-        {(round.status === 'DRAFT' || round.status === 'OPEN') && roundId && (
+        {/* Once the roulette has run the only question left is how many
+            recipes are in. A bar, because "5 of 8" is a fact and "62%" is a
+            feeling, and the host wants both. */}
+        {round.status === 'ASSIGNED' && progress && (
+          <div className="stack">
+            <span className="pass__section-title">{t('rounds.actions.writing')}</span>
+            <div
+              className="meter"
+              role="progressbar"
+              aria-valuemin={0}
+              aria-valuemax={progress.total_players}
+              aria-valuenow={progress.briefs_submitted}
+            >
+              <span
+                className="meter__fill"
+                style={{
+                  width: `${progress.total_players ? (progress.briefs_submitted / progress.total_players) * 100 : 0}%`,
+                }}
+              />
+            </div>
+            <p className="muted" style={{ margin: 0 }}>
+              {t('rounds.briefProgress', {
+                done: progress.briefs_submitted,
+                total: progress.total_players,
+              })}
+            </p>
+          </div>
+        )}
+
+        {/* What this thing is, said once, on the only screen where the host
+            has nothing else to do yet. Repeating "sign-ups are closed" at
+            every later phase was telling them something they already knew
+            about a door they had shut themselves — that guidance moved to
+            settings, where somebody actually goes looking for it. */}
+        {round.status === 'DRAFT' && (
+          <div className="stack">
+            <span className="pass__section-title">{t('rounds.pass.whatIsIt')}</span>
+            <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
+          </div>
+        )}
+
+        {/* Courses are decided once the table is final, not while it is still
+            filling: the number of slots has to equal the number of chefs, and
+            that number is only settled at LOCKED. Left in OPEN it was a sum
+            that changed under the host every time somebody joined. */}
+        {round.status === 'LOCKED' && roundId && (
           <MenuPanel roundId={roundId} slotMode={round.slot_mode} />
         )}
 
-        {(round.status === 'DINNER' || round.status === 'VOTING') && round.voting_mode !== 'DISABLED' && (
+        {/* A hand-counted dinner has no deadline, no progress count and no
+            ballots to wait for — it has a person with a phone and a room. So
+            the whole online apparatus is replaced by one line and one way in. */}
+        {(round.status === 'DINNER' || round.status === 'VOTING') && round.voting_mode === 'MANUAL' && (
           <div className="stack">
             <span className="pass__section-title">{t('rounds.actions.voting')}</span>
+            <PassNote short={t('vote.manual.chosen')} long={t('vote.MANUALHint')} />
+            {round.status === 'DINNER' ? (
+              <button type="button" onClick={onOpenVoting}>
+                {t('vote.openNow')}
+              </button>
+            ) : (
+              <Link to={`/rounds/${roundId}/tally`}>
+                <button type="button">{t('vote.manual.open')}</button>
+              </Link>
+            )}
+          </div>
+        )}
+
+        {(round.status === 'DINNER' || round.status === 'VOTING') &&
+          round.voting_mode !== 'DISABLED' &&
+          round.voting_mode !== 'MANUAL' && (
+          <div className="stack">
+            <span className="pass__section-title">{t('rounds.actions.voting')}</span>
+
+            {/* Chosen here rather than at creation. Three weeks before a
+                dinner nobody knows whether the eight of them will be round a
+                table with phones away or scattered home afterwards. */}
+            {round.status === 'DINNER' && (
+              <div>
+                <label htmlFor="vote-style">{t('vote.style')}</label>
+                <select
+                  id="vote-style"
+                  value={round.voting_mode}
+                  onChange={(e) => onVotingMode(e.target.value as VotingMode)}
+                >
+                  <option value="LIVE">{t('rounds.voting.LIVE')}</option>
+                  <option value="TIMED">{t('rounds.voting.TIMED')}</option>
+                  <option value="MANUAL">{t('vote.MANUAL')}</option>
+                </select>
+                <p className="muted">{t(`rounds.voting.${round.voting_mode}Hint`)}</p>
+              </div>
+            )}
+
             {round.status === 'DINNER' && (
               <button type="button" onClick={onOpenVoting}>
                 {t('vote.openNow')}
               </button>
             )}
 
-            {/* How many have finished, never who and never what. The count
-                is the only thing that helps decide when to close. */}
+            {/* How many have finished, never who and never what. A share as
+                well as a count, because "5 of 8" and "62%" answer different
+                questions and the host is asking both. */}
             {round.status === 'VOTING' && voteProgress && (
-              <p className="muted" style={{ margin: 0 }}>
-                {t('vote.progress', { voted: voteProgress.voted, eligible: voteProgress.eligible })}
-              </p>
+              <div className="stack">
+                <div
+                  className="meter"
+                  role="progressbar"
+                  aria-valuemin={0}
+                  aria-valuemax={voteProgress.eligible}
+                  aria-valuenow={voteProgress.voted}
+                >
+                  <span
+                    className="meter__fill"
+                    style={{
+                      width: `${voteProgress.eligible ? (voteProgress.voted / voteProgress.eligible) * 100 : 0}%`,
+                    }}
+                  />
+                </div>
+                <p className="muted" style={{ margin: 0 }}>
+                  {t('vote.turnout', {
+                    voted: voteProgress.voted,
+                    eligible: voteProgress.eligible,
+                    percent: voteProgress.eligible
+                      ? Math.round((voteProgress.voted / voteProgress.eligible) * 100)
+                      : 0,
+                  })}
+                </p>
+              </div>
             )}
 
-            {round.status === 'VOTING' && (
-              <div>
-                <label htmlFor="deadline">{t('vote.deadline')}</label>
-                <select id="deadline" defaultValue="" onChange={(e) => onDeadline(e.target.value)}>
-                  <option value="">{t('vote.noDeadline')}</option>
-                  <option value="5">5 min</option>
-                  <option value="10">10 min</option>
-                  <option value="60">1 h</option>
-                  <option value="180">3 h</option>
-                  <option value="1440">24 h</option>
-                </select>
-              </div>
+            {/* TIMED only. LIVE means the Executive Chef reads the room and
+                closes it themselves — offering a countdown there was the two
+                modes doing the same thing, which made choosing between them
+                pointless. Set once: replacing a live deadline would move a
+                closing time while people were deciding whether they had time
+                to think. */}
+            {round.status === 'VOTING' && round.voting_mode === 'LIVE' && (
+              <p className="muted" style={{ margin: 0 }}>{t('vote.liveNoDeadline')}</p>
+            )}
+
+            {round.status === 'VOTING' && round.voting_mode === 'TIMED' && (
+              round.voting_closes_at && new Date(round.voting_closes_at) > new Date() ? (
+                <div className="stack">
+                  <p className="muted" style={{ margin: 0 }}>
+                    {t('vote.deadlineSet', {
+                      time: new Date(round.voting_closes_at).toLocaleTimeString(profile?.locale ?? 'en', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: false,
+                        timeZone: round.timezone,
+                      }),
+                    })}
+                  </p>
+                  <button type="button" className="secondary" onClick={() => onDeadline('')}>
+                    {t('vote.deadlineClear')}
+                  </button>
+                </div>
+              ) : (
+                <div>
+                  <label htmlFor="deadline">{t('vote.deadline')}</label>
+                  <select id="deadline" defaultValue="" onChange={(e) => onDeadline(e.target.value)}>
+                    <option value="">{t('vote.noDeadline')}</option>
+                    <option value="60">1 h</option>
+                    <option value="180">3 h</option>
+                    <option value="720">12 h</option>
+                    <option value="1440">24 h</option>
+                    <option value="2880">48 h</option>
+                  </select>
+                </div>
+              )
             )}
 
             <button type="button" className="secondary" onClick={onSkipVoting}>
@@ -476,6 +704,14 @@ export function RoundHomePage() {
               {hasAssignment ? t('rounds.assignment.reroll') : t('rounds.assignment.generate')}
             </button>
             )}
+
+            {/* Only while there is something to undo, and only worth offering
+                because clearing is what unfreezes the menu. */}
+            {hasAssignment && !rerollAsk && (
+              <button type="button" className="secondary" onClick={onClearAssignment} disabled={generating}>
+                {t('rounds.assignment.clear')}
+              </button>
+            )}
           </div>
         )}
 
@@ -498,7 +734,7 @@ export function RoundHomePage() {
 
         {/* ---- Chefs: the roster, and where the host runs the door ---- */}
         <Envelope
-          icon="👨‍🍳"
+          icon={<Icon name="chefs" />}
           name={t('rounds.drawers.chefs')}
           meta={t('rounds.seatCount', { count: activeApprovedCount })}
           badge={isHost && pendingCount > 0 ? pendingCount : undefined}
@@ -573,16 +809,14 @@ export function RoundHomePage() {
 
 
 
-              {isHost && assigned && (
-                <Link to={`/rounds/${roundId}/chain`}>{t('chain.title')}</Link>
-              )}
+
             </div>
           )}
         </Envelope>
 
         {/* ---- The two heavy screens: these take over rather than expand ---- */}
         <Envelope
-          icon="📝"
+          icon={<Icon name="myRecipe" />}
           name={t('rounds.drawers.myRecipe')}
           meta={assigned ? t(`briefs.state.${briefState}`) : undefined}
           waitingFor={waitBrief}
@@ -591,7 +825,7 @@ export function RoundHomePage() {
         />
 
         <Envelope
-          icon="◈"
+          icon={<Icon name="received" />}
           name={t('rounds.drawers.received')}
           meta={t('rounds.drawers.receivedMeta')}
           waitingFor={waitRecipe}
@@ -600,7 +834,7 @@ export function RoundHomePage() {
         />
 
         <Envelope
-          icon="✉"
+          icon={<Icon name="messages" />}
           name={t('rounds.drawers.messages')}
           meta={t('rounds.drawers.messagesMeta')}
           badge={messageMark}
@@ -609,22 +843,38 @@ export function RoundHomePage() {
           tilt={4}
         />
 
-        {/* Hidden entirely, not dimmed, when this round will never vote. */}
+        {/* Hidden entirely, not dimmed, when this round will never vote.
+            Where it leads depends on how this dinner votes: a hand-counted
+            round has no online ballot at all, so sending everybody to one was
+            the envelope contradicting the choice the host had just made. */}
         {round.voting_mode !== 'DISABLED' && (
           <Envelope
-            icon="🏆"
+            icon={<Icon name={resultsOpen ? 'winner' : round.voting_mode === 'MANUAL' ? 'hands' : 'ballot'} />}
             name={t(resultsOpen ? 'rounds.drawers.results' : 'rounds.drawers.vote')}
-            waitingFor={waitVote}
-            to={`/rounds/${roundId}/${resultsOpen ? 'results' : 'ballot'}`}
+            waitingFor={
+              waitVote ??
+              // Members of a hand-counted round have nothing to open: they
+              // raise a hand at the table. Only the host has a screen.
+              (round.voting_mode === 'MANUAL' && !isHost && !resultsOpen
+                ? t('vote.manual.atTheTable')
+                : undefined)
+            }
+            to={
+              resultsOpen
+                ? `/rounds/${roundId}/results`
+                : round.voting_mode === 'MANUAL'
+                  ? `/rounds/${roundId}/tally`
+                  : `/rounds/${roundId}/ballot`
+            }
             tilt={1}
           />
         )}
         {round.voting_mode === 'DISABLED' && resultsOpen && (
-          <Envelope icon="🏆" name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
+          <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
         )}
 
         <Envelope
-          icon="🌾"
+          icon={<Icon name="allergies" />}
           name={t('rounds.drawers.allergies')}
           meta={t('dietary.panelTitle')}
           tilt={2}
@@ -634,7 +884,7 @@ export function RoundHomePage() {
         </Envelope>
 
         <Envelope
-          icon="📍"
+          icon={<Icon name="where" />}
           name={t('rounds.drawers.info')}
           meta={round.city ?? round.location ?? undefined}
           tilt={3}

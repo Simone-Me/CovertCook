@@ -417,6 +417,133 @@ bottone a parte con la sua domanda.
 
 ---
 
+## 11 · Le due conversazioni sono due casse
+
+*Ma recette* e *Recette reçue* si somigliano e non sono la stessa cosa: una è
+con lo chef per cui **scrivi**, l'altra con lo chef che scrive **per te**. Sotto
+due titoletti si confondevano, quindi ognuna ha la sua cassa con il nome sul
+coperchio.
+
+- **Ma recette** porta lo pseudonimo del tuo cuoco, in chiaro: lo conosci, ed è
+  come ti rivolgi a lui.
+- **Recette reçue** porta una **barratura vera**. `get_my_brief` non manda mai
+  chi ha scritto per te, quindi la barra copre un segnaposto — l'unico uso che
+  `.redact` ammette.
+
+Le date sono `mm-dd`, piccole, sotto il testo. Una cena si organizza nell'arco
+di giorni, non di anni, e l'anno era la cosa più larga della riga ed è l'unica
+che non serviva a nessuno.
+
+---
+
+## 12 · Pro, detto onestamente
+
+Il blocco Pro appare **solo accanto a controlli spenti** — cioè esattamente dove
+qualcuno comincia a chiedersi se la versione gratuita sia una demo. Quindi la
+prima cosa che dice è che non lo è.
+
+1. **Tutta l'app resta gratuita.** Ogni cena, qualsiasi numero di invitati, ogni
+   funzione che cambia *come si gioca*. Lo scopo è che tutti possano fare tutto.
+2. **Pro vende solo il decoro**: tavole più belle, serate a tema (Natale, un
+   solstizio d'estate).
+3. **Idea ancora da precisare**: un oste che condivide quello che ha comprato
+   con gli invitati del suo tavolo.
+
+---
+
+## 13 · Le informazioni si leggono come un menu
+
+Le due colonne erano sbagliate: l'etichetta più larga decideva la grondaia e
+ogni valore veniva schiacciato in quel che restava. Su telefono «Fuso orario»
+da solo si mangiava un terzo della riga.
+
+**Etichetta sopra, valore sotto, tutti e due a piena larghezza.** E la riga di
+separazione sta *fra* le voci, non dentro: l'etichetta deve leggersi attaccata
+alla riga che descrive e staccata da quella sopra.
+
+Vale per le info della cena e per il riepilogo «Questa cena in breve».
+
+---
+
+## 14 · Istruzioni numerate, non un paragrafo
+
+Quando quello che si descrive è una **sequenza di azioni**, lo stesso testo in
+un paragrafo denso è illeggibile. Quattro passi numerati, e poi tre note
+separate — cosa si conserva (bordo verde), cosa si mette in pausa (grigio),
+cosa cambia davvero (rosso) — ognuna marcata a sinistra.
+
+---
+
+## 15 · La freccia che gira è sempre la stessa cosa
+
+`↺` significa **una cosa sola** in tutta l'app: *arma una sostituzione, non la
+esegue*. Il controllo che agisce sta sempre sotto.
+
+| Dove | Cosa arma | Cosa agisce |
+|---|---|---|
+| Impostazioni → Status | il ritorno alla fase precedente | il bottone «Conferma» nell'avviso |
+| Menu → portate | la portata da rimpiazzare | il bottone in basso, che da «Aggiungi» diventa «Cambia» |
+
+Cambiare una portata è **una sola istruzione** (`change_course`, `0036`). La
+versione cancella-e-riaggiungi lasciava il menu con una portata in meno rispetto
+ai chef — cioè esattamente la condizione su cui la roulette si rifiuta di
+partire — quindi un oste interrotto a metà si ritrovava con una cena che non
+poteva iniziare e nessun indizio del perché.
+
+---
+
+## 16 · Il pass si spiega una volta sola
+
+In **bozza** il pass dice cosa è: il bancone da cui passano tutte le comande,
+mostra solo quello che la cena aspetta da te adesso, e un pass vuoto significa
+che non c'è niente da fare.
+
+Da lì in poi **non si ripete**. Scrivere «le iscrizioni sono chiuse» a ogni fase
+successiva significava dire all'oste una cosa che sapeva, su una porta che aveva
+chiuso lui. Quella spiegazione sta nelle impostazioni, dove uno ci va a cercarla.
+
+---
+
+## 17 · Il frigo adesso è firmato
+
+**Una marcia indietro voluta, e va detta.** Le righe del frigo portano ora il
+nome segreto di chi le ha scritte, e l'icona-cibo **resta attaccata a quella
+persona** per tutta la serata: Chef Persil è sempre la carota.
+
+Prima era l'opposto — icona per messaggio, ricavata dall'id, apposta perché
+nessuno fosse seguibile (`0031`, `0033`). Quell'anonimato è stato ceduto in
+cambio di una cosa che vale di più su una bacheca: **vedere chi ha detto cosa e
+poterci tornare sopra**.
+
+Cosa resta protetto: l'identità vera. Uno pseudonimo è uno pseudonimo, e chi ci
+sta dietro è il gioco. E resta tolto l'orologio — nessun timestamp esce dal
+server.
+
+### Le frasi del giorno
+
+Dal giorno della cena il mattarello cambia contenuto: «ho 30 minuti di ritardo»,
+«passo al supermercato», «qualcuno ha un cavatappi?». Prima del giorno sono
+rumore, quel giorno sono l'unica cosa che serve.
+
+---
+
+## 18 · I due insiemi di pseudonimi
+
+| Insieme | Cosa contiene | Prezzo |
+|---|---|---|
+| **Erbe e spezie** | Chef Basilico, Chef Zafferano… | gratis |
+| **Brigata di cucina** | Chef Saucier, Chef Pâtissier, Chef Aboyeur… | **gratis** |
+
+Il secondo è gratis di proposito: una seconda lista di parole **non cambia
+niente su come si gioca**. Quello che resta a pagamento è il *decoro* della
+serata — le tovaglie, i temi — non le parole dentro.
+
+I 24 nomi sono stati **verificati**, non ricordati. Due scartati: *limonadier*
+(è un ruolo del bar, non una postazione di cucina — anche se compare nei mockup
+del design) e *chef de garde* (è un turno, non una postazione).
+
+---
+
 ## Gli asset veri (e il loro peso)
 
 Le prime immagini vere sono arrivate. La regola del §4 vale da subito: è una PWA
@@ -466,6 +593,9 @@ La direzione è ferma. Restano tre scelte che cambiano il lavoro, non il mondo.
 |---|---|
 | 2026-08-23 | Trascrizione iniziale dall'artefatto. Aggiunte le sezioni "La lista dei chef" e "Quando si scoprono i chef", che fissano la regola della barratura durante le iscrizioni. |
 | 2026-08-23 | Aggiunta "Gli oggetti si spostano" (§3) con la tabella delle tre posizioni per oggetto, e "Il Frigo" (§3b) con il rullo e l'uovo. Piatto, bicchiere, scodella, tovagliolo, forchetta, coltello e tagliere adesso cambiano posizione fra le fasi invece di restare fermi. |
+| 2026-08-23 | Aggiunte §17 "Il frigo adesso è firmato" (marcia indietro voluta sull'anonimato della bacheca) e §18 "I due insiemi di pseudonimi". La catena si vede dal pass; `Verrouillé`→Attribuzione e `Attribué`→Preparazione. |
+| 2026-08-23 | Aggiunte §13 "Le informazioni si leggono come un menu", §14 "Istruzioni numerate", §15 "La freccia che gira è sempre la stessa cosa", §16 "Il pass si spiega una volta sola". Le portate si compongono a `LOCKED` e si cambiano con `change_course` in una sola istruzione. |
+| 2026-08-23 | Aggiunte §11 "Le due conversazioni sono due casse" e §12 "Pro, detto onestamente". `BRIEFS_CLOSED` esce dal percorso: la ricetta arriva al cuoco appena inviata. Il codice compare solo con le iscrizioni aperte; le portate si scelgono alla fase 3; barra di avanzamento delle ricette; conto alla rovescia del voto visibile a tutti. |
 | 2026-08-23 | Aggiunta §10 "Le conferme stanno nella pagina": eliminati tutti i `window.confirm`. Corretti gli avvisi del passo indietro — non cancella niente, cambia solo cosa è permesso fare. Mattarello: manici 64×28, corpo 58 px, ordine di impilamento corretto, chevron che segnala lo scorrimento. |
 | 2026-08-23 | Aggiunte §6 "La carta del menu", §7 "L'anello della catena", §8 "Il mattarello gira nel verso giusto", §9 "Il segno sulla busta dei messaggi". Status e Voto ora usano la stessa carta del menu; la catena è un cerchio; il mattarello scorre dall'alto in basso con manici lunghi; il frigo dimentica dopo 24 ore. |
 | 2026-08-23 | Arrivate le prime immagini vere. Il frigo disegnato a mano sostituito dall'illustrazione, a finestra fissa e scorrevole. Il rullo verticale rifatto come mattarello orizzontale con le impugnature e tre frasi in vista — senza manici non si capiva cosa fosse. Le impostazioni sono le posate incrociate al posto della scritta. Aggiunta la sezione "Gli asset veri (e il loro peso)". |

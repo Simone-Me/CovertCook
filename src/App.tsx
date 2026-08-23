@@ -4,6 +4,8 @@ import { useAuth } from './lib/auth'
 import { rememberJoinCode } from './lib/pendingJoin'
 import { AppHeader } from './components/AppHeader'
 import { PendingJoinBanner } from './components/PendingJoinBanner'
+import { AppFooter } from './components/AppFooter'
+import { LegalPage } from './features/legal/LegalPage'
 import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
@@ -19,6 +21,7 @@ import { BriefEditorPage } from './features/briefs/BriefEditorPage'
 import { CookViewPage } from './features/briefs/CookViewPage'
 import { BoardPage } from './features/chat/BoardPage'
 import { BallotPage } from './features/vote/BallotPage'
+import { ManualTallyPage } from './features/vote/ManualTallyPage'
 import { ResultsPage } from './features/vote/ResultsPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -49,6 +52,8 @@ function AppRoutes() {
 
   return (
     <Routes>
+      <Route path="/legal/terms" element={<LegalPage page="terms" />} />
+      <Route path="/legal/privacy" element={<LegalPage page="privacy" />} />
       <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
       <Route
         path="/signup"
@@ -152,6 +157,14 @@ function AppRoutes() {
         }
       />
       <Route
+        path="/rounds/:roundId/tally"
+        element={
+          <RequireAuth>
+            <ManualTallyPage />
+          </RequireAuth>
+        }
+      />
+      <Route
         path="/rounds/:roundId/results"
         element={
           <RequireAuth>
@@ -176,6 +189,7 @@ export default function App() {
       <main className="cloth">
         <AppRoutes />
       </main>
+      <AppFooter />
     </BrowserRouter>
   )
 }

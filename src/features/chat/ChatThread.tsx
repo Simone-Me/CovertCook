@@ -101,8 +101,11 @@ export function ChatThread({ pairingId }: { pairingId: string }) {
               <div className="muted">{m.other_party_display_name ?? m.other_party_secret_name}</div>
             )}
             <div>{renderBody(m, m.slot_value)}</div>
-            <div className="row" style={{ justifyContent: 'space-between' }}>
-              <span className="muted">{m.created_day}</span>
+            <div className="row chat-bubble__foot">
+              {/* Month and day, nothing else. A dinner is planned over days,
+                  not across years, and the year was the widest thing on the
+                  line while being the one part nobody needed. */}
+              <span className="chat-bubble__day">{m.created_day.slice(5)}</span>
               {!m.is_mine && !m.reported && (
                 <button type="button" className="secondary" onClick={() => onReport(m.message_id)}>
                   {t('chat.report')}

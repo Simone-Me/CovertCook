@@ -45,6 +45,500 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (4)
+
+**Security pass.** Checked rather than assumed, and it found one real gap.
+
+*Clean already:* RLS is enabled on every table with no exceptions; every
+`SECURITY DEFINER` function pins its `search_path` (the thing that stops a
+hijacked schema turning a privileged function into somebody else's code);
+no secret appears anywhere in `src/`; `manual_tally` has RLS on, no
+policies and no grants, so it is reachable only through the functions that
+own it.
+
+*The gap:* **there were no security headers at all** — no CSP, no
+clickjacking defence, no MIME-sniffing defence, no referrer policy.
+`public/_headers` now serves them. The CSP allows no `unsafe-inline` or
+`unsafe-eval` for scripts (Vite emits real files, so it does not need
+them), permits Supabase over https and wss and Cloudflare Turnstile, and
+sets `frame-ancestors 'none'`. `Referrer-Policy` matters more here than
+usual: join codes travel in query strings, and a full referrer would hand
+them to every third-party host a page touched.
+
+*Also fixed:* a high-severity React Router advisory (RSC-mode CSRF bypass —
+not a mode this app uses, but the fix was a version bump). Production
+dependencies now audit clean.
+
+*Not covered, and worth saying:* this was a checklist, not a pen-test.
+Nobody has adversarially tried to break in.
+
+**Added: consent is asked for, twice, and separately.** Sign-up now
+requires accepting the terms and privacy policy, and — as its own box —
+an undertaking about allergies. They are separate on purpose: bundling
+consent to health data into a general "I agree" is exactly what GDPR
+Article 9 does not allow. The second box does two jobs that are the same
+sentence: it is the explicit consent required to hold the data, and the
+promise to read the dietary panel that makes collecting it worth anything.
+
+**Added: Terms and Privacy, written.** Both languages, kept in the locale
+files so they cannot drift apart. Written from what the app actually does
+— the processors are named, the retention is stated (fridge messages, 24
+hours), and the health-data section says plainly that a severe allergy is
+Article 9 special-category data and that consent is the basis for holding
+it. Marked a draft: they need a lawyer before any money changes hands.
+
+**Added: language can be changed before there is an account.** The only
+switch lived in the profile — behind a sign-in form somebody might not be
+able to read. It is now on sign-in, sign-up and password reset, and on the
+dietary step, so the choice is made before the profile row that stores it
+is written.
+
+**Fixed: icons exploded to full width.** `.icon` was `width: 100%`, which
+is right inside a fixed chip and catastrophic anywhere else — the pass and
+the chain both filled their containers. The size is set inline by the
+component now and nothing overrides it.
+
+**Changed: the pass is an envelope.** It was a paper fold that did not
+match anything else on the cloth. It is one of the drawers now, in wax red
+— the only envelope addressed to one person, so colour sets it apart
+rather than shape. Its subtitle changes with the phase ("Compose the menu,
+then spin the roulette"), and a mark appears on the right only when the
+evening is genuinely stuck on the host.
+
+**Changed: the chain is a clickable card**, icon and all, instead of a
+line of text with a link in it.
+
+**Fixed: hand-counted votes could exceed the room** (`0045`). Nothing
+bounded the counts: a dish could be given more votes than there were
+people, and a place could be handed out more times than there were hands.
+Both are typos rather than opinions. The host is now asked how many are
+voting — asked, not derived from the roster, because somebody who turned
+up without cooking still ate and still gets a say — and both bounds are
+enforced in the database, not only in the interface. Verified: 6 hands
+among 5 voters and 3+3 first places among 5 both refused.
+
+The instructions now also say the part that makes the count mean anything:
+decide your own top three before the hands go up, one hand per round,
+never the same dish twice, and not your own.
+
+**Fixed: "Vote the menu" opened the wrong screen.** A hand-counted round
+has no online ballot, but the envelope sent everyone to one — the drawer
+contradicting the choice the host had just made. It now leads to the tally
+for the host, and tells members plainly that this one is counted at the
+table.
+
+**Changed: the voting method can be changed back** (`0045`). It froze at
+`VOTING`, so picking "by hand" once and then finding half the table had
+gone home left no way back. The real constraint was never the phase: it is
+whether anything has been counted. Change it freely until somebody votes,
+refuse after, and say which.
+
+---
+
+## 2026-08-24 (3)
+
+**Fixed: LIVE voting was offering a countdown.** Choosing "during dinner"
+still showed the deadline picker, which made LIVE and TIMED the same thing
+and the choice between them pointless. LIVE now says plainly that there is
+no countdown — the Executive Chef reads the room and closes it, and sees
+the results first. The picker belongs to TIMED alone.
+
+**Changed: "I have a problem" asks for help instead of resigning**
+(`0044`). The message sent was "I won't be able to cook this dish after
+all", which ends the conversation at the moment it should start one: most
+of the time a cook cannot find an ingredient or has never made the thing,
+and whoever wrote it can solve that in one reply. The wording is now "I
+have a problem with this recipe — can you help me?" The category stays
+`CANNOT_COOK`, because what it *does* is still right — it raises a host
+alert (`0008`), so the Executive Chef learns a dish is at risk while there
+is still time.
+
+**Added: real icons.** Ten of them, replacing the emoji placeholders —
+chef, recipe, cooking, chat, fridge, message alert, allergy, map, raised
+hand, winner. One `Icon` component so a drawer and the mark on its
+envelope can never drift apart, and all of them decorative (`alt=""`,
+`aria-hidden`) because each sits beside a label that already says the same
+thing.
+
+Resized on the way in: 512 px masters to 96 px WebP, **273 KB → 37 KB**.
+Masters moved to `assets-src/icons/`, out of the build, for the same
+reason as the fridge — everything in `public/` is precached onto every
+phone that installs the PWA.
+
+**Added: a footer, and the attribution it owes.** © line, Terms, Privacy,
+Contact — and credit to Flaticon, whose licence requires it visibly
+wherever the icons appear. That is stated in plain words on every screen
+rather than hidden behind an About page nobody opens.
+
+Terms and Privacy link to honest stubs rather than nothing: a footer
+without them looks finished when it is not, and they stop being optional
+the moment the app takes money (`ROADMAP.md` §2).
+
+**Still without an icon** — flagged rather than invented: the online
+**ballot** (the trophy currently doubles for both the vote and the
+results), the **chain** view, and the **pass** itself.
+
+---
+
+## 2026-08-24 (2)
+
+**Corrected: the confirmation email is not sent by this codebase.** The
+`templates.ts` written yesterday is for mail *we* send through Resend —
+invitations, "the round moved on". Sign-up confirmation and password reset
+belong to **Supabase Auth**, which renders them from the dashboard's own
+templates and never calls our function. Editing that file changes nothing
+about what a new account receives. The header now says so, and
+`confirmEmail()` is labelled as the design to paste into Auth's template
+box rather than something already wired up.
+
+**Fixed: confirmation links pointed at localhost.** `signUp` passed no
+`emailRedirectTo`, so Auth fell back to the project's Site URL. It now
+sends `VITE_APP_BASE_URL`, as does the resend. The other half is not in
+code: the dashboard's redirect allow-list has to contain that origin, or
+Auth rejects it and silently falls back again.
+
+**Changed: the vote's style is chosen when it is opened** (`0043`).
+`voting_mode` could only be set at creation, which made MANUAL
+unreachable — a round made with "Classic", or made before it existed, had
+no route to it. Now it is a picker in the pass at `DINNER`, frozen from
+`VOTING` on: once a ballot exists, changing the counting method would be
+changing the rules mid-count. DISABLED stays one-way.
+
+**Changed: a deadline is set once** (`0043`). It could be replaced
+repeatedly, which turned a stated closing time into something that moved
+while people were deciding whether they had time to think. The first one
+sticks; clearing it is still allowed, because that removes a promise
+rather than changes one. Verified: second call raises
+`DEADLINE_ALREADY_SET`.
+
+**Added: turnout as a share, and an automatic close** (`0043`). The pass
+shows a bar and "5 of 8 have voted (62%)". And when everyone has voted the
+round closes itself — `close_voting_if_complete` is callable by anyone in
+the round and does nothing unless the condition is genuinely met, so the
+last person to vote does not have to find the host to end a vote that is
+already over.
+
+**Changed: the hand count is three folds, not a wizard.** The suggested
+order is still last-place-first — and the reasoning holds: asking for
+favourites first makes the next two questions feel like consolation and
+people re-vote for the answer they already gave — but a host who has
+already asked out of order should not have to fight the screen. Each fold
+shows its running total on the closed row; the standings sit below all
+three and update as the counts change.
+
+**Changed: two answers to a received recipe, not three.** A row of
+variations made the choice look like a personality quiz when it is one
+bit: can you cook this or not. "Yes, chef!" and "I have a problem" — and
+what the problem actually is gets said in the conversation underneath,
+where the sender can answer it.
+
+---
+
+## 2026-08-24
+
+**Added: voting by show of hands** (`0040`–`0042`). A fourth voting mode
+for a dinner that would rather not have eight phones out at the table. The
+Executive Chef reads the dishes, counts the hands and enters the totals in
+three passes — **thirds first, then seconds, then firsts**. That order is
+deliberate: asking for favourites first makes the next two questions feel
+like consolation and people re-vote for the answer they already gave.
+Working up keeps each pass a real question, and the winner is the last
+thing said out loud.
+
+Points follow the places (3rd = 1, 2nd = 2, 1st = 3) and the totals are
+written into the same `results` table the online vote fills, so every
+screen after the count — results, publishing, the reveal — is untouched
+and does not need to know how the numbers were reached. Verified end to
+end: 4 firsts + 2 seconds = 16 points, first_places 4, rank 1, round moved
+to RESULTS.
+
+`manual_tally` holds counts per dish per place and nothing else. No voter
+column, deliberately — nobody is writing down who raised a hand, and a
+table that *could* hold it would invite somebody to.
+
+`get_manual_menu` shows who cooked what, which `get_ballot_options`
+withholds. The online ballot is blind on purpose; a show of hands is not —
+everybody watched that person carry the dish in.
+
+**Added: the last door out of a frozen menu** (`0041`). `clear_assignment`
+takes `p_discard_briefs`. The refusal is still the default, but it is no
+longer the only answer: a host who has to change the courses after the
+roulette has run, with recipes already written, previously had no route at
+all. Opt-in, one boolean, and the warning names the cost in full — the
+pairings cascade to briefs *and* to every private message on them. It is
+the most destructive action in the app and now the only one.
+
+**Changed: three answers to a received recipe.** Two cheerful buttons made
+saying no feel like breaking something. The refusal is now written to be
+as easy to press and as formal as a kitchen would be: "Owing to an
+unforeseen impediment, I am unable to carry this out."
+
+**Changed: the ballot row stacks.** Rank, dish, and two dropdowns on one
+line squeezed the dish name — the only part actually being judged — to
+nothing on a phone. Dish above, scores below, and the scores drop to one
+column under 400px.
+
+**Added: the confirmation-email screen says what is happening.** It was
+one borrowed sentence at the worst possible moment: a half-made account
+waiting on mail that, from a new sending domain, very often lands in spam.
+It now says so, tells you to search rather than scroll, and offers a
+resend behind a two-minute floor — which protects the person, not the
+provider: hammering resend is what gets a sender marked as spam, and every
+extra copy makes the inbox harder to search.
+
+**Added: the confirmation email itself**, in
+`supabase/functions/send-email/templates.ts` — written in code rather than
+pasted into a dashboard box so it is reviewable and translatable. Tables
+not flex, every style inline, no web fonts, no background images, a seal
+drawn as text because blocked images leave a hole, and a plain-text part,
+which is not optional: HTML-only is one of the strongest spam signals
+there is, and a new domain has no reputation to spend.
+
+---
+
+## 2026-08-23 (23)
+
+**Changed: two ways to say yes to a recipe.** Accepting was one flat
+button on the one happy screen in the app. There are now two, and they do
+exactly the same thing to the sender — "Yes, chef!" and one of six
+protests ("Oof. That is not a tomato-mozzarella", "I accept, under
+physical protest"). The joke is picked once per visit, not per render, so
+it does not shuffle under the cursor.
+
+**Changed: the chain is a line, not a button.** It was a full-width
+control for something you look at rather than do. It is now the second
+item in the pass, one line, with the link on the right.
+
+**Changed: the roller swaps its contents on the day, it does not grow.**
+Day-of phrases now *replace* the everyday ones rather than being added to
+them: "What a lovely day!" is not what anybody needs at 19:40 with a dish
+in the oven, and "I'm running 30 minutes late" means nothing the week
+before.
+
+**Changed: the menu alert offers a way through.** "Somebody is already
+cooking that course" now carries two answers instead of one dismissal —
+**OK** clears the roulette and applies the change, **No, leave it** backs
+out. Safe by construction: `clear_assignment` refuses once anyone has
+written, so the OK can only ever throw away a shuffle.
+
+**Changed: voting deadlines are hours.** 5 and 10 minutes are gone; the
+options are 1h, 3h, 12h, 24h, 48h. A vote that closes in five minutes is
+a vote nobody who stepped out to the kitchen gets to cast.
+
+**Not done, needs a decision: the manual vote.** The idea of asking the
+host whether an after-dinner vote is *counted by hand at the table* or
+*cast online and anonymous* is a second scoring path, not a setting — it
+needs somewhere to record a show of hands, a rule for who may enter it,
+and an answer for what "anonymous ballots" means when one person types
+them all in. Worth doing, not worth guessing at.
+
+**Design study: three ways to pin the comande** — the spike, the rail
+clip, the push-pin — drawn on the same screen so the fixing is the only
+variable, each with the paper reacting to it (a punched hole, compression
+under the jaws, a dome around the shank). Recommendation is the rail clip,
+because a clipped ticket is the only one of the three that reads as *still
+open*, which is what an uncooked recipe is.
+
+---
+
+## 2026-08-23 (22)
+
+**Diagnosed: production is broken because 22 migrations were never
+deployed.** `Could not find the function public.create_round(p_access, …)`
+is PostgREST failing to match by argument name: production is on `0014`,
+where `create_round` still takes `p_visibility` and `p_voting_enabled`;
+the client has been sending `p_access` and `p_voting_mode` since `0018`.
+Nothing to fix in code — `0015` through `0039` need to go up. Not done
+here: that is a production change and it is the owner's to make.
+
+**Fixed: the received recipe was still gated on `BRIEFS_CLOSED`.** `0035`
+moved the server gate to "has its author submitted", but `waitRecipe` in
+the round page still held the drawer shut for a whole phase. The last
+place recipes were being delayed.
+
+**Changed: `LOCKED` → "Assignment", `ASSIGNED` → "Preparation".** Named
+after what happens in them rather than after what the state machine calls
+them.
+
+**Changed: the chain moved to the pass.** Seeing who cooks for whom is a
+power, not a roster detail, and it was buried in the list of names. It is
+a button in the pass from the moment there is a chain to look at.
+
+**Added: `clear_assignment`** (`0037`). There was only re-roll, and re-roll
+refuses once anyone has written — correct, but it left no way back at all.
+The specific trap: the menu is frozen while any pairing uses a course, so
+a host who spun the roulette and then wanted different courses had a
+button saying no and none saying undo. Same guard as re-roll: a shuffle
+can be redone, somebody's work cannot be thrown away by a button.
+
+**Fixed: the menu error was a dead end.** "Someone is already cooking this
+dish" left the arrow armed and the message on screen with no way out but
+leaving the page. A small OK clears both.
+
+**Changed: the fridge is signed** (`0037`). Board lines now carry the
+author's secret name and a food icon that stays with that person all
+evening — asked for knowingly, and it is a real reversal: the board was
+unattributable first by collapsing phrases (`0031`), then by withholding
+the author (`0033`). A pseudonym can now be followed across an evening's
+messages. Real identities are still the game's secret, and the clock is
+still withheld.
+
+**Added: phrases for the day itself** (`0037`). "Running 30 minutes late",
+"stopping at the shop", "does anybody have a corkscrew". Marked with a
+`day_of` column rather than a new category value — `ALTER TYPE … ADD
+VALUE` cannot be used in the transaction that adds it, which is why `0030`
+and `0031` had to be split in the first place. Offered only while the
+round is in `DINNER`; before then they are noise on the roller.
+
+**Added: the kitchen brigade as a second pseudonym set** (`0038`, `0039`).
+The theme picker was a disabled control with one option. It works now, and
+it is free: a second word list changes nothing about how the game is
+played. What stays paid is the *look* of an evening.
+
+The 24 names were checked against the brigade de cuisine rather than
+recalled — saucier, poissonnier, rôtisseur, grillardin, friturier,
+entremetier, potager, légumier, garde-manger, tournant, pâtissier,
+confiseur, glacier, décorateur, boulanger, boucher, aboyeur, communard,
+commis, plongeur, marmiton, écailler, chef de partie, sous-chef. Two were
+dropped: **limonadier** (a beverage role, not a kitchen station — despite
+appearing in the design mockups) and **chef de garde** (a shift, not a
+station).
+
+**Added: table themes named in settings** as Pro, coming soon, next to
+everything that isn't for sale — so the difference is visible rather than
+asserted.
+
+---
+
+## 2026-08-23 (21)
+
+**Retraction: the re-roll data-loss finding in entry 20 was wrong.** The
+delete and the cascades are real, but `generate_assignment` refuses
+outright if any brief exists in the round (`0005` line 46) — five lines
+above the delete, with a comment saying exactly that. The delete is
+unreachable once anyone has written. The guard was read past and the
+finding should never have been filed; it is struck from the README's
+not-built list and corrected in entry 20.
+
+What actually happens when a member leaves is what `remove_member` already
+does carefully: **only the departing chef's recipe can be lost**, and only
+when their dish and the incoming one are both already submitted. Where one
+is unsubmitted the finished brief is kept and re-attributed, with
+`original_sender_id` recording who really wrote it so the reveal does not
+lie about authorship.
+
+**Fixed: the menu could not be composed where it had just been moved to.**
+Entry 20 moved course selection to `LOCKED`; `add_course`, `remove_course`
+and `set_slot_mode` all gated on `DRAFT`/`OPEN` and would have raised
+`MENU_LOCKED` every time. `0036` opens all three to `LOCKED`, which is the
+right window anyway — it is the first moment the number of chefs is
+settled and the last before the roulette. `COURSE_IN_USE` still does the
+real protecting: once pairings exist, a course nobody may move.
+
+**Added: `change_course`** (`0036`). Swapping a course was delete + add,
+which left the menu one course short of the table in between — the exact
+condition `generate_assignment` refuses on, so a host interrupted halfway
+was left with a dinner that would not start and no clue why. One
+statement, one lock, no window. In the panel it is the same turning arrow
+as the status control: it arms the picker below, and "Add" becomes
+"Change".
+
+**Changed: the pass stops repeating itself.** "Sign-ups are closed" was
+being said at every phase after `OPEN` — telling the host something they
+knew, about a door they had shut themselves. That guidance now lives only
+in settings, where someone goes looking for it, and the pass instead
+explains *what the pass is* while the round is still in `DRAFT`, which is
+the one screen where there is nothing else to do.
+
+**Changed: the how-to is a numbered list.** Adding somebody after the door
+closed was one dense paragraph describing a sequence of actions. It is now
+four numbered steps, then three separate notes — what is kept, what pauses,
+what genuinely changes — each marked down the left.
+
+**Changed: the dinner's details read like a menu.** Two columns meant the
+widest label set the gutter and every value was squeezed into what was
+left, worst on a phone where "Timezone" alone ate a third of the line.
+Label above, value under it, both full width, with the rule between
+entries rather than inside them.
+
+---
+
+## 2026-08-23 (20)
+
+**Retracted (same day, see entry 21): the re-roll data-loss claim was
+wrong.** `generate_assignment` does delete every pairing and briefs do
+cascade off pairings — but five lines above the delete it refuses outright
+if any brief exists in the round. The delete is unreachable once anyone
+has written. The guard was read past; the finding should never have been
+filed.
+
+**Changed: a recipe reaches its cook the moment it is submitted**
+(`0035`). `get_my_brief` gated on the round having reached
+`BRIEFS_CLOSED`, so the whole table waited for the slowest writer and then
+waited again for the Executive Chef to notice and push the phase. The gate
+moved from "which phase is the round in" to "has its author finished" —
+drafts stay invisible, because a cook seeing half a recipe would start
+shopping from it.
+
+**Changed: `BRIEFS_CLOSED` left the journey** (`0035`). With recipes
+landing on submit it had no job. `advance_phase` now steps `ASSIGNED ↔
+DINNER` directly, treating the phase as transparent in both directions;
+the enum value stays so rounds already parked there keep working, and
+`nextPhaseFor`/`previousPhaseFor` fall back to the full order for exactly
+that case. Verified all four paths, including that `ASSIGNED → VOTING` is
+still refused.
+
+**Changed: the pass shows the right things at the right time.** The join
+code and the invite box moved from `DRAFT || OPEN` to `OPEN` alone — a
+code handed out before the door opens gets refused by `join_round`, which
+requires `OPEN`. Course selection moved from `OPEN` to `LOCKED`: the
+number of slots must equal the number of chefs, and that number is only
+settled once the table is locked; in `OPEN` it was a sum that changed
+under the host every time somebody joined.
+
+**Added: how far the recipes have got.** A bar plus "5 of 8" in the pass
+during `ASSIGNED`. The tally had been removed from the *My recipe*
+envelope, where it was the wrong thing on a personal drawer; on the pass
+it is exactly right.
+
+**Added: the vote's clock, for everybody.** A deadline could be set and
+nothing anywhere said so — not even to the host who set it. `VoteCountdown`
+ticks in the round page for every participant, and `voting_closes_at`
+joined the columns the client actually selects, which is why nobody could
+see it.
+
+**Added: how to add somebody after the door closed.** In the pass and in
+settings, where the code used to sit at every phase. It says the route
+(step back to sign-ups, let them in, move forward), what survives
+(everything), what pauses while the door is open (writing and reading
+recipes), and the two things that genuinely change — course counts, and
+one chef ending up with a different recipe when the newcomer is spliced in.
+
+**Changed: the two conversations are two cases.** *My recipe* is headed
+with the pseudonym of the chef you write for; *Recipe received* is headed
+with a redaction, because `get_my_brief` never sends who wrote for you —
+the bar covers a placeholder, which is the only use `.redact` allows.
+Dates dropped to `mm-dd`, small, under the message.
+
+**Added: "This dinner at a glance"** in settings — setup kind, access,
+anonymity, voting, courses, approval, seat cap, each marked with whether
+it is still changeable. The choices were made once in the creation form
+and never shown again.
+
+**Fixed: the step-back confirmation closes when you accept it.** The
+component is not unmounted by the phase change, so it stayed open showing
+a fresh offer to step back *again*, which read as though the first one had
+not worked.
+
+**Added: Pro, said honestly.** The two switched-off v2 options are marked
+Pro, and the note beside them leads with the part that matters: the whole
+app stays free, every dinner and every feature that changes how the game
+is played. Pro sells flavour only — better tables, themed evenings, and a
+still-unsettled idea about a host sharing what they bought with their
+table.
+
+---
+
 ## 2026-08-23 (19)
 
 **Corrected: stepping a dinner back destroys nothing.** The assumption

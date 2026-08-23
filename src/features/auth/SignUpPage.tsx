@@ -1,7 +1,9 @@
 import { useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
+import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { ConfirmEmailNotice } from './ConfirmEmailNotice'
 import { Turnstile } from '../../components/Turnstile'
 import { useAuth } from '../../lib/auth'
 import { completeSignup, type DietaryEntryInput, type DietaryKind } from '../../lib/rpc'
@@ -23,17 +25,35 @@ export function SignUpPage() {
   const [submitting, setSubmitting] = useState(false)
 
   const [displayName, setDisplayName] = useState('')
+  const [acceptedTerms, setAcceptedTerms] = useState(false)
+  const [acceptedAllergies, setAcceptedAllergies] = useState(false)
   const [hasNoRestrictions, setHasNoRestrictions] = useState(false)
   const [entries, setEntries] = useState<DietaryEntryInput[]>([])
 
   async function onAccountSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!acceptedTerms) {
+      setError(t('auth.mustAcceptTerms'))
+      return
+    }
+    if (!acceptedAllergies) {
+      setError(t('auth.mustAcceptAllergies'))
+      return
+    }
     setError(null)
     setSubmitting(true)
+    // Without emailRedirectTo, Supabase Auth falls back to the project's Site
+    // URL — which is why confirmation links have been pointing at localhost.
+    // Saying it explicitly here fixes the half that lives in the app; the
+    // other half is the dashboard's redirect allow-list, which has to contain
+    // this origin or Auth refuses it and falls back again.
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
-      options: captchaToken ? { captchaToken } : undefined,
+      options: {
+        emailRedirectTo: `${import.meta.env.VITE_APP_BASE_URL}/`,
+        ...(captchaToken ? { captchaToken } : {}),
+      },
     })
     setSubmitting(false)
     if (error) {
@@ -88,17 +108,13 @@ export function SignUpPage() {
   }
 
   if (step === 'confirm-email') {
-    return (
-      <div className="stack sheet">
-        <h1>{t('auth.signUp')}</h1>
-        <p>{t('auth.resetSent')}</p>
-      </div>
-    )
+    return <ConfirmEmailNotice email={email} />
   }
 
   if (step === 'dietary') {
     return (
       <div className="stack sheet">
+        <LanguageSwitch />
         <h1>{t('dietary.title')}</h1>
         <p className="muted">{t('dietary.help')}</p>
         {error && <div className="error">{error}</div>}
@@ -175,6 +191,7 @@ export function SignUpPage() {
 
   return (
     <div className="stack sheet">
+      <LanguageSwitch />
       <h1>{t('auth.signUp')}</h1>
       {error && <div className="error">{error}</div>}
       <form onSubmit={onAccountSubmit} className="stack">
@@ -193,8 +210,52 @@ export function SignUpPage() {
             onChange={(e) => setPassword(e.target.value)}
           />
         </div>
+        {/* Consent has to be given, not assumed. A pre-ticked box or a line
+            of small print saying "by continuing you agree" is not agreement —
+            and this is the only moment where asking is honest, because after
+            the account exists the person has already handed over their data.
+            Required, so the browser blocks the submit rather than the server
+            explaining it afterwards. */}
+        <label className="row">
+          <input
+            type="checkbox"
+            required
+            style={{ width: 'auto' }}
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+          />
+          <span>
+            <Trans
+              i18nKey="auth.acceptTerms"
+              components={{
+                terms: <Link to="/legal/terms" target="_blank" />,
+                privacy: <Link to="/legal/privacy" target="_blank" />,
+              }}
+            />
+          </span>
+        </label>
+
+        {/* The second box, and the one that matters most. It does two jobs
+            that happen to be the same sentence: it is the explicit consent
+            GDPR Article 9 requires before an app may hold health data, and it
+            is the undertaking that makes the dietary panel worth collecting at
+            all — a list nobody promises to read protects nobody.
+            Separate from the terms box on purpose: bundling consent to health
+            data into a general "I agree" is exactly what Article 9 does not
+            allow. */}
+        <label className="row signup__allergy">
+          <input
+            type="checkbox"
+            required
+            style={{ width: 'auto' }}
+            checked={acceptedAllergies}
+            onChange={(e) => setAcceptedAllergies(e.target.checked)}
+          />
+          <span>{t('auth.acceptAllergies')}</span>
+        </label>
+
         <Turnstile onVerify={setCaptchaToken} />
-        <button type="submit" disabled={submitting}>
+        <button type="submit" disabled={submitting || !acceptedTerms || !acceptedAllergies}>
           {t('auth.signUp')}
         </button>
       </form>
