@@ -419,3 +419,80 @@ volume business — they start making sense in the hundreds of thousands of
 views a month, which is a different application with a different audience. If
 this ever wants money, §2's per-dinner unlock is better per person, cheaper to
 build, and does not put a stranger's script next to somebody's allergies.
+
+---
+
+## 7. What comes next, in the order it should be built
+
+Written as steps rather than as a list of wants, because three of the things
+below depend on the one above them and doing them in the wrong order means
+building something twice.
+
+### Step 1 — the results screen becomes a menu
+
+No schema, no new data: the results already know the dish, the course and the
+score. What changes is that they stop being a leaderboard and become **a menu
+card**, courses as sections — starters, mains, desserts, drinks — with the
+score printed where a price would be. A round in FREE mode has no courses, so
+it is one carte générale instead. Nothing else in the app is a better fit for
+the tablecloth than a menu, and it is the screen the evening ends on.
+
+Doing this first is not aesthetics: **step 2 hangs its save button off this
+screen**, so its layout has to exist before the button has anywhere to live.
+
+### Step 2 — the recipe book
+
+§5 has the design. Sequence inside it:
+
+1. The table and the RESULTS-gated RPC that opens a round's recipes to its
+   members.
+2. The save flow on the menu: a switch that arms saving, the dish names
+   inviting a tap, a wine ring marking each chosen one, one confirm that saves
+   the lot, and a line saying where they went.
+3. The book itself in the profile: one card per recipe, filters in the
+   browser, delete with a warning that says the truth.
+4. Export — the book, and everything, the second being what Article 20 asks
+   for anyway.
+
+### Step 3 — the host's alert centre
+
+`host_alerts` already exists with the right kinds (`CANNOT_COOK`, `NO_BRIEF`,
+`DROPOUT`, `REPORTED_MESSAGE`) and a page to read them. What is missing is
+that nothing tells the host they are there, and that a reported message has no
+answer beyond reading it.
+
+**The design decision inside this one**, and it is the interesting one:
+**moderate by pseudonym, not by name.** The host should see the message before
+they see who wrote it — knowing the author first is how a host's opinion of a
+person decides whether a message was inappropriate. And they do not need the
+name to act: a warning is delivered to a seat, a removal removes a seat.
+Identity is only needed to reach somebody outside the game, which is a
+different and much rarer act — a deliberate reveal, logged in `audit_log`,
+never a side effect of opening an alert.
+
+This is also the work that satisfies the store requirement in
+`DISTRIBUTION.md` §1: report, block, and a published moderation policy are
+mandatory the day free-text chat ships, and this is where they live.
+
+### Step 4 — the album, and only then any deletion
+
+A photo of the table at the end, one per dinner, becoming an album of every
+evening. Attractive, and the one feature here that changes the arithmetic in
+§2 of nothing and §3 of everything: **text is free, photographs are not.**
+
+Three things it drags in, none of them optional:
+
+- **Storage, not the database.** A Supabase bucket with its own policies. The
+  free tier is 1 GB; at ~200 KB a photo that is a few thousand dinners, which
+  is further away than it sounds but not infinite.
+- **EXIF.** A phone photograph carries GPS coordinates. Uploading one
+  unstripped publishes the address of somebody's flat to everybody at the
+  table. Strip it in the browser, before upload, always.
+- **It is user-generated content.** A photograph is the kind of UGC the stores
+  write their rules for; report and remove have to exist for it too, which is
+  another reason step 3 comes first.
+
+**And only after the album is real can old dinners be deleted.** The argument
+for deletion is that a recipe worth keeping is in somebody's book and a dinner
+worth remembering is in the album — both have to exist and be *used* before
+that is true. Deleting first would prove it false.
