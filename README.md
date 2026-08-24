@@ -354,7 +354,10 @@ names, migration numbers, bugs found and fixed) see
   opens itself when the round is blocked on them.
 - **Platform**: French/English with a working switcher, installable as a
   PWA, deployed on Netlify (frontend) + Supabase (backend), with automated
-  keep-alive pings and nightly database backups.
+  keep-alive pings and nightly database backups
+  **Production now carries the whole migration set** — `0015` → `0045` were
+  deployed on 2026-08-24, closing the schema/client mismatch that had every
+  RPC added since `0015` failing against the live database.
 
 ### Not built yet
 
@@ -371,6 +374,15 @@ Ordered roughly by how much the product misses them.
 - **Outbound email** — invitations already work in-app without it, so this
   is now only for reaching people who aren't looking at the app. Blocked
   on a provider key.
+- **Deleting your account** — there is no way to do it, from inside the app
+  or outside it. Not a nicety: both stores require it (Google Play needs an
+  in-app path *and* a public request URL; Apple guideline 5.1.1(v) needs the
+  in-app one), and GDPR requires it regardless of where the app is
+  distributed. It is also not a one-line delete — `profiles.id` cascades
+  from `auth.users`, while `round_members.profile_id`, `rounds.host_id` and
+  `invites.created_by` do not cascade at all, so deleting a user who ever
+  joined a round fails on a foreign key today. The data map, the blocker and
+  the three ways out are in [`DISTRIBUTION.md`](./DISTRIBUTION.md) §10.
 - **Real table props** — the plate, glass, bowl, napkin, cutlery and bread
   board on the cloth are drawings, not renders. They move correctly between
   the three states; what's missing is the artwork. The three rules the real
@@ -392,16 +404,6 @@ Ordered roughly by how much the product misses them.
   served from `public/_headers`, and production dependencies audit clean. What
   it did *not* cover is anything adversarial — nobody has actually tried to
   break in.
-- **Production is broken, and this is why.** It is still on migration `0014`
-  while the client has been calling the `0018` signature of `create_round`
-  since then. PostgREST matches RPCs by argument name, so it reports
-  `Could not find the function public.create_round(p_access, …) in the schema
-  cache` — the function exists, under different argument names. Every RPC
-  added since `0015` is missing too; `create_round` is just the first one a
-  session hits. Nothing to fix in code: `0015` → `0039` need to go up. See
-  "Deploying" above, and note `0032` revokes a table grant and `0037` changes
-  the board's shape, so deploy in order and in one go.
-
 ### The paid tier, in one line
 
 Nothing is built. The decision is: **free stays a whole product** — unlimited

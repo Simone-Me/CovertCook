@@ -41,12 +41,12 @@ Nothing below can be skipped by choosing a different route.
 
 | Blocker | Why a store forces it | Where it stands |
 |---|---|---|
-| **Production database is behind** | The app has to actually work when a reviewer opens it. Migrations `0015`→`0039` are undeployed. | Known, documented in `README.md` |
+| ~~Production database is behind~~ | The app has to actually work when a reviewer opens it. | **Done — `0015`→`0045` deployed 2026-08-24** |
 | **Turnstile dev bypass** | A placeholder token that disables bot protection cannot ship to a public listing. | Known, `README.md` "Known simplifications" |
 | **Own domain** | Play's TWA verifies ownership via `/.well-known/assetlinks.json`; both stores want a support URL and a privacy URL that look like a product, not `*.netlify.app`. | Not bought |
 | **Privacy policy + terms at public URLs** | Mandatory for both stores, and they must match what the app really collects. | Drafts exist at `/legal/*`, unreviewed |
 | **Legal review** | The drafts have never been read by a lawyer, and the app collects **allergy and dietary data** — GDPR Article 9 special category. Both stores make you declare this. | Open |
-| **In-app account deletion** | Google Play requires an in-app path *and* a web URL to request deletion. Apple guideline 5.1.1(v) requires deletion from inside the app. Not "email us". | **Not built, and not on any list yet** |
+| **In-app account deletion** | Google Play requires an in-app path *and* a web URL to request deletion. Apple guideline 5.1.1(v) requires deletion from inside the app. Not "email us". | Not built. Now on the list, with the data model reviewed and the blocker found — **§10** |
 | **Outbound email** | A password reset or an invite that silently fails is a review rejection and a support burden. | Blocked on a provider key |
 | **Real icons + store assets** | Icons at every size, a 512×512 store icon, a feature graphic, screenshots per device class. | Placeholders |
 | **UGC obligations** | The moment free-text chat opens, both stores require: a way to **report** content, a way to **block** a user, published moderation terms, and a contact. Canned templates today = safe. Free-text = this is required *before* it ships. | Chat is templates-only today |
@@ -310,10 +310,11 @@ Each phase is only worth starting if the previous one landed. Durations
 are part-time-evenings estimates, and the calendar is longer than the
 effort wherever someone else is in the loop.
 
-**Phase 0 — make it real (2–4 weeks).** Deploy migrations `0015`→`0039`.
-Buy the domain, point Netlify at it. Wire the email provider. Remove the
-Turnstile bypass. Build **account deletion**. Run the legal pages past
-somebody qualified. Draw the real icons.
+**Phase 0 — make it real (2–4 weeks).** ~~Deploy the migrations~~ (done,
+2026-08-24). Buy the domain, point Netlify at it. Wire the email provider.
+Remove the Turnstile bypass. Build **account deletion** (§10 — the largest
+remaining item, and a schema change). Run the legal pages past somebody
+qualified. Draw the real icons.
 *Gate: a stranger can sign up, run a dinner, and delete their account.*
 
 **Phase 1 — the private APK (3–5 days).** Bubblewrap, assetlinks,
@@ -341,11 +342,117 @@ target API level. Half a day. Forever.
 
 ---
 
+---
+
+## 10. Personal data: where it is, what it does, and what deletion touches
+
+A store listing forces two things that need the same piece of homework: an
+honest **data safety / privacy label**, and a working **delete my account**.
+Both need to know exactly what the database holds about a person. This is
+that map, read off the migrations, plus the design it implies.
+
+### Where personal data actually lives
+
+| Where | What it holds | Sensitivity |
+|---|---|---|
+| `auth.users` (Supabase-managed) | Email, password hash, sign-in timestamps | Identifying |
+| `profiles` | `display_name`, `avatar_url`, `locale`, and an **`anonymised_at` column that nothing writes to yet** | Identifying |
+| `dietary_entries` | Allergies, diets, dislikes, free-text `note` | **GDPR Art. 9 special category** |
+| `round_members` | `secret_name`, join/leave/removal timestamps, `board_seen_at` | Pseudonymous |
+| `rounds` | `host_id`, plus `location`, `city`, `notes`, `dinner_at` — where and when real people met | Identifying by inference |
+| `briefs`, `brief_ingredients` | Free text one player wrote *for another* | Content, pseudonymous |
+| `messages`, `round_messages` | Author links; canned templates only today | Pseudonymous — **changes the day free-text chat ships** |
+| `ballots`, `ballot_items` | `voter_id` — who voted, and how they ranked | Pseudonymous |
+| `results`, `awards`, `manual_tally` | Aggregates only; `manual_tally` deliberately counts hands, never who raised them | Not personal |
+| `invites` | A nullable **`email` column**, legacy since in-app invitations (`0019`) replaced it | Identifying, probably dead |
+| `round_invitations` | `profile_id`, `invited_by` — cascades on profile delete | Pseudonymous |
+| `audit_log` | `actor_id` and a free-form `payload jsonb` | **Unknown until audited** — a jsonb blob cannot be declared honestly to a store without reading what goes into it |
+| `turnstile_tickets` | `subject`, which can be an email. Rows expire after 10 minutes but **nothing deletes them** | Identifying, and accumulating |
+
+Two of those rows are jobs in themselves: **audit what `audit_log.payload`
+actually carries** before writing any privacy label, and **give
+`turnstile_tickets` a cleanup** — an expiry that no job enforces is a
+retention policy that doesn't exist.
+
+### The blocker: deleting a user is currently impossible
+
+`profiles.id references auth.users (id) on delete cascade`, and
+`dietary_entries` cascades from `profiles`. So far so good. But
+`round_members.profile_id`, `rounds.host_id`, `invites.created_by`,
+`round_invitations.invited_by` and `audit_log.actor_id` reference profiles
+with **no cascade at all**.
+
+The consequence, concretely: calling Supabase's delete-user on anybody who
+has ever joined a round fails on a foreign key. "Delete my account" is not
+a button waiting to be wired — it needs a schema decision first.
+
+### Why hard deletion is the wrong answer anyway
+
+A round is not one person's data. Cascading a player away would take their
+pairings, their brief, their ballot and their place in the chain with them
+— and destroy the record of an evening that seven other people also lived.
+Their brief is a thing they wrote *for someone else*, sitting in that
+person's history.
+
+The standard resolution applies: **anonymise irreversibly, and hard-delete
+only what is genuinely theirs alone.** Once the link to a person is severed
+beyond recovery, what remains is no longer personal data, and that
+satisfies erasure. The unused `anonymised_at` column says this was the
+original intention.
+
+### The three ways out
+
+| Option | What it means | Verdict |
+|---|---|---|
+| **A — scrub in place** | Keep both rows. Blank the auth user's email to an unroutable value and ban it; overwrite `display_name` with a neutral token; null the avatar; stamp `anonymised_at`. | **Recommended.** Smallest change, no FK surgery, nothing else in the app has to learn a new shape. |
+| **B — split identity** | `profiles` stops being keyed by the auth id and gains a nullable `auth_user_id`, so the auth row can be deleted outright. | Cleanest model, worst refactor — every RLS policy compares `auth.uid()` to a profile id today. |
+| **C — cascade everything** | Make the member and round FKs cascade or null. | **No.** This is the option that deletes other people's dinners. |
+
+### What "delete my account" would have to do, under A
+
+1. **Refuse or resolve first, don't silently break a live dinner.** Someone
+   hosting a round that hasn't reached `RESULTS` has to hand it over or
+   cancel it; a player in an in-flight round leaves it first. Both paths
+   already exist — `leave_round` (`0004`) and `remove_member` with the
+   host's choice of what a departure costs (`0016`). Deletion should reuse
+   them, not invent a second way to tear a chain.
+2. **Hard-delete `dietary_entries`.** Art. 9 data, useful to nobody else,
+   no reason to keep a trace.
+3. **Anonymise the profile**, stamp `anonymised_at`, neutralise the auth
+   row so the address can never be used to sign in or be mailed again.
+4. **Leave the round record standing** — members, briefs, ballots, results.
+   Past rounds then show a neutral "former guest" where a name used to be,
+   including in the final reveal. That is a product decision and it belongs
+   in the privacy policy in plain words, not as a surprise.
+5. **A disclosed grace period** (30 days is the norm, and both stores allow
+   it) so a mis-tap is recoverable, then irreversible.
+6. **A public web URL** that starts the same process, because Google
+   requires one that works without installing the app.
+7. **Backups.** Nightly dumps rotate; erasure propagates as they age out.
+   Say the rotation window in the policy rather than implying the data
+   vanishes everywhere the instant the button is pressed.
+
+### Open questions, worth deciding once
+
+- Does a deleted host's round keep its name and location, or does that get
+  neutralised too? (It identifies a place and a date, but it is also seven
+  other people's evening.)
+- Is the neutral token per-round (so an anonymised person isn't trivially
+  re-linkable across rounds by their `secret_name` history) or global?
+- Does free-text chat, when it ships, become deletable content on request —
+  and if so, does deleting it leave a tombstone in the thread?
+
+Effort, estimated: **3–5 days** for the RPC, the schema touch-ups, the
+settings screen and the web endpoint, plus the audit of `audit_log.payload`
+and the turnstile cleanup. It is the largest single item left in §1.
+
 ## 9. The short version
 
-- Getting on **Google Play costs $25 and no rewrite** — the PWA is already
-  the app. The expensive parts are the 12-tester clock, an honest data
-  safety declaration about allergy data, and account deletion.
+- Getting on **Google Play costs $25 once, with no annual fee and no
+  rewrite** — the PWA is already the app. The expensive parts are the
+  12-tester clock, an honest data safety declaration about allergy data,
+  and account deletion, which §10 shows is a schema change and not a
+  button.
 - **A downloadable APK is free and mostly a beta channel**, not a
   distribution strategy — no shell updates, Play Protect friction, and
   sideloading is being tightened.

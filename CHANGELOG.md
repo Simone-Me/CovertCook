@@ -8,9 +8,9 @@ there.
 
 ## Where to pick up
 
-Everything from 2026-08-22 onwards is **local only** — production is still
-on migration `0014`. Nothing has been deployed. Work is on the
-`redesign/drawers` branch, to be merged.
+Production is **up to date**: `0015` → `0045` were deployed on 2026-08-24
+and the client and the database agree again. The schema/client mismatch
+that made every RPC added since `0015` fail is closed.
 
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
@@ -24,6 +24,14 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    the three constraints any render has to meet, and the three questions
    still open (which objects, how many variants, single objects or one
    laid table).
+4. **Deleting an account** — missing entirely, and now on the critical path
+   for a store listing (both stores mandate it) as well as for GDPR. The
+   personal-data map, the foreign-key blocker that stops it being a plain
+   delete, and the three ways out are in `DISTRIBUTION.md` §10; the shape
+   recommended there is anonymise-in-place, hard-delete the dietary rows.
+5. **Distribution** — `DISTRIBUTION.md` covers the four routes (PWA, APK,
+   Play, App Store), the real costs, and why monetising is a later and
+   much more expensive decision than a store listing. Pro is deferred.
 
 **What the email work needs from you** (see also `.env.example`): a Resend
 API key, a verified sender domain, and a decision on the from-address.
