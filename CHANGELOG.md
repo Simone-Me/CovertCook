@@ -59,6 +59,22 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (13)
+
+**The eye is on the sign-in form too**, which is the screen where it matters
+most: signing up you are inventing a password and can retype it, signing in you
+are recalling one and a single invisible typo reads as "wrong password".
+
+Two differences from the two places a password is *chosen*, both deliberate.
+`autoComplete="current-password"` tells a manager to offer the saved one rather
+than generate a new one. And there is no minimum length — **the old
+`minLength={10}` was a latent lockout**: a sign-in form that enforces the
+current rule refuses to submit for anybody whose password predates it, and the
+browser blocks it before the server ever gets to say whether it was right. A
+sign-in form checks nothing; it asks.
+
+---
+
 ## 2026-08-24 (12)
 
 **Added: leaving a dinner** (`0050`), **and a bug in `0049` that review
