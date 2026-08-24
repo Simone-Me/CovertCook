@@ -37,7 +37,7 @@ export function SignInPage() {
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
         <div>
-          <label htmlFor="password">{t('auth.password')}</label>
+          <label htmlFor="password">{t('auth.passwordLabel')}</label>
           <input
             id="password"
             type="password"

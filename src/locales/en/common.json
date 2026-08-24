@@ -25,7 +25,18 @@
     "signIn": "Sign in",
     "signUp": "Create an account",
     "email": "Email",
-    "password": "Password",
+    "password": {
+      "show": "Show password",
+      "hide": "Hide password",
+      "again": "Type it again",
+      "rules": "At least {{classes}} characters with a number and a capital — or {{alone}} or more of anything, which is easier to remember and harder to guess.",
+      "tooWeak": "That password is not long enough yet. The rule is under the field.",
+      "mismatch": "The two do not match.",
+      "match": "They match.",
+      "choose": "Choose a new password",
+      "save": "Save the new password",
+      "changed": "Done. Your new password is in use."
+    },
     "displayName": "First name or nickname",
     "forgotPassword": "Forgot your password?",
     "resetPassword": "Reset password",
@@ -56,8 +67,10 @@
       "checking": "Checking…",
       "free": "Free — it is yours.",
       "taken": "Already taken. Try another one.",
-      "changeLater": "This is how everyone will know you. Changing it later is planned as part of Pro."
-    }
+      "changeLater": "This is how everyone will know you. Changing it later is planned as part of Pro.",
+      "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
+    },
+    "passwordLabel": "Password"
   },
   "dietary": {
     "title": "Your dietary restrictions",
@@ -742,5 +755,16 @@
     "pending": "Your account is scheduled for deletion on {{date}}. Nothing has been erased yet.",
     "keepMyAccount": "Keep my account after all",
     "hostingBlocks": "You are running a dinner that has not finished. Hand it to somebody else or cancel it first — a table cannot lose the person organising it halfway through."
+  },
+  "welcome": {
+    "title": "Welcome to CovertCook",
+    "lead": "The app for organising a dinner with your friends and cooking it together — except nobody chooses their own dish.",
+    "how": [
+      "Somebody sets up a dinner and invites the table.",
+      "Each person is secretly given another person to cook for, and writes them a recipe.",
+      "Nobody knows who wrote theirs. Everyone cooks what they were given and brings it.",
+      "You eat, you rank the dishes, and only then does everyone find out who chose what."
+    ],
+    "next": "Start by creating a dinner, or join one with a code somebody sent you. A guided example dinner is coming here soon."
   }
 }

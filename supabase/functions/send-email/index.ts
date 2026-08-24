@@ -113,7 +113,11 @@ Deno.serve(async (req) => {
   const metaLocale = payload.user.user_metadata?.locale
   const locale: EmailLocale = metaLocale === 'fr' ? 'fr' : 'en'
 
-  const { subject, html, text } = authEmail(action, { url, locale })
+  // Where the logo is fetched from. Falls back to the template's own default,
+  // so a missing secret costs nothing.
+  const appUrl = Deno.env.get('APP_BASE_URL') ?? undefined
+
+  const { subject, html, text } = authEmail(action, { url, locale, appUrl })
 
   const res = await fetch('https://api.resend.com/emails', {
     method: 'POST',

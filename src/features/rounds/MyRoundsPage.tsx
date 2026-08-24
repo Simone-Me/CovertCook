@@ -132,7 +132,24 @@ export function MyRoundsPage() {
 
       {isLoading && <p className="muted">…</p>}
 
-      {rounds && rounds.length === 0 && <p className="muted">{t('app.tagline')}</p>}
+      {/* First run, and the only screen where the app has to explain itself.
+          A muted one-line tagline was doing that job badly: somebody who has
+          just made an account and sees an empty list needs to know what the
+          thing is for before they are asked to press "create". The guided
+          demo dinner that will eventually live here is a later job — this is
+          the words, not the tour. */}
+      {rounds && rounds.length === 0 && (
+        <div className="card stack welcome">
+          <h2>{t('welcome.title')}</h2>
+          <p>{t('welcome.lead')}</p>
+          <ol className="howto__steps">
+            {(t('welcome.how', { returnObjects: true }) as string[]).map((step) => (
+              <li key={step}>{step}</li>
+            ))}
+          </ol>
+          <p className="muted">{t('welcome.next')}</p>
+        </div>
+      )}
 
       <div className="stack">
         {current.map((r) => (

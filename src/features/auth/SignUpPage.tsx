@@ -5,6 +5,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ConfirmEmailNotice } from './ConfirmEmailNotice'
 import { Turnstile } from '../../components/Turnstile'
+import { PasswordField } from '../../components/PasswordField'
+import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/password'
 import { useAuth } from '../../lib/auth'
 import {
   completeSignup,
@@ -31,6 +33,7 @@ export function SignUpPage() {
   )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordAgain, setPasswordAgain] = useState('')
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
@@ -74,6 +77,14 @@ export function SignUpPage() {
 
   async function onAccountSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!checkPassword(password).valid) {
+      setError(t('auth.password.tooWeak'))
+      return
+    }
+    if (password !== passwordAgain) {
+      setError(t('auth.password.mismatch'))
+      return
+    }
     if (!acceptedTerms) {
       setError(t('auth.mustAcceptTerms'))
       return
@@ -163,6 +174,12 @@ export function SignUpPage() {
     }
   }
 
+  // Reusing the field-status colours the name check introduced: green when a
+  // rule is met, red when it is actively wrong, silent while nothing has been
+  // typed. Nobody should be told they are wrong before they have started.
+  const passwordState = !password ? 'idle' : checkPassword(password).valid ? 'free' : 'taken'
+  const confirmState = !passwordAgain ? 'idle' : password === passwordAgain ? 'free' : 'taken'
+
   if (step === 'confirm-email') {
     return <ConfirmEmailNotice email={email} />
   }
@@ -177,6 +194,10 @@ export function SignUpPage() {
         <form onSubmit={onDietarySubmit} className="stack">
           <div>
             <label htmlFor="displayName">{t('auth.displayName')}</label>
+            {/* The one place these two names can be confused, so it is said
+                here rather than discovered mid-dinner: this is the person,
+                the secret name is the player. */}
+            <p className="muted">{t('auth.name.whatItIs')}</p>
             <input
               id="displayName"
               required
@@ -265,17 +286,35 @@ export function SignUpPage() {
           <label htmlFor="email">{t('auth.email')}</label>
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
-        <div>
-          <label htmlFor="password">{t('auth.password')}</label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={10}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        <PasswordField
+          id="password"
+          label={t('auth.passwordLabel')}
+          value={password}
+          onChange={setPassword}
+          describedBy="password-rules"
+        />
+        {/* The rules, before they are broken rather than after. Two routes,
+            both stated, because "at least one uppercase" on its own teaches
+            people to end their password with an exclamation mark. */}
+        <p id="password-rules" className={`field-status is-${passwordState}`}>
+          {t('auth.password.rules', { classes: MIN_WITH_CLASSES, alone: LONG_ENOUGH_ALONE })}
+        </p>
+
+        <PasswordField
+          id="password-again"
+          label={t('auth.password.again')}
+          value={passwordAgain}
+          onChange={setPasswordAgain}
+          allowPaste={false}
+          describedBy="password-again-status"
+        />
+        <p id="password-again-status" className={`field-status is-${confirmState}`}>
+          {confirmState === 'taken'
+            ? t('auth.password.mismatch')
+            : confirmState === 'free'
+              ? t('auth.password.match')
+              : ''}
+        </p>
         {/* Consent has to be given, not assumed. A pre-ticked box or a line
             of small print saying "by continuing you agree" is not agreement —
             and this is the only moment where asking is honest, because after
@@ -321,7 +360,16 @@ export function SignUpPage() {
         </label>
 
         <Turnstile onVerify={setCaptchaToken} />
-        <button type="submit" disabled={submitting || !acceptedTerms || !acceptedAllergies}>
+        <button
+          type="submit"
+          disabled={
+            submitting ||
+            !acceptedTerms ||
+            !acceptedAllergies ||
+            passwordState !== 'free' ||
+            confirmState !== 'free'
+          }
+        >
           {t('auth.signUp')}
         </button>
       </form>

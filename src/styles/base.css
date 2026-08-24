@@ -312,3 +312,35 @@ input.is-taken {
 .field-status.is-taken {
   color: var(--danger);
 }
+
+/* The password field and its eye. The button must not stretch to the input's
+   full width the way a .row child otherwise would, and the input loses its
+   own bottom margin so the rule underneath sits against the field it
+   describes rather than floating below a gap. */
+.password-row {
+  align-items: stretch;
+  margin-bottom: 6px;
+}
+
+.password-row input {
+  margin-bottom: 0;
+}
+
+.password-row .password-reveal {
+  flex: 0 0 auto;
+  padding: 0 12px;
+  font-size: 18px;
+  line-height: 1;
+}
+
+/* First-run panel. Slightly warmer than a plain card: it is the one moment
+   the app introduces itself, and it should read as an invitation rather than
+   as an empty state. */
+.welcome {
+  background: var(--bg-elevated);
+  border-color: var(--accent);
+}
+
+.welcome h2 {
+  margin: 0;
+}

@@ -31,7 +31,11 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
 5. **A public deletion request URL** — the in-app path is built (`0049`);
    Google Play also wants a page reachable without installing the app. A form
    and an inbox, not a schema change.
-6. **Distribution** — `DISTRIBUTION.md` covers the four routes (PWA, APK,
+6. **A guided demo dinner** on the first-run panel — pre-filled players,
+   pop-up arrows pointing at the next control, running through to the vote and
+   the results, so the app can be understood without an evening being spent.
+   The panel that will hold it exists; the tour does not.
+7. **Distribution** — `DISTRIBUTION.md` covers the four routes (PWA, APK,
    Play, App Store), the real costs, and why monetising is a later and
    much more expensive decision than a store listing. Pro is deferred.
 
@@ -52,6 +56,63 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-08-24 (11)
+
+**Added: password rules that prefer length, the missing half of the password
+reset, a first-run panel, and the real mark on the mail.**
+
+*Two ways to be long enough.* Fourteen characters with a digit and a capital,
+**or** twenty-one of anything at all. The second route exists because a rule
+that forbids `the cat sat on the fridge again` while allowing `Abcd1234!` has
+it backwards: length is what costs an attacker time, and a passphrase is both
+stronger and easier to remember. Stated under the field before it is broken
+rather than after, and the same green/red the name check uses.
+
+*The eye, and what is blocked.* The field starts masked and can be revealed —
+hiding what somebody types on their own phone guards against a shoulder that is
+usually not there, at the price of invisible typos, which is what pushes people
+towards shorter passwords. Copy and cut are blocked on both fields, because a
+password copied out of a form is a password in a clipboard history syncing to
+three devices. Paste is blocked **on the confirmation only**: pasting there
+defeats the point of typing it twice, while pasting into the first field is how
+a password manager offers a generated one. Managers that autofill raise no
+paste event and are unaffected either way.
+
+*Found while building it: the password reset had no second half.* `/reset`
+asked for an address and sent a mail; the link in that mail came back to the
+same page, which showed the request form again. There was nowhere to type a new
+password — the flow was a loop. The recovery session now switches the page into
+"choose a new password", detected both from the `PASSWORD_RECOVERY` event and
+from `type=recovery` still in the URL hash, because catching only one of those
+means showing somebody the request form for the third time.
+
+*The name field says which name it is.* Beside it, at sign-up: this is your
+real name, outside the game — how friends recognise you and how a host knows
+who is asking to join. You are never called it at a dinner; each dinner draws
+you its own secret name. One sentence in the only place the two can be
+confused.
+
+*A first-run panel instead of a tagline.* Somebody who has just made an account
+and sees an empty list needs to know what the app is for before being asked to
+press "create". Four lines: someone sets up a dinner, each person is secretly
+given somebody to cook for and writes them a recipe, nobody knows who wrote
+theirs, and only after the ranking does everyone find out. The guided demo
+dinner — pre-filled, with arrows, running all the way to the vote — is a
+separate and later job; this is the words, not the tour.
+
+*The mail carries the app's own mark.* The seal was the letters CC because
+images are blocked by default in most clients. It is now the real icon served
+from the app itself, on a red tile that is a background colour rather than part
+of the artwork — so a blocked image leaves a red seal reading "CovertCook",
+not a broken-image hole. The origin is overridable (`APP_BASE_URL`), so buying
+a domain does not mean editing a template.
+
+**Verified:** build and lint clean; all fourteen auth mails still render with
+subject, link in HTML and text, the logo present, no `undefined`, and the
+origin override producing no double slash.
 
 ---
 

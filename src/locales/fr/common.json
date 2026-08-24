@@ -25,7 +25,18 @@
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
     "email": "E-mail",
-    "password": "Mot de passe",
+    "password": {
+      "show": "Afficher le mot de passe",
+      "hide": "Masquer le mot de passe",
+      "again": "Retapez-le",
+      "rules": "Au moins {{classes}} caractères avec un chiffre et une majuscule — ou {{alone}} et plus de n’importe quoi, plus facile à retenir et plus dur à deviner.",
+      "tooWeak": "Ce mot de passe n’est pas encore assez long. La règle est sous le champ.",
+      "mismatch": "Les deux ne correspondent pas.",
+      "match": "Ils correspondent.",
+      "choose": "Choisissez un nouveau mot de passe",
+      "save": "Enregistrer le nouveau mot de passe",
+      "changed": "C’est fait. Votre nouveau mot de passe est actif."
+    },
     "displayName": "Prénom ou pseudo",
     "forgotPassword": "Mot de passe oublié ?",
     "resetPassword": "Réinitialiser le mot de passe",
@@ -56,8 +67,10 @@
       "checking": "Vérification…",
       "free": "Libre — il est à vous.",
       "taken": "Déjà pris. Essayez-en un autre.",
-      "changeLater": "C'est ainsi que tout le monde vous connaîtra. Le changer plus tard est prévu dans la version Pro."
-    }
+      "changeLater": "C'est ainsi que tout le monde vous connaîtra. Le changer plus tard est prévu dans la version Pro.",
+      "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
+    },
+    "passwordLabel": "Mot de passe"
   },
   "dietary": {
     "title": "Vos restrictions alimentaires",
@@ -742,5 +755,16 @@
     "pending": "Votre compte doit être supprimé le {{date}}. Rien n’a encore été effacé.",
     "keepMyAccount": "Finalement, je garde mon compte",
     "hostingBlocks": "Vous organisez un dîner qui n’est pas terminé. Confiez-le à quelqu’un d’autre ou annulez-le d’abord — une table ne peut pas perdre son organisateur en cours de route."
+  },
+  "welcome": {
+    "title": "Bienvenue dans CovertCook",
+    "lead": "L’application pour organiser un dîner entre amis et le cuisiner ensemble — sauf que personne ne choisit son propre plat.",
+    "how": [
+      "Quelqu’un crée un dîner et invite la table.",
+      "Chacun se voit attribuer en secret une autre personne pour qui cuisiner, et lui écrit une recette.",
+      "Personne ne sait qui a écrit la sienne. Chacun cuisine ce qu’on lui a donné et l’apporte.",
+      "On mange, on classe les plats, et c’est seulement là qu’on découvre qui a choisi quoi."
+    ],
+    "next": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé. Un dîner d’exemple guidé arrivera bientôt ici."
   }
 }

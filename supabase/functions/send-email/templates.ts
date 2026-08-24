@@ -51,7 +51,12 @@ export type EmailLocale = 'en' | 'fr'
 export interface AuthEmailInput {
   url: string
   locale?: EmailLocale
+  /** Where the logo is served from. Overridable so a preview or a future
+      domain does not have to hard-code the Netlify origin. */
+  appUrl?: string
 }
+
+const DEFAULT_APP_URL = 'https://covertcook.netlify.app'
 
 // Shared furniture: the same in every mail, so it is written once.
 const CHROME = {
@@ -227,6 +232,7 @@ export function authEmail(action: AuthEmailAction, input: AuthEmailInput) {
   const c = COPY[action][locale]
   const x = CHROME[locale]
   const url = input.url
+  const appUrl = (input.appUrl ?? DEFAULT_APP_URL).replace(/\/$/, '')
 
   const text = [c.heading, '', c.lead, '', url, '', x.ignore, '', x.spam, '', x.signoff, 'CovertCook'].join(
     '\n',
@@ -251,13 +257,25 @@ export function authEmail(action: AuthEmailAction, input: AuthEmailInput) {
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
              style="max-width:520px;background:${LINO};border:1px solid ${PIEGA};border-radius:4px;">
 
-        <!-- The wax seal, as a character rather than an image: images are
-             blocked by default in most clients, and a red disc that never
-             loads is a broken-looking hole at the top of the mail. -->
+        <!-- The real mark, on its own red ground.
+             Images are blocked by default in most clients, which is why the
+             tile is a background colour and not part of the artwork: when the
+             image does not load, what is left is a red seal with the word
+             CovertCook in it, rather than a broken-image hole. The src is
+             absolute because an email has no page to be relative to, and it
+             is the app's own icon, so it is never out of date with the app. -->
         <tr>
           <td align="center" style="padding:28px 28px 0;">
-            <div style="width:34px;height:34px;line-height:34px;border-radius:50%;background:${NAPPE};
-                        color:${LINO};font:700 15px Georgia,serif;">CC</div>
+            <table role="presentation" cellpadding="0" cellspacing="0" border="0"
+                   style="background:${NAPPE};border-radius:10px;">
+              <tr>
+                <td align="center" style="padding:8px;">
+                  <img src="${appUrl}/pwa-192x192.png" width="40" height="40" alt="CovertCook"
+                       style="display:block;width:40px;height:40px;border:0;outline:none;
+                              color:${LINO};font:700 13px Georgia,serif;">
+                </td>
+              </tr>
+            </table>
           </td>
         </tr>
 
