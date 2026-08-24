@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams, Link, Navigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Link, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
@@ -50,6 +50,20 @@ export function RoundSettingsPage() {
   const queryClient = useQueryClient()
 
   const { data: round, isLoading } = useRound(roundId)
+
+  // A link that names a field should arrive at that field. The browser cannot
+  // do it on its own here: the anchor does not exist yet when the URL is read,
+  // because the page is still waiting for the round — and the sections are
+  // folded, so scrolling to a closed one would land on a heading. Open it and
+  // then scroll, once there is something to scroll to.
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (!hash || !round) return
+    const target = document.querySelector(hash)
+    if (!target) return
+    target.closest('details')?.setAttribute('open', '')
+    target.scrollIntoView({ block: 'center' })
+  }, [hash, round])
   const { data: members } = useRoundMembers(roundId)
   const [location, setLocation] = useState<string | null>(null)
   const [city, setCity] = useState<string | null>(null)
@@ -267,8 +281,16 @@ export function RoundSettingsPage() {
             <dt>{t('rounds.voting.label')}</dt>
             <dd>
               {t(`rounds.voting.${round.voting_mode}`)}
-              {round.voting_mode === 'DISABLED' && (
+              {/* MANUAL arrived with 0040 and never got a line here, so the
+                  row printed its own key. The note underneath is the rule
+                  rather than a live state: the method is settled when the vote
+                  opens, and stays changeable until somebody has actually voted
+                  (0043, 0045) — which is a thing worth knowing before the
+                  evening, not a status to look up during it. */}
+              {round.voting_mode === 'DISABLED' ? (
                 <span className="fixed-note">{t('rounds.settings.votingNeverOn')}</span>
+              ) : (
+                <span className="fixed-note">{t('rounds.voting.chosenWhenOpening')}</span>
               )}
             </dd>
 
