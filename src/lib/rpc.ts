@@ -49,16 +49,47 @@ export async function displayNameAvailable(name: string): Promise<boolean> {
   return unwrap<boolean>(res)
 }
 
-// Asks the send-push function to tell everyone else in the round that it
-// moved. Deliberately not awaited at the call site and deliberately silent on
-// failure: the phase has already changed by the time this runs, and a dinner
-// must not appear to have failed to advance because a push service was slow.
-export async function notifyRound(roundId: string, kind: RoundStatus) {
+// The four moments that earn an interruption (0048). Everything else the round
+// does — dinner starting, a setting changed, a phase nudged back — is silent on
+// purpose: a notification nobody acts on teaches people to ignore the ones that
+// matter. The two remaining emails (password reset, address change) are Auth's
+// and are not part of this at all.
+export type NotifiedMoment = 'ASSIGNED' | 'BRIEF_RECEIVED' | 'VOTING' | 'RESULTS'
+
+const NOTIFIED_PHASES: Partial<Record<RoundStatus, NotifiedMoment>> = {
+  ASSIGNED: 'ASSIGNED',
+  VOTING: 'VOTING',
+  RESULTS: 'RESULTS',
+}
+
+// Never awaited at the call site and silent on failure: the phase has already
+// changed by the time this runs, and a dinner must not look like it failed to
+// advance because a push service was slow. A phase nobody is notified about
+// does not even reach the network.
+export async function notifyRoundPhase(roundId: string, phase: RoundStatus) {
+  const moment = NOTIFIED_PHASES[phase]
+  if (!moment) return
+  await notify(roundId, moment)
+}
+
+// Sent by the author the moment they submit, because since 0035 the recipe
+// lands then rather than at a phase change. Who it reaches is resolved from the
+// chain server-side — the sender neither names their cook nor learns of them.
+export async function notifyMyCook(roundId: string) {
+  await notify(roundId, 'BRIEF_RECEIVED')
+}
+
+async function notify(roundId: string, kind: NotifiedMoment) {
   try {
     await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind } })
   } catch {
-    // Nothing to do here: the round moved, which is the part that mattered.
+    // Nothing to do here: the thing that mattered already happened.
   }
+}
+
+export async function setNotificationsEnabled(enabled: boolean) {
+  const res = await supabase.rpc('set_notifications_enabled', { p_enabled: enabled })
+  return unwrap(res)
 }
 
 // Web push subscriptions. Writes go through RPCs rather than a table policy

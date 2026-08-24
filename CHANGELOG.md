@@ -24,10 +24,10 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    the three constraints any render has to meet, and the three questions
    still open (which objects, how many variants, single objects or one
    laid table).
-4. **Email for the asynchronous moments** — push now covers the live ones
-   (`0047`), but only for people who switched it on. The invitation and the
-   "recipes are due" reminder still need mail that is not an auth mail:
-   `send-email` renders auth templates today and is the natural home for it.
+4. **The invitation, and reaching people who never switch push on** — the four
+   moments are covered (`0048`), but only for people who opted in. An invited
+   player who has never opened the app cannot be pushed to at all. That is the
+   mail that still has to be written, and `send-email` is the natural home.
 5. **Deleting an account** — missing entirely, and now on the critical path
    for a store listing (both stores mandate it) as well as for GDPR. The
    personal-data map, the foreign-key blocker that stops it being a plain
@@ -54,6 +54,70 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-08-24 (9)
+
+**Decided: the hook, four moments, and the Netlify origin.**
+
+*Mail is the hook, not the paste* (`send-email`). `supabase/email-templates/`
+stays as the bridge until it is deployed and as a way to open a mail in a
+browser and look at it, and the generated README now says so rather than
+leaving the choice open. The consequence that decided it: a dashboard box
+holds one language, and this app has two.
+
+*Mail shrank to what Auth owns.* Password reset and address change. Everything
+else that used to want an email is a notification now, which is the reason
+`ROADMAP.md` §1 has a "superseded" section rather than a quiet edit — the
+argument it made was right, and what changed underneath it was the platform,
+not the reasoning.
+
+*Four moments, and nothing else* (`0048`):
+
+| Moment | Who | When |
+|---|---|---|
+| Your cook has been chosen | the round, minus the host | `ASSIGNED` |
+| Your recipe has arrived | one cook | its author submits |
+| Voting is open | the round, minus the host | `VOTING`, **online ballots only** |
+| The results are in | the round, minus the host | `RESULTS` |
+
+Three of those are the Executive Chef announcing the round. The second is not,
+and that is the interesting one: since `0035` a recipe lands the moment its
+author submits, so hanging its notification on a phase change would rebuild
+exactly the stall `0035` removed. It is sent by the sender, at submit — and
+resolved through the chain, so the sender never names their cook and never
+learns who they reached. The text says nothing about who wrote it, and cannot:
+it is composed in the Edge Function, because a caller that supplies the words
+is a caller that can put a name on somebody's lock screen.
+
+A hand-counted round gets no voting push at all. Everyone is in the room and
+somebody is standing up to say it.
+
+Dinner starting, a settings change, a phase nudged backwards: silent. An
+unknown moment reaching `send-push` is answered with `skipped`, not with a
+generic notification — the app has decided what it interrupts people about,
+and "something happened" is not on the list.
+
+*One switch, all dinners, all devices.* The subscription rows are per browser
+because that is what the Push API gives us; the decision is now a column on
+`profiles`, so turning it off on the phone silences the laptop. Stated in the
+migration rather than discovered later: turning it back on anywhere revives
+both. Per-dinner preferences are v2, and the profile screen says so.
+
+*The origin is `https://covertcook.netlify.app`*, until a domain is bought. All
+three settings that have to agree — `VITE_APP_BASE_URL`, Site URL, Redirect
+URLs — are named with that value in README, because a mismatch between them is
+silent and surfaces only as a link that opens the wrong place.
+
+**Verified:** `0001` → `0048` replayed into a throwaway Postgres 16. A DRAFT
+brief notifies nobody (no doorbell before you have written anything); once
+submitted it reaches exactly the cook, in the cook's own language; the cook
+cannot reach themselves from their own seat; the account switch empties both
+audiences at once and refills them; and a MANUAL round reports its vote as not
+online while a LIVE one reports it as online. Grants re-checked with
+`has_function_privilege`: both audience functions and the vote-mode check are
+`service_role` only. Build and lint clean.
 
 ---
 

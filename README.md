@@ -162,7 +162,7 @@ env vars — not GitHub's. Site configuration → Environment variables:
 |---|---|---|
 | `VITE_SUPABASE_URL` | Supabase → Project Settings → API | Public |
 | `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | The anon/publishable key — intentionally public, same as it is in the frontend bundle |
-| `VITE_APP_BASE_URL` | the real deployed URL (e.g. `https://covertcook.netlify.app`) | **Not** `localhost` — that's the local-dev-only value in `.env.local` |
+| `VITE_APP_BASE_URL` | `https://covertcook.netlify.app` | The deployed origin, until a real domain is bought. **Not** `localhost` — that's the local-dev-only value in `.env.local` |
 | `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile dashboard | Until this is set, `Turnstile.tsx` falls back to a dev placeholder token that bypasses bot protection entirely (see "Known simplifications") — do not ship without a real key |
 | `VITE_VAPID_PUBLIC_KEY` | `npx web-push generate-vapid-keys` | Public by design. Empty is a valid state: the notifications switch reports itself unavailable instead of failing when pressed |
 
@@ -188,11 +188,16 @@ still set to `http://localhost:5173` is therefore the whole explanation for a
 confirmation link that opens nothing: the template is innocent, and pasting a
 different one changes nothing.
 
-Fix all three together, or the symptom moves rather than goes:
+Fix all three together, or the symptom moves rather than goes. Until a real
+domain is bought, all three are the Netlify origin:
 
-1. Netlify → `VITE_APP_BASE_URL` = the deployed origin.
-2. Supabase → **Site URL** = the same origin.
-3. Supabase → **Redirect URLs** = that origin (`https://…/**`).
+1. Netlify → `VITE_APP_BASE_URL` = `https://covertcook.netlify.app`
+2. Supabase → **Site URL** = `https://covertcook.netlify.app`
+3. Supabase → **Redirect URLs** = `https://covertcook.netlify.app/**`
+
+When the domain does arrive, these three change together and in that order —
+a mismatch between them is silent, and shows up only as a link that opens the
+wrong place.
 
 ### Which mail is sent by whom
 
@@ -207,8 +212,9 @@ ways to replace those, and the repo supports both:
 | Transport | Auth → SMTP → Resend | Auth → our function → Resend's API |
 | Setup | Copy two fields per template | Deploy, three secrets, one switch |
 
-The hook is the one worth having; the pasted files are the bridge until it is
-deployed. Turning it on:
+**Decided: the hook.** The generated files stay in the repo as the bridge
+until it is deployed, and as a way to open a mail in a browser and look at it —
+they are not the route. Turning the hook on:
 
 1. `npx supabase functions deploy send-email --no-verify-jwt` — Auth calls it
    with a webhook signature, not a user token, so a JWT gate rejects every call.
@@ -224,6 +230,29 @@ two in daily use.
 ---
 
 ## Push notifications
+
+Mail is now only what Auth owns — **password reset and address change**.
+Everything else that used to want an email is a notification instead.
+
+**The four moments, and nothing else** (`0048`):
+
+| Moment | Who gets it | Sent when |
+|---|---|---|
+| Your cook has been chosen | everyone in the round but the host | the round reaches `ASSIGNED` |
+| Your recipe has arrived | the one cook it was written for | its author submits — `0035` lands it then, so waiting for a phase would rebuild the stall `0035` removed |
+| Voting is open | everyone but the host | the round reaches `VOTING`, **and only for an online ballot** — a hand-counted one is announced out loud by somebody standing up |
+| The results are in | everyone but the host | the round reaches `RESULTS` |
+
+Dinner starting, a settings change, a phase nudged backwards: silent. A
+notification nobody acts on is how an app teaches people to ignore the ones
+that matter. And "your recipe has arrived" never says who wrote it — the text
+is composed in the Edge Function precisely so no caller can put a name on a
+lock screen.
+
+The switch in the profile is **one switch, all dinners, all devices**. The
+subscription rows are per browser because that is what the Push API gives us,
+but the decision is an account-level column, so turning it off on the phone
+silences the laptop too. Per-dinner preferences are v2.
 
 Web push, in the app as installed from the browser — no store involved.
 Android delivers it in a tab or installed; **iOS only in an app added to the

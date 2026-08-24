@@ -54,6 +54,27 @@ device with no install and no permission dance, and the single moment
 push would win is the moment people are sitting together anyway. Revisit
 push only if async reminders measurably fail to land.
 
+### Superseded, 2026-08-24: push shipped, and email shrank
+
+What changed is not the argument but the platform. The app is installed on a
+home screen, which is the prerequisite iOS imposes, so push works with no
+store listing — and the table above was reasoning about a channel that then
+cost a subscription table, a permission dance and a rewrite of the service
+worker. It now costs none of those, because they exist.
+
+The split as built (`0047`, `0048`):
+
+- **Push** carries the four moments worth interrupting for: your cook is
+  chosen, the recipe you must cook has arrived, online voting opens, results
+  are published. One account-level switch, all dinners, all devices.
+- **Email** is now only what Auth owns — password reset and address change.
+- **Still unbuilt, and still email-shaped**: the invitation, and reaching
+  people who never switch notifications on. The "somebody says it out loud"
+  row survives intact: the dinner itself is not notified about.
+- **Per-dinner notification preferences are v2**, and deliberately: they need
+  a per-round row and somewhere in the round UI to set it, and neither is
+  worth building before anyone has been annoyed by the global switch.
+
 ---
 
 ## 2. A paid tier

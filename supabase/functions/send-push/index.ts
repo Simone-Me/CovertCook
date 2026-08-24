@@ -30,20 +30,23 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 import webpush from 'npm:web-push@3.6.7'
 
-type Kind = 'ASSIGNED' | 'BRIEFS_CLOSED' | 'DINNER' | 'VOTING' | 'RESULTS' | 'MOVED'
+// The four moments, and nothing else (0048). A notification nobody acts on is
+// how an app teaches people to ignore it.
+type Kind = 'ASSIGNED' | 'BRIEF_RECEIVED' | 'VOTING' | 'RESULTS'
+
+const KINDS: Kind[] = ['ASSIGNED', 'BRIEF_RECEIVED', 'VOTING', 'RESULTS']
 
 const COPY: Record<Kind, Record<'en' | 'fr', { title: string; body: string }>> = {
   ASSIGNED: {
     en: { title: 'Your cook has been chosen', body: 'Open the envelope and write their recipe.' },
     fr: { title: 'Votre cuisinier est tiré', body: 'Ouvrez l’enveloppe et écrivez sa recette.' },
   },
-  BRIEFS_CLOSED: {
-    en: { title: 'The briefs are in', body: 'Yours is waiting. Time to shop.' },
-    fr: { title: 'Les consignes sont écrites', body: 'La vôtre vous attend. Aux courses.' },
-  },
-  DINNER: {
-    en: { title: 'It is dinner', body: 'The table is open.' },
-    fr: { title: 'C’est le dîner', body: 'La table est ouverte.' },
+  // Says nothing about who wrote it, and cannot: the text is composed here,
+  // never passed in, and the whole game depends on that name staying unknown
+  // until the reveal.
+  BRIEF_RECEIVED: {
+    en: { title: 'Your recipe has arrived', body: 'Somebody has decided what you are cooking.' },
+    fr: { title: 'Votre recette est arrivée', body: 'Quelqu’un a décidé ce que vous cuisinez.' },
   },
   VOTING: {
     en: { title: 'Voting is open', body: 'Rank the dishes before the plates are cleared.' },
@@ -52,10 +55,6 @@ const COPY: Record<Kind, Record<'en' | 'fr', { title: string; body: string }>> =
   RESULTS: {
     en: { title: 'The results are in', body: 'And so is the name of whoever wrote your brief.' },
     fr: { title: 'Les résultats sont là', body: 'Et le nom de qui a écrit votre consigne aussi.' },
-  },
-  MOVED: {
-    en: { title: 'Your dinner moved on', body: 'Something changed at the table.' },
-    fr: { title: 'Votre dîner a avancé', body: 'Quelque chose a changé à table.' },
   },
 }
 
@@ -91,11 +90,15 @@ Deno.serve(async (req) => {
   }
   if (!body.round_id) return fail(400, 'round_id is required')
 
-  const kind: Kind = (['ASSIGNED', 'BRIEFS_CLOSED', 'DINNER', 'VOTING', 'RESULTS'] as const).includes(
-    body.kind as never,
-  )
-    ? (body.kind as Kind)
-    : 'MOVED'
+  // An unknown moment is not a generic notification, it is nothing: the caller
+  // asked for something this app has decided not to interrupt people about.
+  if (!KINDS.includes(body.kind as Kind)) {
+    return new Response(JSON.stringify({ sent: 0, skipped: 'not a notified moment' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
+  }
+  const kind = body.kind as Kind
 
   // As the caller, with the caller's own permissions.
   const asCaller = createClient(url, anonKey, {
@@ -105,20 +108,54 @@ Deno.serve(async (req) => {
   const uid = userData.user?.id
   if (!uid) return fail(401, 'not authenticated')
 
-  const { data: isHost, error: hostError } = await asCaller.rpc('is_round_host', {
-    p_round_id: body.round_id,
-    p_uid: uid,
-  })
-  if (hostError) return fail(500, hostError.message)
-  if (!isHost) return fail(403, 'only the host of this round can send this')
-
-  // From here on, with the service key and only for the audience.
   const asService = createClient(url, serviceKey)
-  const { data: audience, error: audienceError } = await asService.rpc('push_audience_for_round', {
-    p_round_id: body.round_id,
-    p_actor: uid,
-  })
-  if (audienceError) return fail(500, audienceError.message)
+
+  // Two audiences, two different questions about who may speak.
+  //
+  //   BRIEF_RECEIVED is one person's message to the cook they wrote for. The
+  //   sender may send it, and never learns who they reached: the chain
+  //   resolves the recipient, the caller does not name them.
+  //
+  //   The other three are the Executive Chef announcing the round to everyone
+  //   in it, so the caller has to actually be the host.
+  let audience: unknown
+  if (kind === 'BRIEF_RECEIVED') {
+    const { data, error } = await asService.rpc('push_audience_for_my_cook', {
+      p_round_id: body.round_id,
+      p_sender: uid,
+    })
+    if (error) return fail(500, error.message)
+    audience = data
+  } else {
+    const { data: isHost, error: hostError } = await asCaller.rpc('is_round_host', {
+      p_round_id: body.round_id,
+      p_uid: uid,
+    })
+    if (hostError) return fail(500, hostError.message)
+    if (!isHost) return fail(403, 'only the host of this round can send this')
+
+    // A hand-counted vote is announced out loud by somebody standing up. A
+    // push there advertises something already happening in the room.
+    if (kind === 'VOTING') {
+      const { data: online, error: modeError } = await asService.rpc('round_vote_is_online', {
+        p_round_id: body.round_id,
+      })
+      if (modeError) return fail(500, modeError.message)
+      if (!online) {
+        return new Response(JSON.stringify({ sent: 0, skipped: 'this round votes by hand' }), {
+          status: 200,
+          headers: { 'Content-Type': 'application/json' },
+        })
+      }
+    }
+
+    const { data, error } = await asService.rpc('push_audience_for_round', {
+      p_round_id: body.round_id,
+      p_actor: uid,
+    })
+    if (error) return fail(500, error.message)
+    audience = data
+  }
 
   webpush.setVapidDetails(subject, publicKey, privateKey)
 

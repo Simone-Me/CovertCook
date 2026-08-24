@@ -17,7 +17,7 @@ import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import {
   advancePhase,
-  notifyRound,
+  notifyRoundPhase,
   approveMember,
   rejectMember,
   removeMember,
@@ -250,7 +250,7 @@ export function RoundHomePage() {
     setError(null)
     try {
       await advancePhase(roundId, nextPhase)
-      void notifyRound(roundId, nextPhase)
+      void notifyRoundPhase(roundId, nextPhase)
       queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
@@ -295,7 +295,7 @@ export function RoundHomePage() {
     setError(null)
     try {
       await advancePhase(roundId, 'VOTING')
-      void notifyRound(roundId, 'VOTING')
+      void notifyRoundPhase(roundId, 'VOTING')
       queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))

@@ -12,6 +12,7 @@ import {
   getMyBriefDraft,
   saveBriefDraft,
   submitBrief,
+  notifyMyCook,
   type BriefIngredient,
 } from '../../lib/rpc'
 
@@ -198,6 +199,9 @@ export function BriefEditorPage() {
     try {
       await save()
       await submitBrief(roundId)
+      // The recipe reaches its cook the instant it is submitted (0035), so the
+      // notification belongs here rather than at the next phase change.
+      void notifyMyCook(roundId)
       setSubmitted(true)
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''

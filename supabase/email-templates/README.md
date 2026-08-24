@@ -17,10 +17,11 @@ only one of them belongs to this folder.
 | Path to Resend | Auth → SMTP → Resend | Auth → our function → Resend API |
 | Editing a word | Paste again, ten times | Change the file, redeploy |
 
-Pasting is the fast route and it works. It is not the good one: the moment a
-French player gets English mail, the reason this file was generated from code
-rather than written in a textarea has been thrown away. Treat it as the bridge
-until the hook is deployed.
+**Decided: the hook.** Pasting is the fast route and it works, but the moment a
+French player gets English mail, the reason these files were generated from
+code rather than written in a textarea has been thrown away. This folder is the
+bridge until `send-email` is deployed — and a convenient way to open a mail in
+a browser and look at it. It is not the route.
 
 ## What to paste where
 

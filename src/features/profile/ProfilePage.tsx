@@ -46,11 +46,20 @@ export function ProfilePage() {
     }
   }, [])
 
+  // Two facts, one switch. The browser holds an address for this device; the
+  // account holds the decision, for every device and every dinner. Subscribed
+  // here but switched off there reads as off, because that is what the person
+  // asked for on whichever device they asked on.
+  const notificationsAllowed = profile?.notifications_enabled !== false
+  const shownPush: PushState | 'checking' =
+    push === null ? 'checking' : push === 'on' && !notificationsAllowed ? 'off' : push
+
   async function onTogglePush() {
     setError(null)
     setPushBusy(true)
     try {
-      setPush(push === 'on' ? await disablePush() : await enablePush())
+      setPush(shownPush === 'on' ? await disablePush() : await enablePush())
+      await refreshProfile()
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
@@ -163,12 +172,18 @@ export function ProfilePage() {
           never on load — a refusal cannot be taken back by the site, only by
           the person, in browser settings they will never find. */}
       <div className="card stack">
-        <p className="muted">{t(`push.state.${push ?? 'checking'}`)}</p>
-        {(push === 'on' || push === 'off') && (
+        <p className="muted">{t(`push.state.${shownPush}`)}</p>
+        {(shownPush === 'on' || shownPush === 'off') && (
           <button type="button" disabled={pushBusy} onClick={onTogglePush}>
-            {t(push === 'on' ? 'push.turnOff' : 'push.turnOn')}
+            {t(shownPush === 'on' ? 'push.turnOff' : 'push.turnOn')}
           </button>
         )}
+        <ul className="muted">
+          {(t('push.moments', { returnObjects: true }) as string[]).map((moment) => (
+            <li key={moment}>{moment}</li>
+          ))}
+        </ul>
+        <p className="muted">{t('push.perRound')}</p>
       </div>
 
       <h2>{t('dietary.title')}</h2>

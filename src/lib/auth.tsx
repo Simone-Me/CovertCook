@@ -8,6 +8,7 @@ export interface Profile {
   avatar_url: string | null
   locale: string
   has_no_restrictions: boolean
+  notifications_enabled: boolean
 }
 
 interface AuthState {

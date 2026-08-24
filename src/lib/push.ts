@@ -1,4 +1,4 @@
-import { savePushSubscription, forgetPushSubscription } from './rpc'
+import { savePushSubscription, forgetPushSubscription, setNotificationsEnabled } from './rpc'
 
 /**
  * Web push, for the app as it is actually installed.
@@ -103,6 +103,11 @@ export async function enablePush(): Promise<PushState> {
     userAgent: navigator.userAgent,
   })
 
+  // The device now has an address; the account says whether to use it. Turning
+  // it on here turns it on for every dinner and every device you own (0048) —
+  // which is what the switch promises, so it has to actually do it.
+  await setNotificationsEnabled(true)
+
   return 'on'
 }
 
@@ -114,6 +119,11 @@ export async function enablePush(): Promise<PushState> {
  */
 export async function disablePush(): Promise<PushState> {
   if (!pushSupported()) return 'unsupported'
+
+  // The account switch goes first and unconditionally: somebody pressing "off"
+  // means it everywhere, including on the devices they are not holding, and
+  // including when this browser turns out to have no subscription to drop.
+  await setNotificationsEnabled(false)
 
   const registration = await navigator.serviceWorker.ready
   const subscription = await registration.pushManager.getSubscription()
