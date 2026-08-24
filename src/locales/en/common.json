@@ -369,6 +369,17 @@
       "keeps": "Nothing is deleted. Every recipe already written and every message already sent is kept, and comes back the moment sign-ups close again.",
       "pauses": "While the door is open, chefs cannot write or read recipes. That resumes as soon as you move forward.",
       "changes": "Two things do change: if you chose specific courses, their number has to match the new number of chefs — and fitting the newcomer into the chain means one chef ends up cooking a different recipe than the one they had."
+    },
+    "leave": {
+      "now": "Leave this dinner",
+      "ask": "Ask to be let out",
+      "confirmNow": "Leave this dinner?",
+      "confirmAsk": "Ask the Executive Chef to let you out?",
+      "whyNow": "Nobody has been assigned anybody yet, so you can simply go. The dinner moves to your archive and your seat is free for somebody else.",
+      "whyAsk": "The recipes are already handed out, and three other people’s evening is built on your pairing. The Executive Chef decides what your leaving costs: reconnect the chain, or one dish fewer. Until they answer, you are still cooking.",
+      "asked": "You have asked to be let out. The Executive Chef has been told and will decide — until then nothing has changed and you are still expected at the table.",
+      "stayAfterAll": "Never mind, I’m staying",
+      "requested": "asked to leave"
     }
   },
   "briefs": {
@@ -738,6 +749,15 @@
       "needs-install": "Add CovertCook to your home screen and open it from there. On iPhone and iPad, notifications only exist in the installed app — this is Apple’s rule, not ours.",
       "unsupported": "This browser has no notification support. Nothing is broken; it simply cannot.",
       "unconfigured": "Not available on this deployment yet."
+    },
+    "aside": {
+      "checking": "…",
+      "on": "On",
+      "off": "Off",
+      "denied": "Blocked",
+      "needs-install": "Needs the installed app",
+      "unsupported": "Unavailable",
+      "unconfigured": "Unavailable"
     }
   },
   "account": {

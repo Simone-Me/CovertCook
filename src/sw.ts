@@ -19,12 +19,18 @@
 // tap on it opens.
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
+import { precacheAndRoute, cleanupOutdatedCaches, type PrecacheEntry } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
 import { NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
-declare const self: ServiceWorkerGlobalScope
+// `__WB_MANIFEST` is a build-time placeholder the plugin replaces with the
+// precache list, not part of ServiceWorkerGlobalScope. It type-checks today
+// through ambient types, which is a thing to depend on rather than to state —
+// so it is stated.
+declare const self: ServiceWorkerGlobalScope & {
+  __WB_MANIFEST: (string | PrecacheEntry)[]
+}
 
 self.skipWaiting()
 clientsClaim()

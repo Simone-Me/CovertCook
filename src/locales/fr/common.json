@@ -369,6 +369,17 @@
       "keeps": "Rien n'est effacé. Chaque recette déjà écrite et chaque message déjà envoyé sont conservés, et reviennent dès que les inscriptions se referment.",
       "pauses": "Pendant que la porte est ouverte, les chefs ne peuvent ni écrire ni lire les recettes. Cela reprend dès que vous avancez.",
       "changes": "Deux choses changent : si vous avez choisi des plats précis, leur nombre doit correspondre au nouveau nombre de chefs — et insérer le nouveau venu dans la chaîne fait qu'un chef se retrouve avec une autre recette que celle qu'il avait."
+    },
+    "leave": {
+      "now": "Quitter ce dîner",
+      "ask": "Demander à sortir",
+      "confirmNow": "Quitter ce dîner ?",
+      "confirmAsk": "Demander au Executive Chef de vous laisser sortir ?",
+      "whyNow": "Personne n’a encore été attribué à personne, vous pouvez donc simplement partir. Le dîner passe dans vos archives et votre place se libère.",
+      "whyAsk": "Les recettes sont déjà distribuées, et la soirée de trois autres personnes repose sur votre binôme. Le Executive Chef décide de ce que coûte votre départ : reconnecter la chaîne, ou un plat de moins. Tant qu’il n’a pas répondu, vous cuisinez toujours.",
+      "asked": "Vous avez demandé à sortir. Le Executive Chef est prévenu et décidera — d’ici là rien n’a changé et on vous attend toujours à table.",
+      "stayAfterAll": "Finalement, je reste",
+      "requested": "a demandé à sortir"
     }
   },
   "briefs": {
@@ -738,6 +749,15 @@
       "needs-install": "Ajoutez CovertCook à votre écran d’accueil et ouvrez-le depuis là. Sur iPhone et iPad, les notifications n’existent que dans l’application installée — c’est la règle d’Apple, pas la nôtre.",
       "unsupported": "Ce navigateur ne gère pas les notifications. Rien n’est cassé : il ne peut simplement pas.",
       "unconfigured": "Pas encore disponible sur ce déploiement."
+    },
+    "aside": {
+      "checking": "…",
+      "on": "Activées",
+      "off": "Désactivées",
+      "denied": "Bloquées",
+      "needs-install": "Nécessite l’app installée",
+      "unsupported": "Indisponible",
+      "unconfigured": "Indisponible"
     }
   },
   "account": {

@@ -59,6 +59,92 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (13)
+
+**The eye is on the sign-in form too**, which is the screen where it matters
+most: signing up you are inventing a password and can retype it, signing in you
+are recalling one and a single invisible typo reads as "wrong password".
+
+Two differences from the two places a password is *chosen*, both deliberate.
+`autoComplete="current-password"` tells a manager to offer the saved one rather
+than generate a new one. And there is no minimum length — **the old
+`minLength={10}` was a latent lockout**: a sign-in form that enforces the
+current rule refuses to submit for anybody whose password predates it, and the
+browser blocks it before the server ever gets to say whether it was right. A
+sign-in form checks nothing; it asks.
+
+---
+
+## 2026-08-24 (12)
+
+**Added: leaving a dinner** (`0050`), **and a bug in `0049` that review
+caught.**
+
+*The rule was already written; what was missing was the door and the receipt.*
+`leave_round` has always known that while the round is DRAFT/OPEN/LOCKED
+nobody depends on you — you go, and that is the end of it — and that once the
+lottery has run you are a link in a chain three other people's evening is built
+on, so leaving becomes a request the Executive Chef answers. There was no
+button anywhere in the app for either, and the post-assignment branch returned
+silently: you pressed, and the screen looked exactly as it had a second before.
+The same failure shape as the confirmation resend.
+
+So the request is stamped on the membership now, where both sides see it: the
+player is told it is waiting, the host sees who is asking **in their own
+roster**, next to the name, rather than by digging through the alerts page.
+Pressing it twice returns `ALREADY_REQUESTED` and raises no second alert —
+somebody who hears nothing back will press again, and that is a person being
+reasonable. Withdrawing is one button, and it resolves the host's alert too,
+because a question with nobody behind it is worse than no question.
+
+*A round you left no longer vanishes.* `useMyRounds` filtered on
+`status = 'ACTIVE'`, so walking out deleted the dinner from your account
+entirely — you could not even see that it had happened. LEFT and REMOVED rows
+are fetched now and sort into the archive: two ways for a dinner to be over,
+it ended or you are no longer at it.
+
+*`list_round_members` gains one column, on purpose.* It hands back an explicit
+list precisely so a new column cannot leak by being added to the table, which
+means the request had to be added deliberately — and only for the two people
+entitled to it, the person who asked and the host who answers.
+
+### The `0049` bug, found by review
+
+`anonymise_profile` marked **every** active membership LEFT, including in
+rounds whose assignment already exists — exactly what `leave_round` refuses to
+do. The reason turns out to be sharper than consistency: `remove_member` starts
+by checking the member is ACTIVE and raises otherwise, so erasure emptied the
+seat and locked the only function that can repair the chain out of it in the
+same breath. The host would have been handed a DROPOUT alert they could not
+act on. It now mirrors `leave_round` exactly.
+
+Two other review notes did not survive checking, and are recorded so they are
+not raised again: `filename: 'sw.ts'` does not ship a `.ts` URL — the plugin
+compiles it and emits `dist/sw.js`, which the build output states on every run
+— and `self.__WB_MANIFEST` does type-check today. The second one got an
+explicit declaration anyway: it was working through ambient types, which is a
+thing to depend on rather than to state.
+
+**Also:** the profile page folds. Three sections that had become one long
+scroll — notifications, dietary, deleting your account — arrive closed, each
+closed row still showing its current answer, because folding away the choices
+should not fold away the choice you already made. The language dropdown is
+gone: it is the same two buttons the sign-in and sign-up pages use, since a
+dropdown that hides one of its two options behind a click was never the better
+control. And the account-deletion card carries a red border — the border and
+not the background, because it is a boundary to notice, not an error that has
+already happened.
+
+**Verified:** `0001` → `0050` replayed into a throwaway Postgres 16. Leaving
+before the lottery returns `LEFT` and empties the seat; after it returns
+`REQUESTED`, the seat stays ACTIVE and one alert is raised; pressing again
+returns `ALREADY_REQUESTED` and still one alert; withdrawing clears both the
+stamp and the alert. And the `0049` fix: after erasure in an ASSIGNED round the
+seat is still ACTIVE with the host told and the reason `ACCOUNT_DELETED`.
+Build and lint clean.
+
+---
+
 ## 2026-08-24 (11)
 
 **Added: password rules that prefer length, the missing half of the password

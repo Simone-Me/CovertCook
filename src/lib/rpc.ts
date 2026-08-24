@@ -283,9 +283,19 @@ export async function joinRound(input: { code: string; turnstileTicket: string }
   return unwrap<string>(res) // round_members id
 }
 
-export async function leaveRound(roundId: string) {
-  const res = await supabase.rpc('leave_round', { p_round_id: roundId })
+// What leaving costs depends on when you go (0050): before the lottery the
+// seat empties on the spot; after it, this is a request the Executive Chef
+// answers, and the answer decides whether the chain is reconnected.
+export type LeaveOutcome = 'LEFT' | 'REQUESTED' | 'ALREADY_REQUESTED'
+
+export async function cancelLeaveRequest(roundId: string) {
+  const res = await supabase.rpc('cancel_leave_request', { p_round_id: roundId })
   return unwrap(res)
+}
+
+export async function leaveRound(roundId: string): Promise<LeaveOutcome> {
+  const res = await supabase.rpc('leave_round', { p_round_id: roundId })
+  return unwrap<LeaveOutcome>(res)
 }
 
 export async function approveMember(roundId: string, memberId: string) {
