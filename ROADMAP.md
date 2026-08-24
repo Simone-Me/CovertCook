@@ -496,3 +496,70 @@ Three things it drags in, none of them optional:
 for deletion is that a recipe worth keeping is in somebody's book and a dinner
 worth remembering is in the album — both have to exist and be *used* before
 that is true. Deleting first would prove it false.
+
+---
+
+## 8. Choosing what you cannot eat, in pictures
+
+The shape is settled: at sign-up and in the profile, two yes/no questions, each
+opening a grid of large icons with the name underneath, tapped to select and
+marked when chosen. Nothing below argues with that. These are the seven things
+it does not yet say, and each of them changes what gets built.
+
+### 1. The grid must write codes, not words
+
+This is the one that matters most, and it is invisible until it breaks.
+`README.md` records the current simplification: allergy matching is
+**exact-string**. So a French player writing *céleri* and an English one
+writing *celery* are two different allergens today, and a dish declared safe
+for one is not checked against the other.
+
+A grid fixes this for free **if each tile writes a stable code** — `CELERY`,
+`GLUTEN`, `PEANUT` — with the translated word shown to the reader and never
+stored. Store the visible label instead and the grid becomes a prettier way of
+producing the same bug in two languages.
+
+### 2. Severity did not survive the two questions
+
+The schema has four kinds: `ALLERGY_SEVERE`, `ALLERGY_MILD`, `DIET`,
+`DISLIKE`. "Are you allergic to anything? — yes" collapses the first two, and
+they are not the same fact: one is a safety matter that a cook must design
+around, the other is discomfort they should merely know about. Losing it would
+be a regression in the one part of this app that is not decoration.
+
+**Proposal:** the tile is tapped once to select; the selected card grows a
+small two-way switch, *severe / mild*, defaulting to severe. Defaulting the
+other way asks somebody to argue their allergy up.
+
+### 3. Question two is two questions
+
+"Preferences that might interest the chefs" covers both *vegan* — a rule a cook
+must respect — and *I don't like olives* — a courtesy. The schema separates
+them (`DIET`, `DISLIKE`) and should: a diet constrains the dish, a dislike
+only colours it. One panel, two rows, labelled differently.
+
+### 4. "Other" is not optional
+
+Fourteen allergens is the legal list, not the human one — kiwi, nickel,
+histamine and a hundred others exist. `dietary_entries.label` is free text
+today and that flexibility must survive the grid: a final tile that opens a
+text field. Without it, the app tells somebody their allergy does not exist.
+
+### 5. No is an answer, not a skip
+
+Both "no"s together are `has_no_restrictions = true`, which `complete_signup`
+already requires as the alternative to at least one entry. The two questions
+map onto it exactly — but the flag has to be written by answering, never by
+walking past the screen.
+
+### 6. Selected cannot be a colour
+
+A chosen tile needs a ring **and** a mark, not a tint: one in twelve men reads
+red-green poorly, and this is the screen where being wrong about what you
+selected has consequences.
+
+### 7. One component, two places
+
+Sign-up and the profile must render the same grid from the same file. Two
+copies drift, and the day they drift is the day somebody's profile says
+something their sign-up did not.
