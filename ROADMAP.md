@@ -276,18 +276,44 @@ detail. **Recommendation: yes, gated on `RESULTS` and on membership**, because
 the alternative (each person can only keep the one recipe they cooked) makes a
 book of four entries a year, which nobody opens twice.
 
-### Save a reference, never a copy
+### Copy the recipe, reference the person
 
-An entry points at the brief. Copying the text would duplicate every recipe
-once per person who liked it, and — worse — would freeze a name: erasure
-anonymises a profile, and a snapshot would keep somebody's real name in ten
-other people's books after they asked to be forgotten. Pointing means the
-author simply becomes "Former guest" there, which is what erasure is supposed
-to do.
+**Revised.** Reference-only was the right answer while rounds were permanent.
+Since old dinners may eventually be deleted, a book of references would empty
+itself the day that happens — the one outcome a recipe book must never have.
 
-The cost of pointing is that the book depends on the round surviving. That is
-already the decision in §3 of this file's neighbourhood: rounds are not
-deleted.
+So the entry splits in two, and the split is the whole design:
+
+- **The recipe is copied.** Title, ingredients, method, link, allergen tags —
+  frozen at the moment of saving. It is text, it is not personal data in any
+  meaningful sense, and it must outlive the dinner it came from. A saved
+  recipe is a copy in your kitchen, not a bookmark to somebody else's.
+- **The author is a reference.** `profile_id`, never a snapshot of their name.
+  Erasure anonymises a profile, and a frozen name would keep somebody in ten
+  other people's books after they asked to be forgotten. Referenced, they
+  become "Former guest" there — which is exactly what erasure is for.
+- **The pseudonym is copied**, because it is not an identity: "Chef Basilic"
+  was the name you knew them by *that evening*, and it means nothing outside
+  that dinner. It is a label on the card, never a filter (see below).
+
+Cost of copying: a recipe saved by six people is stored six times. At a few
+kilobytes each, six copies of a recipe is smaller than one photograph.
+
+### Deleting from the book, and taking it with you
+
+Two more things the sketch asked for, and both are right:
+
+- **Delete an entry**, with a warning that says the truth: if the dinner it
+  came from is gone, nothing can bring it back. That is a real
+  irreversibility and the confirmation should say so rather than saying "are
+  you sure".
+- **Download the book**, and — separately — **download everything** before
+  erasing an account. The second is not a nicety: GDPR Article 20 gives a
+  right to portability in a structured, machine-readable format, and the
+  natural moment to offer it is beside the delete button, not buried. Both
+  are the same mechanism: an RPC that assembles the JSON, a file the browser
+  saves. Recipes should come out as **both** — JSON for completeness and
+  plain text/Markdown for a human who just wants to cook from it.
 
 ### What the design as sketched is missing
 
@@ -297,7 +323,8 @@ Six things, in the order they will bite:
    person in every dinner. Storing it is fine as a label on the card — it is
    the name you knew them by that evening — but **filtering by it across the
    book is wrong**: it would group strangers together. The filter has to be on
-   the real name.
+   the real name, which is why the author stays a reference even though the
+   recipe is a copy.
 2. **The recipe you wrote is not the recipe you cooked.** Two different things,
    both worth keeping, and they need different labels. "Received" alone loses
    half of what a person made that evening.
@@ -310,6 +337,27 @@ Six things, in the order they will bite:
    and a round short of `RESULTS` would leak an author.
 6. **One save per recipe per person.** Unique on (profile, brief), or the
    button becomes a counter.
+
+### The recipe as one thing
+
+Shown as it will be cooked from: **name, ingredients, method, link if there is
+one, allergen tags** — one card, not four fields. That means the ingredients
+must be copied with it (`brief_ingredients` is a separate table today), and it
+settles what "one save per person per recipe" means: the same recipe cannot be
+saved twice by the same person, so the button is a switch and never a counter.
+
+### What still needs deciding
+
+1. **Where the save button lives.** The end-of-dinner menu is the obvious
+   place — the full list of dishes is already there — but the same button has
+   to exist inside the book for a recipe saved and then deleted by mistake.
+   Probably: save from the menu, and nothing else.
+2. **Whether the note is per-entry or per-recipe.** Per-entry: it is *your*
+   comment on *your* copy.
+3. **What happens to a recipe whose author never submitted it.** Nothing to
+   save; the button should not appear.
+4. **Sorting the book by default** — most recent dinner first, almost
+   certainly, since that is what somebody is looking for after an evening.
 
 ### Is it too much work?
 

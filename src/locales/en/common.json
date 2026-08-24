@@ -127,7 +127,10 @@
       "TIMED": "After dinner",
       "TIMEDHint": "You set a deadline and the results publish themselves when it runs out.",
       "DISABLED": "No voting",
-      "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later."
+      "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later.",
+      "MANUAL": "By a show of hands",
+      "MANUALHint": "No phones at the table: dishes are ranked by hands going up, and you type in the count.",
+      "chosenWhenOpening": "Chosen when you open the vote, not now — and changeable until the first vote is cast."
     },
     "nameTheme": {
       "label": "Pseudonym theme",
@@ -236,7 +239,9 @@
       "no": "No",
       "noLimit": "No limit",
       "themes": "Table theme",
-      "themesSoon": "Christmas, midsummer, and others to come. Pro — the look of the evening only; nothing about how the game is played."
+      "themesSoon": "Christmas, midsummer, and others to come. Pro — the look of the evening only; nothing about how the game is played.",
+      "venueEditable": "Editable in the dinner settings",
+      "venueHere": "change them"
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
@@ -353,7 +358,9 @@
         "RESULTS": "Announce the result",
         "ARCHIVED": "Nothing left to do",
         "CANCELLED": "This dinner was called off"
-      }
+      },
+      "empty": "empty",
+      "whatIsItToggle": "What is the pass?"
     },
     "lateJoinerShort": "Adding someone now changes two chefs' partners.",
     "briefProgress": "{{done}} of {{total}} recipes written",

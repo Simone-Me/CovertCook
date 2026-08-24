@@ -127,7 +127,10 @@
       "TIMED": "Après le dîner",
       "TIMEDHint": "Vous fixez un délai et les résultats se publient tout seuls à son échéance.",
       "DISABLED": "Pas de vote",
-      "DISABLEDHint": "Celui-ci est sans retour : le vote sera indisponible pour ce dîner et ne pourra pas être activé ensuite."
+      "DISABLEDHint": "Celui-ci est sans retour : le vote sera indisponible pour ce dîner et ne pourra pas être activé ensuite.",
+      "MANUAL": "À main levée",
+      "MANUALHint": "Pas de téléphones à table : les plats sont classés à main levée, et vous saisissez le décompte.",
+      "chosenWhenOpening": "Choisi à l’ouverture du vote, pas maintenant — et modifiable tant que personne n’a voté."
     },
     "nameTheme": {
       "label": "Thème des pseudonymes",
@@ -236,7 +239,9 @@
       "no": "Non",
       "noLimit": "Sans limite",
       "themes": "Thème de la table",
-      "themesSoon": "Noël, solstice d'été, et d'autres à venir. Pro — le décor de la soirée uniquement ; rien sur la façon de jouer."
+      "themesSoon": "Noël, solstice d'été, et d'autres à venir. Pro — le décor de la soirée uniquement ; rien sur la façon de jouer.",
+      "venueEditable": "Modifiable dans les paramètres du dîner",
+      "venueHere": "les modifier"
     },
     "entryPoints": {
       "writeRecipe": "Écrire votre recette",
@@ -353,7 +358,9 @@
         "RESULTS": "Annoncez le résultat",
         "ARCHIVED": "Plus rien à faire",
         "CANCELLED": "Ce dîner a été annulé"
-      }
+      },
+      "empty": "vide",
+      "whatIsItToggle": "Qu’est-ce que le passe ?"
     },
     "lateJoinerShort": "Ajouter quelqu'un maintenant change les partenaires de deux chefs.",
     "briefProgress": "{{done}} recettes écrites sur {{total}}",

@@ -1669,3 +1669,48 @@
   height: 26px;
   object-fit: contain;
 }
+
+/* The pass with nothing on it. The word is the state, the rule under it keeps
+   that state from being read as the first line of the explanation below. */
+.pass__empty {
+  color: var(--text-muted);
+  font-size: 15px;
+}
+
+.pass__rule {
+  border: 0;
+  border-top: 1px dashed var(--piega, var(--border));
+  margin: 10px 0 2px;
+}
+
+/* A question mark that opens a paragraph, not a paragraph that is always
+   open: the explanation earns one reading and then only gets in the way. */
+.pass__help {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  align-self: flex-start;
+  background: transparent;
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 12px 4px 8px;
+  font-size: 13px;
+}
+
+.pass__help > span:first-child {
+  display: inline-grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 1px solid currentColor;
+  font-size: 12px;
+  line-height: 1;
+}
+
+/* "Editable in the settings" under the venue block: a sentence, not a link
+   pretending to be a destination. */
+.editable-note {
+  margin: 8px 0 0;
+}
