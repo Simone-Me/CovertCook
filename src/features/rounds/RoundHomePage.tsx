@@ -590,10 +590,7 @@ export function RoundHomePage() {
                 aria-expanded={passHelp}
                 onClick={() => setPassHelp((v) => !v)}
               >
-                {/* Swap for <Icon name="help" /> once public/loupe_question.webp
-                    is committed — the file is not in the repo yet, and a
-                    missing image is worse than a glyph. */}
-                <span aria-hidden="true">?</span>
+                <Icon name="help" size={18} />
                 <span>{t('rounds.pass.whatIsItToggle')}</span>
               </button>
               {passHelp && (

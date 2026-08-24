@@ -22,10 +22,6 @@ const ICONS = {
   pass: 'kitchen',
   chain: 'diagram',
   winner: 'chef_winner_result',
-  // Registered ahead of its file. `public/loupe_question.webp` is not in the
-  // repo yet — the master goes in assets-src/icons/ at 512px and ships as a
-  // 96px WebP like the rest — and until it lands, the pass's help control uses
-  // a plain "?" rather than a broken image.
   help: 'loupe_question',
 } as const
 
