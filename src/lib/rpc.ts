@@ -79,6 +79,26 @@ export async function notifyMyCook(roundId: string) {
   await notify(roundId, 'BRIEF_RECEIVED')
 }
 
+// The two at the door (0052), addressed by membership rather than by round:
+// joining hands back a membership id, and approving is about one person. Which
+// of "asked to join" and "took a seat" this was is decided in the database from
+// the seat itself, not guessed here.
+export async function notifyHostOfArrival(memberId: string) {
+  await notifyMember(memberId, 'JOIN_REQUESTED')
+}
+
+export async function notifyApproved(memberId: string) {
+  await notifyMember(memberId, 'JOIN_APPROVED')
+}
+
+async function notifyMember(memberId: string, kind: 'JOIN_REQUESTED' | 'JOIN_APPROVED') {
+  try {
+    await supabase.functions.invoke('send-push', { body: { member_id: memberId, kind } })
+  } catch {
+    // Same posture as the rest: the door already opened.
+  }
+}
+
 async function notify(roundId: string, kind: NotifiedMoment) {
   try {
     await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind } })

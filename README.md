@@ -271,10 +271,12 @@ defended against on every write path.
 Mail is now only what Auth owns — **password reset and address change**.
 Everything else that used to want an email is a notification instead.
 
-**The four moments, and nothing else** (`0048`):
+**Six moments, and nothing else** (`0048`, `0052`):
 
 | Moment | Who gets it | Sent when |
 |---|---|---|
+| Somebody is at the door | the host alone | a request to join arrives, or a seat is taken in a round that needs no approval |
+| You are at the table | the one person who asked | the host approves them |
 | Your cook has been chosen | everyone in the round but the host | the round reaches `ASSIGNED` |
 | Your recipe has arrived | the one cook it was written for | its author submits — `0035` lands it then, so waiting for a phase would rebuild the stall `0035` removed |
 | Voting is open | everyone but the host | the round reaches `VOTING`, **and only for an online ballot** — a hand-counted one is announced out loud by somebody standing up |
@@ -282,9 +284,19 @@ Everything else that used to want an email is a notification instead.
 
 Dinner starting, a settings change, a phase nudged backwards: silent. A
 notification nobody acts on is how an app teaches people to ignore the ones
-that matter. And "your recipe has arrived" never says who wrote it — the text
-is composed in the Edge Function precisely so no caller can put a name on a
-lock screen.
+that matter.
+
+**No push carries a name.** "Your recipe has arrived" never says who wrote it,
+and the two at the door say how many, not who — the host's approval screen
+shows the real name of whoever is asking, but that is a screen they chose to
+open, not a lock screen a stranger reads over their shoulder. The text is
+composed in the Edge Function precisely so no caller can put a name on one. The
+dinner's name is carried, because a host running two of them needs to know
+which door this is.
+
+The two door moments are addressed by **membership**, not by round, and
+authorised in SQL: you may announce your own arrival and nobody else's, and
+only the host of that seat's round may announce that it was approved.
 
 The switch in the profile is **one switch, all dinners, all devices**. The
 subscription rows are per browser because that is what the Push API gives us,

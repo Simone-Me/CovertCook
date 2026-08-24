@@ -748,6 +748,8 @@
     "turnOff": "Désactiver les notifications",
     "perRound": "Un seul réglage pour tous vos dîners et tous vos appareils. Le choix dîner par dîner viendra plus tard.",
     "moments": [
+      "Quelqu’un demande à entrer, ou prend une place, à un dîner que vous organisez",
+      "Votre demande d’entrée est acceptée",
       "Votre cuisinier est tiré — vous pouvez écrire sa recette",
       "La recette que vous devez cuisiner est arrivée",
       "Le vote en ligne s’ouvre",
@@ -755,7 +757,7 @@
     ],
     "state": {
       "checking": "Vérification de ce que cet appareil sait faire…",
-      "on": "Activées. Vous serez prévenu des quatre moments ci-dessous, et de rien d’autre.",
+      "on": "Activées. Vous serez prévenu des six moments ci-dessous, et de rien d’autre.",
       "off": "Désactivées. Les activer demande une fois l’autorisation à votre navigateur.",
       "denied": "Bloquées. Votre navigateur refuse à votre place et l’application ne peut plus le demander — il faut les réautoriser dans les réglages du site pour CovertCook.",
       "needs-install": "Ajoutez CovertCook à votre écran d’accueil et ouvrez-le depuis là. Sur iPhone et iPad, les notifications n’existent que dans l’application installée — c’est la règle d’Apple, pas la nôtre.",

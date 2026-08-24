@@ -19,6 +19,7 @@ import {
   advancePhase,
   cancelLeaveRequest,
   leaveRound,
+  notifyApproved,
   notifyRoundPhase,
   approveMember,
   rejectMember,
@@ -411,6 +412,9 @@ export function RoundHomePage() {
   async function onApprove(memberId: string) {
     if (!roundId) return
     await approveMember(roundId, memberId)
+    // The person who asked has been looking at "waiting for approval" with
+    // nothing they can do about it. Tell them the door opened.
+    void notifyApproved(memberId)
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'pending-members'] })
   }

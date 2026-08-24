@@ -748,6 +748,8 @@
     "turnOff": "Turn notifications off",
     "perRound": "One switch for every dinner you are in, on every device you use. Choosing per dinner is coming later.",
     "moments": [
+      "Somebody asks to join, or takes a seat, at a dinner you are running",
+      "Your request to join is accepted",
       "Your cook has been chosen — you can write their recipe",
       "The recipe you have to cook has arrived",
       "Online voting opens",
@@ -755,7 +757,7 @@
     ],
     "state": {
       "checking": "Checking what this device can do…",
-      "on": "On. You will hear about the four moments below, and nothing else.",
+      "on": "On. You will hear about the six moments below, and nothing else.",
       "off": "Off. Turning them on asks your browser for permission once.",
       "denied": "Blocked. Your browser is refusing on your behalf and the app cannot ask again — it has to be re-allowed in the site settings for CovertCook.",
       "needs-install": "Add CovertCook to your home screen and open it from there. On iPhone and iPad, notifications only exist in the installed app — this is Apple’s rule, not ours.",
