@@ -800,5 +800,48 @@
       "On mange, on classe les plats, et c’est seulement là qu’on découvre qui a choisi quoi."
     ],
     "next": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé. Un dîner d’exemple guidé arrivera bientôt ici."
+  },
+  "food": {
+    "allergyQuestion": "Êtes-vous allergique à un aliment ?",
+    "allergyHelp": "Tout ce que vous choisissez est traité comme sérieux. Mieux vaut un cuisinier qui a prévu large qu’un cuisinier qui a sous-estimé ce qui comptait.",
+    "dietQuestion": "Suivez-vous un régime particulier ?",
+    "dietHelp": "Une règle avec laquelle le cuisinier doit composer, pas un goût. Ce que vous n’aimez simplement pas n’est pas cette question.",
+    "yes": "Oui",
+    "no": "Non",
+    "pickOne": "Choisissez-en au moins un, ou répondez non.",
+    "answerBoth": "Répondez aux deux questions avant de continuer.",
+    "typedNotChecked": "Écrit à la main : le cuisinier le lit, mais ce n’est pas vérifié automatiquement contre un plat.",
+    "allergen": {
+      "GLUTEN": "Gluten",
+      "CRUSTACEANS": "Crustacés",
+      "EGG": "Œuf",
+      "FISH": "Poisson",
+      "PEANUTS": "Arachides",
+      "SOY": "Soja",
+      "MILK": "Lait",
+      "NUTS": "Fruits à coque",
+      "CELERY": "Céleri",
+      "MUSTARD": "Moutarde",
+      "SESAME": "Sésame",
+      "SULPHITES": "Sulfites",
+      "LUPIN": "Lupin",
+      "MOLLUSCS": "Mollusques",
+      "OTHER": "Autre chose",
+      "otherPlaceholder": "Précisez — kiwi, nickel, autre"
+    },
+    "diet": {
+      "VEGETARIAN": "Végétarien",
+      "VEGAN": "Végan",
+      "PESCATARIAN": "Pescétarien",
+      "NO_MEAT": "Sans viande",
+      "NO_BEEF": "Sans bœuf",
+      "NO_DAIRY": "Sans produits laitiers",
+      "HALAL": "Halal",
+      "KOSHER": "Casher",
+      "NO_ALCOHOL": "Sans alcool",
+      "NO_SMOKING": "Sans tabac",
+      "OTHER": "Autre chose",
+      "otherPlaceholder": "Précisez"
+    }
   }
 }

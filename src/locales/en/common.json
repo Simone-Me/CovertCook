@@ -800,5 +800,48 @@
       "You eat, you rank the dishes, and only then does everyone find out who chose what."
     ],
     "next": "Start by creating a dinner, or join one with a code somebody sent you. A guided example dinner is coming here soon."
+  },
+  "food": {
+    "allergyQuestion": "Are you allergic to any food?",
+    "allergyHelp": "Everything you pick is treated as serious. Better a cook who planned around something mild than one who under-read something that mattered.",
+    "dietQuestion": "Do you follow a particular diet?",
+    "dietHelp": "A rule a cook has to design around, not a taste. Things you simply dislike are not this question.",
+    "yes": "Yes",
+    "no": "No",
+    "pickOne": "Pick at least one, or answer no.",
+    "answerBoth": "Answer both questions before continuing.",
+    "typedNotChecked": "Written by hand, so a cook reads it — but it is not matched automatically against a dish.",
+    "allergen": {
+      "GLUTEN": "Gluten",
+      "CRUSTACEANS": "Crustaceans",
+      "EGG": "Egg",
+      "FISH": "Fish",
+      "PEANUTS": "Peanuts",
+      "SOY": "Soy",
+      "MILK": "Milk",
+      "NUTS": "Tree nuts",
+      "CELERY": "Celery",
+      "MUSTARD": "Mustard",
+      "SESAME": "Sesame",
+      "SULPHITES": "Sulphites",
+      "LUPIN": "Lupin",
+      "MOLLUSCS": "Molluscs",
+      "OTHER": "Something else",
+      "otherPlaceholder": "Name it — kiwi, nickel, anything"
+    },
+    "diet": {
+      "VEGETARIAN": "Vegetarian",
+      "VEGAN": "Vegan",
+      "PESCATARIAN": "Pescatarian",
+      "NO_MEAT": "No meat",
+      "NO_BEEF": "No beef",
+      "NO_DAIRY": "No dairy",
+      "HALAL": "Halal",
+      "KOSHER": "Kosher",
+      "NO_ALCOHOL": "No alcohol",
+      "NO_SMOKING": "No smoking",
+      "OTHER": "Something else",
+      "otherPlaceholder": "Name it"
+    }
   }
 }

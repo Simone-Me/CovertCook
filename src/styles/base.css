@@ -390,3 +390,118 @@ input.is-taken {
   font-size: 14px;
   margin-bottom: 12px;
 }
+
+/* The food grid: three to a row, which is what lets a tile be large enough to
+   recognise a picture in rather than a label to read. */
+.tag-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tag-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.tag-tile img {
+  width: 72px;
+  height: 72px;
+}
+
+.tag-tile__name {
+  text-align: center;
+}
+
+/* Chosen: a ring AND a tick. The colour is the third signal, never the only
+   one. */
+.tag-tile.is-on {
+  border-color: var(--ok);
+  border-width: 2px;
+  padding: 9px 3px 7px;
+}
+
+.tag-tile__mark {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: var(--bg);
+  font-size: 11px;
+}
+
+.tag-typed {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+.tag-typed li {
+  margin-bottom: 4px;
+}
+
+.linkish {
+  background: none;
+  border: 0;
+  padding: 0 0 0 8px;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* A question and the grid that answers it, kept together so the grid is
+   visibly the answer to the line above rather than a second thing on the
+   page. <fieldset> because that is what a group of controls with one label
+   is, and screen readers read the legend before every option inside. */
+.ask {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 0 0 12px;
+}
+
+.ask legend {
+  padding: 0 6px;
+  font-size: 15px;
+  color: var(--text);
+}
+
+.ask .row {
+  margin-bottom: 10px;
+}
+
+/* A stored dietary label. The icon is small here — this is a list to read,
+   not a grid to tap — and a typed label has none, which is the difference
+   that matters: only a coded one is checked against a dish. */
+.food-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.food-label img {
+  width: 22px;
+  height: 22px;
+}
+
+.food-label--typed {
+  color: var(--text);
+}

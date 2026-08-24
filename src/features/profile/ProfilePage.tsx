@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { Fold } from '../../components/Fold'
+import { FoodLabel } from '../../components/FoodLabel'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
@@ -232,7 +233,7 @@ export function ProfilePage() {
         {entries?.map((e) => (
           <div key={e.id} className="card row" style={{ justifyContent: 'space-between' }}>
             <span>
-              <strong>{e.label}</strong>
+              <FoodLabel label={e.label} />
               <span className="muted"> — {t(`dietary.kind.${e.kind}`)}</span>
             </span>
             <button type="button" className="secondary" onClick={() => onRemove(e.id)}>
