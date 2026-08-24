@@ -185,6 +185,12 @@ control, real uptime, someone else's electricity and network.
 
 ## 4. Getting onto the Play Store
 
+> Superseded in detail by [`DISTRIBUTION.md`](./DISTRIBUTION.md), which
+> covers all four routes (PWA, APK, Play, App Store), the real costs, the
+> obligations a store adds, and what monetising would cost in practice.
+> This section stays as the summary and the record of the one decision
+> already taken (purchases happen on the web).
+
 Very doable, and cheaper than expected — the app is already a PWA, so it
 doesn't need rewriting. Android wraps a PWA in a native shell via a
 **Trusted Web Activity**, generated with Bubblewrap. The store listing
