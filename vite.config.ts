@@ -35,6 +35,13 @@ export default defineConfig({
       },
       injectManifest: {
         globPatterns: ['**/*.{js,css,html,png,webp,svg,woff2}'],
+        // The allergen and diet tiles are 25 files and ~294 KB — a third of
+        // the app, for two screens somebody sees once when they sign up and
+        // rarely again. Precaching is for what has to work on bad wifi at the
+        // flat: the recipe card, the shopping list, the dietary panel. These
+        // are fetched when the grid opens and then cached at runtime (src/sw.ts),
+        // which costs one load and nothing afterwards.
+        globIgnores: ['**/allergy/*', '**/diet/*'],
       },
     }),
   ],
