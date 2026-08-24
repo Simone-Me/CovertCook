@@ -63,8 +63,6 @@ export interface MyRoundRow extends RoundRow {
    *  a dinner still running is over as far as somebody who walked out of it
    *  is concerned. */
   member_status: 'ACTIVE' | 'LEFT' | 'REMOVED'
-  /** Set while the host has not yet answered a request to be let out (0050). */
-  removal_requested_at: string | null
 }
 
 export function useMyRounds(uid: string | undefined) {
@@ -76,9 +74,20 @@ export function useMyRounds(uid: string | undefined) {
       // dinner you walked out of vanish from your account entirely, which
       // reads as data loss rather than as leaving — you can no longer even
       // see that it happened. They belong in the archive.
+      //
+      // NOT `removal_requested_at`, and not by oversight. round_members has
+      // column-level grants (0032 revoked the table and handed the columns
+      // back one by one so secret_name could never leak), so a column added
+      // later is unreadable here until somebody grants it — asking for one
+      // fails the whole query with "permission denied for table
+      // round_members", naming the table rather than the column. Granting it
+      // would also be wrong: who asked to leave is for that person and the
+      // host, and a column grant cannot say that. list_round_members decides
+      // it instead, which is why the round page reads it and this list does
+      // not.
       const { data, error } = await supabase
         .from('round_members')
-        .select(`approved, status, removal_requested_at, rounds(${ROUND_COLUMNS})`)
+        .select(`approved, status, rounds(${ROUND_COLUMNS})`)
         .eq('profile_id', uid as string)
         .in('status', ['ACTIVE', 'LEFT', 'REMOVED'])
         .order('joined_at', { ascending: false })
@@ -87,7 +96,6 @@ export function useMyRounds(uid: string | undefined) {
         ...(m.rounds as unknown as RoundRow),
         approved: m.approved,
         member_status: m.status,
-        removal_requested_at: m.removal_requested_at,
       })) as MyRoundRow[]
     },
   })

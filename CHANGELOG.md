@@ -59,6 +59,34 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (14)
+
+**Fixed: `42501 permission denied for table round_members`** — the rounds list,
+from the moment `0050` was deployed.
+
+`round_members` is the one table in this schema with **column-level** grants:
+`0032` revoked the table and handed the columns back one at a time, so that
+`secret_name` could never leak by being selected. The consequence, which is
+easy to forget precisely because it is invisible in the table definition: a
+column added later is unreadable from the client until somebody grants it, and
+asking for one fails the **entire** query — with a message naming the table
+rather than the column, which sends you looking at RLS policies that are fine.
+
+`useMyRounds` asked for `removal_requested_at`, added in `0050`, and never used
+it. It is gone from the query, and granting it would have been the wrong fix
+anyway: who asked to leave is for that person and the host, and a column grant
+cannot express that. `list_round_members` decides it instead, which is why the
+round page can read it and the list cannot. The reasoning now sits in a comment
+at the query, so the column is not re-added by somebody who sees a field on the
+table and assumes it is readable.
+
+Audited the other direct table reads at the same time: `profiles`,
+`dietary_entries` and `rounds` hold table-level grants, so columns added to
+them — `notifications_enabled`, `deletion_requested_at` — reach the client
+without anything further. `round_members` is the exception, and the only one.
+
+---
+
 ## 2026-08-24 (13)
 
 **The eye is on the sign-in form too**, which is the screen where it matters
