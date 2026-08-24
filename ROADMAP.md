@@ -252,3 +252,122 @@ opens. The second part is free — Supabase auth already spans both.
 
 iOS is a separate and stricter story, and worth treating as its own
 decision rather than assuming it follows.
+
+---
+
+## 5. The recipe book
+
+**Nothing is built.** The question asked is the right one and it has a
+gate in front of it that decides the whole shape.
+
+### The gate: nobody can read anybody else's recipe today
+
+`briefs` has **no SELECT policy at all** — not a narrow one, none. The only
+reader is `get_my_brief`, which returns the recipe written *for you*. The
+ballot shows dish names, never bodies. So "collect the recipes of the other
+chefs" is not a feature that reads existing data: it needs a **new, deliberate
+exposure**, an RPC that opens every brief of a round to its members once that
+round has reached `RESULTS`.
+
+That is defensible — after the reveal, who wrote what is announced, everyone
+has eaten every dish, and the secrecy has done its job — but it is a change to
+what the app has promised so far, so it is a decision and not an implementation
+detail. **Recommendation: yes, gated on `RESULTS` and on membership**, because
+the alternative (each person can only keep the one recipe they cooked) makes a
+book of four entries a year, which nobody opens twice.
+
+### Save a reference, never a copy
+
+An entry points at the brief. Copying the text would duplicate every recipe
+once per person who liked it, and — worse — would freeze a name: erasure
+anonymises a profile, and a snapshot would keep somebody's real name in ten
+other people's books after they asked to be forgotten. Pointing means the
+author simply becomes "Former guest" there, which is what erasure is supposed
+to do.
+
+The cost of pointing is that the book depends on the round surviving. That is
+already the decision in §3 of this file's neighbourhood: rounds are not
+deleted.
+
+### What the design as sketched is missing
+
+Six things, in the order they will bite:
+
+1. **The pseudonym is per-round and reused.** "Chef Basilic" is a different
+   person in every dinner. Storing it is fine as a label on the card — it is
+   the name you knew them by that evening — but **filtering by it across the
+   book is wrong**: it would group strangers together. The filter has to be on
+   the real name.
+2. **The recipe you wrote is not the recipe you cooked.** Two different things,
+   both worth keeping, and they need different labels. "Received" alone loses
+   half of what a person made that evening.
+3. **Ingredients live in their own table.** `brief_ingredients` is the shopping
+   list; a saved recipe without it is half a recipe.
+4. **`contains_tags` travels with it.** Cooking it again, for different people,
+   makes the allergens matter again — the one piece of data in this app that
+   is not decoration.
+5. **Only submitted briefs, only finished rounds.** A draft is not a recipe,
+   and a round short of `RESULTS` would leak an author.
+6. **One save per recipe per person.** Unique on (profile, brief), or the
+   button becomes a counter.
+
+### Is it too much work?
+
+No, and the reason is that the filtering does not need a server. Ten saves a
+dinner, a few dinners a year: a few dozen rows. Sorting and searching them
+happens in the browser on data already loaded, so "filterable by cook, date,
+dish" costs a text input and an `Array.filter`, not an index.
+
+The real work is one migration (a `recipe_book` table plus the RESULTS-gated
+RPC), a button on the results screen, and the book page. **One to two days.**
+
+### Shape it in this order
+
+1. **Save what you cooked and what you wrote** — no new exposure, works
+   immediately.
+2. **Save anybody's, from the results screen** — the RPC above; this is the
+   inclusive version and the one worth having.
+3. **Your own recipes, typed in** — the table stops being a list of references
+   and gains rows that carry their own text. The day it also fills a brief you
+   are writing, the book stops being an archive and becomes a tool.
+
+---
+
+## 6. Advertising
+
+Asked as a hypothetical, answered with the arithmetic, because the arithmetic
+is what settles it.
+
+### What it would pay
+
+This app is used in bursts: a host runs perhaps four dinners a year, eight
+people each, and a person opens it a handful of times per dinner. Call it
+~150 page views per dinner across the whole table — generous. At EU display
+rates for non-commercial content (**€0.50–3 CPM**, and the low end is likelier
+for an audience nobody is trying to sell kitchens to), a dinner produces
+**€0.10–0.45**.
+
+Against the same evening, the per-dinner unlock in §2 was priced at €3, of
+which about €1.85 survives fees and tax. **Ads pay roughly ten times less per
+dinner than one €3 unlock**, and they need the same traffic to get there:
+break-even on the fixed costs in §2 would take something like **4,000 dinners
+a year**.
+
+### What it would cost, beyond the money
+
+- **A consent banner.** EEA traffic needs a certified CMP before a single ad
+  loads. The product's whole manner is a clean table; the first thing every
+  guest would meet is a cookie dialog.
+- **Ad tech next to allergy data.** This app holds Article 9 health data. Ads
+  mean third-party scripts and identifiers on the same pages, and the burden
+  of proving none of it leaks. That is a real audit, not a checkbox.
+- **A real domain.** AdSense wants a site you own; a `*.netlify.app`
+  subdomain is not one.
+- **The tone.** A tablecloth with a banner on it reads as cheap in a way a €3
+  unlock does not, and this product is almost entirely tone.
+
+**Recommendation: no, and not later either at this scale.** Ads are a
+volume business — they start making sense in the hundreds of thousands of
+views a month, which is a different application with a different audience. If
+this ever wants money, §2's per-dinner unlock is better per person, cheaper to
+build, and does not put a stranger's script next to somebody's allergies.
