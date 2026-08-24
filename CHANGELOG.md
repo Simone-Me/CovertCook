@@ -59,6 +59,44 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (15)
+
+**Fixed: the archive was empty, and leaving said nothing** (`0051`).
+
+Two separate bugs behind one symptom.
+
+*RLS was hiding the round from the person who left it.* `0050` sorted LEFT and
+REMOVED memberships into the archive and the archive stayed empty, because
+`is_round_member` (`0002`) answers only for an ACTIVE, approved seat and the
+rounds SELECT policy is built on it. The moment a seat is marked LEFT, the
+round row itself becomes unreadable to that person: the client asked, RLS
+returned nothing, and the card had no data to draw.
+
+Loosening `is_round_member` would have been the wrong fix by a wide margin —
+it gates the briefs, the chat, the roster, the pass and the ballots, so
+widening it hands a departed player the inside of a dinner they walked out of.
+Instead there is a second policy on `rounds` alone. Postgres ORs policies of
+the same command, so it adds exactly one thing: a former member can read the
+round **row** — name, date, status — and nothing else in the schema moves.
+
+*And the card no longer pretends to be a door.* It keeps its place in the list
+and loses its link, dimmed rather than struck through: everything behind it
+checks for an active seat and refuses, so opening it could only produce an
+error. A dinner that vanishes reads as data lost; a dinner you cannot open
+reads as a room you left.
+
+*Leaving now says so.* The confirmation is shown on the page you land on, not
+the one you are leaving — that page unmounts in the same tick, so a message
+there would be gone before it could be read.
+
+**Verified** on a throwaway Postgres 16 with RLS actually enabled and the
+`authenticated` role assumed, rather than as the owner who bypasses it: an
+active member reads the round; after leaving they still read the row and its
+name; the roster refuses them with "not a member of this round" and the slots
+return nothing; and a stranger sees nothing at all.
+
+---
+
 ## 2026-08-24 (14)
 
 **Fixed: `42501 permission denied for table round_members`** — the rounds list,

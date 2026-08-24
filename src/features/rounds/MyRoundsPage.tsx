@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { isPastRound, useMyRounds, type MyRoundRow } from './hooks'
@@ -9,9 +9,19 @@ import { peekJoinCode } from '../../lib/pendingJoin'
 
 function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
   const { t } = useTranslation()
-  return (
-    <Link to={`/rounds/${round.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <div className="card" style={{ borderLeft: `4px solid ${round.accent_color}` }}>
+
+  // A dinner you left keeps its card and loses its link. There is nothing
+  // behind it any more — the roster, the briefs and the chat all check for an
+  // active seat and refuse — so a door that opens onto an error would be
+  // worse than no door. It stays in the list because a dinner that vanishes
+  // reads as data lost rather than as a room left (0051).
+  const left = round.member_status !== 'ACTIVE'
+
+  const card = (
+      <div
+        className={`card${left ? ' card--left' : ''}`}
+        style={{ borderLeft: `4px solid ${round.accent_color}` }}
+      >
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <strong>
             {round.accent_emoji} {round.name}
@@ -25,11 +35,19 @@ function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
             )}
           </strong>
           <span className="row">
-            {!round.approved && <span className="badge">{t('rounds.pendingApproval')}</span>}
+            {left && <span className="badge">{t(`rounds.left.${round.member_status}`)}</span>}
+            {!left && !round.approved && <span className="badge">{t('rounds.pendingApproval')}</span>}
             <span className="badge">{t(`rounds.phase.${round.status}`)}</span>
           </span>
         </div>
       </div>
+  )
+
+  if (left) return card
+
+  return (
+    <Link to={`/rounds/${round.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+      {card}
     </Link>
   )
 }
@@ -38,6 +56,7 @@ export function MyRoundsPage() {
   const { t } = useTranslation()
   const { profile } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const { data: rounds, isLoading } = useMyRounds(profile?.id)
 
@@ -49,6 +68,10 @@ export function MyRoundsPage() {
     if (pendingCode) navigate(`/join?code=${encodeURIComponent(pendingCode)}`, { replace: true })
   }, [pendingCode, navigate])
 
+  // Said on arrival rather than on the page being left: the round page
+  // disappears at the same moment, so a message shown there would be gone
+  // before it was read.
+  const leftName = (location.state as { leftRound?: string } | null)?.leftRound ?? null
   const [showPast, setShowPast] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -98,6 +121,8 @@ export function MyRoundsPage() {
       </div>
 
       {error && <div className="error">{error}</div>}
+
+      {leftName && <p className="notice">{t('rounds.left.done', { name: leftName })}</p>}
 
       {/* Shown only when there's something in it — an empty inbox on a
           first-run screen is noise, not reassurance. */}

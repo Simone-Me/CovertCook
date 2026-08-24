@@ -380,6 +380,11 @@
       "asked": "Vous avez demandé à sortir. Le Executive Chef est prévenu et décidera — d’ici là rien n’a changé et on vous attend toujours à table.",
       "stayAfterAll": "Finalement, je reste",
       "requested": "a demandé à sortir"
+    },
+    "left": {
+      "done": "Vous avez quitté {{name}}. Ce dîner est passé dans vos archives, et il n’y a plus rien à ouvrir.",
+      "LEFT": "Vous êtes parti",
+      "REMOVED": "Retiré"
     }
   },
   "briefs": {

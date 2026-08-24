@@ -174,7 +174,11 @@ export function RoundHomePage() {
       // Walking out means this round is no longer one of yours: the list has
       // to be re-read, or you are left looking at a dinner you have left.
       await queryClient.invalidateQueries({ queryKey: ['rounds'] })
-      if (outcome === 'LEFT') navigate('/', { replace: true })
+      // The confirmation belongs on the page you land on, not the one you are
+      // leaving: this page unmounts in the same tick.
+      if (outcome === 'LEFT') {
+        navigate('/', { replace: true, state: { leftRound: round?.name } })
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
