@@ -519,31 +519,44 @@ A grid fixes this for free **if each tile writes a stable code** — `CELERY`,
 stored. Store the visible label instead and the grid becomes a prettier way of
 producing the same bug in two languages.
 
-### 2. Severity did not survive the two questions
+### 2. Severity: decided — there is only one
 
-The schema has four kinds: `ALLERGY_SEVERE`, `ALLERGY_MILD`, `DIET`,
-`DISLIKE`. "Are you allergic to anything? — yes" collapses the first two, and
-they are not the same fact: one is a safety matter that a cook must design
-around, the other is discomfort they should merely know about. Losing it would
-be a regression in the one part of this app that is not decoration.
+Raised as a gap, answered by choosing deliberately not to have it. **Every
+allergy the grid records is `ALLERGY_SEVERE`.** Better to plan a dinner around
+somebody who turns out to have been mildly allergic than to under-read the one
+that mattered, and a two-way switch invites exactly that under-reading: nobody
+wants to be the person marking themselves *severe*, so a mild default would be
+chosen by people it is wrong for.
 
-**Proposal:** the tile is tapped once to select; the selected card grows a
-small two-way switch, *severe / mild*, defaulting to severe. Defaulting the
-other way asks somebody to argue their allergy up.
+`ALLERGY_MILD` stays in the enum. Rows already carry it, and removing an enum
+value that live data references is not a migration, it is an outage — the same
+reason `BRIEFS_CLOSED` survived `0035`.
 
-### 3. Question two is two questions
+One consequence, stated rather than discovered: with everything severe, the
+panel stops distinguishing weights and shows every allergy at full strength.
+That is the intended reading and not a bug to fix later.
 
-"Preferences that might interest the chefs" covers both *vegan* — a rule a cook
-must respect — and *I don't like olives* — a courtesy. The schema separates
-them (`DIET`, `DISLIKE`) and should: a diet constrains the dish, a dislike
-only colours it. One panel, two rows, labelled differently.
+### 3. Question two asks about diets — decided
 
-### 4. "Other" is not optional
+Not "preferences": a **diet**. The word matters because the two facts behave
+differently — a diet constrains what a cook may put on the plate, a dislike
+only colours it — and the vaguer word invited both into one answer.
 
-Fourteen allergens is the legal list, not the human one — kiwi, nickel,
-histamine and a hundred others exist. `dietary_entries.label` is free text
-today and that flexibility must survive the grid: a final tile that opens a
-text field. Without it, the app tells somebody their allergy does not exist.
+Which leaves `DISLIKE` unasked at sign-up, and that is fine: the profile can
+grow it later, for people who care enough to go looking. What must not happen
+is a dislike arriving through the diet question and being read by a cook as a
+rule.
+
+### 4. "Other" is a tile — decided
+
+Fourteen allergens is the legal list, not the human one; kiwi, nickel and
+histamine exist. The last tile in each grid opens a text field, and what it
+writes is a free-text label exactly as `dietary_entries` holds today.
+
+The one rule that comes with it: a typed label cannot be matched against a
+dish's `contains_tags`, because those are codes. So a typed allergy is shown to
+the cook in words and never silently checked — the panel has to say which of
+the two it is, or somebody will trust a check that never ran.
 
 ### 5. No is an answer, not a skip
 
