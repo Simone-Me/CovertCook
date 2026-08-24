@@ -54,6 +54,27 @@ device with no install and no permission dance, and the single moment
 push would win is the moment people are sitting together anyway. Revisit
 push only if async reminders measurably fail to land.
 
+### Superseded, 2026-08-24: push shipped, and email shrank
+
+What changed is not the argument but the platform. The app is installed on a
+home screen, which is the prerequisite iOS imposes, so push works with no
+store listing — and the table above was reasoning about a channel that then
+cost a subscription table, a permission dance and a rewrite of the service
+worker. It now costs none of those, because they exist.
+
+The split as built (`0047`, `0048`):
+
+- **Push** carries the four moments worth interrupting for: your cook is
+  chosen, the recipe you must cook has arrived, online voting opens, results
+  are published. One account-level switch, all dinners, all devices.
+- **Email** is now only what Auth owns — password reset and address change.
+- **Still unbuilt, and still email-shaped**: the invitation, and reaching
+  people who never switch notifications on. The "somebody says it out loud"
+  row survives intact: the dinner itself is not notified about.
+- **Per-dinner notification preferences are v2**, and deliberately: they need
+  a per-round row and somewhere in the round UI to set it, and neither is
+  worth building before anyone has been annoyed by the global switch.
+
 ---
 
 ## 2. A paid tier
@@ -87,6 +108,7 @@ about, real enough to be worth building.
 |---|---|
 | **Table styles / personalisation** | **Best candidate.** The tablecloth is the identity — blue check, linen, butcher paper, seasonal. Pure flavour, zero mechanical effect, obviously desirable, and it scales forever without design debt. |
 | **Pseudonym themes** | **Yes.** Same logic: flavour only. Already specced as v2 in `PRESENTATION.md`. |
+| **Changing your public name** | **Yes, and it arrived on its own.** The name became a unique handle in `0046`, which is exactly what makes changing it worth something — and what makes it cost something, since the old one is released for somebody else to take. Flavour, not mechanics: nobody plays a worse game because their neighbour renamed themselves. |
 | **Two recipes per brief** | **Acceptable, because it's round-level.** The host buys it and every player in that round gets it, so nobody at the table has a worse game than their neighbour. It would be a bad paid feature if it were per-player. |
 | **Global leaderboard** | **Push back.** It needs a persistent cross-round identity, which fights the anonymity the whole product is built on, and it changes why people play — optimising a score rather than cooking something funny for a friend. If some form is wanted, keep it per-group and opt-in, not global. |
 | **Help build v3** | **Keep, but as recognition, not a feature.** An early-supporter credit costs nothing and suits a product about a shared table. |
@@ -184,6 +206,12 @@ control, real uptime, someone else's electricity and network.
 ---
 
 ## 4. Getting onto the Play Store
+
+> Superseded in detail by [`DISTRIBUTION.md`](./DISTRIBUTION.md), which
+> covers all four routes (PWA, APK, Play, App Store), the real costs, the
+> obligations a store adds, and what monetising would cost in practice.
+> This section stays as the summary and the record of the one decision
+> already taken (purchases happen on the web).
 
 Very doable, and cheaper than expected — the app is already a PWA, so it
 doesn't need rewriting. Android wraps a PWA in a native shell via a

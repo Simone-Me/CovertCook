@@ -25,7 +25,18 @@
     "signIn": "Se connecter",
     "signUp": "Créer un compte",
     "email": "E-mail",
-    "password": "Mot de passe",
+    "password": {
+      "show": "Afficher le mot de passe",
+      "hide": "Masquer le mot de passe",
+      "again": "Retapez-le",
+      "rules": "Au moins {{classes}} caractères avec un chiffre et une majuscule — ou {{alone}} et plus de n’importe quoi, plus facile à retenir et plus dur à deviner.",
+      "tooWeak": "Ce mot de passe n’est pas encore assez long. La règle est sous le champ.",
+      "mismatch": "Les deux ne correspondent pas.",
+      "match": "Ils correspondent.",
+      "choose": "Choisissez un nouveau mot de passe",
+      "save": "Enregistrer le nouveau mot de passe",
+      "changed": "C’est fait. Votre nouveau mot de passe est actif."
+    },
     "displayName": "Prénom ou pseudo",
     "forgotPassword": "Mot de passe oublié ?",
     "resetPassword": "Réinitialiser le mot de passe",
@@ -46,12 +57,20 @@
       "spam": "Regardez dans les spams ou courriers indésirables. CovertCook est un expéditeur récent, et les expéditeurs récents y atterrissent plus souvent qu'ailleurs — marquer le message comme « non indésirable » une fois règle le problème définitivement.",
       "resend": "Renvoyer",
       "wait": "Vous pourrez renvoyer dans",
-      "sentAgain": "Envoyé. Regardez la même boîte, spams compris."
+      "sentAgain": "C'est parti — si cette adresse attend toujours d'être confirmée. Regardez la même boîte, spams compris."
     },
     "acceptTerms": "J'ai lu et j'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
     "mustAcceptTerms": "Vous devez accepter les conditions et la politique de confidentialité pour créer un compte.",
     "acceptAllergies": "Je comprends que CovertCook conserve les allergies et régimes que je saisis, qu'il s'agit de données de santé, et j'accepte qu'ils soient montrés aux personnes de mes dîners afin qu'elles puissent cuisiner pour moi sans danger. Je lirai le panneau diététique avant d'écrire une recette pour quelqu'un, et je n'enverrai pas un plat que je sais dangereux pour lui.",
-    "mustAcceptAllergies": "Celle-ci n'est pas optionnelle : un dîner où personne ne lit les allergies est réellement dangereux."
+    "mustAcceptAllergies": "Celle-ci n'est pas optionnelle : un dîner où personne ne lit les allergies est réellement dangereux.",
+    "name": {
+      "checking": "Vérification…",
+      "free": "Libre — il est à vous.",
+      "taken": "Déjà pris. Essayez-en un autre.",
+      "changeLater": "C'est ainsi que tout le monde vous connaîtra. Le changer plus tard est prévu dans la version Pro.",
+      "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
+    },
+    "passwordLabel": "Mot de passe"
   },
   "dietary": {
     "title": "Vos restrictions alimentaires",
@@ -699,5 +718,53 @@
     },
     "draftNote": "Un brouillon, écrit à partir de ce que fait réellement l'application. Il n'a pas été relu par un juriste, et il devra l'être avant que CovertCook facture quoi que ce soit — le panneau diététique contient des données de santé, et toute vente entraîne TVA européenne et droit de rétractation.",
     "by": "par"
+  },
+  "push": {
+    "title": "Notifications",
+    "turnOn": "Activer les notifications",
+    "turnOff": "Désactiver les notifications",
+    "perRound": "Un seul réglage pour tous vos dîners et tous vos appareils. Le choix dîner par dîner viendra plus tard.",
+    "moments": [
+      "Votre cuisinier est tiré — vous pouvez écrire sa recette",
+      "La recette que vous devez cuisiner est arrivée",
+      "Le vote en ligne s’ouvre",
+      "Les résultats sont publiés"
+    ],
+    "state": {
+      "checking": "Vérification de ce que cet appareil sait faire…",
+      "on": "Activées. Vous serez prévenu des quatre moments ci-dessous, et de rien d’autre.",
+      "off": "Désactivées. Les activer demande une fois l’autorisation à votre navigateur.",
+      "denied": "Bloquées. Votre navigateur refuse à votre place et l’application ne peut plus le demander — il faut les réautoriser dans les réglages du site pour CovertCook.",
+      "needs-install": "Ajoutez CovertCook à votre écran d’accueil et ouvrez-le depuis là. Sur iPhone et iPad, les notifications n’existent que dans l’application installée — c’est la règle d’Apple, pas la nôtre.",
+      "unsupported": "Ce navigateur ne gère pas les notifications. Rien n’est cassé : il ne peut simplement pas.",
+      "unconfigured": "Pas encore disponible sur ce déploiement."
+    }
+  },
+  "account": {
+    "title": "Supprimer votre compte",
+    "help": "Vous pouvez supprimer votre compte ici. Cela prend trente jours, et vous pouvez tout arrêter entre-temps.",
+    "delete": "Supprimer mon compte",
+    "confirmTitle": "Supprimer ce compte dans trente jours ?",
+    "confirmLabel": "Oui, lancer les trente jours",
+    "consequences": [
+      "Votre e-mail, votre nom et vos allergies sont effacés. Les allergies partent immédiatement et entièrement.",
+      "Vous quittez chaque dîner en cours, exactement comme si vous étiez parti : là où les recettes sont déjà attribuées, l’organisateur est prévenu pour réparer la chaîne.",
+      "Les dîners déjà terminés gardent leurs plats, leurs votes et leurs résultats — ils appartiennent à tous ceux qui étaient là. Votre nom y devient « Ancien convive ».",
+      "Rien ne se passe pendant trente jours. D’ici là, un clic ramène tout."
+    ],
+    "pending": "Votre compte doit être supprimé le {{date}}. Rien n’a encore été effacé.",
+    "keepMyAccount": "Finalement, je garde mon compte",
+    "hostingBlocks": "Vous organisez un dîner qui n’est pas terminé. Confiez-le à quelqu’un d’autre ou annulez-le d’abord — une table ne peut pas perdre son organisateur en cours de route."
+  },
+  "welcome": {
+    "title": "Bienvenue dans CovertCook",
+    "lead": "L’application pour organiser un dîner entre amis et le cuisiner ensemble — sauf que personne ne choisit son propre plat.",
+    "how": [
+      "Quelqu’un crée un dîner et invite la table.",
+      "Chacun se voit attribuer en secret une autre personne pour qui cuisiner, et lui écrit une recette.",
+      "Personne ne sait qui a écrit la sienne. Chacun cuisine ce qu’on lui a donné et l’apporte.",
+      "On mange, on classe les plats, et c’est seulement là qu’on découvre qui a choisi quoi."
+    ],
+    "next": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé. Un dîner d’exemple guidé arrivera bientôt ici."
   }
 }

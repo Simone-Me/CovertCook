@@ -8,9 +8,9 @@ there.
 
 ## Where to pick up
 
-Everything from 2026-08-22 onwards is **local only** — production is still
-on migration `0014`. Nothing has been deployed. Work is on the
-`redesign/drawers` branch, to be merged.
+Production is **up to date**: `0015` → `0045` were deployed on 2026-08-24
+and the client and the database agree again. The schema/client mismatch
+that made every RPC added since `0015` fail is closed.
 
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
@@ -24,6 +24,20 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    the three constraints any render has to meet, and the three questions
    still open (which objects, how many variants, single objects or one
    laid table).
+4. **The invitation, and reaching people who never switch push on** — the four
+   moments are covered (`0048`), but only for people who opted in. An invited
+   player who has never opened the app cannot be pushed to at all. That is the
+   mail that still has to be written, and `send-email` is the natural home.
+5. **A public deletion request URL** — the in-app path is built (`0049`);
+   Google Play also wants a page reachable without installing the app. A form
+   and an inbox, not a schema change.
+6. **A guided demo dinner** on the first-run panel — pre-filled players,
+   pop-up arrows pointing at the next control, running through to the vote and
+   the results, so the app can be understood without an evening being spent.
+   The panel that will hold it exists; the tour does not.
+7. **Distribution** — `DISTRIBUTION.md` covers the four routes (PWA, APK,
+   Play, App Store), the real costs, and why monetising is a later and
+   much more expensive decision than a store listing. Pro is deferred.
 
 **What the email work needs from you** (see also `.env.example`): a Resend
 API key, a verified sender domain, and a decision on the from-address.
@@ -42,6 +56,399 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-08-24 (11)
+
+**Added: password rules that prefer length, the missing half of the password
+reset, a first-run panel, and the real mark on the mail.**
+
+*Two ways to be long enough.* Fourteen characters with a digit and a capital,
+**or** twenty-one of anything at all. The second route exists because a rule
+that forbids `the cat sat on the fridge again` while allowing `Abcd1234!` has
+it backwards: length is what costs an attacker time, and a passphrase is both
+stronger and easier to remember. Stated under the field before it is broken
+rather than after, and the same green/red the name check uses.
+
+*The eye, and what is blocked.* The field starts masked and can be revealed —
+hiding what somebody types on their own phone guards against a shoulder that is
+usually not there, at the price of invisible typos, which is what pushes people
+towards shorter passwords. Copy and cut are blocked on both fields, because a
+password copied out of a form is a password in a clipboard history syncing to
+three devices. Paste is blocked **on the confirmation only**: pasting there
+defeats the point of typing it twice, while pasting into the first field is how
+a password manager offers a generated one. Managers that autofill raise no
+paste event and are unaffected either way.
+
+*Found while building it: the password reset had no second half.* `/reset`
+asked for an address and sent a mail; the link in that mail came back to the
+same page, which showed the request form again. There was nowhere to type a new
+password — the flow was a loop. The recovery session now switches the page into
+"choose a new password", detected both from the `PASSWORD_RECOVERY` event and
+from `type=recovery` still in the URL hash, because catching only one of those
+means showing somebody the request form for the third time.
+
+*The name field says which name it is.* Beside it, at sign-up: this is your
+real name, outside the game — how friends recognise you and how a host knows
+who is asking to join. You are never called it at a dinner; each dinner draws
+you its own secret name. One sentence in the only place the two can be
+confused.
+
+*A first-run panel instead of a tagline.* Somebody who has just made an account
+and sees an empty list needs to know what the app is for before being asked to
+press "create". Four lines: someone sets up a dinner, each person is secretly
+given somebody to cook for and writes them a recipe, nobody knows who wrote
+theirs, and only after the ranking does everyone find out. The guided demo
+dinner — pre-filled, with arrows, running all the way to the vote — is a
+separate and later job; this is the words, not the tour.
+
+*The mail carries the app's own mark.* The seal was the letters CC because
+images are blocked by default in most clients. It is now the real icon served
+from the app itself, on a red tile that is a background colour rather than part
+of the artwork — so a blocked image leaves a red seal reading "CovertCook",
+not a broken-image hole. The origin is overridable (`APP_BASE_URL`), so buying
+a domain does not mean editing a template.
+
+**Verified:** build and lint clean; all fourteen auth mails still render with
+subject, link in HTML and text, the logo present, no `undefined`, and the
+origin override producing no double slash.
+
+---
+
+## 2026-08-24 (10)
+
+**Added: deleting an account, and the foreign key that made it impossible**
+(`0049`).
+
+Reported from the dashboard: `DELETE /admin/users/…` → 500, `violates foreign
+key constraint "audit_log_actor_id_fkey"`. `audit_log` is not the problem, it
+is the first row Postgres happened to check. The chain is `auth.users` →
+`profiles` (ON DELETE CASCADE, from `0001`) → and then everything referencing
+`profiles` without one: `round_members`, `rounds.host_id`,
+`invites.created_by`, `round_invitations.invited_by`, `audit_log.actor_id`.
+
+*The fix is to break the cascade, not to add more of them.* `profiles.id` is no
+longer a foreign key to `auth.users`. That single change lets the auth row —
+email, password, sessions — be deleted outright while the profile survives as
+an anonymous placeholder holding the rounds together. It is also what makes the
+dashboard's own Delete user work, and `DISTRIBUTION.md` §10's option A is
+updated accordingly: it turns out not to need the auth row kept at all, which
+is strictly better than scrubbing one in place.
+
+*Rounds are left, not scrubbed* — asked for directly, and the machinery already
+existed with the right rule. `leave_round` (`0004`) removes cleanly while a
+round is DRAFT/OPEN/LOCKED and, once an assignment exists, refuses to touch the
+chain and raises a DROPOUT alert so the Executive Chef decides what the
+departure costs (`remove_member`, `0016`: reconnect, or one dish fewer).
+Deletion reuses exactly that instead of inventing a second, quieter way to tear
+a chain. Finished dinners are not touched at all: the dishes, the votes and the
+results belong to everyone who was there, and only the name on them changes.
+
+*Hard-deleted, because it is theirs alone:* dietary entries — Article 9 health
+data, no trace — push subscriptions, and invitations nobody answered.
+
+*Thirty days, and reversible for all of them.* The rounds are left at the
+moment of erasure, not at the moment of asking, so cancelling restores an
+account that never lost anything. `purge-deletions.yml` runs daily and is
+boring by design: on almost every run it purges nothing and says so. It holds
+the service role key, because deleting auth users is something no signed-in
+person may ever do.
+
+*A trigger on `auth.users` anonymises the profile whatever deletes the
+account.* The dashboard and the admin API do not call our RPC, and without it
+they would leave a real name and a list of allergies attached to nobody. The
+safe outcome is now the automatic one.
+
+*A host cannot walk out of a dinner they are running* — the same rule
+`leave_round` has always had, with the same remedy, and the interface says it
+in words rather than forwarding `hosting_a_live_round`.
+
+*The in-app path is a `InlineConfirm`, not a dialog*, and it lists what will
+actually happen in four lines before anything starts — including that finished
+dinners keep their dishes and that one click brings it all back.
+
+**One honest gap, recorded rather than hidden:** Supabase access tokens are
+stateless and live about an hour, so a token already in a browser keeps working
+until it expires. It belongs to the person who asked for the deletion.
+
+**Verified** by reproducing the reported failure and then watching it succeed:
+`0001` → `0049` replayed into a throwaway Postgres 16 with an `audit_log` row
+for the actor, a round in `ASSIGNED`, a submitted brief and an allergy. After
+`delete from auth.users`: the auth row is gone, the profile reads "Ancien
+convive", the allergy row count is zero, the brief is still in the round, the
+seat is `LEFT` with its secret name intact, and a DROPOUT alert is waiting for
+the host. Also checked: a live host is refused, ask-then-cancel leaves nothing
+behind, the purge takes nothing before thirty days and exactly one account
+after thirty-one, and the archived dinner still has both its seats.
+
+---
+
+## 2026-08-24 (9)
+
+**Decided: the hook, four moments, and the Netlify origin.**
+
+*Mail is the hook, not the paste* (`send-email`). `supabase/email-templates/`
+stays as the bridge until it is deployed and as a way to open a mail in a
+browser and look at it, and the generated README now says so rather than
+leaving the choice open. The consequence that decided it: a dashboard box
+holds one language, and this app has two.
+
+*Mail shrank to what Auth owns.* Password reset and address change. Everything
+else that used to want an email is a notification now, which is the reason
+`ROADMAP.md` §1 has a "superseded" section rather than a quiet edit — the
+argument it made was right, and what changed underneath it was the platform,
+not the reasoning.
+
+*Four moments, and nothing else* (`0048`):
+
+| Moment | Who | When |
+|---|---|---|
+| Your cook has been chosen | the round, minus the host | `ASSIGNED` |
+| Your recipe has arrived | one cook | its author submits |
+| Voting is open | the round, minus the host | `VOTING`, **online ballots only** |
+| The results are in | the round, minus the host | `RESULTS` |
+
+Three of those are the Executive Chef announcing the round. The second is not,
+and that is the interesting one: since `0035` a recipe lands the moment its
+author submits, so hanging its notification on a phase change would rebuild
+exactly the stall `0035` removed. It is sent by the sender, at submit — and
+resolved through the chain, so the sender never names their cook and never
+learns who they reached. The text says nothing about who wrote it, and cannot:
+it is composed in the Edge Function, because a caller that supplies the words
+is a caller that can put a name on somebody's lock screen.
+
+A hand-counted round gets no voting push at all. Everyone is in the room and
+somebody is standing up to say it.
+
+Dinner starting, a settings change, a phase nudged backwards: silent. An
+unknown moment reaching `send-push` is answered with `skipped`, not with a
+generic notification — the app has decided what it interrupts people about,
+and "something happened" is not on the list.
+
+*One switch, all dinners, all devices.* The subscription rows are per browser
+because that is what the Push API gives us; the decision is now a column on
+`profiles`, so turning it off on the phone silences the laptop. Stated in the
+migration rather than discovered later: turning it back on anywhere revives
+both. Per-dinner preferences are v2, and the profile screen says so.
+
+*The origin is `https://covertcook.netlify.app`*, until a domain is bought. All
+three settings that have to agree — `VITE_APP_BASE_URL`, Site URL, Redirect
+URLs — are named with that value in README, because a mismatch between them is
+silent and surfaces only as a link that opens the wrong place.
+
+**Verified:** `0001` → `0048` replayed into a throwaway Postgres 16. A DRAFT
+brief notifies nobody (no doorbell before you have written anything); once
+submitted it reaches exactly the cook, in the cook's own language; the cook
+cannot reach themselves from their own seat; the account switch empties both
+audiences at once and refills them; and a MANUAL round reports its vote as not
+online while a LIVE one reports it as online. Grants re-checked with
+`has_function_privilege`: both audience functions and the vote-mode check are
+`service_role` only. Build and lint clean.
+
+---
+
+## 2026-08-24 (8)
+
+**Added: the auth mail is ours now, and push exists.**
+
+### The mail was never a template problem
+
+Custom SMTP decides *where* mail is posted, not *what* it says — the body kept
+coming from Auth's dashboard templates, which is why `templates.ts` could be
+perfect and change nothing. Two routes now exist to replace them, and the repo
+supports both:
+
+*`npm run mail:templates`* renders every auth mail into
+`supabase/email-templates/*.html` with `{{ .ConfirmationURL }}` in place of the
+link, ready to paste into the dashboard. Ten files, five templates, two
+languages, generated from the same source as everything else.
+
+*`supabase/functions/send-email/`* is the better one: the **Send Email Hook**.
+Auth stops sending and hands us the mail; we render `templates.ts` in the
+recipient's own language and post it to Resend's API. It is the difference
+between a dashboard box that holds one language and a function that picks per
+person. `templates.ts` grew from one template to all seven action types Auth
+can emit, because with the hook on, an action with no template gets no mail at
+all.
+
+The function is deployed `--no-verify-jwt` — Auth calls it with a webhook
+signature, not a token — which makes that signature the only thing standing
+between the endpoint and an open relay sending CovertCook-branded mail to any
+address a stranger names. It is verified before the body is parsed, never
+after.
+
+*And the localhost link is a third thing again, in the dashboard.* Auth builds
+`{{ .ConfirmationURL }}` from the redirect the client asked for, checks it
+against the Redirect URLs allow-list, and **falls back to Site URL** when it
+does not match. A Site URL still pointing at `localhost` is the entire
+explanation, and no template can fix it. README now says which three settings
+have to agree.
+
+### Push, for the app as installed
+
+`ROADMAP.md` §1 chose email over push and the argument still holds for the
+asynchronous moments. What changed is the platform: the app is on a home
+screen, which is the prerequisite **iOS** imposes, so push works without a
+store listing. That is the part worth saying plainly — web push in an installed
+PWA is the same API a native app gets; Android delivers it in a tab or
+installed, iOS only from the home screen, and no store is involved either way.
+
+- `0047` — subscriptions, **one row per browser**, not per person: the phone
+  and the laptop are two, and revoking one must not silence the other. Writes
+  go through RPCs; an insert policy would let a client claim an endpoint
+  belonging to somebody else's browser.
+- `src/sw.ts` — the service worker is hand-written now. `generateSW` had
+  nowhere to put a `push` listener, so `injectManifest` took over and the
+  worker reproduces what the config used to declare: precaching, skipWaiting,
+  and the `/rest/v1/` GET cache for bad wifi at the flat.
+- `send-push` — composes the text server-side (a client that supplies the
+  words is a client that can put any words on somebody else's lock screen),
+  checks the caller is the host with the caller's own token, and only then
+  reads the audience with the service key. Endpoints and encryption keys never
+  reach a browser. 404/410 prunes the row; anything else is left alone,
+  because a timeout must not cost somebody their notifications.
+- The settings screen asks what the device can do rather than assuming, and
+  the permission prompt is raised by a button — a refusal is permanent, and
+  raising it on page load is how an app loses a person forever.
+
+### Found while testing: two functions anyone could call
+
+`revoke all on function … from anon, authenticated` does **not** do what it
+reads like. Postgres grants EXECUTE on every new function to PUBLIC, and both
+roles inherit it — so the revoke removes a grant they did not need while
+leaving the one they were using. Caught by asking `has_function_privilege`
+instead of trusting the REVOKE.
+
+`push_audience_for_round` was written that way and is now revoked from PUBLIC
+and granted back to `service_role` alone — which is itself a trap worth
+recording, since revoking from PUBLIC takes it from `service_role` too and
+would have silently broken the only caller. The same latent hole has been
+open since `0003` on `consume_turnstile_ticket`: the table was locked, the
+function was not. Closed in the same migration. Nothing calls it from outside
+the database.
+
+**Verified:** `0001` → `0047` replayed into a throwaway Postgres 16 — the
+chain applies, the subscription upsert is idempotent, a shared device changes
+hands instead of failing, `forget` only silences your own endpoint, and the
+audience function is now unreachable for `anon` and `authenticated` and
+reachable for `service_role`. All fourteen auth mails (seven actions × two
+languages) render with a subject, the link in both the HTML and the text part,
+and no `undefined` anywhere. `npm run build` produces a service worker that
+really does contain the `push` and `notificationclick` listeners.
+
+---
+
+## 2026-08-24 (7)
+
+**Added: the public name is an identity, not a label** (`0046`).
+
+`display_name` had been free text since `0001` — two people could both be
+"Simone" and nothing anywhere noticed. That is fine for a label and wrong
+for a handle, and a handle is what it had become: it is the name the reveal
+prints, the name a host reads when approving a request to join, and the
+name an invitation is addressed to. Each of those is ambiguous with a
+duplicate in the room.
+
+*Unique, case-insensitively, on live accounts only.* `lower(display_name)`
+under a unique index, so "Simone" and "simone" are the same person to the
+database while the name is **stored exactly as typed** — how you capitalise
+your own name is yours. The index is partial, `where anonymised_at is
+null`, and that is not an optimisation: erasure (`DISTRIBUTION.md` §10)
+anonymises rather than deletes, every retired profile is meant to end up
+wearing the same neutral token, and a total index would make the second
+person to leave impossible to anonymise.
+
+*The form asks before the submit does.* A 400 ms debounce behind
+`display_name_available`, and the field answers while you type — green
+border and "free", red border and "already taken". Never colour alone: the
+same answer is in words underneath, because a border colour is not readable
+to everyone. The check is authenticated-only on purpose; an open
+availability endpoint is an account-enumeration oracle.
+
+*Advisory, and treated as such.* Three layers, because a check is stale the
+moment it returns: the debounce answers the typist, `complete_signup`
+re-checks and raises `display_name_taken` in words rather than forwarding a
+constraint name, and the unique index catches the two people who pick the
+same name in the same second. A failed check reads as "don't know", never
+as "taken" — refusing a free name over a dropped connection is the one
+failure that would be the app's fault.
+
+*Existing duplicates are settled before the index is built.* The oldest
+account keeps the name — its friends already know them by it — and the rest
+gain a short suffix, each rename logged as a notice so the deploy output is
+the record of who moved and to what.
+
+*A small note under the field says what happens next:* changing the name
+later is planned as part of Pro. That is now a row in `ROADMAP.md` §2 and
+it earned its place by accident — a name only becomes worth changing once
+it is unique, and it only costs something once giving it up releases it to
+somebody else.
+
+**Verified, not assumed.** Migrations `0001` → `0046` were replayed into a
+throwaway Postgres 16 with a stubbed `auth` schema: the whole chain applies,
+duplicates are renamed as described, the index refuses a case-different
+duplicate, availability is right for a taken name, a trimmed/case-different
+one, a free one and your own, and `complete_signup` raises
+`display_name_taken` rather than a constraint name. The `secret_name` side
+was checked at the same time and needed nothing: it is already unique per
+round by constraint (`unique (round_id, secret_name)`), assigned rather than
+chosen, and deliberately not unique *across* rounds — a pseudonym that
+followed you between dinners would be the cross-round identity the
+anonymity design exists to prevent.
+
+---
+
+## 2026-08-24 (6)
+
+**Audited: the confirmation mail, because resending one did nothing.**
+Reported symptom: the sign-up mail arrives, the "send it again" button
+does nothing visible, and Resend has no record of a second send at all.
+
+*What the mail system actually is.* Worth stating, because it decides
+where to look: the confirmation and the password reset are sent by
+**Supabase Auth**, rendered from the dashboard's templates and handed to
+Resend over SMTP. `supabase/functions/send-email/` holds `templates.ts`
+and no `index.ts` — it has never been deployed and sends nothing. So a
+mail that never reaches Resend was never handed to SMTP: it died inside
+GoTrue, before any provider was involved. That rules out Resend, the
+sending domain, DNS and spam filtering in one step.
+
+*Fixed: `/resend` was the only auth call in the app with no captcha
+token.* Sign-up, sign-in and password reset all pass one;
+`ConfirmEmailNotice` passed none. GoTrue gates `/resend` with the same
+project-level captcha setting as the rest, so with protection on, every
+resend is refused before a mail is attempted — first mail out, second
+never, nothing in Resend, which is exactly the reported shape. The
+sign-up token could not have been forwarded either: Turnstile tokens are
+single-use and that one was spent by sign-up, so the screen now solves
+its own, like every other form.
+
+*Fixed: the screen claimed a send it cannot know happened.* Supabase's
+email-enumeration protection makes `/resend` answer **200 with no mail**
+for an address that is already confirmed or unknown — deliberately, so
+the endpoint cannot be used to test whether an account exists. "Sent.
+Check the same mailbox" was therefore a statement the client had no
+grounds for. It now reads as a conditional in both languages: on its way,
+*if that address is still waiting to be confirmed*.
+
+*Not fixed, because they are settings, not code.* Two remaining causes
+produce identical symptoms and can only be checked in the Supabase
+dashboard: **captcha protection** (whether it is on at all — the fix
+above only matters if it is), and **the email rate limit**, which
+`config.toml` carries at the stock `email_sent = 2` per hour. Two mails
+an hour is a whole afternoon of testing spent in one signup and one
+resend, and GoTrue answers 429 without touching SMTP.
+
+*Found, not fixed — the resend button is unreachable exactly when it is
+needed.* `ConfirmEmailNotice` renders only as a step inside `SignUpPage`,
+holding the address in component state. Close the tab and there is no way
+back to it: the person who did not get the mail is the person most likely
+to have given up on the tab. Signing up again returns the same
+enumeration-protected success without sending anything. The recovery path
+this button exists to provide needs its own entry point — a "resend the
+confirmation" route reachable from sign-in — and that is a design
+decision, not a patch.
 
 ---
 

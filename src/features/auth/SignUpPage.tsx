@@ -1,14 +1,27 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ConfirmEmailNotice } from './ConfirmEmailNotice'
 import { Turnstile } from '../../components/Turnstile'
+import { PasswordField } from '../../components/PasswordField'
+import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/password'
 import { useAuth } from '../../lib/auth'
-import { completeSignup, type DietaryEntryInput, type DietaryKind } from '../../lib/rpc'
+import {
+  completeSignup,
+  displayNameAvailable,
+  type DietaryEntryInput,
+  type DietaryKind,
+} from '../../lib/rpc'
 
 const DIETARY_KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
+
+// Long enough that a normal typist isn't asking the server about every
+// keystroke, short enough that the answer feels like part of typing.
+const NAME_CHECK_DEBOUNCE_MS = 400
+
+type NameState = 'idle' | 'checking' | 'free' | 'taken'
 
 export function SignUpPage() {
   const { t, i18n } = useTranslation()
@@ -20,18 +33,58 @@ export function SignUpPage() {
   )
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [passwordAgain, setPasswordAgain] = useState('')
   const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
   const [displayName, setDisplayName] = useState('')
+  const [nameState, setNameState] = useState<NameState>('idle')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [acceptedAllergies, setAcceptedAllergies] = useState(false)
   const [hasNoRestrictions, setHasNoRestrictions] = useState(false)
   const [entries, setEntries] = useState<DietaryEntryInput[]>([])
 
+  // The name is an identity now (migration 0046), so the form asks before the
+  // submit does. Advisory only: `stale` drops answers that arrive after the
+  // person has typed on, and complete_signup re-checks under the unique index
+  // for the two people who pick the same name in the same second.
+  useEffect(() => {
+    const name = displayName.trim()
+    if (!name) {
+      setNameState('idle')
+      return
+    }
+    setNameState('checking')
+    let stale = false
+    const id = setTimeout(() => {
+      displayNameAvailable(name)
+        .then((free) => {
+          if (!stale) setNameState(free ? 'free' : 'taken')
+        })
+        // A failed check must not read as "taken" — that would refuse a name
+        // that is free over a dropped connection. Say nothing and let the
+        // submit decide.
+        .catch(() => {
+          if (!stale) setNameState('idle')
+        })
+    }, NAME_CHECK_DEBOUNCE_MS)
+    return () => {
+      stale = true
+      clearTimeout(id)
+    }
+  }, [displayName])
+
   async function onAccountSubmit(e: React.FormEvent) {
     e.preventDefault()
+    if (!checkPassword(password).valid) {
+      setError(t('auth.password.tooWeak'))
+      return
+    }
+    if (password !== passwordAgain) {
+      setError(t('auth.password.mismatch'))
+      return
+    }
     if (!acceptedTerms) {
       setError(t('auth.mustAcceptTerms'))
       return
@@ -52,6 +105,9 @@ export function SignUpPage() {
       password,
       options: {
         emailRedirectTo: `${import.meta.env.VITE_APP_BASE_URL}/`,
+        // The confirmation mail is rendered before a profile exists, so the
+        // only place the send-email hook can learn a language is here.
+        data: { locale: i18n.language.startsWith('en') ? 'en' : 'fr' },
         ...(captchaToken ? { captchaToken } : {}),
       },
     })
@@ -79,6 +135,11 @@ export function SignUpPage() {
     e.preventDefault()
     setError(null)
 
+    if (nameState === 'taken') {
+      setError(t('auth.name.taken'))
+      return
+    }
+
     if (!hasNoRestrictions && entries.filter((it) => it.label.trim()).length === 0) {
       setError(t('dietary.required'))
       return
@@ -101,11 +162,23 @@ export function SignUpPage() {
       // longer exists. AuthProvider clears such sessions on load, but a tab
       // already open when the account vanished only finds out here. Say
       // what happened instead of forwarding Postgres's constraint name.
-      setError(message.includes('profiles_id_fkey') ? t('auth.staleSession') : message)
+      if (message.includes('display_name_taken')) {
+        // Somebody took it between the check and the submit.
+        setNameState('taken')
+        setError(t('auth.name.taken'))
+      } else {
+        setError(message.includes('profiles_id_fkey') ? t('auth.staleSession') : message)
+      }
     } finally {
       setSubmitting(false)
     }
   }
+
+  // Reusing the field-status colours the name check introduced: green when a
+  // rule is met, red when it is actively wrong, silent while nothing has been
+  // typed. Nobody should be told they are wrong before they have started.
+  const passwordState = !password ? 'idle' : checkPassword(password).valid ? 'free' : 'taken'
+  const confirmState = !passwordAgain ? 'idle' : password === passwordAgain ? 'free' : 'taken'
 
   if (step === 'confirm-email') {
     return <ConfirmEmailNotice email={email} />
@@ -121,6 +194,10 @@ export function SignUpPage() {
         <form onSubmit={onDietarySubmit} className="stack">
           <div>
             <label htmlFor="displayName">{t('auth.displayName')}</label>
+            {/* The one place these two names can be confused, so it is said
+                here rather than discovered mid-dinner: this is the person,
+                the secret name is the player. */}
+            <p className="muted">{t('auth.name.whatItIs')}</p>
             <input
               id="displayName"
               required
@@ -128,7 +205,17 @@ export function SignUpPage() {
               maxLength={60}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
+              className={nameState === 'free' ? 'is-free' : nameState === 'taken' ? 'is-taken' : ''}
+              aria-invalid={nameState === 'taken'}
+              aria-describedby="displayName-status"
             />
+            {/* The border carries the answer, but never alone: colour is not
+                readable to everyone, and "taken" is the kind of thing a person
+                needs in words before they retype. */}
+            <p id="displayName-status" className={`field-status is-${nameState}`}>
+              {nameState !== 'idle' && t(`auth.name.${nameState}`)}
+            </p>
+            <p className="muted">{t('auth.name.changeLater')}</p>
           </div>
 
           <label className="row">
@@ -181,7 +268,7 @@ export function SignUpPage() {
             </div>
           )}
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" disabled={submitting || nameState === 'taken'}>
             {t('actions.submit')}
           </button>
         </form>
@@ -199,17 +286,35 @@ export function SignUpPage() {
           <label htmlFor="email">{t('auth.email')}</label>
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
-        <div>
-          <label htmlFor="password">{t('auth.password')}</label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={10}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        <PasswordField
+          id="password"
+          label={t('auth.passwordLabel')}
+          value={password}
+          onChange={setPassword}
+          describedBy="password-rules"
+        />
+        {/* The rules, before they are broken rather than after. Two routes,
+            both stated, because "at least one uppercase" on its own teaches
+            people to end their password with an exclamation mark. */}
+        <p id="password-rules" className={`field-status is-${passwordState}`}>
+          {t('auth.password.rules', { classes: MIN_WITH_CLASSES, alone: LONG_ENOUGH_ALONE })}
+        </p>
+
+        <PasswordField
+          id="password-again"
+          label={t('auth.password.again')}
+          value={passwordAgain}
+          onChange={setPasswordAgain}
+          allowPaste={false}
+          describedBy="password-again-status"
+        />
+        <p id="password-again-status" className={`field-status is-${confirmState}`}>
+          {confirmState === 'taken'
+            ? t('auth.password.mismatch')
+            : confirmState === 'free'
+              ? t('auth.password.match')
+              : ''}
+        </p>
         {/* Consent has to be given, not assumed. A pre-ticked box or a line
             of small print saying "by continuing you agree" is not agreement —
             and this is the only moment where asking is honest, because after
@@ -255,7 +360,16 @@ export function SignUpPage() {
         </label>
 
         <Turnstile onVerify={setCaptchaToken} />
-        <button type="submit" disabled={submitting || !acceptedTerms || !acceptedAllergies}>
+        <button
+          type="submit"
+          disabled={
+            submitting ||
+            !acceptedTerms ||
+            !acceptedAllergies ||
+            passwordState !== 'free' ||
+            confirmState !== 'free'
+          }
+        >
           {t('auth.signUp')}
         </button>
       </form>

@@ -1,11 +1,13 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackToTable } from '../../components/BackToTable'
+import { InlineConfirm } from '../../components/InlineConfirm'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import { SUPPORTED_LOCALES, type SupportedLocale } from '../../lib/i18n'
-import type { DietaryKind } from '../../lib/rpc'
+import { cancelAccountDeletion, requestAccountDeletion, type DietaryKind } from '../../lib/rpc'
+import { currentPushState, disablePush, enablePush, type PushState } from '../../lib/push'
 
 const KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
 
@@ -30,6 +32,76 @@ export function ProfilePage() {
   const [label, setLabel] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [push, setPush] = useState<PushState | null>(null)
+  const [pushBusy, setPushBusy] = useState(false)
+  const [confirmingDeletion, setConfirmingDeletion] = useState(false)
+
+  const deletionDue = profile?.deletion_requested_at
+    ? new Date(new Date(profile.deletion_requested_at).getTime() + 30 * 24 * 60 * 60 * 1000)
+    : null
+
+  async function onRequestDeletion() {
+    setError(null)
+    setBusy(true)
+    try {
+      await requestAccountDeletion()
+      setConfirmingDeletion(false)
+      await refreshProfile()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('errors.generic')
+      // The one refusal worth translating: a dinner cannot lose the person
+      // running it halfway through.
+      setError(message.includes('hosting_a_live_round') ? t('account.hostingBlocks') : message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onCancelDeletion() {
+    setError(null)
+    setBusy(true)
+    try {
+      await cancelAccountDeletion()
+      await refreshProfile()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  // Asked, never assumed: the answer differs between this phone in a Safari
+  // tab and the same phone with the app on its home screen.
+  useEffect(() => {
+    let stale = false
+    currentPushState().then((state) => {
+      if (!stale) setPush(state)
+    })
+    return () => {
+      stale = true
+    }
+  }, [])
+
+  // Two facts, one switch. The browser holds an address for this device; the
+  // account holds the decision, for every device and every dinner. Subscribed
+  // here but switched off there reads as off, because that is what the person
+  // asked for on whichever device they asked on.
+  const notificationsAllowed = profile?.notifications_enabled !== false
+  const shownPush: PushState | 'checking' =
+    push === null ? 'checking' : push === 'on' && !notificationsAllowed ? 'off' : push
+
+  async function onTogglePush() {
+    setError(null)
+    setPushBusy(true)
+    try {
+      setPush(shownPush === 'on' ? await disablePush() : await enablePush())
+      await refreshProfile()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setPushBusy(false)
+    }
+  }
 
   const { data: entries } = useQuery({
     queryKey: ['dietary', profile?.id],
@@ -130,6 +202,26 @@ export function ProfilePage() {
         </div>
       </div>
 
+      <h2>{t('push.title')}</h2>
+      {/* One switch, and it is per device: this is the phone you are holding,
+          not your account. The permission prompt is raised by the button and
+          never on load — a refusal cannot be taken back by the site, only by
+          the person, in browser settings they will never find. */}
+      <div className="card stack">
+        <p className="muted">{t(`push.state.${shownPush}`)}</p>
+        {(shownPush === 'on' || shownPush === 'off') && (
+          <button type="button" disabled={pushBusy} onClick={onTogglePush}>
+            {t(shownPush === 'on' ? 'push.turnOff' : 'push.turnOn')}
+          </button>
+        )}
+        <ul className="muted">
+          {(t('push.moments', { returnObjects: true }) as string[]).map((moment) => (
+            <li key={moment}>{moment}</li>
+          ))}
+        </ul>
+        <p className="muted">{t('push.perRound')}</p>
+      </div>
+
       <h2>{t('dietary.title')}</h2>
       {/* Round-wide, not per-dinner: a brief is checked against every
           diner's restrictions, so this list follows you into every round
@@ -176,6 +268,42 @@ export function ProfilePage() {
       <button type="button" className="secondary" onClick={() => supabase.auth.signOut()}>
         {t('auth.signOut')}
       </button>
+
+      <h2>{t('account.title')}</h2>
+      {/* Required by both stores and by GDPR, and it has to be here rather
+          than in an email to support: the whole point is that it does not
+          depend on anybody answering. */}
+      <div className="card stack">
+        {deletionDue ? (
+          <>
+            <p>{t('account.pending', { date: deletionDue.toLocaleDateString(i18n.language) })}</p>
+            <button type="button" disabled={busy} onClick={onCancelDeletion}>
+              {t('account.keepMyAccount')}
+            </button>
+          </>
+        ) : confirmingDeletion ? (
+          <InlineConfirm
+            title={t('account.confirmTitle')}
+            confirmLabel={t('account.confirmLabel')}
+            busy={busy}
+            onConfirm={onRequestDeletion}
+            onCancel={() => setConfirmingDeletion(false)}
+          >
+            <ul className="muted">
+              {(t('account.consequences', { returnObjects: true }) as string[]).map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </InlineConfirm>
+        ) : (
+          <>
+            <p className="muted">{t('account.help')}</p>
+            <button type="button" className="secondary" onClick={() => setConfirmingDeletion(true)}>
+              {t('account.delete')}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   )
 }

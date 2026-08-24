@@ -215,6 +215,21 @@ web3 = 30
 # This is separate from the turnstile_tickets table in migration 0003,
 # which gates our own join_round RPC — GoTrue's built-in captcha only
 # covers GoTrue's own endpoints, not custom RPCs.
+# Edge Functions. Both of these are called by something that is not a
+# signed-in user, so neither can sit behind the default JWT gate:
+# verify-turnstile runs before an account exists, and send-email is called by
+# GoTrue itself with a webhook signature instead of a token.
+[functions.verify-turnstile]
+verify_jwt = false
+
+[functions.send-email]
+verify_jwt = false
+
+# send-push, by contrast, keeps its JWT gate: it is called by the host's own
+# browser and the caller's identity is the whole authorisation check.
+[functions.send-push]
+verify_jwt = true
+
 [auth.captcha]
 enabled = false # flip to true once a real Turnstile secret is set below
 provider = "turnstile"

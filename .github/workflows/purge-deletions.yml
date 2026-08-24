@@ -1,0 +1,35 @@
+name: Finish due account deletions
+
+# The thirty-day wait in 0049 needs something to notice when it is over.
+# Here rather than pg_cron for the same reason the keep-alive ping is here:
+# this project's scheduler already lives in GitHub Actions, and one place to
+# look beats two.
+#
+# The job is idempotent and boring by design — on almost every run it purges
+# nothing and says so. It needs the SERVICE ROLE key, because purge_due_deletions
+# is revoked from every client role: it deletes auth users, which no signed-in
+# person may ever do.
+on:
+  schedule:
+    - cron: '41 3 * * *' # daily, 03:41 UTC
+  workflow_dispatch:
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Purge accounts whose thirty days are up
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{}' \
+            "${{ vars.VITE_SUPABASE_URL }}/rest/v1/rpc/purge_due_deletions")
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "status=$status accounts_purged=$body"
+          if [ "$status" != "200" ]; then
+            echo "purge_due_deletions did not run"
+            exit 1
+          fi

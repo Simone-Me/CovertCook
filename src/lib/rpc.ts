@@ -40,6 +40,95 @@ function unwrap<T>({ data, error }: { data: T | null; error: { message: string }
   return data as T
 }
 
+// Is this public name still free? Authenticated-only by design (0046), and
+// advisory by nature: the answer can go stale between the keystroke and the
+// submit, which is why complete_signup checks again and the unique index
+// checks after that.
+export async function displayNameAvailable(name: string): Promise<boolean> {
+  const res = await supabase.rpc('display_name_available', { p_name: name })
+  return unwrap<boolean>(res)
+}
+
+// The four moments that earn an interruption (0048). Everything else the round
+// does — dinner starting, a setting changed, a phase nudged back — is silent on
+// purpose: a notification nobody acts on teaches people to ignore the ones that
+// matter. The two remaining emails (password reset, address change) are Auth's
+// and are not part of this at all.
+export type NotifiedMoment = 'ASSIGNED' | 'BRIEF_RECEIVED' | 'VOTING' | 'RESULTS'
+
+const NOTIFIED_PHASES: Partial<Record<RoundStatus, NotifiedMoment>> = {
+  ASSIGNED: 'ASSIGNED',
+  VOTING: 'VOTING',
+  RESULTS: 'RESULTS',
+}
+
+// Never awaited at the call site and silent on failure: the phase has already
+// changed by the time this runs, and a dinner must not look like it failed to
+// advance because a push service was slow. A phase nobody is notified about
+// does not even reach the network.
+export async function notifyRoundPhase(roundId: string, phase: RoundStatus) {
+  const moment = NOTIFIED_PHASES[phase]
+  if (!moment) return
+  await notify(roundId, moment)
+}
+
+// Sent by the author the moment they submit, because since 0035 the recipe
+// lands then rather than at a phase change. Who it reaches is resolved from the
+// chain server-side — the sender neither names their cook nor learns of them.
+export async function notifyMyCook(roundId: string) {
+  await notify(roundId, 'BRIEF_RECEIVED')
+}
+
+async function notify(roundId: string, kind: NotifiedMoment) {
+  try {
+    await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind } })
+  } catch {
+    // Nothing to do here: the thing that mattered already happened.
+  }
+}
+
+export async function setNotificationsEnabled(enabled: boolean) {
+  const res = await supabase.rpc('set_notifications_enabled', { p_enabled: enabled })
+  return unwrap(res)
+}
+
+// Erasure, asked for rather than done: the account keeps working until the
+// thirty days are up, because a mis-tap has to be recoverable (0049). Returns
+// the date it becomes irreversible, so the interface can say it out loud
+// instead of implying "soon".
+export async function requestAccountDeletion(): Promise<string> {
+  const res = await supabase.rpc('request_account_deletion')
+  return unwrap<string>(res)
+}
+
+export async function cancelAccountDeletion() {
+  const res = await supabase.rpc('cancel_account_deletion')
+  return unwrap(res)
+}
+
+// Web push subscriptions. Writes go through RPCs rather than a table policy
+// because the endpoint is a claim about a browser, and an insert policy would
+// let a client claim somebody else's (0047).
+export async function savePushSubscription(input: {
+  endpoint: string
+  p256dh: string
+  auth: string
+  userAgent?: string
+}) {
+  const res = await supabase.rpc('save_push_subscription', {
+    p_endpoint: input.endpoint,
+    p_p256dh: input.p256dh,
+    p_auth: input.auth,
+    p_user_agent: input.userAgent ?? null,
+  })
+  return unwrap(res)
+}
+
+export async function forgetPushSubscription(endpoint: string) {
+  const res = await supabase.rpc('forget_push_subscription', { p_endpoint: endpoint })
+  return unwrap(res)
+}
+
 export async function completeSignup(input: {
   displayName: string
   locale: string
