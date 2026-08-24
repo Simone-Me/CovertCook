@@ -726,5 +726,21 @@
       "unsupported": "This browser has no notification support. Nothing is broken; it simply cannot.",
       "unconfigured": "Not available on this deployment yet."
     }
+  },
+  "account": {
+    "title": "Deleting your account",
+    "help": "You can delete your account from here. It takes thirty days, and you can stop it at any point in between.",
+    "delete": "Delete my account",
+    "confirmTitle": "Delete this account in thirty days?",
+    "confirmLabel": "Yes, start the thirty days",
+    "consequences": [
+      "Your email, your name and your allergy list are erased. The allergy list goes immediately and completely.",
+      "You leave every dinner still in progress, exactly as if you had walked out: where the recipes are already assigned, the host is told so they can repair the chain.",
+      "Dinners that are already over keep their dishes, their votes and their results — they belong to everyone who was there. Your name on them becomes \"Former guest\".",
+      "Nothing happens for thirty days. Until then, one click brings it all back."
+    ],
+    "pending": "Your account is scheduled for deletion on {{date}}. Nothing has been erased yet.",
+    "keepMyAccount": "Keep my account after all",
+    "hostingBlocks": "You are running a dinner that has not finished. Hand it to somebody else or cancel it first — a table cannot lose the person organising it halfway through."
   }
 }

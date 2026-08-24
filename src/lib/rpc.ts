@@ -92,6 +92,20 @@ export async function setNotificationsEnabled(enabled: boolean) {
   return unwrap(res)
 }
 
+// Erasure, asked for rather than done: the account keeps working until the
+// thirty days are up, because a mis-tap has to be recoverable (0049). Returns
+// the date it becomes irreversible, so the interface can say it out loud
+// instead of implying "soon".
+export async function requestAccountDeletion(): Promise<string> {
+  const res = await supabase.rpc('request_account_deletion')
+  return unwrap<string>(res)
+}
+
+export async function cancelAccountDeletion() {
+  const res = await supabase.rpc('cancel_account_deletion')
+  return unwrap(res)
+}
+
 // Web push subscriptions. Writes go through RPCs rather than a table policy
 // because the endpoint is a claim about a browser, and an insert policy would
 // let a client claim somebody else's (0047).

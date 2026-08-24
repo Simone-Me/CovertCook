@@ -28,11 +28,9 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    moments are covered (`0048`), but only for people who opted in. An invited
    player who has never opened the app cannot be pushed to at all. That is the
    mail that still has to be written, and `send-email` is the natural home.
-5. **Deleting an account** — missing entirely, and now on the critical path
-   for a store listing (both stores mandate it) as well as for GDPR. The
-   personal-data map, the foreign-key blocker that stops it being a plain
-   delete, and the three ways out are in `DISTRIBUTION.md` §10; the shape
-   recommended there is anonymise-in-place, hard-delete the dietary rows.
+5. **A public deletion request URL** — the in-app path is built (`0049`);
+   Google Play also wants a page reachable without installing the app. A form
+   and an inbox, not a schema change.
 6. **Distribution** — `DISTRIBUTION.md` covers the four routes (PWA, APK,
    Play, App Store), the real costs, and why monetising is a later and
    much more expensive decision than a store listing. Pro is deferred.
@@ -54,6 +52,74 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-08-24 (10)
+
+**Added: deleting an account, and the foreign key that made it impossible**
+(`0049`).
+
+Reported from the dashboard: `DELETE /admin/users/…` → 500, `violates foreign
+key constraint "audit_log_actor_id_fkey"`. `audit_log` is not the problem, it
+is the first row Postgres happened to check. The chain is `auth.users` →
+`profiles` (ON DELETE CASCADE, from `0001`) → and then everything referencing
+`profiles` without one: `round_members`, `rounds.host_id`,
+`invites.created_by`, `round_invitations.invited_by`, `audit_log.actor_id`.
+
+*The fix is to break the cascade, not to add more of them.* `profiles.id` is no
+longer a foreign key to `auth.users`. That single change lets the auth row —
+email, password, sessions — be deleted outright while the profile survives as
+an anonymous placeholder holding the rounds together. It is also what makes the
+dashboard's own Delete user work, and `DISTRIBUTION.md` §10's option A is
+updated accordingly: it turns out not to need the auth row kept at all, which
+is strictly better than scrubbing one in place.
+
+*Rounds are left, not scrubbed* — asked for directly, and the machinery already
+existed with the right rule. `leave_round` (`0004`) removes cleanly while a
+round is DRAFT/OPEN/LOCKED and, once an assignment exists, refuses to touch the
+chain and raises a DROPOUT alert so the Executive Chef decides what the
+departure costs (`remove_member`, `0016`: reconnect, or one dish fewer).
+Deletion reuses exactly that instead of inventing a second, quieter way to tear
+a chain. Finished dinners are not touched at all: the dishes, the votes and the
+results belong to everyone who was there, and only the name on them changes.
+
+*Hard-deleted, because it is theirs alone:* dietary entries — Article 9 health
+data, no trace — push subscriptions, and invitations nobody answered.
+
+*Thirty days, and reversible for all of them.* The rounds are left at the
+moment of erasure, not at the moment of asking, so cancelling restores an
+account that never lost anything. `purge-deletions.yml` runs daily and is
+boring by design: on almost every run it purges nothing and says so. It holds
+the service role key, because deleting auth users is something no signed-in
+person may ever do.
+
+*A trigger on `auth.users` anonymises the profile whatever deletes the
+account.* The dashboard and the admin API do not call our RPC, and without it
+they would leave a real name and a list of allergies attached to nobody. The
+safe outcome is now the automatic one.
+
+*A host cannot walk out of a dinner they are running* — the same rule
+`leave_round` has always had, with the same remedy, and the interface says it
+in words rather than forwarding `hosting_a_live_round`.
+
+*The in-app path is a `InlineConfirm`, not a dialog*, and it lists what will
+actually happen in four lines before anything starts — including that finished
+dinners keep their dishes and that one click brings it all back.
+
+**One honest gap, recorded rather than hidden:** Supabase access tokens are
+stateless and live about an hour, so a token already in a browser keeps working
+until it expires. It belongs to the person who asked for the deletion.
+
+**Verified** by reproducing the reported failure and then watching it succeed:
+`0001` → `0049` replayed into a throwaway Postgres 16 with an `audit_log` row
+for the actor, a round in `ASSIGNED`, a submitted brief and an allergy. After
+`delete from auth.users`: the auth row is gone, the profile reads "Ancien
+convive", the allergy row count is zero, the brief is still in the round, the
+seat is `LEFT` with its secret name intact, and a DROPOUT alert is waiting for
+the host. Also checked: a live host is refused, ask-then-cancel leaves nothing
+behind, the purge takes nothing before thirty days and exactly one account
+after thirty-one, and the archived dinner still has both its seats.
 
 ---
 

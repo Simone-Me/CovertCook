@@ -229,6 +229,43 @@ two in daily use.
 
 ---
 
+## Deleting an account
+
+The rule, and the reason a plain DELETE cannot work: **a round is not one
+person's data.** A brief is a recipe written *for somebody else*, a ballot is
+part of how a dish was ranked, a pairing is a link in a chain other people are
+standing in. So the account is **anonymised, not deleted** — and the health
+data, which is theirs alone, really is deleted.
+
+| | What happens |
+|---|---|
+| Email, password, sessions | The `auth.users` row is deleted outright |
+| Allergies and diets | Hard-deleted. Article 9 data, no trace |
+| Push subscriptions, unanswered invitations | Hard-deleted |
+| Name, avatar | Replaced by "Former guest" / "Ancien convive" |
+| Rounds still in progress | **Left, exactly as if they had walked out**: `leave_round`'s rule, so where an assignment exists the host gets a DROPOUT alert and decides what the departure costs (`remove_member`) rather than the chain quietly tearing |
+| Rounds already finished | Untouched — dishes, votes and results belong to everyone who was there |
+
+**Thirty days**, disclosed in the interface, cancellable to the last day. The
+rounds are left at the moment of erasure and not at the moment of asking, so
+cancelling restores an account that never lost anything.
+`purge-deletions.yml` is what notices the wait is over.
+
+`0049` also drops the `profiles → auth.users` foreign key, and that is the
+change that unblocks everything else, including **Delete user in the Supabase
+dashboard** — which failed with `audit_log_actor_id_fkey` because deleting the
+auth row cascaded into `profiles` and then hit the six tables that reference it
+without a cascade. A trigger on `auth.users` anonymises the profile whatever
+path deletes the account, so the dashboard and the admin API cannot leave a
+real name and an allergy list attached to nobody.
+
+One honest gap: Supabase access tokens are stateless and live about an hour, so
+a token already in a browser keeps working until it expires. It belongs to the
+person who asked for the deletion, which is why it is recorded here rather than
+defended against on every write path.
+
+---
+
 ## Push notifications
 
 Mail is now only what Auth owns — **password reset and address change**.
@@ -279,8 +316,8 @@ kills every existing subscription.
 
 ## CI/CD & required GitHub configuration
 
-The remaining two workflows in `.github/workflows/` (`keepalive.yml`,
-`backup.yml`) read from GitHub repo **Settings → Secrets and variables →
+The three workflows in `.github/workflows/` (`keepalive.yml`, `backup.yml`,
+`purge-deletions.yml`) read from GitHub repo **Settings → Secrets and variables →
 Actions**, not from `.env.local` (which is gitignored and never leaves
 your machine). If a workflow run shows blank interpolations in its log
 (an empty `apikey:` header, a URL missing its host, `pg_dump` falling back
@@ -295,6 +332,7 @@ nothing here should ever be committed):
 |---|---|---|---|
 | Variables | `VITE_SUPABASE_URL` | `keepalive.yml` | Supabase → Project Settings → API |
 | Variables | `VITE_SUPABASE_ANON_KEY` | `keepalive.yml` | Supabase → Project Settings → API (anon/publishable key — intentionally public, hence a Variable not a Secret) |
+| Secrets | `SUPABASE_SERVICE_ROLE_KEY` | `purge-deletions.yml` | Supabase → Project Settings → API (**service role** — full bypass of RLS, a Secret and never a Variable, and never in the frontend) |
 | Secrets | `SUPABASE_DB_URL` | `backup.yml` | Supabase → Project Settings → Database → Connection string (pooler host is in `supabase/.temp/pooler-url` after linking; password isn't stored anywhere in the repo) |
 
 These two GitHub Variables are separate from the four Netlify env vars
@@ -483,15 +521,9 @@ Ordered roughly by how much the product misses them.
 - **Outbound email** — invitations already work in-app without it, so this
   is now only for reaching people who aren't looking at the app. Blocked
   on a provider key.
-- **Deleting your account** — there is no way to do it, from inside the app
-  or outside it. Not a nicety: both stores require it (Google Play needs an
-  in-app path *and* a public request URL; Apple guideline 5.1.1(v) needs the
-  in-app one), and GDPR requires it regardless of where the app is
-  distributed. It is also not a one-line delete — `profiles.id` cascades
-  from `auth.users`, while `round_members.profile_id`, `rounds.host_id` and
-  `invites.created_by` do not cascade at all, so deleting a user who ever
-  joined a round fails on a foreign key today. The data map, the blocker and
-  the three ways out are in [`DISTRIBUTION.md`](./DISTRIBUTION.md) §10.
+- **A public deletion request URL** — the in-app path exists (`0049`), but
+  Google Play also wants a page a person can reach *without* installing the
+  app. It is a form and an inbox, not a schema change.
 - **Real table props** — the plate, glass, bowl, napkin, cutlery and bread
   board on the cloth are drawings, not renders. They move correctly between
   the three states; what's missing is the artwork. The three rules the real

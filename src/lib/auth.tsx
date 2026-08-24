@@ -9,6 +9,8 @@ export interface Profile {
   locale: string
   has_no_restrictions: boolean
   notifications_enabled: boolean
+  deletion_requested_at: string | null
+  anonymised_at: string | null
 }
 
 interface AuthState {

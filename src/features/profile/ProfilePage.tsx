@@ -1,11 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackToTable } from '../../components/BackToTable'
+import { InlineConfirm } from '../../components/InlineConfirm'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import { SUPPORTED_LOCALES, type SupportedLocale } from '../../lib/i18n'
-import type { DietaryKind } from '../../lib/rpc'
+import { cancelAccountDeletion, requestAccountDeletion, type DietaryKind } from '../../lib/rpc'
 import { currentPushState, disablePush, enablePush, type PushState } from '../../lib/push'
 
 const KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
@@ -33,6 +34,41 @@ export function ProfilePage() {
   const [busy, setBusy] = useState(false)
   const [push, setPush] = useState<PushState | null>(null)
   const [pushBusy, setPushBusy] = useState(false)
+  const [confirmingDeletion, setConfirmingDeletion] = useState(false)
+
+  const deletionDue = profile?.deletion_requested_at
+    ? new Date(new Date(profile.deletion_requested_at).getTime() + 30 * 24 * 60 * 60 * 1000)
+    : null
+
+  async function onRequestDeletion() {
+    setError(null)
+    setBusy(true)
+    try {
+      await requestAccountDeletion()
+      setConfirmingDeletion(false)
+      await refreshProfile()
+    } catch (err) {
+      const message = err instanceof Error ? err.message : t('errors.generic')
+      // The one refusal worth translating: a dinner cannot lose the person
+      // running it halfway through.
+      setError(message.includes('hosting_a_live_round') ? t('account.hostingBlocks') : message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onCancelDeletion() {
+    setError(null)
+    setBusy(true)
+    try {
+      await cancelAccountDeletion()
+      await refreshProfile()
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   // Asked, never assumed: the answer differs between this phone in a Safari
   // tab and the same phone with the app on its home screen.
@@ -232,6 +268,42 @@ export function ProfilePage() {
       <button type="button" className="secondary" onClick={() => supabase.auth.signOut()}>
         {t('auth.signOut')}
       </button>
+
+      <h2>{t('account.title')}</h2>
+      {/* Required by both stores and by GDPR, and it has to be here rather
+          than in an email to support: the whole point is that it does not
+          depend on anybody answering. */}
+      <div className="card stack">
+        {deletionDue ? (
+          <>
+            <p>{t('account.pending', { date: deletionDue.toLocaleDateString(i18n.language) })}</p>
+            <button type="button" disabled={busy} onClick={onCancelDeletion}>
+              {t('account.keepMyAccount')}
+            </button>
+          </>
+        ) : confirmingDeletion ? (
+          <InlineConfirm
+            title={t('account.confirmTitle')}
+            confirmLabel={t('account.confirmLabel')}
+            busy={busy}
+            onConfirm={onRequestDeletion}
+            onCancel={() => setConfirmingDeletion(false)}
+          >
+            <ul className="muted">
+              {(t('account.consequences', { returnObjects: true }) as string[]).map((line) => (
+                <li key={line}>{line}</li>
+              ))}
+            </ul>
+          </InlineConfirm>
+        ) : (
+          <>
+            <p className="muted">{t('account.help')}</p>
+            <button type="button" className="secondary" onClick={() => setConfirmingDeletion(true)}>
+              {t('account.delete')}
+            </button>
+          </>
+        )}
+      </div>
     </div>
   )
 }

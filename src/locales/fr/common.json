@@ -726,5 +726,21 @@
       "unsupported": "Ce navigateur ne gère pas les notifications. Rien n’est cassé : il ne peut simplement pas.",
       "unconfigured": "Pas encore disponible sur ce déploiement."
     }
+  },
+  "account": {
+    "title": "Supprimer votre compte",
+    "help": "Vous pouvez supprimer votre compte ici. Cela prend trente jours, et vous pouvez tout arrêter entre-temps.",
+    "delete": "Supprimer mon compte",
+    "confirmTitle": "Supprimer ce compte dans trente jours ?",
+    "confirmLabel": "Oui, lancer les trente jours",
+    "consequences": [
+      "Votre e-mail, votre nom et vos allergies sont effacés. Les allergies partent immédiatement et entièrement.",
+      "Vous quittez chaque dîner en cours, exactement comme si vous étiez parti : là où les recettes sont déjà attribuées, l’organisateur est prévenu pour réparer la chaîne.",
+      "Les dîners déjà terminés gardent leurs plats, leurs votes et leurs résultats — ils appartiennent à tous ceux qui étaient là. Votre nom y devient « Ancien convive ».",
+      "Rien ne se passe pendant trente jours. D’ici là, un clic ramène tout."
+    ],
+    "pending": "Votre compte doit être supprimé le {{date}}. Rien n’a encore été effacé.",
+    "keepMyAccount": "Finalement, je garde mon compte",
+    "hostingBlocks": "Vous organisez un dîner qui n’est pas terminé. Confiez-le à quelqu’un d’autre ou annulez-le d’abord — une table ne peut pas perdre son organisateur en cours de route."
   }
 }

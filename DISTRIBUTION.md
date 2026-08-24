@@ -46,7 +46,7 @@ Nothing below can be skipped by choosing a different route.
 | **Own domain** | Play's TWA verifies ownership via `/.well-known/assetlinks.json`; both stores want a support URL and a privacy URL that look like a product, not `*.netlify.app`. | Not bought |
 | **Privacy policy + terms at public URLs** | Mandatory for both stores, and they must match what the app really collects. | Drafts exist at `/legal/*`, unreviewed |
 | **Legal review** | The drafts have never been read by a lawyer, and the app collects **allergy and dietary data** — GDPR Article 9 special category. Both stores make you declare this. | Open |
-| **In-app account deletion** | Google Play requires an in-app path *and* a web URL to request deletion. Apple guideline 5.1.1(v) requires deletion from inside the app. Not "email us". | Not built. Now on the list, with the data model reviewed and the blocker found — **§10** |
+| **In-app account deletion** | Google Play requires an in-app path *and* a web URL to request deletion. Apple guideline 5.1.1(v) requires deletion from inside the app. Not "email us". | **Built (`0049`)** — anonymise in place, thirty days, cancellable. What is left is the public request URL for people who have not installed the app |
 | **Outbound email** | A password reset or an invite that silently fails is a review rejection and a support burden. | Blocked on a provider key |
 | **Real icons + store assets** | Icons at every size, a 512×512 store icon, a feature graphic, screenshots per device class. | Placeholders |
 | **UGC obligations** | The moment free-text chat opens, both stores require: a way to **report** content, a way to **block** a user, published moderation terms, and a contact. Canned templates today = safe. Free-text = this is required *before* it ships. | Chat is templates-only today |
@@ -401,6 +401,14 @@ satisfies erasure. The unused `anonymised_at` column says this was the
 original intention.
 
 ### The three ways out
+
+**Chosen: A, and shipped in `0049`.** The section below is kept as the
+reasoning rather than rewritten as a description — it is why the migration
+looks the way it does. One detail changed in the building: A does not keep the
+auth row after all. Dropping the `profiles → auth.users` foreign key means the
+auth row can be deleted outright — email, password and sessions really gone —
+while the profile survives anonymised. Strictly better than scrubbing an auth
+row in place, and it is what makes the dashboard's own Delete user work.
 
 | Option | What it means | Verdict |
 |---|---|---|
