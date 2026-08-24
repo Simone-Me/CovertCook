@@ -49,6 +49,41 @@ export async function displayNameAvailable(name: string): Promise<boolean> {
   return unwrap<boolean>(res)
 }
 
+// Asks the send-push function to tell everyone else in the round that it
+// moved. Deliberately not awaited at the call site and deliberately silent on
+// failure: the phase has already changed by the time this runs, and a dinner
+// must not appear to have failed to advance because a push service was slow.
+export async function notifyRound(roundId: string, kind: RoundStatus) {
+  try {
+    await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind } })
+  } catch {
+    // Nothing to do here: the round moved, which is the part that mattered.
+  }
+}
+
+// Web push subscriptions. Writes go through RPCs rather than a table policy
+// because the endpoint is a claim about a browser, and an insert policy would
+// let a client claim somebody else's (0047).
+export async function savePushSubscription(input: {
+  endpoint: string
+  p256dh: string
+  auth: string
+  userAgent?: string
+}) {
+  const res = await supabase.rpc('save_push_subscription', {
+    p_endpoint: input.endpoint,
+    p_p256dh: input.p256dh,
+    p_auth: input.auth,
+    p_user_agent: input.userAgent ?? null,
+  })
+  return unwrap(res)
+}
+
+export async function forgetPushSubscription(endpoint: string) {
+  const res = await supabase.rpc('forget_push_subscription', { p_endpoint: endpoint })
+  return unwrap(res)
+}
+
 export async function completeSignup(input: {
   displayName: string
   locale: string

@@ -94,6 +94,9 @@ export function SignUpPage() {
       password,
       options: {
         emailRedirectTo: `${import.meta.env.VITE_APP_BASE_URL}/`,
+        // The confirmation mail is rendered before a profile exists, so the
+        // only place the send-email hook can learn a language is here.
+        data: { locale: i18n.language.startsWith('en') ? 'en' : 'fr' },
         ...(captchaToken ? { captchaToken } : {}),
       },
     })

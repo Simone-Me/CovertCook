@@ -24,9 +24,10 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    the three constraints any render has to meet, and the three questions
    still open (which objects, how many variants, single objects or one
    laid table).
-4. **Push notifications** — still not built and still not decided; §1 of
-   `ROADMAP.md` chose email, and installing the PWA on a phone changes what
-   is *possible*, not what exists. Nothing subscribes, nothing sends.
+4. **Email for the asynchronous moments** — push now covers the live ones
+   (`0047`), but only for people who switched it on. The invitation and the
+   "recipes are due" reminder still need mail that is not an auth mail:
+   `send-email` renders auth templates today and is the natural home for it.
 5. **Deleting an account** — missing entirely, and now on the critical path
    for a store listing (both stores mandate it) as well as for GDPR. The
    personal-data map, the foreign-key blocker that stops it being a plain
@@ -53,6 +54,97 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-08-24 (8)
+
+**Added: the auth mail is ours now, and push exists.**
+
+### The mail was never a template problem
+
+Custom SMTP decides *where* mail is posted, not *what* it says — the body kept
+coming from Auth's dashboard templates, which is why `templates.ts` could be
+perfect and change nothing. Two routes now exist to replace them, and the repo
+supports both:
+
+*`npm run mail:templates`* renders every auth mail into
+`supabase/email-templates/*.html` with `{{ .ConfirmationURL }}` in place of the
+link, ready to paste into the dashboard. Ten files, five templates, two
+languages, generated from the same source as everything else.
+
+*`supabase/functions/send-email/`* is the better one: the **Send Email Hook**.
+Auth stops sending and hands us the mail; we render `templates.ts` in the
+recipient's own language and post it to Resend's API. It is the difference
+between a dashboard box that holds one language and a function that picks per
+person. `templates.ts` grew from one template to all seven action types Auth
+can emit, because with the hook on, an action with no template gets no mail at
+all.
+
+The function is deployed `--no-verify-jwt` — Auth calls it with a webhook
+signature, not a token — which makes that signature the only thing standing
+between the endpoint and an open relay sending CovertCook-branded mail to any
+address a stranger names. It is verified before the body is parsed, never
+after.
+
+*And the localhost link is a third thing again, in the dashboard.* Auth builds
+`{{ .ConfirmationURL }}` from the redirect the client asked for, checks it
+against the Redirect URLs allow-list, and **falls back to Site URL** when it
+does not match. A Site URL still pointing at `localhost` is the entire
+explanation, and no template can fix it. README now says which three settings
+have to agree.
+
+### Push, for the app as installed
+
+`ROADMAP.md` §1 chose email over push and the argument still holds for the
+asynchronous moments. What changed is the platform: the app is on a home
+screen, which is the prerequisite **iOS** imposes, so push works without a
+store listing. That is the part worth saying plainly — web push in an installed
+PWA is the same API a native app gets; Android delivers it in a tab or
+installed, iOS only from the home screen, and no store is involved either way.
+
+- `0047` — subscriptions, **one row per browser**, not per person: the phone
+  and the laptop are two, and revoking one must not silence the other. Writes
+  go through RPCs; an insert policy would let a client claim an endpoint
+  belonging to somebody else's browser.
+- `src/sw.ts` — the service worker is hand-written now. `generateSW` had
+  nowhere to put a `push` listener, so `injectManifest` took over and the
+  worker reproduces what the config used to declare: precaching, skipWaiting,
+  and the `/rest/v1/` GET cache for bad wifi at the flat.
+- `send-push` — composes the text server-side (a client that supplies the
+  words is a client that can put any words on somebody else's lock screen),
+  checks the caller is the host with the caller's own token, and only then
+  reads the audience with the service key. Endpoints and encryption keys never
+  reach a browser. 404/410 prunes the row; anything else is left alone,
+  because a timeout must not cost somebody their notifications.
+- The settings screen asks what the device can do rather than assuming, and
+  the permission prompt is raised by a button — a refusal is permanent, and
+  raising it on page load is how an app loses a person forever.
+
+### Found while testing: two functions anyone could call
+
+`revoke all on function … from anon, authenticated` does **not** do what it
+reads like. Postgres grants EXECUTE on every new function to PUBLIC, and both
+roles inherit it — so the revoke removes a grant they did not need while
+leaving the one they were using. Caught by asking `has_function_privilege`
+instead of trusting the REVOKE.
+
+`push_audience_for_round` was written that way and is now revoked from PUBLIC
+and granted back to `service_role` alone — which is itself a trap worth
+recording, since revoking from PUBLIC takes it from `service_role` too and
+would have silently broken the only caller. The same latent hole has been
+open since `0003` on `consume_turnstile_ticket`: the table was locked, the
+function was not. Closed in the same migration. Nothing calls it from outside
+the database.
+
+**Verified:** `0001` → `0047` replayed into a throwaway Postgres 16 — the
+chain applies, the subscription upsert is idempotent, a shared device changes
+hands instead of failing, `forget` only silences your own endpoint, and the
+audience function is now unreachable for `anon` and `authenticated` and
+reachable for `service_role`. All fourteen auth mails (seven actions × two
+languages) render with a subject, the link in both the HTML and the text part,
+and no `undefined` anywhere. `npm run build` produces a service worker that
+really does contain the `push` and `notificationclick` listeners.
 
 ---
 

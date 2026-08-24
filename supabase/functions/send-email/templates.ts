@@ -1,21 +1,22 @@
-// Transactional email bodies for the mail THIS APP sends through Resend:
-// invitations, "the round moved on", and anything else the send-email function
-// grows. Written here rather than pasted into a dashboard box so they are
-// reviewable, translatable and diffable like the rest of the product.
+// Transactional email bodies for the mail this app sends through Resend —
+// written here rather than pasted into a dashboard box so they are reviewable,
+// translatable and diffable like the rest of the product.
 //
-// WHAT THIS FILE DOES NOT SEND, and it matters: the sign-up confirmation and
-// the password reset are sent by **Supabase Auth**, not by us. Auth owns those
-// two, renders them from the templates in Authentication → Email Templates,
-// and never calls this function. confirmEmail() below is the design to paste
-// in there — or to send from here later if those flows are ever moved onto
-// Resend — but editing this file alone changes nothing about the mail a new
-// account receives today.
+// THIS NOW INCLUDES THE AUTH MAIL. Sign-up confirmation and password reset used
+// to belong to Supabase Auth, rendered from Authentication → Email Templates,
+// and this file could not reach them. With the **Send Email Hook** enabled
+// (see `index.ts`), Auth stops sending and hands every one of those mails to
+// our function instead, which renders it from here. One consequence worth
+// knowing: once the hook is on, an action with no template here gets NO mail
+// at all — which is why `authEmail` covers every action type Auth can emit
+// rather than only the two that matter today.
 //
-// The link inside the Auth mail comes from `{{ .ConfirmationURL }}`, which Auth
-// builds from emailRedirectTo (now set at the call site) validated against the
-// dashboard's redirect allow-list. If the allow-list does not contain the
-// origin, Auth silently falls back to Site URL — which is how those links ended
-// up pointing at localhost.
+// The link is built by `index.ts` from the token hash Auth supplies; it points
+// at the project's /auth/v1/verify endpoint, which validates the token and then
+// redirects to `redirect_to` — the value the client passes as emailRedirectTo,
+// still validated against the dashboard's redirect allow-list. If that list
+// does not contain the origin, Auth falls back to Site URL, which is how those
+// links once ended up pointing at localhost.
 //
 // Email is not the web and the rules are older and stricter:
 //
@@ -33,41 +34,180 @@
 //     the first thing a suspicious reader distrusts and the first thing a
 //     text-only client loses.
 
-export interface ConfirmEmailInput {
-  confirmUrl: string
-  locale?: 'en' | 'fr'
+// Every action type Supabase Auth can hand to the hook. `email_change` is
+// emitted twice when double confirmation is on — once to each address — and
+// both get the same body, because both are asking the same question.
+export type AuthEmailAction =
+  | 'signup'
+  | 'recovery'
+  | 'invite'
+  | 'magiclink'
+  | 'email_change'
+  | 'email_change_current'
+  | 'email_change_new'
+
+export type EmailLocale = 'en' | 'fr'
+
+export interface AuthEmailInput {
+  url: string
+  locale?: EmailLocale
 }
 
-const COPY = {
+// Shared furniture: the same in every mail, so it is written once.
+const CHROME = {
   en: {
-    subject: 'Confirm your email — CovertCook',
-    preheader: 'One link and your seat at the table is real.',
-    heading: 'One link and you are in',
-    lead:
-      'Somebody — we assume you — is setting up a CovertCook account. Confirm this address and your seat at the table is real.',
-    button: 'Confirm my email',
     fallback: 'If the button does nothing, paste this into your browser:',
     ignore:
       'If this was not you, ignore it. Nothing was created that this link does not create, and it expires on its own.',
     spam:
-      'Filed as spam? Marking it "not spam" once means the rest of your dinner’s mail lands where you can find it.',
+      'Filed as spam? Marking it "not spam" once means the rest of your dinner\u2019s mail lands where you can find it.',
     signoff: 'See you at the pass.',
   },
   fr: {
-    subject: 'Confirmez votre e-mail — CovertCook',
-    preheader: 'Un lien, et votre place à table devient réelle.',
-    heading: 'Un lien et vous entrez',
-    lead:
-      'Quelqu’un — nous supposons que c’est vous — crée un compte CovertCook. Confirmez cette adresse et votre place à table devient réelle.',
-    button: 'Confirmer mon e-mail',
     fallback: 'Si le bouton ne fait rien, collez ceci dans votre navigateur :',
     ignore:
-      'Si ce n’était pas vous, ignorez ce message. Rien n’a été créé que ce lien ne crée, et il expire tout seul.',
+      'Si ce n\u2019\u00e9tait pas vous, ignorez ce message. Rien n\u2019a \u00e9t\u00e9 cr\u00e9\u00e9 que ce lien ne cr\u00e9e, et il expire tout seul.',
     spam:
-      'Classé en indésirable ? Le marquer « non indésirable » une fois suffit pour que le reste du courrier de votre dîner arrive là où vous le trouverez.',
-    signoff: 'À tout à l’heure au passe.',
+      'Class\u00e9 en ind\u00e9sirable ? Le marquer \u00ab non ind\u00e9sirable \u00bb une fois suffit pour que le reste du courrier de votre d\u00eener arrive l\u00e0 o\u00f9 vous le trouverez.',
+    signoff: '\u00c0 tout \u00e0 l\u2019heure au passe.',
   },
 } as const
+
+interface ActionCopy {
+  subject: string
+  preheader: string
+  heading: string
+  lead: string
+  button: string
+}
+
+const COPY: Record<AuthEmailAction, Record<EmailLocale, ActionCopy>> = {
+  signup: {
+    en: {
+      subject: 'Confirm your email \u2014 CovertCook',
+      preheader: 'One link and your seat at the table is real.',
+      heading: 'One link and you are in',
+      lead:
+        'Somebody \u2014 we assume you \u2014 is setting up a CovertCook account. Confirm this address and your seat at the table is real.',
+      button: 'Confirm my email',
+    },
+    fr: {
+      subject: 'Confirmez votre e-mail \u2014 CovertCook',
+      preheader: 'Un lien, et votre place \u00e0 table devient r\u00e9elle.',
+      heading: 'Un lien et vous entrez',
+      lead:
+        'Quelqu\u2019un \u2014 nous supposons que c\u2019est vous \u2014 cr\u00e9e un compte CovertCook. Confirmez cette adresse et votre place \u00e0 table devient r\u00e9elle.',
+      button: 'Confirmer mon e-mail',
+    },
+  },
+  recovery: {
+    en: {
+      subject: 'Reset your password \u2014 CovertCook',
+      preheader: 'A new password, and nothing else changes.',
+      heading: 'Choose a new password',
+      lead:
+        'Somebody asked to reset the password for this address. Follow the link and pick a new one \u2014 your dinners, your briefs and your name are untouched either way.',
+      button: 'Set a new password',
+    },
+    fr: {
+      subject: 'R\u00e9initialisez votre mot de passe \u2014 CovertCook',
+      preheader: 'Un nouveau mot de passe, et rien d\u2019autre ne change.',
+      heading: 'Choisissez un nouveau mot de passe',
+      lead:
+        'Quelqu\u2019un a demand\u00e9 \u00e0 r\u00e9initialiser le mot de passe de cette adresse. Suivez le lien et choisissez-en un nouveau \u2014 vos d\u00eeners, vos consignes et votre nom restent intacts dans tous les cas.',
+      button: 'D\u00e9finir un mot de passe',
+    },
+  },
+  invite: {
+    en: {
+      subject: 'You are invited \u2014 CovertCook',
+      preheader: 'A seat has been kept for you.',
+      heading: 'A seat has been kept for you',
+      lead:
+        'Somebody set up a CovertCook account for this address. Follow the link to claim it and choose your password.',
+      button: 'Claim my seat',
+    },
+    fr: {
+      subject: 'Vous \u00eates invit\u00e9 \u2014 CovertCook',
+      preheader: 'Une place vous a \u00e9t\u00e9 gard\u00e9e.',
+      heading: 'Une place vous a \u00e9t\u00e9 gard\u00e9e',
+      lead:
+        'Quelqu\u2019un a cr\u00e9\u00e9 un compte CovertCook pour cette adresse. Suivez le lien pour la r\u00e9clamer et choisir votre mot de passe.',
+      button: 'R\u00e9clamer ma place',
+    },
+  },
+  magiclink: {
+    en: {
+      subject: 'Your sign-in link \u2014 CovertCook',
+      preheader: 'One link, no password.',
+      heading: 'Your way in',
+      lead: 'Follow the link to sign in. It works once, and only from this mail.',
+      button: 'Sign me in',
+    },
+    fr: {
+      subject: 'Votre lien de connexion \u2014 CovertCook',
+      preheader: 'Un lien, sans mot de passe.',
+      heading: 'Votre entr\u00e9e',
+      lead:
+        'Suivez le lien pour vous connecter. Il ne fonctionne qu\u2019une fois, et seulement depuis ce message.',
+      button: 'Me connecter',
+    },
+  },
+  email_change: {
+    en: {
+      subject: 'Confirm your new address \u2014 CovertCook',
+      preheader: 'Confirm the change and the new address takes over.',
+      heading: 'Confirm the new address',
+      lead:
+        'A request was made to change the address on this CovertCook account. Confirm it here; until both ends are confirmed, nothing moves.',
+      button: 'Confirm the change',
+    },
+    fr: {
+      subject: 'Confirmez votre nouvelle adresse \u2014 CovertCook',
+      preheader: 'Confirmez le changement et la nouvelle adresse prend le relais.',
+      heading: 'Confirmez la nouvelle adresse',
+      lead:
+        'Une demande de changement d\u2019adresse a \u00e9t\u00e9 faite sur ce compte CovertCook. Confirmez-la ici ; tant que les deux extr\u00e9mit\u00e9s ne sont pas confirm\u00e9es, rien ne bouge.',
+      button: 'Confirmer le changement',
+    },
+  },
+  email_change_current: {
+    en: {
+      subject: 'Confirm your new address \u2014 CovertCook',
+      preheader: 'Confirm the change and the new address takes over.',
+      heading: 'Confirm the new address',
+      lead:
+        'A request was made to change the address on this CovertCook account. Confirm it here; until both ends are confirmed, nothing moves.',
+      button: 'Confirm the change',
+    },
+    fr: {
+      subject: 'Confirmez votre nouvelle adresse \u2014 CovertCook',
+      preheader: 'Confirmez le changement et la nouvelle adresse prend le relais.',
+      heading: 'Confirmez la nouvelle adresse',
+      lead:
+        'Une demande de changement d\u2019adresse a \u00e9t\u00e9 faite sur ce compte CovertCook. Confirmez-la ici ; tant que les deux extr\u00e9mit\u00e9s ne sont pas confirm\u00e9es, rien ne bouge.',
+      button: 'Confirmer le changement',
+    },
+  },
+  email_change_new: {
+    en: {
+      subject: 'Confirm your new address \u2014 CovertCook',
+      preheader: 'Confirm the change and the new address takes over.',
+      heading: 'Confirm the new address',
+      lead:
+        'A request was made to change the address on this CovertCook account. Confirm it here; until both ends are confirmed, nothing moves.',
+      button: 'Confirm the change',
+    },
+    fr: {
+      subject: 'Confirmez votre nouvelle adresse \u2014 CovertCook',
+      preheader: 'Confirmez le changement et la nouvelle adresse prend le relais.',
+      heading: 'Confirmez la nouvelle adresse',
+      lead:
+        'Une demande de changement d\u2019adresse a \u00e9t\u00e9 faite sur ce compte CovertCook. Confirmez-la ici ; tant que les deux extr\u00e9mit\u00e9s ne sont pas confirm\u00e9es, rien ne bouge.',
+      button: 'Confirmer le changement',
+    },
+  },
+}
 
 // CovertCook's palette (DESIGN.md §1), as literals because email has no
 // custom properties.
@@ -78,36 +218,31 @@ const NAPPE = '#C6202C'
 const INK = '#2A2320'
 const MUTED = '#7A6E66'
 
-export function confirmEmail(input: ConfirmEmailInput) {
-  const t = COPY[input.locale ?? 'en']
-  const url = input.confirmUrl
+// Renders one auth mail. The shell is identical for every action — the seal,
+// the button, the visible URL, the spam line — and only the five strings at
+// the top of the card change, which is what keeps a new action type a copy
+// edit rather than a second template to keep in sync.
+export function authEmail(action: AuthEmailAction, input: AuthEmailInput) {
+  const locale: EmailLocale = input.locale ?? 'en'
+  const c = COPY[action][locale]
+  const x = CHROME[locale]
+  const url = input.url
 
-  const text = [
-    t.heading,
-    '',
-    t.lead,
-    '',
-    url,
-    '',
-    t.ignore,
-    '',
-    t.spam,
-    '',
-    t.signoff,
-    'CovertCook',
-  ].join('\n')
+  const text = [c.heading, '', c.lead, '', url, '', x.ignore, '', x.spam, '', x.signoff, 'CovertCook'].join(
+    '\n',
+  )
 
   const html = `<!doctype html>
-<html lang="${input.locale ?? 'en'}">
+<html lang="${locale}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>${t.subject}</title>
+<title>${c.subject}</title>
 </head>
 <body style="margin:0;padding:0;background:${BUSTA};">
 <!-- Preheader: the line the inbox shows next to the subject. Hidden in the
      body itself, or it reads as a duplicated first sentence. -->
-<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${t.preheader}</div>
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">${c.preheader}</div>
 
 <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:${BUSTA};">
   <tr>
@@ -129,14 +264,14 @@ export function confirmEmail(input: ConfirmEmailInput) {
         <tr>
           <td style="padding:18px 28px 0;">
             <h1 style="margin:0;font:600 26px/1.2 Georgia,'Times New Roman',serif;color:${INK};">
-              ${t.heading}
+              ${c.heading}
             </h1>
           </td>
         </tr>
 
         <tr>
           <td style="padding:12px 28px 0;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:${INK};">
-            ${t.lead}
+            ${c.lead}
           </td>
         </tr>
 
@@ -147,13 +282,13 @@ export function confirmEmail(input: ConfirmEmailInput) {
             <a href="${url}"
                style="display:inline-block;padding:13px 26px;background:${NAPPE};color:${LINO};
                       text-decoration:none;border-radius:999px;
-                      font:700 15px Helvetica,Arial,sans-serif;">${t.button}</a>
+                      font:700 15px Helvetica,Arial,sans-serif;">${c.button}</a>
           </td>
         </tr>
 
         <tr>
           <td style="padding:22px 28px 0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:${MUTED};">
-            ${t.fallback}<br>
+            ${x.fallback}<br>
             <a href="${url}" style="color:${NAPPE};word-break:break-all;">${url}</a>
           </td>
         </tr>
@@ -166,19 +301,19 @@ export function confirmEmail(input: ConfirmEmailInput) {
 
         <tr>
           <td style="padding:16px 28px 0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:${MUTED};">
-            ${t.spam}
+            ${x.spam}
           </td>
         </tr>
 
         <tr>
           <td style="padding:10px 28px 0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:${MUTED};">
-            ${t.ignore}
+            ${x.ignore}
           </td>
         </tr>
 
         <tr>
           <td style="padding:20px 28px 28px;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:${MUTED};">
-            ${t.signoff}<br>
+            ${x.signoff}<br>
             <strong style="color:${INK};">CovertCook</strong>
           </td>
         </tr>
@@ -190,5 +325,11 @@ export function confirmEmail(input: ConfirmEmailInput) {
 </body>
 </html>`
 
-  return { subject: t.subject, html, text }
+  return { subject: c.subject, html, text }
+}
+
+// Kept because it reads better at the call site and because it was the name
+// this file shipped with.
+export function confirmEmail(input: { confirmUrl: string; locale?: EmailLocale }) {
+  return authEmail('signup', { url: input.confirmUrl, locale: input.locale })
 }

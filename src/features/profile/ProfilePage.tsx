@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackToTable } from '../../components/BackToTable'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -6,6 +6,7 @@ import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import { SUPPORTED_LOCALES, type SupportedLocale } from '../../lib/i18n'
 import type { DietaryKind } from '../../lib/rpc'
+import { currentPushState, disablePush, enablePush, type PushState } from '../../lib/push'
 
 const KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
 
@@ -30,6 +31,32 @@ export function ProfilePage() {
   const [label, setLabel] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
+  const [push, setPush] = useState<PushState | null>(null)
+  const [pushBusy, setPushBusy] = useState(false)
+
+  // Asked, never assumed: the answer differs between this phone in a Safari
+  // tab and the same phone with the app on its home screen.
+  useEffect(() => {
+    let stale = false
+    currentPushState().then((state) => {
+      if (!stale) setPush(state)
+    })
+    return () => {
+      stale = true
+    }
+  }, [])
+
+  async function onTogglePush() {
+    setError(null)
+    setPushBusy(true)
+    try {
+      setPush(push === 'on' ? await disablePush() : await enablePush())
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setPushBusy(false)
+    }
+  }
 
   const { data: entries } = useQuery({
     queryKey: ['dietary', profile?.id],
@@ -128,6 +155,20 @@ export function ProfilePage() {
             ))}
           </select>
         </div>
+      </div>
+
+      <h2>{t('push.title')}</h2>
+      {/* One switch, and it is per device: this is the phone you are holding,
+          not your account. The permission prompt is raised by the button and
+          never on load — a refusal cannot be taken back by the site, only by
+          the person, in browser settings they will never find. */}
+      <div className="card stack">
+        <p className="muted">{t(`push.state.${push ?? 'checking'}`)}</p>
+        {(push === 'on' || push === 'off') && (
+          <button type="button" disabled={pushBusy} onClick={onTogglePush}>
+            {t(push === 'on' ? 'push.turnOff' : 'push.turnOn')}
+          </button>
+        )}
       </div>
 
       <h2>{t('dietary.title')}</h2>

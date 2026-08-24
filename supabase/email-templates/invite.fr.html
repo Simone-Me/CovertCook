@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Vous êtes invité — CovertCook</title>
+</head>
+<body style="margin:0;padding:0;background:#F6EEDD;">
+<!-- Preheader: the line the inbox shows next to the subject. Hidden in the
+     body itself, or it reads as a duplicated first sentence. -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;">Une place vous a été gardée.</div>
+
+<table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background:#F6EEDD;">
+  <tr>
+    <td align="center" style="padding:32px 16px;">
+
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0"
+             style="max-width:520px;background:#FFFCF6;border:1px solid #DCC9A6;border-radius:4px;">
+
+        <!-- The wax seal, as a character rather than an image: images are
+             blocked by default in most clients, and a red disc that never
+             loads is a broken-looking hole at the top of the mail. -->
+        <tr>
+          <td align="center" style="padding:28px 28px 0;">
+            <div style="width:34px;height:34px;line-height:34px;border-radius:50%;background:#C6202C;
+                        color:#FFFCF6;font:700 15px Georgia,serif;">CC</div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:18px 28px 0;">
+            <h1 style="margin:0;font:600 26px/1.2 Georgia,'Times New Roman',serif;color:#2A2320;">
+              Une place vous a été gardée
+            </h1>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:12px 28px 0;font:400 15px/1.6 Helvetica,Arial,sans-serif;color:#2A2320;">
+            Quelqu’un a créé un compte CovertCook pour cette adresse. Suivez le lien pour la réclamer et choisir votre mot de passe.
+          </td>
+        </tr>
+
+        <tr>
+          <td align="center" style="padding:24px 28px 0;">
+            <!-- Bulletproof-ish button: a padded anchor, not a styled div, so
+                 the whole shape is clickable in clients that ignore padding. -->
+            <a href="{{ .ConfirmationURL }}"
+               style="display:inline-block;padding:13px 26px;background:#C6202C;color:#FFFCF6;
+                      text-decoration:none;border-radius:999px;
+                      font:700 15px Helvetica,Arial,sans-serif;">Réclamer ma place</a>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:22px 28px 0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:#7A6E66;">
+            Si le bouton ne fait rien, collez ceci dans votre navigateur :<br>
+            <a href="{{ .ConfirmationURL }}" style="color:#C6202C;word-break:break-all;">{{ .ConfirmationURL }}</a>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:20px 28px 0;">
+            <div style="border-top:1px dashed #DCC9A6;"></div>
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:16px 28px 0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:#7A6E66;">
+            Classé en indésirable ? Le marquer « non indésirable » une fois suffit pour que le reste du courrier de votre dîner arrive là où vous le trouverez.
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:10px 28px 0;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:#7A6E66;">
+            Si ce n’était pas vous, ignorez ce message. Rien n’a été créé que ce lien ne crée, et il expire tout seul.
+          </td>
+        </tr>
+
+        <tr>
+          <td style="padding:20px 28px 28px;font:400 13px/1.6 Helvetica,Arial,sans-serif;color:#7A6E66;">
+            À tout à l’heure au passe.<br>
+            <strong style="color:#2A2320;">CovertCook</strong>
+          </td>
+        </tr>
+
+      </table>
+    </td>
+  </tr>
+</table>
+</body>
+</html>

@@ -705,5 +705,19 @@
     },
     "draftNote": "Un brouillon, écrit à partir de ce que fait réellement l'application. Il n'a pas été relu par un juriste, et il devra l'être avant que CovertCook facture quoi que ce soit — le panneau diététique contient des données de santé, et toute vente entraîne TVA européenne et droit de rétractation.",
     "by": "par"
+  },
+  "push": {
+    "title": "Notifications sur cet appareil",
+    "turnOn": "Activer les notifications",
+    "turnOff": "Désactiver sur cet appareil",
+    "state": {
+      "checking": "Vérification de ce que cet appareil sait faire…",
+      "on": "Activées sur cet appareil. Vous saurez quand un dîner avance.",
+      "off": "Désactivées. Les activer demande une fois l’autorisation à votre navigateur.",
+      "denied": "Bloquées. Votre navigateur refuse à votre place et l’application ne peut plus le demander — il faut les réautoriser dans les réglages du site pour CovertCook.",
+      "needs-install": "Ajoutez CovertCook à votre écran d’accueil et ouvrez-le depuis là. Sur iPhone et iPad, les notifications n’existent que dans l’application installée — c’est la règle d’Apple, pas la nôtre.",
+      "unsupported": "Ce navigateur ne gère pas les notifications. Rien n’est cassé : il ne peut simplement pas.",
+      "unconfigured": "Pas encore disponible sur ce déploiement."
+    }
   }
 }

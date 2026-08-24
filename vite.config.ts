@@ -7,6 +7,14 @@ export default defineConfig({
   plugins: [
     react(),
     VitePWA({
+      // injectManifest, not generateSW: the worker needs a `push` listener and
+      // a generated one has nowhere to put it. src/sw.ts reproduces everything
+      // this config used to declare — precaching, skipWaiting/clientsClaim, and
+      // the /rest/v1/ GET cache whose reasoning now lives beside the code that
+      // implements it.
+      strategies: 'injectManifest',
+      srcDir: 'src',
+      filename: 'sw.ts',
       registerType: 'autoUpdate',
       includeAssets: ['favicon-32.png', 'favicon-192.png', 'apple-touch-icon.png'],
       manifest: {
@@ -25,23 +33,8 @@ export default defineConfig({
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
-      workbox: {
-        // Recipe cards, shopping lists, and the dietary panel must work on
-        // bad wifi at the flat (§10) — cache the API's GET responses so a
-        // round already loaded once keeps rendering offline. Never cache
-        // POST/RPC calls: those must fail loudly rather than serve stale
-        // game state.
-        runtimeCaching: [
-          {
-            urlPattern: ({ url, request }) =>
-              url.pathname.startsWith('/rest/v1/') && request.method === 'GET',
-            handler: 'NetworkFirst',
-            options: {
-              cacheName: 'covertcook-api-get',
-              expiration: { maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 },
-            },
-          },
-        ],
+      injectManifest: {
+        globPatterns: ['**/*.{js,css,html,png,webp,svg,woff2}'],
       },
     }),
   ],
