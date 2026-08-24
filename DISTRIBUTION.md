@@ -419,7 +419,11 @@ original intention.
 2. **Hard-delete `dietary_entries`.** Art. 9 data, useful to nobody else,
    no reason to keep a trace.
 3. **Anonymise the profile**, stamp `anonymised_at`, neutralise the auth
-   row so the address can never be used to sign in or be mailed again.
+   row so the address can never be used to sign in or be mailed again. The
+   uniqueness index added in `0046` is partial (`where anonymised_at is
+   null`) precisely so every retired profile can wear the same neutral
+   token instead of the second one colliding with the first — and so the
+   name they gave up returns to the pool for somebody else.
 4. **Leave the round record standing** — members, briefs, ballots, results.
    Past rounds then show a neutral "former guest" where a name used to be,
    including in the final reveal. That is a product decision and it belongs

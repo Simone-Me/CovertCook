@@ -87,6 +87,7 @@ about, real enough to be worth building.
 |---|---|
 | **Table styles / personalisation** | **Best candidate.** The tablecloth is the identity — blue check, linen, butcher paper, seasonal. Pure flavour, zero mechanical effect, obviously desirable, and it scales forever without design debt. |
 | **Pseudonym themes** | **Yes.** Same logic: flavour only. Already specced as v2 in `PRESENTATION.md`. |
+| **Changing your public name** | **Yes, and it arrived on its own.** The name became a unique handle in `0046`, which is exactly what makes changing it worth something — and what makes it cost something, since the old one is released for somebody else to take. Flavour, not mechanics: nobody plays a worse game because their neighbour renamed themselves. |
 | **Two recipes per brief** | **Acceptable, because it's round-level.** The host buys it and every player in that round gets it, so nobody at the table has a worse game than their neighbour. It would be a bad paid feature if it were per-player. |
 | **Global leaderboard** | **Push back.** It needs a persistent cross-round identity, which fights the anonymity the whole product is built on, and it changes why people play — optimising a score rather than cooking something funny for a friend. If some form is wanted, keep it per-group and opt-in, not global. |
 | **Help build v3** | **Keep, but as recognition, not a feature.** An early-supporter credit costs nothing and suits a product about a shared table. |

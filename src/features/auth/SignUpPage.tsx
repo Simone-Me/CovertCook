@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useNavigate, Link } from 'react-router-dom'
@@ -6,9 +6,20 @@ import { supabase } from '../../lib/supabase'
 import { ConfirmEmailNotice } from './ConfirmEmailNotice'
 import { Turnstile } from '../../components/Turnstile'
 import { useAuth } from '../../lib/auth'
-import { completeSignup, type DietaryEntryInput, type DietaryKind } from '../../lib/rpc'
+import {
+  completeSignup,
+  displayNameAvailable,
+  type DietaryEntryInput,
+  type DietaryKind,
+} from '../../lib/rpc'
 
 const DIETARY_KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
+
+// Long enough that a normal typist isn't asking the server about every
+// keystroke, short enough that the answer feels like part of typing.
+const NAME_CHECK_DEBOUNCE_MS = 400
+
+type NameState = 'idle' | 'checking' | 'free' | 'taken'
 
 export function SignUpPage() {
   const { t, i18n } = useTranslation()
@@ -25,10 +36,41 @@ export function SignUpPage() {
   const [submitting, setSubmitting] = useState(false)
 
   const [displayName, setDisplayName] = useState('')
+  const [nameState, setNameState] = useState<NameState>('idle')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [acceptedAllergies, setAcceptedAllergies] = useState(false)
   const [hasNoRestrictions, setHasNoRestrictions] = useState(false)
   const [entries, setEntries] = useState<DietaryEntryInput[]>([])
+
+  // The name is an identity now (migration 0046), so the form asks before the
+  // submit does. Advisory only: `stale` drops answers that arrive after the
+  // person has typed on, and complete_signup re-checks under the unique index
+  // for the two people who pick the same name in the same second.
+  useEffect(() => {
+    const name = displayName.trim()
+    if (!name) {
+      setNameState('idle')
+      return
+    }
+    setNameState('checking')
+    let stale = false
+    const id = setTimeout(() => {
+      displayNameAvailable(name)
+        .then((free) => {
+          if (!stale) setNameState(free ? 'free' : 'taken')
+        })
+        // A failed check must not read as "taken" — that would refuse a name
+        // that is free over a dropped connection. Say nothing and let the
+        // submit decide.
+        .catch(() => {
+          if (!stale) setNameState('idle')
+        })
+    }, NAME_CHECK_DEBOUNCE_MS)
+    return () => {
+      stale = true
+      clearTimeout(id)
+    }
+  }, [displayName])
 
   async function onAccountSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -79,6 +121,11 @@ export function SignUpPage() {
     e.preventDefault()
     setError(null)
 
+    if (nameState === 'taken') {
+      setError(t('auth.name.taken'))
+      return
+    }
+
     if (!hasNoRestrictions && entries.filter((it) => it.label.trim()).length === 0) {
       setError(t('dietary.required'))
       return
@@ -101,7 +148,13 @@ export function SignUpPage() {
       // longer exists. AuthProvider clears such sessions on load, but a tab
       // already open when the account vanished only finds out here. Say
       // what happened instead of forwarding Postgres's constraint name.
-      setError(message.includes('profiles_id_fkey') ? t('auth.staleSession') : message)
+      if (message.includes('display_name_taken')) {
+        // Somebody took it between the check and the submit.
+        setNameState('taken')
+        setError(t('auth.name.taken'))
+      } else {
+        setError(message.includes('profiles_id_fkey') ? t('auth.staleSession') : message)
+      }
     } finally {
       setSubmitting(false)
     }
@@ -128,7 +181,17 @@ export function SignUpPage() {
               maxLength={60}
               value={displayName}
               onChange={(e) => setDisplayName(e.target.value)}
+              className={nameState === 'free' ? 'is-free' : nameState === 'taken' ? 'is-taken' : ''}
+              aria-invalid={nameState === 'taken'}
+              aria-describedby="displayName-status"
             />
+            {/* The border carries the answer, but never alone: colour is not
+                readable to everyone, and "taken" is the kind of thing a person
+                needs in words before they retype. */}
+            <p id="displayName-status" className={`field-status is-${nameState}`}>
+              {nameState !== 'idle' && t(`auth.name.${nameState}`)}
+            </p>
+            <p className="muted">{t('auth.name.changeLater')}</p>
           </div>
 
           <label className="row">
@@ -181,7 +244,7 @@ export function SignUpPage() {
             </div>
           )}
 
-          <button type="submit" disabled={submitting}>
+          <button type="submit" disabled={submitting || nameState === 'taken'}>
             {t('actions.submit')}
           </button>
         </form>

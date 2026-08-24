@@ -335,7 +335,10 @@ names, migration numbers, bugs found and fixed) see
   whole assignment chain, and an inbox for player-reported issues.
   Approvals show the real name of whoever is asking to join — a decision
   about a pseudonym is a decision about nobody — and the name gives way to
-  the pseudonym the moment they're in.
+  the pseudonym the moment they're in. That name is unique across the app
+  since `0046`: it is checked while you type at sign-up (free, taken) and
+  held by a case-insensitive index, so an approval is never a choice between
+  two identical strangers.
 - **When someone drops out**: removing a cook after the lottery has run is
   a choice, not an automatic repair. *Reconnect* closes the chain so
   everyone still has a dish to make, at the cost of handing one cook a

@@ -40,6 +40,15 @@ function unwrap<T>({ data, error }: { data: T | null; error: { message: string }
   return data as T
 }
 
+// Is this public name still free? Authenticated-only by design (0046), and
+// advisory by nature: the answer can go stale between the keystroke and the
+// submit, which is why complete_signup checks again and the unique index
+// checks after that.
+export async function displayNameAvailable(name: string): Promise<boolean> {
+  const res = await supabase.rpc('display_name_available', { p_name: name })
+  return unwrap<boolean>(res)
+}
+
 export async function completeSignup(input: {
   displayName: string
   locale: string

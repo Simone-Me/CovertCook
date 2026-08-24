@@ -284,3 +284,31 @@ header.app-header {
 .pending-join strong {
   letter-spacing: 0.08em;
 }
+
+/* Availability on the name field (0046). The border answers while you type;
+   .field-status says the same thing in words underneath, because a colour is
+   not an answer for everyone reading it. Green is --ok, red is --danger and
+   not --accent: the accent is the app's own red, used for seals and buttons,
+   and borrowing it here would read as emphasis rather than refusal. */
+input.is-free {
+  border-color: var(--ok);
+}
+
+input.is-taken {
+  border-color: var(--danger);
+}
+
+.field-status {
+  font-size: 13px;
+  margin: -10px 0 10px;
+  min-height: 1em;
+  color: var(--text-muted);
+}
+
+.field-status.is-free {
+  color: var(--ok);
+}
+
+.field-status.is-taken {
+  color: var(--danger);
+}

@@ -51,7 +51,13 @@
     "acceptTerms": "J'ai lu et j'accepte les <terms>conditions d'utilisation</terms> et la <privacy>politique de confidentialité</privacy>.",
     "mustAcceptTerms": "Vous devez accepter les conditions et la politique de confidentialité pour créer un compte.",
     "acceptAllergies": "Je comprends que CovertCook conserve les allergies et régimes que je saisis, qu'il s'agit de données de santé, et j'accepte qu'ils soient montrés aux personnes de mes dîners afin qu'elles puissent cuisiner pour moi sans danger. Je lirai le panneau diététique avant d'écrire une recette pour quelqu'un, et je n'enverrai pas un plat que je sais dangereux pour lui.",
-    "mustAcceptAllergies": "Celle-ci n'est pas optionnelle : un dîner où personne ne lit les allergies est réellement dangereux."
+    "mustAcceptAllergies": "Celle-ci n'est pas optionnelle : un dîner où personne ne lit les allergies est réellement dangereux.",
+    "name": {
+      "checking": "Vérification…",
+      "free": "Libre — il est à vous.",
+      "taken": "Déjà pris. Essayez-en un autre.",
+      "changeLater": "C'est ainsi que tout le monde vous connaîtra. Le changer plus tard est prévu dans la version Pro."
+    }
   },
   "dietary": {
     "title": "Vos restrictions alimentaires",

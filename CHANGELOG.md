@@ -24,12 +24,15 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    the three constraints any render has to meet, and the three questions
    still open (which objects, how many variants, single objects or one
    laid table).
-4. **Deleting an account** — missing entirely, and now on the critical path
+4. **Push notifications** — still not built and still not decided; §1 of
+   `ROADMAP.md` chose email, and installing the PWA on a phone changes what
+   is *possible*, not what exists. Nothing subscribes, nothing sends.
+5. **Deleting an account** — missing entirely, and now on the critical path
    for a store listing (both stores mandate it) as well as for GDPR. The
    personal-data map, the foreign-key blocker that stops it being a plain
    delete, and the three ways out are in `DISTRIBUTION.md` §10; the shape
    recommended there is anonymise-in-place, hard-delete the dietary rows.
-5. **Distribution** — `DISTRIBUTION.md` covers the four routes (PWA, APK,
+6. **Distribution** — `DISTRIBUTION.md` covers the four routes (PWA, APK,
    Play, App Store), the real costs, and why monetising is a later and
    much more expensive decision than a store listing. Pro is deferred.
 
@@ -50,6 +53,66 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-08-24 (7)
+
+**Added: the public name is an identity, not a label** (`0046`).
+
+`display_name` had been free text since `0001` — two people could both be
+"Simone" and nothing anywhere noticed. That is fine for a label and wrong
+for a handle, and a handle is what it had become: it is the name the reveal
+prints, the name a host reads when approving a request to join, and the
+name an invitation is addressed to. Each of those is ambiguous with a
+duplicate in the room.
+
+*Unique, case-insensitively, on live accounts only.* `lower(display_name)`
+under a unique index, so "Simone" and "simone" are the same person to the
+database while the name is **stored exactly as typed** — how you capitalise
+your own name is yours. The index is partial, `where anonymised_at is
+null`, and that is not an optimisation: erasure (`DISTRIBUTION.md` §10)
+anonymises rather than deletes, every retired profile is meant to end up
+wearing the same neutral token, and a total index would make the second
+person to leave impossible to anonymise.
+
+*The form asks before the submit does.* A 400 ms debounce behind
+`display_name_available`, and the field answers while you type — green
+border and "free", red border and "already taken". Never colour alone: the
+same answer is in words underneath, because a border colour is not readable
+to everyone. The check is authenticated-only on purpose; an open
+availability endpoint is an account-enumeration oracle.
+
+*Advisory, and treated as such.* Three layers, because a check is stale the
+moment it returns: the debounce answers the typist, `complete_signup`
+re-checks and raises `display_name_taken` in words rather than forwarding a
+constraint name, and the unique index catches the two people who pick the
+same name in the same second. A failed check reads as "don't know", never
+as "taken" — refusing a free name over a dropped connection is the one
+failure that would be the app's fault.
+
+*Existing duplicates are settled before the index is built.* The oldest
+account keeps the name — its friends already know them by it — and the rest
+gain a short suffix, each rename logged as a notice so the deploy output is
+the record of who moved and to what.
+
+*A small note under the field says what happens next:* changing the name
+later is planned as part of Pro. That is now a row in `ROADMAP.md` §2 and
+it earned its place by accident — a name only becomes worth changing once
+it is unique, and it only costs something once giving it up releases it to
+somebody else.
+
+**Verified, not assumed.** Migrations `0001` → `0046` were replayed into a
+throwaway Postgres 16 with a stubbed `auth` schema: the whole chain applies,
+duplicates are renamed as described, the index refuses a case-different
+duplicate, availability is right for a taken name, a trimmed/case-different
+one, a free one and your own, and `complete_signup` raises
+`display_name_taken` rather than a constraint name. The `secret_name` side
+was checked at the same time and needed nothing: it is already unique per
+round by constraint (`unique (round_id, secret_name)`), assigned rather than
+chosen, and deliberately not unique *across* rounds — a pseudonym that
+followed you between dinners would be the cross-round identity the
+anonymity design exists to prevent.
 
 ---
 
