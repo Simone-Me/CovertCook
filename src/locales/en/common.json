@@ -46,7 +46,7 @@
       "spam": "Look in spam or junk. CovertCook is a new sender, and new senders land there more often than not — marking the mail as \"not spam\" once fixes it for good.",
       "resend": "Send it again",
       "wait": "You can resend in",
-      "sentAgain": "Sent. Check the same mailbox, spam included."
+      "sentAgain": "On its way — if that address is still waiting to be confirmed. Check the same mailbox, spam included."
     },
     "acceptTerms": "I have read and accept the <terms>terms of use</terms> and the <privacy>privacy policy</privacy>.",
     "mustAcceptTerms": "You have to accept the terms and the privacy policy to create an account.",

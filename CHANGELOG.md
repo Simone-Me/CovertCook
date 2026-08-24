@@ -53,6 +53,59 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (6)
+
+**Audited: the confirmation mail, because resending one did nothing.**
+Reported symptom: the sign-up mail arrives, the "send it again" button
+does nothing visible, and Resend has no record of a second send at all.
+
+*What the mail system actually is.* Worth stating, because it decides
+where to look: the confirmation and the password reset are sent by
+**Supabase Auth**, rendered from the dashboard's templates and handed to
+Resend over SMTP. `supabase/functions/send-email/` holds `templates.ts`
+and no `index.ts` — it has never been deployed and sends nothing. So a
+mail that never reaches Resend was never handed to SMTP: it died inside
+GoTrue, before any provider was involved. That rules out Resend, the
+sending domain, DNS and spam filtering in one step.
+
+*Fixed: `/resend` was the only auth call in the app with no captcha
+token.* Sign-up, sign-in and password reset all pass one;
+`ConfirmEmailNotice` passed none. GoTrue gates `/resend` with the same
+project-level captcha setting as the rest, so with protection on, every
+resend is refused before a mail is attempted — first mail out, second
+never, nothing in Resend, which is exactly the reported shape. The
+sign-up token could not have been forwarded either: Turnstile tokens are
+single-use and that one was spent by sign-up, so the screen now solves
+its own, like every other form.
+
+*Fixed: the screen claimed a send it cannot know happened.* Supabase's
+email-enumeration protection makes `/resend` answer **200 with no mail**
+for an address that is already confirmed or unknown — deliberately, so
+the endpoint cannot be used to test whether an account exists. "Sent.
+Check the same mailbox" was therefore a statement the client had no
+grounds for. It now reads as a conditional in both languages: on its way,
+*if that address is still waiting to be confirmed*.
+
+*Not fixed, because they are settings, not code.* Two remaining causes
+produce identical symptoms and can only be checked in the Supabase
+dashboard: **captcha protection** (whether it is on at all — the fix
+above only matters if it is), and **the email rate limit**, which
+`config.toml` carries at the stock `email_sent = 2` per hour. Two mails
+an hour is a whole afternoon of testing spent in one signup and one
+resend, and GoTrue answers 429 without touching SMTP.
+
+*Found, not fixed — the resend button is unreachable exactly when it is
+needed.* `ConfirmEmailNotice` renders only as a step inside `SignUpPage`,
+holding the address in component state. Close the tab and there is no way
+back to it: the person who did not get the mail is the person most likely
+to have given up on the tab. Signing up again returns the same
+enumeration-protected success without sending anything. The recovery path
+this button exists to provide needs its own entry point — a "resend the
+confirmation" route reachable from sign-in — and that is a design
+decision, not a patch.
+
+---
+
 ## 2026-08-24 (5)
 
 **Added: the app has a mark.** The wok goes in the browser tab, on the
