@@ -59,6 +59,112 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (16)
+
+**Added: the two moments at the door** (`0052`), and four interface fixes.
+
+The four moments in `0048` all happen once a dinner is under way. The door has
+its own pair, and they are the two where waiting in silence is worst: somebody
+asks to join — only the Executive Chef can answer, and they are running the
+evening in their head rather than refreshing a roster — and a request is
+accepted, after the person who asked has been staring at "waiting for approval"
+with nothing to do about it.
+
+*Addressed by membership, not by round.* `join_round` hands the client a
+membership id and nothing else, and approving is about one person, so passing
+the seat is passing what the caller actually has. The round is derived in SQL,
+where it can be authorised in the same query: **you may announce your own
+arrival and nobody else's** — checked against the joiner's own profile, not
+against membership of the round, so a player already inside cannot make the
+host's phone ring on somebody else's behalf — and only the host of that seat's
+round may announce that it was approved, gated on the seat actually being
+approved so the message cannot arrive before the thing it announces.
+
+*Request or arrival is the database's call.* A round that needs approval
+produces one, a round that does not produces the other, and the seat already
+knows which — so the client does not guess and cannot be wrong.
+
+*No names on a lock screen.* The host's approval screen shows who is asking,
+because approving a pseudonym is approving nobody (`0015`) — but that is a
+screen they chose to open, not something a stranger reads over their shoulder
+on a train. The dinner's name is carried instead: a host with two running needs
+to know which door this is, and neither side learns anything from it they did
+not already know.
+
+*And an empty audience is a normal answer, not a failure.* The host may have
+notifications off; the caller may not be entitled to send this. Both come back
+the same way, on purpose.
+
+**Also fixed**, all four reported from use:
+
+- `MANUAL` arrived as a fourth voting mode in `0040` and never got a
+  translation, so the settings row printed `rounds.voting.MANUAL` at the
+  reader. It has one now, plus a note that says the **rule** rather than a
+  state: the method is settled when the vote opens and stays changeable until
+  somebody has voted (`0043`, `0045`).
+- The venue block ended in a bare "Dinner settings" link, which reads as a
+  place rather than as an answer to "can I still change this?". It is a
+  sentence now, and the link lands on the venue fields — the settings page
+  opens the fold the hash names and scrolls to it, which the browser cannot do
+  alone because the anchor does not exist until the round has loaded.
+- An empty pass in `DRAFT` was a blank space above a paragraph explaining what
+  the pass is, and the two read as one thing. The word says the state, a rule
+  separates it, and the explanation moved behind a question mark: it earns one
+  reading and then gets in the way. The glyph is a placeholder until
+  `public/loupe_question.webp` is committed — it is not in the repo yet, and a
+  missing image is worse than a character.
+- The notifications list in the profile says six moments now, because a list
+  that is not complete is a promise that is not kept.
+
+**Verified:** `0001` → `0052` replayed into a throwaway Postgres 16. The host
+is told, in the host's own language, with the dinner's name and the request
+flag; ringing the bell on somebody else's behalf reaches nobody; nothing goes
+back to the person waiting until the seat is actually approved; after approval
+it reaches exactly them, in their language; a player cannot announce an
+approval; a seat taken without approval reports as an arrival rather than a
+request; and the account switch silences all of it like everything else. Build
+and lint clean.
+
+---
+
+## 2026-08-24 (15)
+
+**Fixed: the archive was empty, and leaving said nothing** (`0051`).
+
+Two separate bugs behind one symptom.
+
+*RLS was hiding the round from the person who left it.* `0050` sorted LEFT and
+REMOVED memberships into the archive and the archive stayed empty, because
+`is_round_member` (`0002`) answers only for an ACTIVE, approved seat and the
+rounds SELECT policy is built on it. The moment a seat is marked LEFT, the
+round row itself becomes unreadable to that person: the client asked, RLS
+returned nothing, and the card had no data to draw.
+
+Loosening `is_round_member` would have been the wrong fix by a wide margin —
+it gates the briefs, the chat, the roster, the pass and the ballots, so
+widening it hands a departed player the inside of a dinner they walked out of.
+Instead there is a second policy on `rounds` alone. Postgres ORs policies of
+the same command, so it adds exactly one thing: a former member can read the
+round **row** — name, date, status — and nothing else in the schema moves.
+
+*And the card no longer pretends to be a door.* It keeps its place in the list
+and loses its link, dimmed rather than struck through: everything behind it
+checks for an active seat and refuses, so opening it could only produce an
+error. A dinner that vanishes reads as data lost; a dinner you cannot open
+reads as a room you left.
+
+*Leaving now says so.* The confirmation is shown on the page you land on, not
+the one you are leaving — that page unmounts in the same tick, so a message
+there would be gone before it could be read.
+
+**Verified** on a throwaway Postgres 16 with RLS actually enabled and the
+`authenticated` role assumed, rather than as the owner who bypasses it: an
+active member reads the round; after leaving they still read the row and its
+name; the roster refuses them with "not a member of this round" and the slots
+return nothing; and a stranger sees nothing at all.
+
+---
+
 ## 2026-08-24 (14)
 
 **Fixed: `42501 permission denied for table round_members`** — the rounds list,

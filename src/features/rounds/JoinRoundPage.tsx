@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
-import { joinRound } from '../../lib/rpc'
+import { joinRound, notifyHostOfArrival } from '../../lib/rpc'
 import { getTurnstileTicket } from '../../lib/turnstileTicket'
 import { Turnstile } from '../../components/Turnstile'
 import { BackToTable } from '../../components/BackToTable'
@@ -48,7 +48,11 @@ export function JoinRoundPage() {
     try {
       const normalizedCode = code.trim().toUpperCase()
       const ticket = await getTurnstileTicket(captchaToken, 'JOIN_ROUND', normalizedCode)
-      await joinRound({ code: normalizedCode, turnstileTicket: ticket })
+      const memberId = await joinRound({ code: normalizedCode, turnstileTicket: ticket })
+      // The Executive Chef is the only person who can act on a request, and
+      // they are running the evening in their head rather than refreshing a
+      // roster. Not awaited: the seat is taken either way.
+      void notifyHostOfArrival(memberId)
       navigate('/', { replace: true })
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''

@@ -372,3 +372,21 @@ input.is-taken {
   border-color: var(--danger);
   border-width: 2px;
 }
+
+/* A dinner still in your list but no longer yours to open. Dimmed rather than
+   struck through: it happened, and it is still part of your history. */
+.card--left {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* Something that went right, said once. The error box's calm opposite. */
+.notice {
+  color: var(--ok);
+  background: var(--bg-elevated);
+  border: 1px solid var(--ok);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}

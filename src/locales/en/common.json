@@ -127,7 +127,10 @@
       "TIMED": "After dinner",
       "TIMEDHint": "You set a deadline and the results publish themselves when it runs out.",
       "DISABLED": "No voting",
-      "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later."
+      "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later.",
+      "MANUAL": "By a show of hands",
+      "MANUALHint": "No phones at the table: dishes are ranked by hands going up, and you type in the count.",
+      "chosenWhenOpening": "Chosen when you open the vote, not now — and changeable until the first vote is cast."
     },
     "nameTheme": {
       "label": "Pseudonym theme",
@@ -236,7 +239,9 @@
       "no": "No",
       "noLimit": "No limit",
       "themes": "Table theme",
-      "themesSoon": "Christmas, midsummer, and others to come. Pro — the look of the evening only; nothing about how the game is played."
+      "themesSoon": "Christmas, midsummer, and others to come. Pro — the look of the evening only; nothing about how the game is played.",
+      "venueEditable": "Editable in the dinner settings",
+      "venueHere": "change them"
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
@@ -353,7 +358,9 @@
         "RESULTS": "Announce the result",
         "ARCHIVED": "Nothing left to do",
         "CANCELLED": "This dinner was called off"
-      }
+      },
+      "empty": "empty",
+      "whatIsItToggle": "What is the pass?"
     },
     "lateJoinerShort": "Adding someone now changes two chefs' partners.",
     "briefProgress": "{{done}} of {{total}} recipes written",
@@ -380,6 +387,11 @@
       "asked": "You have asked to be let out. The Executive Chef has been told and will decide — until then nothing has changed and you are still expected at the table.",
       "stayAfterAll": "Never mind, I’m staying",
       "requested": "asked to leave"
+    },
+    "left": {
+      "done": "You have left {{name}}. It is in your past dinners now, and there is nothing left to open.",
+      "LEFT": "You left",
+      "REMOVED": "Removed"
     }
   },
   "briefs": {
@@ -736,6 +748,8 @@
     "turnOff": "Turn notifications off",
     "perRound": "One switch for every dinner you are in, on every device you use. Choosing per dinner is coming later.",
     "moments": [
+      "Somebody asks to join, or takes a seat, at a dinner you are running",
+      "Your request to join is accepted",
       "Your cook has been chosen — you can write their recipe",
       "The recipe you have to cook has arrived",
       "Online voting opens",
@@ -743,7 +757,7 @@
     ],
     "state": {
       "checking": "Checking what this device can do…",
-      "on": "On. You will hear about the four moments below, and nothing else.",
+      "on": "On. You will hear about the six moments below, and nothing else.",
       "off": "Off. Turning them on asks your browser for permission once.",
       "denied": "Blocked. Your browser is refusing on your behalf and the app cannot ask again — it has to be re-allowed in the site settings for CovertCook.",
       "needs-install": "Add CovertCook to your home screen and open it from there. On iPhone and iPad, notifications only exist in the installed app — this is Apple’s rule, not ours.",

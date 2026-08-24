@@ -19,6 +19,7 @@ import {
   advancePhase,
   cancelLeaveRequest,
   leaveRound,
+  notifyApproved,
   notifyRoundPhase,
   approveMember,
   rejectMember,
@@ -65,6 +66,7 @@ export function RoundHomePage() {
   const { data: round, isLoading: roundLoading } = useRound(roundId)
   const { data: members } = useRoundMembers(roundId)
   const [error, setError] = useState<string | null>(null)
+  const [passHelp, setPassHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -174,7 +176,11 @@ export function RoundHomePage() {
       // Walking out means this round is no longer one of yours: the list has
       // to be re-read, or you are left looking at a dinner you have left.
       await queryClient.invalidateQueries({ queryKey: ['rounds'] })
-      if (outcome === 'LEFT') navigate('/', { replace: true })
+      // The confirmation belongs on the page you land on, not the one you are
+      // leaving: this page unmounts in the same tick.
+      if (outcome === 'LEFT') {
+        navigate('/', { replace: true, state: { leftRound: round?.name } })
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
     } finally {
@@ -406,6 +412,9 @@ export function RoundHomePage() {
   async function onApprove(memberId: string) {
     if (!roundId) return
     await approveMember(roundId, memberId)
+    // The person who asked has been looking at "waiting for approval" with
+    // nothing they can do about it. Tell them the door opened.
+    void notifyApproved(memberId)
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'pending-members'] })
   }
@@ -564,10 +573,34 @@ export function RoundHomePage() {
             about a door they had shut themselves — that guidance moved to
             settings, where somebody actually goes looking for it. */}
         {round.status === 'DRAFT' && (
-          <div className="stack">
-            <span className="pass__section-title">{t('rounds.pass.whatIsIt')}</span>
-            <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
-          </div>
+          <>
+            {/* An empty pass in DRAFT was a blank space above a paragraph
+                explaining what the pass is, and the two read as one thing. The
+                word says the state, the rule below separates it, and the
+                explanation is behind the question mark — because it is worth
+                reading once and never again. */}
+            <p className="pass__empty" style={{ margin: 0 }}>
+              <em>{t('rounds.pass.empty')}</em>
+            </p>
+            <hr className="pass__rule" />
+            <div className="stack">
+              <button
+                type="button"
+                className="pass__help"
+                aria-expanded={passHelp}
+                onClick={() => setPassHelp((v) => !v)}
+              >
+                {/* Swap for <Icon name="help" /> once public/loupe_question.webp
+                    is committed — the file is not in the repo yet, and a
+                    missing image is worse than a glyph. */}
+                <span aria-hidden="true">?</span>
+                <span>{t('rounds.pass.whatIsItToggle')}</span>
+              </button>
+              {passHelp && (
+                <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
+              )}
+            </div>
+          </>
         )}
 
         {/* Courses are decided once the table is final, not while it is still
@@ -1019,7 +1052,21 @@ export function RoundHomePage() {
                   </>
                 )}
               </dl>
-              {isHost && <Link to={`/rounds/${roundId}/settings`}>{t('rounds.settings.title')}</Link>}
+              {/* Was a bare "Dinner settings" link, which reads as a place
+                  rather than as an answer to the question the reader actually
+                  has, which is "can I still change this?". The sentence says
+                  yes, and the link lands on the venue fields instead of the
+                  top of a long page. */}
+              {isHost && (
+                <p className="muted editable-note">
+                  <em>
+                    {t('rounds.settings.venueEditable')} —{' '}
+                    <Link to={`/rounds/${roundId}/settings#location`}>
+                      {t('rounds.settings.venueHere')}
+                    </Link>
+                  </em>
+                </p>
+              )}
               {isHost && assigned && <Link to={`/rounds/${roundId}/alerts`}>{t('alerts.title')}</Link>}
             </div>
           )}
