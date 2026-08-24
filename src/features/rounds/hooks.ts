@@ -51,12 +51,20 @@ const ROUND_COLUMNS =
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing
 // lives in a round, and one person cancelling shouldn't erase it.
-export function isPastRound(r: Pick<RoundRow, 'status'>) {
+export function isPastRound(r: Pick<RoundRow, 'status'> & { member_status?: string }) {
+  // Two ways for a dinner to be over: it ended, or you are no longer at it.
+  if (r.member_status && r.member_status !== 'ACTIVE') return true
   return r.status === 'CANCELLED' || r.status === 'ARCHIVED'
 }
 
 export interface MyRoundRow extends RoundRow {
   approved: boolean
+  /** Your own standing in this round, which is not the round's own status:
+   *  a dinner still running is over as far as somebody who walked out of it
+   *  is concerned. */
+  member_status: 'ACTIVE' | 'LEFT' | 'REMOVED'
+  /** Set while the host has not yet answered a request to be let out (0050). */
+  removal_requested_at: string | null
 }
 
 export function useMyRounds(uid: string | undefined) {
@@ -64,16 +72,22 @@ export function useMyRounds(uid: string | undefined) {
     queryKey: ['rounds', 'mine', uid],
     enabled: !!uid,
     queryFn: async () => {
+      // LEFT and REMOVED rows are fetched too. Filtering them out made a
+      // dinner you walked out of vanish from your account entirely, which
+      // reads as data loss rather than as leaving — you can no longer even
+      // see that it happened. They belong in the archive.
       const { data, error } = await supabase
         .from('round_members')
-        .select(`approved, rounds(${ROUND_COLUMNS})`)
+        .select(`approved, status, removal_requested_at, rounds(${ROUND_COLUMNS})`)
         .eq('profile_id', uid as string)
-        .eq('status', 'ACTIVE')
+        .in('status', ['ACTIVE', 'LEFT', 'REMOVED'])
         .order('joined_at', { ascending: false })
       if (error) throw error
       return (data ?? []).map((m) => ({
         ...(m.rounds as unknown as RoundRow),
         approved: m.approved,
+        member_status: m.status,
+        removal_requested_at: m.removal_requested_at,
       })) as MyRoundRow[]
     },
   })
@@ -106,6 +120,9 @@ export interface RoundMemberRow {
   role: 'HOST' | 'PLAYER'
   status: 'ACTIVE' | 'LEFT' | 'REMOVED'
   approved: boolean
+  /** Set when this player has asked to be let out of a round whose chain
+   *  already exists (0050). Visible only to them and to the host. */
+  removal_requested_at: string | null
 }
 
 export function useRoundMembers(roundId: string | undefined) {

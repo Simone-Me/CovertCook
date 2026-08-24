@@ -2,10 +2,12 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
+import { Fold } from '../../components/Fold'
+import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
-import { SUPPORTED_LOCALES, type SupportedLocale } from '../../lib/i18n'
+import { type SupportedLocale } from '../../lib/i18n'
 import { cancelAccountDeletion, requestAccountDeletion, type DietaryKind } from '../../lib/rpc'
 import { currentPushState, disablePush, enablePush, type PushState } from '../../lib/push'
 
@@ -186,23 +188,18 @@ export function ProfilePage() {
           <label>{t('profile.signedInAs')}</label>
           <strong>{session?.user.email}</strong>
         </div>
-        <div>
-          <label htmlFor="locale">{t('app.language')}</label>
-          <select
-            id="locale"
-            value={profile?.locale ?? i18n.resolvedLanguage ?? 'en'}
-            onChange={(e) => onLocale(e.target.value as SupportedLocale)}
-          >
-            {SUPPORTED_LOCALES.map((l) => (
-              <option key={l} value={l}>
-                {t(`profile.locale.${l}`)}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* The same two buttons the sign-in and sign-up pages use. A dropdown
+            here and a pair of buttons there were two controls for one choice,
+            and with two languages a dropdown hides half of what it offers
+            behind a click. */}
+        <LanguageSwitch onChange={(code) => onLocale(code as SupportedLocale)} />
       </div>
 
-      <h2>{t('push.title')}</h2>
+      {/* Folded, all three of them. The page had become one long scroll where
+          every setting shouted at once; they arrive closed and you open the
+          one you came for. The closed row still says what the current answer
+          is, or folding would hide the choice as well as the choices. */}
+      <Fold title={t('push.title')} aside={t(`push.aside.${shownPush}`)}>
       {/* One switch, and it is per device: this is the phone you are holding,
           not your account. The permission prompt is raised by the button and
           never on load — a refusal cannot be taken back by the site, only by
@@ -222,7 +219,9 @@ export function ProfilePage() {
         <p className="muted">{t('push.perRound')}</p>
       </div>
 
-      <h2>{t('dietary.title')}</h2>
+      </Fold>
+
+      <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>
       {/* Round-wide, not per-dinner: a brief is checked against every
           diner's restrictions, so this list follows you into every round
           you join. Changing it here changes it everywhere. */}
@@ -265,15 +264,13 @@ export function ProfilePage() {
         </div>
       </div>
 
-      <button type="button" className="secondary" onClick={() => supabase.auth.signOut()}>
-        {t('auth.signOut')}
-      </button>
+      </Fold>
 
-      <h2>{t('account.title')}</h2>
+      <Fold title={t('account.title')}>
       {/* Required by both stores and by GDPR, and it has to be here rather
           than in an email to support: the whole point is that it does not
           depend on anybody answering. */}
-      <div className="card stack">
+      <div className="card stack card--danger">
         {deletionDue ? (
           <>
             <p>{t('account.pending', { date: deletionDue.toLocaleDateString(i18n.language) })}</p>
@@ -304,6 +301,11 @@ export function ProfilePage() {
           </>
         )}
       </div>
+      </Fold>
+
+      <button type="button" className="secondary" onClick={() => supabase.auth.signOut()}>
+        {t('auth.signOut')}
+      </button>
     </div>
   )
 }

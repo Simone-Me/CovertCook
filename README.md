@@ -482,6 +482,12 @@ names, migration numbers, bugs found and fixed) see
   since `0046`: it is checked while you type at sign-up (free, taken) and
   held by a case-insensitive index, so an approval is never a choice between
   two identical strangers.
+- **Leaving a dinner**: while the door is still open you simply go, and the
+  round moves to your archive. Once the lottery has run, three other people's
+  evening is built on your pairing, so leaving becomes a request the Executive
+  Chef answers — marked in their own roster, withdrawable until they do, and
+  answered with the same choice below. A round you left or were removed from
+  stays visible among your past dinners rather than vanishing (`0050`).
 - **When someone drops out**: removing a cook after the lottery has run is
   a choice, not an automatic repair. *Reconnect* closes the chain so
   everyone still has a dish to make, at the cost of handing one cook a

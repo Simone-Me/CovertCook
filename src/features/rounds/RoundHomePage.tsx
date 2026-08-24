@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
@@ -17,6 +17,8 @@ import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import {
   advancePhase,
+  cancelLeaveRequest,
+  leaveRound,
   notifyRoundPhase,
   approveMember,
   rejectMember,
@@ -56,12 +58,15 @@ type OpenDrawer = 'chefs' | 'allergies' | 'info' | null
 export function RoundHomePage() {
   const { t } = useTranslation()
   const { roundId } = useParams()
+  const navigate = useNavigate()
   const { profile } = useAuth()
   const queryClient = useQueryClient()
 
   const { data: round, isLoading: roundLoading } = useRound(roundId)
   const { data: members } = useRoundMembers(roundId)
   const [error, setError] = useState<string | null>(null)
+  const [leaveConfirm, setLeaveConfirm] = useState(false)
+  const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteNote, setInviteNote] = useState<string | null>(null)
@@ -154,6 +159,41 @@ export function RoundHomePage() {
   if (roundLoading || !round) return <p className="muted">…</p>
 
   const isHost = round.host_id === profile?.id
+  // Your own seat in this round, which the roster query already knows about.
+  const myMembership = members?.find((m) => m.profile_id === profile?.id)
+  const leaveIsFree = ['DRAFT', 'OPEN', 'LOCKED'].includes(round.status)
+  const leaveAsked = !!myMembership?.removal_requested_at
+  const isFinished = ['RESULTS', 'ARCHIVED', 'CANCELLED'].includes(round.status)
+
+  async function onLeave() {
+    if (!roundId) return
+    setLeaveBusy(true)
+    try {
+      const outcome = await leaveRound(roundId)
+      setLeaveConfirm(false)
+      // Walking out means this round is no longer one of yours: the list has
+      // to be re-read, or you are left looking at a dinner you have left.
+      await queryClient.invalidateQueries({ queryKey: ['rounds'] })
+      if (outcome === 'LEFT') navigate('/', { replace: true })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setLeaveBusy(false)
+    }
+  }
+
+  async function onCancelLeave() {
+    if (!roundId) return
+    setLeaveBusy(true)
+    try {
+      await cancelLeaveRequest(roundId)
+      await queryClient.invalidateQueries({ queryKey: ['rounds'] })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setLeaveBusy(false)
+    }
+  }
   const pendingById = new Map((pendingMembers ?? []).map((p) => [p.member_id, p]))
   const phaseIdx = ROUND_PHASE_ORDER.indexOf(round.status)
   const assigned = phaseIdx >= ROUND_PHASE_ORDER.indexOf('ASSIGNED')
@@ -758,6 +798,11 @@ export function RoundHomePage() {
                         so without a mark there is no way to tell which
                         stranger you are. A wine ring, the same trace the
                         cloth picks up as the evening goes on. */}
+                    {/* A request to be let out, marked where the host is
+                        already looking at who is in the room. */}
+                    {isHost && m.removal_requested_at && (
+                      <span className="chef-leaving">{t('rounds.leave.requested')}</span>
+                    )}
                     {name ? (
                       <span className={m.profile_id === profile?.id ? 'chef-you' : undefined}>
                         {name}
@@ -808,6 +853,42 @@ export function RoundHomePage() {
 
               {rosterCovered && (
                 <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>
+              )}
+
+              {/* Your own way out, at the bottom of the roster because that is
+                  where you are looking at who is in the room. What it does
+                  depends entirely on when you press it, and the words change
+                  with it rather than staying vague: while the door is open you
+                  simply go; once the lottery has run, three other people's
+                  evening is built on your pairing, so it becomes a request the
+                  Executive Chef answers. */}
+              {!isHost && myMembership?.status === 'ACTIVE' && !isFinished && (
+                <div className="stack leave-seat">
+                  {leaveAsked ? (
+                    <>
+                      <p className="muted" style={{ margin: 0 }}>{t('rounds.leave.asked')}</p>
+                      <button type="button" className="secondary" disabled={leaveBusy} onClick={onCancelLeave}>
+                        {t('rounds.leave.stayAfterAll')}
+                      </button>
+                    </>
+                  ) : leaveConfirm ? (
+                    <InlineConfirm
+                      title={t(leaveIsFree ? 'rounds.leave.confirmNow' : 'rounds.leave.confirmAsk')}
+                      confirmLabel={t(leaveIsFree ? 'rounds.leave.now' : 'rounds.leave.ask')}
+                      busy={leaveBusy}
+                      onConfirm={onLeave}
+                      onCancel={() => setLeaveConfirm(false)}
+                    >
+                      <p className="confirmbox__why">
+                        {t(leaveIsFree ? 'rounds.leave.whyNow' : 'rounds.leave.whyAsk')}
+                      </p>
+                    </InlineConfirm>
+                  ) : (
+                    <button type="button" className="secondary" onClick={() => setLeaveConfirm(true)}>
+                      {t(leaveIsFree ? 'rounds.leave.now' : 'rounds.leave.ask')}
+                    </button>
+                  )}
+                </div>
               )}
 
 
