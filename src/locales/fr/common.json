@@ -68,7 +68,9 @@
       "free": "Libre — il est à vous.",
       "taken": "Déjà pris. Essayez-en un autre.",
       "changeLater": "C'est ainsi que tout le monde vous connaîtra. Le changer plus tard est prévu dans la version Pro.",
-      "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
+      "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret.",
+      "pageTitle": "Prénom ou pseudo",
+      "pageHelp": "La dernière chose, et votre place est réelle."
     },
     "passwordLabel": "Mot de passe"
   },

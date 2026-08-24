@@ -480,7 +480,13 @@ input.is-taken {
 
 .ask legend {
   padding: 0 6px;
-  font-size: 15px;
+  /* The question is the heading of its own section, so it is sized like one:
+     it was competing with the help text underneath at 15px. */
+  /* No display face is defined in this app, so it inherits the body one and
+     only the size and weight change. */
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
   color: var(--text);
 }
 

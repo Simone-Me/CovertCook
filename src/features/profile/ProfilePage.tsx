@@ -4,6 +4,8 @@ import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { Fold } from '../../components/Fold'
 import { FoodLabel } from '../../components/FoodLabel'
+import { FoodTagGrid } from '../../components/FoodTagGrid'
+import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
@@ -11,8 +13,6 @@ import { supabase } from '../../lib/supabase'
 import { type SupportedLocale } from '../../lib/i18n'
 import { cancelAccountDeletion, requestAccountDeletion, type DietaryKind } from '../../lib/rpc'
 import { currentPushState, disablePush, enablePush, type PushState } from '../../lib/push'
-
-const KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
 
 interface DietaryRow {
   id: string
@@ -31,8 +31,8 @@ export function ProfilePage() {
   const { profile, session, refreshProfile } = useAuth()
   const queryClient = useQueryClient()
 
-  const [kind, setKind] = useState<DietaryKind>('ALLERGY_SEVERE')
-  const [label, setLabel] = useState('')
+  const [set, setSet] = useState<'allergy' | 'diet'>('allergy')
+  const [otherOpen, setOtherOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [push, setPush] = useState<PushState | null>(null)
@@ -119,16 +119,56 @@ export function ProfilePage() {
     },
   })
 
-  async function onAdd() {
-    if (!label.trim() || !profile?.id) return
+  // What is already stored, split the way the grid needs it: codes drive the
+  // tiles, typed labels are listed underneath because no picture can stand for
+  // them.
+  const kindsInSet: DietaryKind[] =
+    set === 'allergy' ? ['ALLERGY_SEVERE', 'ALLERGY_MILD'] : ['DIET']
+  const inSet = (entries ?? []).filter((e) => kindsInSet.includes(e.kind))
+  const chosenCodes = inSet.filter((e) => isFoodCode(e.label)).map((e) => e.label)
+  const typedLabels = inSet.filter((e) => !isFoodCode(e.label)).map((e) => e.label)
+  if (otherOpen && !chosenCodes.includes(OTHER_CODE)) chosenCodes.push(OTHER_CODE)
+
+  async function onToggleTag(code: string) {
+    if (!profile?.id) return
+    // The Other tile has nothing to store on its own: it opens the field, and
+    // what gets stored is whatever is typed into it.
+    if (code === OTHER_CODE) {
+      setOtherOpen((v) => !v)
+      return
+    }
+    const existing = inSet.find((e) => e.label === code)
     setError(null)
     setBusy(true)
     try {
-      const { error } = await supabase
-        .from('dietary_entries')
-        .insert({ profile_id: profile.id, kind, label: label.trim() })
+      const { error } = existing
+        ? await supabase.from('dietary_entries').delete().eq('id', existing.id)
+        : await supabase.from('dietary_entries').insert({
+            profile_id: profile.id,
+            // Every allergen the grid records is severe, here as at sign-up.
+            kind: set === 'allergy' ? 'ALLERGY_SEVERE' : 'DIET',
+            label: code,
+          })
       if (error) throw error
-      setLabel('')
+      await queryClient.invalidateQueries({ queryKey: ['dietary'] })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onAddTyped(value: string) {
+    if (!profile?.id || !value.trim()) return
+    setError(null)
+    setBusy(true)
+    try {
+      const { error } = await supabase.from('dietary_entries').insert({
+        profile_id: profile.id,
+        kind: set === 'allergy' ? 'ALLERGY_SEVERE' : 'DIET',
+        label: value.trim(),
+      })
+      if (error) throw error
       await queryClient.invalidateQueries({ queryKey: ['dietary'] })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
@@ -243,26 +283,38 @@ export function ProfilePage() {
         ))}
       </div>
 
+      {/* The same grid as sign-up, from the same file. A free-text field here
+          and a grid there meant the two screens could disagree about what an
+          allergen is called — and only one of the two spellings was ever
+          matched against a dish. */}
       <div className="card stack">
-        <label htmlFor="new-kind">{t('dietary.addEntry')}</label>
-        <select id="new-kind" value={kind} onChange={(e) => setKind(e.target.value as DietaryKind)}>
-          {KINDS.map((k) => (
-            <option key={k} value={k}>
-              {t(`dietary.kind.${k}`)}
-            </option>
-          ))}
-        </select>
         <div className="row">
-          <input
-            placeholder={t('dietary.label')}
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && onAdd()}
-          />
-          <button type="button" disabled={busy || !label.trim()} onClick={onAdd}>
-            {t('actions.add')}
+          <button
+            type="button"
+            className={set === 'allergy' ? '' : 'secondary'}
+            aria-pressed={set === 'allergy'}
+            onClick={() => setSet('allergy')}
+          >
+            {t('dietary.kind.ALLERGY_SEVERE')}
+          </button>
+          <button
+            type="button"
+            className={set === 'diet' ? '' : 'secondary'}
+            aria-pressed={set === 'diet'}
+            onClick={() => setSet('diet')}
+          >
+            {t('dietary.kind.DIET')}
           </button>
         </div>
+
+        <FoodTagGrid
+          tags={set === 'allergy' ? ALLERGENS : DIETS}
+          selected={chosenCodes}
+          onToggle={onToggleTag}
+          namespace={set === 'allergy' ? 'food.allergen' : 'food.diet'}
+          otherValues={typedLabels}
+          onOtherAdd={(value) => void onAddTyped(value)}
+        />
       </div>
 
       </Fold>

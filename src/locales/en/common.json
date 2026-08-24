@@ -68,7 +68,9 @@
       "free": "Free — it is yours.",
       "taken": "Already taken. Try another one.",
       "changeLater": "This is how everyone will know you. Changing it later is planned as part of Pro.",
-      "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
+      "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name.",
+      "pageTitle": "First name or nickname",
+      "pageHelp": "The last thing, and then your seat is real."
     },
     "passwordLabel": "Password"
   },

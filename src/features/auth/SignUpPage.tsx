@@ -50,6 +50,11 @@ export function SignUpPage() {
   const [allergyCodes, setAllergyCodes] = useState<string[]>([])
   const [dietCodes, setDietCodes] = useState<string[]>([])
   const [typedAllergies, setTypedAllergies] = useState<string[]>([])
+  // The name used to sit above the food questions and the two would not read
+  // as one page: one asks who you are, the other what you cannot eat. They are
+  // two pages now, food first, because the food is the part somebody came to
+  // answer and the name is the last thing before confirming.
+  const [profileStep, setProfileStep] = useState<'food' | 'name'>('food')
 
   // The name is an identity now (migration 0046), so the form asks before the
   // submit does. Advisory only: `stale` drops answers that arrive after the
@@ -125,6 +130,17 @@ export function SignUpPage() {
     setStep(data.session ? 'dietary' : 'confirm-email')
   }
 
+  // Answered by the Continue button and again at submit: the second is not
+  // paranoia, it is what stops a state change on the last page from letting an
+  // unanswered question through.
+  function validateFood(): string | null {
+    if (hasAllergies === null || hasDiet === null) return t('food.answerBoth')
+    // Saying yes and then choosing nothing is the one answer that means
+    // neither thing: it is not "no", and it records nothing a cook can use.
+    if ((hasAllergies || hasDiet) && buildEntries().length === 0) return t('food.pickOne')
+    return null
+  }
+
   function toggle(list: string[], set: (v: string[]) => void, code: string) {
     set(list.includes(code) ? list.filter((c) => c !== code) : [...list, code])
   }
@@ -152,19 +168,15 @@ export function SignUpPage() {
       return
     }
 
-    if (hasAllergies === null || hasDiet === null) {
-      setError(t('food.answerBoth'))
+    const foodProblem = validateFood()
+    if (foodProblem) {
+      setError(foodProblem)
+      setProfileStep('food')
       return
     }
 
     const dietaryEntries = buildEntries()
     const noneDeclared = dietaryEntries.length === 0
-    // Saying yes and then choosing nothing is the one answer that means
-    // neither thing: it is not "no", and it records nothing a cook can use.
-    if ((hasAllergies || hasDiet) && noneDeclared) {
-      setError(t('food.pickOne'))
-      return
-    }
 
     setSubmitting(true)
     try {
@@ -209,35 +221,12 @@ export function SignUpPage() {
     return (
       <div className="stack sheet">
         <LanguageSwitch />
-        <h1>{t('dietary.title')}</h1>
-        <p className="muted">{t('dietary.help')}</p>
+        <h1>{t(profileStep === 'food' ? 'dietary.title' : 'auth.name.pageTitle')}</h1>
+        <p className="muted">{t(profileStep === 'food' ? 'dietary.help' : 'auth.name.pageHelp')}</p>
         {error && <div className="error">{error}</div>}
         <form onSubmit={onDietarySubmit} className="stack">
-          <div>
-            <label htmlFor="displayName">{t('auth.displayName')}</label>
-            {/* The one place these two names can be confused, so it is said
-                here rather than discovered mid-dinner: this is the person,
-                the secret name is the player. */}
-            <p className="muted">{t('auth.name.whatItIs')}</p>
-            <input
-              id="displayName"
-              required
-              minLength={1}
-              maxLength={60}
-              value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className={nameState === 'free' ? 'is-free' : nameState === 'taken' ? 'is-taken' : ''}
-              aria-invalid={nameState === 'taken'}
-              aria-describedby="displayName-status"
-            />
-            {/* The border carries the answer, but never alone: colour is not
-                readable to everyone, and "taken" is the kind of thing a person
-                needs in words before they retype. */}
-            <p id="displayName-status" className={`field-status is-${nameState}`}>
-              {nameState !== 'idle' && t(`auth.name.${nameState}`)}
-            </p>
-            <p className="muted">{t('auth.name.changeLater')}</p>
-          </div>
+          {profileStep === 'food' ? (
+            <>
 
           {/* Two questions, in pictures. The form they replace asked somebody
               to type their own allergens: whatever spelling came to mind, in
@@ -319,9 +308,64 @@ export function SignUpPage() {
             )}
           </fieldset>
 
-          <button type="submit" disabled={submitting || nameState === 'taken'}>
-            {t('actions.submit')}
-          </button>
+              <button
+                type="button"
+                onClick={() => {
+                  const problem = validateFood()
+                  if (problem) {
+                    setError(problem)
+                    return
+                  }
+                  setError(null)
+                  setProfileStep('name')
+                }}
+              >
+                {t('actions.next')}
+              </button>
+            </>
+          ) : (
+            <>
+          <div>
+            <label htmlFor="displayName">{t('auth.displayName')}</label>
+            {/* The one place these two names can be confused, so it is said
+                here rather than discovered mid-dinner: this is the person,
+                the secret name is the player. */}
+            <p className="muted">{t('auth.name.whatItIs')}</p>
+            <input
+              id="displayName"
+              required
+              minLength={1}
+              maxLength={60}
+              value={displayName}
+              onChange={(e) => setDisplayName(e.target.value)}
+              className={nameState === 'free' ? 'is-free' : nameState === 'taken' ? 'is-taken' : ''}
+              aria-invalid={nameState === 'taken'}
+              aria-describedby="displayName-status"
+            />
+            {/* The border carries the answer, but never alone: colour is not
+                readable to everyone, and "taken" is the kind of thing a person
+                needs in words before they retype. */}
+            <p id="displayName-status" className={`field-status is-${nameState}`}>
+              {nameState !== 'idle' && t(`auth.name.${nameState}`)}
+            </p>
+            <p className="muted">{t('auth.name.changeLater')}</p>
+          </div>
+
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setError(null)
+                  setProfileStep('food')
+                }}
+              >
+                {t('actions.back')}
+              </button>
+              <button type="submit" disabled={submitting || nameState !== 'free'}>
+                {t('actions.submit')}
+              </button>
+            </>
+          )}
         </form>
       </div>
     )

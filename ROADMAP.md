@@ -501,11 +501,10 @@ that is true. Deleting first would prove it false.
 
 ## 8. Choosing what you cannot eat, in pictures
 
-**Built, 2026-08-24** — the sign-up flow, the manifest and the two grids are
-in. What remains from this section is the profile, which still adds entries
-through the old free-text field: it works, and what it writes is a typed label
-rather than a code, which the panel now marks as such. One component, two
-places, is finished when that field becomes the same grid.
+**Built, 2026-08-24** — all seven. The manifest, the two grids, the sign-up
+flow and the profile, which now uses the same component from the same file
+rather than a free-text field that could disagree with it about what an
+allergen is called.
 
 The shape is settled: at sign-up and in the profile, two yes/no questions, each
 opening a grid of large icons with the name underneath, tapped to select and
