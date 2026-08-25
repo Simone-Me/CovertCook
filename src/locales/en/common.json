@@ -397,7 +397,8 @@
       "noLongerIn": "You are no longer at this dinner. It stays in your past dinners, but there is nothing left to open."
     },
     "chefCount_one": "{{count}} chef",
-    "chefCount_other": "{{count}} chefs"
+    "chefCount_other": "{{count}} chefs",
+    "frozen": "This dinner is over. It stays here to be read — the recipes, the menu and the results — and nothing about it can be changed any more, by anybody."
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",

@@ -106,7 +106,10 @@ export function RoundSettingsPage() {
 
   if (isLoading || !round) return <p className="muted">…</p>
 
-  const isHost = round.host_id === profile?.id
+  // Same rule as the round page: over is over, and the forms below would each
+  // come back with the same refusal from the database.
+  const frozen = round.status === 'ARCHIVED' || round.status === 'CANCELLED'
+  const isHost = round.host_id === profile?.id && !frozen
   if (!isHost) {
     return <Navigate to={`/rounds/${roundId}`} replace />
   }

@@ -494,6 +494,14 @@ names, migration numbers, bugs found and fixed) see
   since `0046`: it is checked while you type at sign-up (free, taken) and
   held by a case-insensitive index, so an approval is never a choice between
   two identical strangers.
+- **A finished dinner is a record**: once a round is `ARCHIVED` or
+  `CANCELLED`, every table that belongs to it refuses writes — the name, the
+  date, the roster, the courses, the recipes, the board, the ballots. Enforced
+  by triggers rather than by a check in each RPC (`0054`): there are a dozen
+  write paths and the one that gets forgotten is the hole. The move *into*
+  archived is the last write a round accepts. The Executive Chef keeps the
+  title and loses the powers, and the interface says so rather than offering
+  controls that would only produce a refusal.
 - **Leaving a dinner**: while the door is still open you simply go, and the
   round moves to your archive. Once the lottery has run, three other people's
   evening is built on your pairing, so leaving becomes a request the Executive

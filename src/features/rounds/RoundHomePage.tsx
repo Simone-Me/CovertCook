@@ -198,7 +198,13 @@ export function RoundHomePage() {
 
   if (roundLoading || !round) return <p className="muted">…</p>
 
-  const isHost = round.host_id === profile?.id
+  // A dinner that has been archived or cancelled is a record (0054): the
+  // database refuses every write to it, so the host's controls would only lead
+  // to an error. Folding that into isHost turns the whole page read-only in
+  // one line — the Executive Chef keeps the title and loses the powers, which
+  // is what being over means.
+  const frozen = round.status === 'ARCHIVED' || round.status === 'CANCELLED'
+  const isHost = round.host_id === profile?.id && !frozen
 
 
   // Your own seat in this round, which the roster query already knows about.
@@ -513,6 +519,10 @@ export function RoundHomePage() {
         <div className="paper">
           <RoundProgress round={round} isHost={isHost} />
         </div>
+
+        {/* Said once, so the missing controls read as a rule rather than as
+            something broken. */}
+        {frozen && <p className="notice">{t('rounds.frozen')}</p>}
 
         {error && <div className="error">{error}</div>}
 

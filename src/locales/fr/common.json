@@ -397,7 +397,8 @@
       "noLongerIn": "Vous n’êtes plus à ce dîner. Il reste dans vos archives, mais il n’y a plus rien à ouvrir."
     },
     "chefCount_one": "{{count}} chef",
-    "chefCount_other": "{{count}} chefs"
+    "chefCount_other": "{{count}} chefs",
+    "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne."
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
