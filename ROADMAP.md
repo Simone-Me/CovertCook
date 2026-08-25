@@ -419,3 +419,165 @@ volume business — they start making sense in the hundreds of thousands of
 views a month, which is a different application with a different audience. If
 this ever wants money, §2's per-dinner unlock is better per person, cheaper to
 build, and does not put a stranger's script next to somebody's allergies.
+
+---
+
+## 7. What comes next, in the order it should be built
+
+Written as steps rather than as a list of wants, because three of the things
+below depend on the one above them and doing them in the wrong order means
+building something twice.
+
+### Step 1 — the results screen becomes a menu
+
+No schema, no new data: the results already know the dish, the course and the
+score. What changes is that they stop being a leaderboard and become **a menu
+card**, courses as sections — starters, mains, desserts, drinks — with the
+score printed where a price would be. A round in FREE mode has no courses, so
+it is one carte générale instead. Nothing else in the app is a better fit for
+the tablecloth than a menu, and it is the screen the evening ends on.
+
+Doing this first is not aesthetics: **step 2 hangs its save button off this
+screen**, so its layout has to exist before the button has anywhere to live.
+
+### Step 2 — the recipe book
+
+§5 has the design. Sequence inside it:
+
+1. The table and the RESULTS-gated RPC that opens a round's recipes to its
+   members.
+2. The save flow on the menu: a switch that arms saving, the dish names
+   inviting a tap, a wine ring marking each chosen one, one confirm that saves
+   the lot, and a line saying where they went.
+3. The book itself in the profile: one card per recipe, filters in the
+   browser, delete with a warning that says the truth.
+4. Export — the book, and everything, the second being what Article 20 asks
+   for anyway.
+
+### Step 3 — the host's alert centre
+
+`host_alerts` already exists with the right kinds (`CANNOT_COOK`, `NO_BRIEF`,
+`DROPOUT`, `REPORTED_MESSAGE`) and a page to read them. What is missing is
+that nothing tells the host they are there, and that a reported message has no
+answer beyond reading it.
+
+**The design decision inside this one**, and it is the interesting one:
+**moderate by pseudonym, not by name.** The host should see the message before
+they see who wrote it — knowing the author first is how a host's opinion of a
+person decides whether a message was inappropriate. And they do not need the
+name to act: a warning is delivered to a seat, a removal removes a seat.
+Identity is only needed to reach somebody outside the game, which is a
+different and much rarer act — a deliberate reveal, logged in `audit_log`,
+never a side effect of opening an alert.
+
+This is also the work that satisfies the store requirement in
+`DISTRIBUTION.md` §1: report, block, and a published moderation policy are
+mandatory the day free-text chat ships, and this is where they live.
+
+### Step 4 — the album, and only then any deletion
+
+A photo of the table at the end, one per dinner, becoming an album of every
+evening. Attractive, and the one feature here that changes the arithmetic in
+§2 of nothing and §3 of everything: **text is free, photographs are not.**
+
+Three things it drags in, none of them optional:
+
+- **Storage, not the database.** A Supabase bucket with its own policies. The
+  free tier is 1 GB; at ~200 KB a photo that is a few thousand dinners, which
+  is further away than it sounds but not infinite.
+- **EXIF.** A phone photograph carries GPS coordinates. Uploading one
+  unstripped publishes the address of somebody's flat to everybody at the
+  table. Strip it in the browser, before upload, always.
+- **It is user-generated content.** A photograph is the kind of UGC the stores
+  write their rules for; report and remove have to exist for it too, which is
+  another reason step 3 comes first.
+
+**And only after the album is real can old dinners be deleted.** The argument
+for deletion is that a recipe worth keeping is in somebody's book and a dinner
+worth remembering is in the album — both have to exist and be *used* before
+that is true. Deleting first would prove it false.
+
+---
+
+## 8. Choosing what you cannot eat, in pictures
+
+**Built, 2026-08-24** — all seven. The manifest, the two grids, the sign-up
+flow and the profile, which now uses the same component from the same file
+rather than a free-text field that could disagree with it about what an
+allergen is called.
+
+The shape is settled: at sign-up and in the profile, two yes/no questions, each
+opening a grid of large icons with the name underneath, tapped to select and
+marked when chosen. Nothing below argues with that. These are the seven things
+it does not yet say, and each of them changes what gets built.
+
+### 1. The grid must write codes, not words
+
+This is the one that matters most, and it is invisible until it breaks.
+`README.md` records the current simplification: allergy matching is
+**exact-string**. So a French player writing *céleri* and an English one
+writing *celery* are two different allergens today, and a dish declared safe
+for one is not checked against the other.
+
+A grid fixes this for free **if each tile writes a stable code** — `CELERY`,
+`GLUTEN`, `PEANUT` — with the translated word shown to the reader and never
+stored. Store the visible label instead and the grid becomes a prettier way of
+producing the same bug in two languages.
+
+### 2. Severity: decided — there is only one
+
+Raised as a gap, answered by choosing deliberately not to have it. **Every
+allergy the grid records is `ALLERGY_SEVERE`.** Better to plan a dinner around
+somebody who turns out to have been mildly allergic than to under-read the one
+that mattered, and a two-way switch invites exactly that under-reading: nobody
+wants to be the person marking themselves *severe*, so a mild default would be
+chosen by people it is wrong for.
+
+`ALLERGY_MILD` stays in the enum. Rows already carry it, and removing an enum
+value that live data references is not a migration, it is an outage — the same
+reason `BRIEFS_CLOSED` survived `0035`.
+
+One consequence, stated rather than discovered: with everything severe, the
+panel stops distinguishing weights and shows every allergy at full strength.
+That is the intended reading and not a bug to fix later.
+
+### 3. Question two asks about diets — decided
+
+Not "preferences": a **diet**. The word matters because the two facts behave
+differently — a diet constrains what a cook may put on the plate, a dislike
+only colours it — and the vaguer word invited both into one answer.
+
+Which leaves `DISLIKE` unasked at sign-up, and that is fine: the profile can
+grow it later, for people who care enough to go looking. What must not happen
+is a dislike arriving through the diet question and being read by a cook as a
+rule.
+
+### 4. "Other" is a tile — decided
+
+Fourteen allergens is the legal list, not the human one; kiwi, nickel and
+histamine exist. The last tile in each grid opens a text field, and what it
+writes is a free-text label exactly as `dietary_entries` holds today.
+
+The one rule that comes with it: a typed label cannot be matched against a
+dish's `contains_tags`, because those are codes. So a typed allergy is shown to
+the cook in words and never silently checked — the panel has to say which of
+the two it is, or somebody will trust a check that never ran.
+
+### 5. No is an answer, not a skip
+
+Both "no"s together are `has_no_restrictions = true`, which `complete_signup`
+already requires as the alternative to at least one entry. The two questions
+map onto it exactly — but the flag has to be written by answering, never by
+walking past the screen.
+
+### 6. Selected cannot be a colour
+
+A chosen tile needs a ring **and** a mark, not a tint: one in twelve men reads
+red-green poorly, and this is the screen where being wrong about what you
+selected has consequences.
+
+### 7. One component, two places
+
+Sign-up and the profile must render the same grid from the same file. Two
+copies drift, and the day they drift is the day somebody's profile says
+something their sign-up did not.

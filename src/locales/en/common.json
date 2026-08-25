@@ -67,14 +67,15 @@
       "checking": "Checking…",
       "free": "Free — it is yours.",
       "taken": "Already taken. Try another one.",
-      "changeLater": "This is how everyone will know you. Changing it later is planned as part of Pro.",
+      "changeLater": "Changing it later is planned as part of Pro.",
       "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
     },
-    "passwordLabel": "Password"
+    "passwordLabel": "Password",
+    "step": "Step {{n}} of {{total}}"
   },
   "dietary": {
     "title": "Your dietary restrictions",
-    "help": "What you can't eat — never a diagnosis, just what's needed to cook for you.",
+    "help": "Declaring an allergy, a diet or a food restriction lets everybody at the table know, and lets the dishes be planned around it. Your health matters to us, so you can share the evening like everybody else.",
     "noRestrictions": "I have no dietary restrictions",
     "addEntry": "Add a restriction",
     "kind": {
@@ -88,7 +89,8 @@
     "required": "Tick \"no restrictions\" or add at least one entry.",
     "panelTitle": "Dinner's dietary panel",
     "panelEmpty": "Nobody has flagged a restriction for this dinner.",
-    "gridAlt": "Placeholder — allergen icons coming soon"
+    "gridAlt": "Placeholder — allergen icons coming soon",
+    "whoSeesIt": "What you declare is shown to everybody at the dinner, and again to the person writing your recipe, as a reminder while they write it. If something is wrong or you would rather it were not there, the contact address is in the footer."
   },
   "rounds": {
     "myRounds": "My rounds",
@@ -391,8 +393,12 @@
     "left": {
       "done": "You have left {{name}}. It is in your past dinners now, and there is nothing left to open.",
       "LEFT": "You left",
-      "REMOVED": "Removed"
-    }
+      "REMOVED": "Removed",
+      "noLongerIn": "You are no longer at this dinner. It stays in your past dinners, but there is nothing left to open."
+    },
+    "chefCount_one": "{{count}} chef",
+    "chefCount_other": "{{count}} chefs",
+    "frozen": "This dinner is over. It stays here to be read — the recipes, the menu and the results — and nothing about it can be changed any more, by anybody."
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",
@@ -595,7 +601,11 @@
     "locale": {
       "en": "English",
       "fr": "Français"
-    }
+    },
+    "noneAllergy": "— no allergy declared",
+    "noneDiet": "— no diet declared",
+    "editAllergies": "Allergies",
+    "editDiets": "Diets"
   },
   "board": {
     "pageTitle": "Messages",
@@ -792,13 +802,62 @@
   },
   "welcome": {
     "title": "Welcome to CovertCook",
-    "lead": "The app for organising a dinner with your friends and cooking it together — except nobody chooses their own dish.",
+    "lead": "The app for organising a dinner among friends — except nobody chooses their own dish. Ready to take it on?",
+    "howTitle": "How does it work?",
     "how": [
-      "Somebody sets up a dinner and invites the table.",
-      "Each person is secretly given another person to cook for, and writes them a recipe.",
-      "Nobody knows who wrote theirs. Everyone cooks what they were given and brings it.",
-      "You eat, you rank the dishes, and only then does everyone find out who chose what."
+      "Somebody creates a dinner and invites the table.",
+      "You write a recipe for another guest — and somebody writes yours, without either of you knowing who.",
+      "Everyone cooks what they were given and brings it along.",
+      "You eat, you rank the dishes by what you liked, and only then does everyone find out who chose what."
     ],
-    "next": "Start by creating a dinner, or join one with a code somebody sent you. A guided example dinner is coming here soon."
+    "whyTitle": "Why does this exist?",
+    "why": [
+      "I made this app for my friends. We like eating together — sharing a good evening, passing recipes and tricks around. We wanted to meet up around a game and show each other the dishes we love — and what better way to learn a recipe than to cook it yourself?",
+      "Whether you love cooking or you eat the same three ready meals every week, I hope you enjoy making the recipe somebody wanted to share with you."
+    ],
+    "start": "Start by creating a dinner, or join one with a code somebody sent you.",
+    "next": "A guided example dinner is coming here soon.",
+    "readAgain": "How CovertCook works"
+  },
+  "food": {
+    "allergyQuestion": "Are you allergic to any food?",
+    "dietQuestion": "Do you follow a particular diet?",
+    "yes": "Yes",
+    "no": "No",
+    "pickOne": "Pick at least one, or answer no.",
+    "answerBoth": "Answer both questions before continuing.",
+    "typedNotChecked": "Written by hand, so a cook reads it — but it is not matched automatically against a dish.",
+    "allergen": {
+      "GLUTEN": "Gluten",
+      "CRUSTACEANS": "Crustaceans",
+      "EGG": "Egg",
+      "FISH": "Fish",
+      "PEANUTS": "Peanuts",
+      "SOY": "Soy",
+      "MILK": "Milk",
+      "NUTS": "Tree nuts",
+      "CELERY": "Celery",
+      "MUSTARD": "Mustard",
+      "SESAME": "Sesame",
+      "SULPHITES": "Sulphites",
+      "LUPIN": "Lupin",
+      "MOLLUSCS": "Molluscs",
+      "OTHER": "Something else",
+      "otherPlaceholder": "Name it — kiwi, nickel, anything"
+    },
+    "diet": {
+      "VEGETARIAN": "Vegetarian",
+      "VEGAN": "Vegan",
+      "PESCATARIAN": "Pescatarian",
+      "NO_MEAT": "No meat",
+      "NO_BEEF": "No beef",
+      "NO_DAIRY": "No dairy",
+      "HALAL": "Halal",
+      "KOSHER": "Kosher",
+      "NO_ALCOHOL": "No alcohol",
+      "NO_SMOKING": "No smoking",
+      "OTHER": "Something else",
+      "otherPlaceholder": "Name it"
+    }
   }
 }

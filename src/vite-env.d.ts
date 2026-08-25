@@ -10,3 +10,6 @@ interface ImportMetaEnv {
 interface ImportMeta {
   readonly env: ImportMetaEnv
 }
+
+/** Injected by vite.config.ts: "v0.1.0 · a1b2c3d". */
+declare const __APP_VERSION__: string

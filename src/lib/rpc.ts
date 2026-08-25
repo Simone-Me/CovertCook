@@ -126,6 +126,20 @@ export async function cancelAccountDeletion() {
   return unwrap(res)
 }
 
+// Who is actually at this table, by name, for the host alone (0053).
+// Deliberately carries no pseudonym: excluding a pair is a statement about two
+// people, and pairing that list with the roster's would hand the host the
+// mapping the round is keeping from them.
+export interface RoundPerson {
+  member_id: string
+  display_name: string
+}
+
+export async function listRoundPeople(roundId: string): Promise<RoundPerson[]> {
+  const res = await supabase.rpc('list_round_people', { p_round_id: roundId })
+  return unwrap<RoundPerson[]>(res)
+}
+
 // Web push subscriptions. Writes go through RPCs rather than a table policy
 // because the endpoint is a claim about a browser, and an insert policy would
 // let a client claim somebody else's (0047).

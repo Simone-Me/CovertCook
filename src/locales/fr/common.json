@@ -67,14 +67,15 @@
       "checking": "Vérification…",
       "free": "Libre — il est à vous.",
       "taken": "Déjà pris. Essayez-en un autre.",
-      "changeLater": "C'est ainsi que tout le monde vous connaîtra. Le changer plus tard est prévu dans la version Pro.",
+      "changeLater": "Le changer plus tard est prévu dans la version Pro.",
       "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
     },
-    "passwordLabel": "Mot de passe"
+    "passwordLabel": "Mot de passe",
+    "step": "Étape {{n}} sur {{total}}"
   },
   "dietary": {
     "title": "Vos restrictions alimentaires",
-    "help": "Ce que vous ne pouvez pas manger — jamais un diagnostic, juste ce qu'il faut savoir pour cuisiner pour vous.",
+    "help": "Déclarer une allergie, un régime ou une contrainte alimentaire permet d’informer tous les convives et d’adapter les plats en conséquence. Votre santé compte pour nous, pour que vous puissiez partager ce moment comme tout le monde.",
     "noRestrictions": "Je n'ai aucune restriction alimentaire",
     "addEntry": "Ajouter une restriction",
     "kind": {
@@ -88,7 +89,8 @@
     "required": "Cochez « aucune restriction » ou ajoutez au moins une entrée.",
     "panelTitle": "Panneau diététique du dîner",
     "panelEmpty": "Personne n'a signalé de restriction pour ce dîner.",
-    "gridAlt": "Espace réservé — icônes d'allergènes à venir"
+    "gridAlt": "Espace réservé — icônes d'allergènes à venir",
+    "whoSeesIt": "Ce que vous déclarez est visible par tous les convives, et rappelé à la personne qui écrit votre recette pendant qu’elle l’écrit. Si quelque chose est faux ou que vous préférez le retirer, l’adresse de contact est en pied de page."
   },
   "rounds": {
     "myRounds": "Mes dîners",
@@ -391,8 +393,12 @@
     "left": {
       "done": "Vous avez quitté {{name}}. Ce dîner est passé dans vos archives, et il n’y a plus rien à ouvrir.",
       "LEFT": "Vous êtes parti",
-      "REMOVED": "Retiré"
-    }
+      "REMOVED": "Retiré",
+      "noLongerIn": "Vous n’êtes plus à ce dîner. Il reste dans vos archives, mais il n’y a plus rien à ouvrir."
+    },
+    "chefCount_one": "{{count}} chef",
+    "chefCount_other": "{{count}} chefs",
+    "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne."
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
@@ -595,7 +601,11 @@
     "locale": {
       "en": "English",
       "fr": "Français"
-    }
+    },
+    "noneAllergy": "— aucune allergie déclarée",
+    "noneDiet": "— aucun régime déclaré",
+    "editAllergies": "Allergies",
+    "editDiets": "Régimes"
   },
   "board": {
     "pageTitle": "Messages",
@@ -792,13 +802,62 @@
   },
   "welcome": {
     "title": "Bienvenue dans CovertCook",
-    "lead": "L’application pour organiser un dîner entre amis et le cuisiner ensemble — sauf que personne ne choisit son propre plat.",
+    "lead": "L’application pour organiser un dîner entre amis — sauf que personne ne choisit son propre plat. Prêt à relever le défi ?",
+    "howTitle": "Comment ça marche ?",
     "how": [
       "Quelqu’un crée un dîner et invite la table.",
-      "Chacun se voit attribuer en secret une autre personne pour qui cuisiner, et lui écrit une recette.",
-      "Personne ne sait qui a écrit la sienne. Chacun cuisine ce qu’on lui a donné et l’apporte.",
-      "On mange, on classe les plats, et c’est seulement là qu’on découvre qui a choisi quoi."
+      "Vous écrivez une recette pour un autre convive — et quelqu’un écrit la vôtre, sans que ni l’un ni l’autre ne sache qui.",
+      "Chacun cuisine ce qu’on lui a donné et l’apporte.",
+      "On mange, on classe les plats selon nos goûts, et c’est seulement là qu’on découvre qui a choisi quoi."
     ],
-    "next": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé. Un dîner d’exemple guidé arrivera bientôt ici."
+    "whyTitle": "Pourquoi ça existe ?",
+    "why": [
+      "J’ai créé cette application pour mes amis. On aime les repas en famille : partager un bon moment, se passer des recettes et des astuces. On voulait se retrouver autour d’un jeu et faire découvrir aux autres nos plats préférés — et quelle meilleure façon d’apprendre une recette que de la faire soi-même ?",
+      "Que vous aimiez cuisiner ou que vous mangiez toujours les trois mêmes plats tout prêts, j’espère que vous prendrez plaisir à préparer la recette que quelqu’un a eu envie de partager avec vous."
+    ],
+    "start": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé.",
+    "next": "Un dîner d’exemple guidé arrivera bientôt ici.",
+    "readAgain": "Comment fonctionne CovertCook"
+  },
+  "food": {
+    "allergyQuestion": "Êtes-vous allergique à un aliment ?",
+    "dietQuestion": "Suivez-vous un régime particulier ?",
+    "yes": "Oui",
+    "no": "Non",
+    "pickOne": "Choisissez-en au moins un, ou répondez non.",
+    "answerBoth": "Répondez aux deux questions avant de continuer.",
+    "typedNotChecked": "Écrit à la main : le cuisinier le lit, mais ce n’est pas vérifié automatiquement contre un plat.",
+    "allergen": {
+      "GLUTEN": "Gluten",
+      "CRUSTACEANS": "Crustacés",
+      "EGG": "Œuf",
+      "FISH": "Poisson",
+      "PEANUTS": "Arachides",
+      "SOY": "Soja",
+      "MILK": "Lait",
+      "NUTS": "Fruits à coque",
+      "CELERY": "Céleri",
+      "MUSTARD": "Moutarde",
+      "SESAME": "Sésame",
+      "SULPHITES": "Sulfites",
+      "LUPIN": "Lupin",
+      "MOLLUSCS": "Mollusques",
+      "OTHER": "Autre chose",
+      "otherPlaceholder": "Précisez — kiwi, nickel, autre"
+    },
+    "diet": {
+      "VEGETARIAN": "Végétarien",
+      "VEGAN": "Végan",
+      "PESCATARIAN": "Pescétarien",
+      "NO_MEAT": "Sans viande",
+      "NO_BEEF": "Sans bœuf",
+      "NO_DAIRY": "Sans produits laitiers",
+      "HALAL": "Halal",
+      "KOSHER": "Casher",
+      "NO_ALCOHOL": "Sans alcool",
+      "NO_SMOKING": "Sans tabac",
+      "OTHER": "Autre chose",
+      "otherPlaceholder": "Précisez"
+    }
   }
 }

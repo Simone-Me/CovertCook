@@ -1698,15 +1698,9 @@
   font-size: 13px;
 }
 
-.pass__help > span:first-child {
-  display: inline-grid;
-  place-items: center;
-  width: 18px;
-  height: 18px;
-  border-radius: 50%;
-  border: 1px solid currentColor;
-  font-size: 12px;
-  line-height: 1;
+/* The icon carries its own shape, so the ring the text glyph needed is gone. */
+.pass__help {
+  padding: 4px 12px 4px 6px;
 }
 
 /* "Editable in the settings" under the venue block: a sentence, not a link

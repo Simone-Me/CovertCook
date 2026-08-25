@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { supabase } from '../../lib/supabase'
 import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
@@ -64,7 +65,7 @@ export function RoundHomePage() {
   const queryClient = useQueryClient()
 
   const { data: round, isLoading: roundLoading } = useRound(roundId)
-  const { data: members } = useRoundMembers(roundId)
+  const { data: members, error: membersError } = useRoundMembers(roundId)
   const [error, setError] = useState<string | null>(null)
   const [passHelp, setPassHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
@@ -158,9 +159,54 @@ export function RoundHomePage() {
     refetchInterval: 30000,
   })
 
+  // The Executive Chef is the one person at this table who is not anonymous:
+  // PRESENTATION.md has them standing apart from the pseudonyms, the roster
+  // already marks which seat is theirs, and organising is a public act. So the
+  // roster names them — and names nobody else.
+  const { data: hostName } = useQuery({
+    queryKey: ['profiles', round?.host_id],
+    enabled: !!round?.host_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', round?.host_id as string)
+        .maybeSingle()
+      return (data?.display_name as string | undefined) ?? null
+    },
+  })
+
+  // 0051 made the round row readable to somebody who left it, so that it could
+  // sit in their archive — which also made this page reachable by URL, by the
+  // back button, or by a link somebody still had open. Everything inside
+  // refuses a former member, so the roster call comes back 42501 and the page
+  // used to render around a hole. It says what happened instead.
+  const notAMember =
+    membersError instanceof Error && /not a member of this round/i.test(membersError.message)
+
+  if (notAMember) {
+    return (
+      <div className="stack sheet">
+        <h1>{round?.name ?? t('rounds.myRounds')}</h1>
+        <p className="muted">{t('rounds.left.noLongerIn')}</p>
+        <Link to="/">
+          <button type="button">{t('rounds.myRounds')}</button>
+        </Link>
+      </div>
+    )
+  }
+
   if (roundLoading || !round) return <p className="muted">…</p>
 
-  const isHost = round.host_id === profile?.id
+  // A dinner that has been archived or cancelled is a record (0054): the
+  // database refuses every write to it, so the host's controls would only lead
+  // to an error. Folding that into isHost turns the whole page read-only in
+  // one line — the Executive Chef keeps the title and loses the powers, which
+  // is what being over means.
+  const frozen = round.status === 'ARCHIVED' || round.status === 'CANCELLED'
+  const isHost = round.host_id === profile?.id && !frozen
+
+
   // Your own seat in this round, which the roster query already knows about.
   const myMembership = members?.find((m) => m.profile_id === profile?.id)
   const leaveIsFree = ['DRAFT', 'OPEN', 'LOCKED'].includes(round.status)
@@ -207,6 +253,10 @@ export function RoundHomePage() {
   const shareLink = `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE') ?? []
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
+
+  const rosterMeta = hostName
+    ? `${t('rounds.chefCount', { count: activeApprovedCount })} — ${t('rounds.executiveChef')} : ${hostName}`
+    : t('rounds.chefCount', { count: activeApprovedCount })
   const pendingCount = pendingMembers?.length ?? 0
 
   // While the door is open the server sends no names but your own (0032), so
@@ -470,6 +520,10 @@ export function RoundHomePage() {
           <RoundProgress round={round} isHost={isHost} />
         </div>
 
+        {/* Said once, so the missing controls read as a rule rather than as
+            something broken. */}
+        {frozen && <p className="notice">{t('rounds.frozen')}</p>}
+
         {error && <div className="error">{error}</div>}
 
         {/* Everyone's clock, not the host's. A deadline only the Executive
@@ -590,10 +644,7 @@ export function RoundHomePage() {
                 aria-expanded={passHelp}
                 onClick={() => setPassHelp((v) => !v)}
               >
-                {/* Swap for <Icon name="help" /> once public/loupe_question.webp
-                    is committed — the file is not in the repo yet, and a
-                    missing image is worse than a glyph. */}
-                <span aria-hidden="true">?</span>
+                <Icon name="help" size={18} />
                 <span>{t('rounds.pass.whatIsItToggle')}</span>
               </button>
               {passHelp && (
@@ -812,7 +863,7 @@ export function RoundHomePage() {
         <Envelope
           icon={<Icon name="chefs" />}
           name={t('rounds.drawers.chefs')}
-          meta={t('rounds.seatCount', { count: activeApprovedCount })}
+          meta={rosterMeta}
           badge={isHost && pendingCount > 0 ? pendingCount : undefined}
           tilt={1}
           onOpen={() => toggle('chefs')}
@@ -990,10 +1041,15 @@ export function RoundHomePage() {
           <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
         )}
 
+        {/* The count on the flap, and nothing at all when it is zero: a badge
+            reading 0 is a thing to check, and there is nothing to check. It is
+            the one envelope where knowing there is something inside changes
+            whether you open it before you start cooking. */}
         <Envelope
           icon={<Icon name="allergies" />}
           name={t('rounds.drawers.allergies')}
           meta={t('dietary.panelTitle')}
+          badge={dietaryPanel && dietaryPanel.length > 0 ? dietaryPanel.length : undefined}
           tilt={2}
           onOpen={() => toggle('allergies')}
         >

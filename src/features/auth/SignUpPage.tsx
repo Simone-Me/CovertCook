@@ -5,6 +5,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ConfirmEmailNotice } from './ConfirmEmailNotice'
 import { Turnstile } from '../../components/Turnstile'
+import { FoodTagGrid } from '../../components/FoodTagGrid'
+import { ALLERGENS, DIETS, OTHER_CODE } from '../../lib/foodTags'
 import { PasswordField } from '../../components/PasswordField'
 import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/password'
 import { useAuth } from '../../lib/auth'
@@ -15,13 +17,28 @@ import {
   type DietaryKind,
 } from '../../lib/rpc'
 
-const DIETARY_KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
-
 // Long enough that a normal typist isn't asking the server about every
 // keystroke, short enough that the answer feels like part of typing.
 const NAME_CHECK_DEBOUNCE_MS = 400
 
 type NameState = 'idle' | 'checking' | 'free' | 'taken'
+
+/**
+ * Where you are in signing up. Three forms, and the mail confirmation between
+ * the first and the second is not one of them — it is a wait, and numbering a
+ * wait would tell somebody they have four things to do when they have three.
+ */
+function Steps({ n }: { n: number }) {
+  const { t } = useTranslation()
+  return (
+    <div className="steps" aria-label={t('auth.step', { n, total: 3 })}>
+      <div className="steps__bar">
+        <span className="steps__fill" style={{ width: `${(n / 3) * 100}%` }} />
+      </div>
+      <span className="steps__text">{t('auth.step', { n, total: 3 })}</span>
+    </div>
+  )
+}
 
 export function SignUpPage() {
   const { t, i18n } = useTranslation()
@@ -42,8 +59,19 @@ export function SignUpPage() {
   const [nameState, setNameState] = useState<NameState>('idle')
   const [acceptedTerms, setAcceptedTerms] = useState(false)
   const [acceptedAllergies, setAcceptedAllergies] = useState(false)
-  const [hasNoRestrictions, setHasNoRestrictions] = useState(false)
-  const [entries, setEntries] = useState<DietaryEntryInput[]>([])
+  // Two questions, each answered before its grid appears. Null is "not asked
+  // yet" and is why the submit can insist on an answer: walking past the
+  // screen must not be the same as saying no.
+  const [hasAllergies, setHasAllergies] = useState<boolean | null>(null)
+  const [hasDiet, setHasDiet] = useState<boolean | null>(null)
+  const [allergyCodes, setAllergyCodes] = useState<string[]>([])
+  const [dietCodes, setDietCodes] = useState<string[]>([])
+  const [typedAllergies, setTypedAllergies] = useState<string[]>([])
+  // The name used to sit above the food questions and the two would not read
+  // as one page: one asks who you are, the other what you cannot eat. They are
+  // two pages now, food first, because the food is the part somebody came to
+  // answer and the name is the last thing before confirming.
+  const [profileStep, setProfileStep] = useState<'food' | 'name'>('food')
 
   // The name is an identity now (migration 0046), so the form asks before the
   // submit does. Advisory only: `stale` drops answers that arrive after the
@@ -119,16 +147,33 @@ export function SignUpPage() {
     setStep(data.session ? 'dietary' : 'confirm-email')
   }
 
-  function addEntry() {
-    setEntries((prev) => [...prev, { kind: 'DIET', label: '' }])
+  // Answered by the Continue button and again at submit: the second is not
+  // paranoia, it is what stops a state change on the last page from letting an
+  // unanswered question through.
+  function validateFood(): string | null {
+    if (hasAllergies === null || hasDiet === null) return t('food.answerBoth')
+    // Saying yes and then choosing nothing is the one answer that means
+    // neither thing: it is not "no", and it records nothing a cook can use.
+    if ((hasAllergies || hasDiet) && buildEntries().length === 0) return t('food.pickOne')
+    return null
   }
 
-  function updateEntry(index: number, patch: Partial<DietaryEntryInput>) {
-    setEntries((prev) => prev.map((it, i) => (i === index ? { ...it, ...patch } : it)))
+  function toggle(list: string[], set: (v: string[]) => void, code: string) {
+    set(list.includes(code) ? list.filter((c) => c !== code) : [...list, code])
   }
 
-  function removeEntry(index: number) {
-    setEntries((prev) => prev.filter((_, i) => i !== index))
+  // Every allergen the grid records is severe (ROADMAP §8): a two-way switch
+  // invites the under-reading it is supposed to capture, because nobody wants
+  // to be the person marking themselves serious.
+  function buildEntries(): DietaryEntryInput[] {
+    const allergens = allergyCodes
+      .filter((c) => c !== OTHER_CODE)
+      .map((code) => ({ kind: 'ALLERGY_SEVERE' as DietaryKind, label: code }))
+    const typed = typedAllergies.map((label) => ({ kind: 'ALLERGY_SEVERE' as DietaryKind, label }))
+    const diets = dietCodes
+      .filter((c) => c !== OTHER_CODE)
+      .map((code) => ({ kind: 'DIET' as DietaryKind, label: code }))
+    return [...allergens, ...typed, ...diets]
   }
 
   async function onDietarySubmit(e: React.FormEvent) {
@@ -140,18 +185,23 @@ export function SignUpPage() {
       return
     }
 
-    if (!hasNoRestrictions && entries.filter((it) => it.label.trim()).length === 0) {
-      setError(t('dietary.required'))
+    const foodProblem = validateFood()
+    if (foodProblem) {
+      setError(foodProblem)
+      setProfileStep('food')
       return
     }
+
+    const dietaryEntries = buildEntries()
+    const noneDeclared = dietaryEntries.length === 0
 
     setSubmitting(true)
     try {
       await completeSignup({
         displayName,
         locale: i18n.language.startsWith('en') ? 'en' : 'fr',
-        hasNoRestrictions,
-        dietaryEntries: entries.filter((it) => it.label.trim()),
+        hasNoRestrictions: noneDeclared,
+        dietaryEntries,
       })
       await refreshProfile()
       navigate('/', { replace: true })
@@ -188,10 +238,114 @@ export function SignUpPage() {
     return (
       <div className="stack sheet">
         <LanguageSwitch />
+        <Steps n={profileStep === 'food' ? 2 : 3} />
         <h1>{t('dietary.title')}</h1>
-        <p className="muted">{t('dietary.help')}</p>
+        {/* One sentence where three used to be — a page lead, a line over the
+            allergy question and another over the diet one, all saying a
+            version of the same thing. It also stops implying a private dinner
+            party: this is friends cooking for each other. */}
+        {profileStep === 'food' && <p className="muted">{t('dietary.help')}</p>}
         {error && <div className="error">{error}</div>}
         <form onSubmit={onDietarySubmit} className="stack">
+          {profileStep === 'food' ? (
+            <>
+
+          {/* Two questions, in pictures. The form they replace asked somebody
+              to type their own allergens: whatever spelling came to mind, in
+              whichever language, and it left them to remember that celery is
+              an allergen at all. A grid says so for them — and stores a code,
+              so celery and celeri stop being two different allergens. */}
+          <fieldset className="ask">
+            <legend>{t('food.allergyQuestion')}</legend>
+            <div className="row">
+              <button
+                type="button"
+                className={hasAllergies === true ? '' : 'secondary'}
+                aria-pressed={hasAllergies === true}
+                onClick={() => setHasAllergies(true)}
+              >
+                {t('food.yes')}
+              </button>
+              <button
+                type="button"
+                className={hasAllergies === false ? '' : 'secondary'}
+                aria-pressed={hasAllergies === false}
+                onClick={() => {
+                  setHasAllergies(false)
+                  setAllergyCodes([])
+                  setTypedAllergies([])
+                }}
+              >
+                {t('food.no')}
+              </button>
+            </div>
+            {hasAllergies && (
+              <FoodTagGrid
+                tags={ALLERGENS}
+                selected={allergyCodes}
+                onToggle={(code) => toggle(allergyCodes, setAllergyCodes, code)}
+                namespace="food.allergen"
+                otherValues={typedAllergies}
+                onOtherAdd={(v) => setTypedAllergies((prev) => [...prev, v])}
+                onOtherRemove={(v) => setTypedAllergies((prev) => prev.filter((x) => x !== v))}
+              />
+            )}
+            {typedAllergies.length > 0 && (
+              <p className="muted">{t('food.typedNotChecked')}</p>
+            )}
+            {hasAllergies && <p className="muted">{t('dietary.whoSeesIt')}</p>}
+          </fieldset>
+
+          <fieldset className="ask">
+            <legend>{t('food.dietQuestion')}</legend>
+            <div className="row">
+              <button
+                type="button"
+                className={hasDiet === true ? '' : 'secondary'}
+                aria-pressed={hasDiet === true}
+                onClick={() => setHasDiet(true)}
+              >
+                {t('food.yes')}
+              </button>
+              <button
+                type="button"
+                className={hasDiet === false ? '' : 'secondary'}
+                aria-pressed={hasDiet === false}
+                onClick={() => {
+                  setHasDiet(false)
+                  setDietCodes([])
+                }}
+              >
+                {t('food.no')}
+              </button>
+            </div>
+            {hasDiet && (
+              <FoodTagGrid
+                tags={DIETS}
+                selected={dietCodes}
+                onToggle={(code) => toggle(dietCodes, setDietCodes, code)}
+                namespace="food.diet"
+              />
+            )}
+          </fieldset>
+
+              <button
+                type="button"
+                onClick={() => {
+                  const problem = validateFood()
+                  if (problem) {
+                    setError(problem)
+                    return
+                  }
+                  setError(null)
+                  setProfileStep('name')
+                }}
+              >
+                {t('actions.next')}
+              </button>
+            </>
+          ) : (
+            <>
           <div>
             <label htmlFor="displayName">{t('auth.displayName')}</label>
             {/* The one place these two names can be confused, so it is said
@@ -215,62 +369,24 @@ export function SignUpPage() {
             <p id="displayName-status" className={`field-status is-${nameState}`}>
               {nameState !== 'idle' && t(`auth.name.${nameState}`)}
             </p>
-            <p className="muted">{t('auth.name.changeLater')}</p>
+            <p className="muted small-italic">{t('auth.name.changeLater')}</p>
           </div>
 
-          <label className="row">
-            <input
-              type="checkbox"
-              style={{ width: 'auto' }}
-              checked={hasNoRestrictions}
-              onChange={(e) => setHasNoRestrictions(e.target.checked)}
-            />
-            {t('dietary.noRestrictions')}
-          </label>
-
-          {!hasNoRestrictions && (
-            <div className="stack">
-              {entries.map((entry, i) => (
-                <div key={i} className="card">
-                  <label htmlFor={`kind-${i}`}>{t('dietary.kind.DIET')}</label>
-                  <select
-                    id={`kind-${i}`}
-                    value={entry.kind}
-                    onChange={(e) => updateEntry(i, { kind: e.target.value as DietaryKind })}
-                  >
-                    {DIETARY_KINDS.map((k) => (
-                      <option key={k} value={k}>
-                        {t(`dietary.kind.${k}`)}
-                      </option>
-                    ))}
-                  </select>
-                  <label htmlFor={`label-${i}`}>{t('dietary.label')}</label>
-                  <input
-                    id={`label-${i}`}
-                    required
-                    value={entry.label}
-                    onChange={(e) => updateEntry(i, { label: e.target.value })}
-                  />
-                  <label htmlFor={`note-${i}`}>{t('dietary.note')}</label>
-                  <input
-                    id={`note-${i}`}
-                    value={entry.note ?? ''}
-                    onChange={(e) => updateEntry(i, { note: e.target.value })}
-                  />
-                  <button type="button" className="secondary" onClick={() => removeEntry(i)}>
-                    {t('actions.cancel')}
-                  </button>
-                </div>
-              ))}
-              <button type="button" className="secondary" onClick={addEntry}>
-                {t('dietary.addEntry')}
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  setError(null)
+                  setProfileStep('food')
+                }}
+              >
+                {t('actions.back')}
               </button>
-            </div>
+              <button type="submit" disabled={submitting || nameState !== 'free'}>
+                {t('actions.submit')}
+              </button>
+            </>
           )}
-
-          <button type="submit" disabled={submitting || nameState === 'taken'}>
-            {t('actions.submit')}
-          </button>
         </form>
       </div>
     )
@@ -279,6 +395,7 @@ export function SignUpPage() {
   return (
     <div className="stack sheet">
       <LanguageSwitch />
+      <Steps n={1} />
       <h1>{t('auth.signUp')}</h1>
       {error && <div className="error">{error}</div>}
       <form onSubmit={onAccountSubmit} className="stack">

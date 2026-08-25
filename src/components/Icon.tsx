@@ -22,6 +22,7 @@ const ICONS = {
   pass: 'kitchen',
   chain: 'diagram',
   winner: 'chef_winner_result',
+  help: 'loupe_question',
 } as const
 
 export type IconName = keyof typeof ICONS

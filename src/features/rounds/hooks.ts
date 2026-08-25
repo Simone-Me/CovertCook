@@ -120,7 +120,11 @@ export function useRound(roundId: string | undefined) {
 export interface RoundMemberRow {
   id: string
   round_id: string
-  profile_id: string
+  // Null for everybody but you, unless the round is OPEN, you are a SPY host,
+  // or the reveal has happened (0053). It used to be present for every member
+  // beside their pseudonym, and profiles are readable by co-members — two
+  // calls and a join gave up the whole mapping.
+  profile_id: string | null
   // Null while sign-ups are still open: the roster is revealed to everyone at
   // once when the door closes, so that arrival order can't be read back as
   // identity (0032). Your own name is always present.
