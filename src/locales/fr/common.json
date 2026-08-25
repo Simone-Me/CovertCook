@@ -393,7 +393,8 @@
     "left": {
       "done": "Vous avez quitté {{name}}. Ce dîner est passé dans vos archives, et il n’y a plus rien à ouvrir.",
       "LEFT": "Vous êtes parti",
-      "REMOVED": "Retiré"
+      "REMOVED": "Retiré",
+      "noLongerIn": "Vous n’êtes plus à ce dîner. Il reste dans vos archives, mais il n’y a plus rien à ouvrir."
     },
     "chefCount_one": "{{count}} chef",
     "chefCount_other": "{{count}} chefs"

@@ -344,7 +344,7 @@ nothing here should ever be committed):
 |---|---|---|---|
 | Variables | `VITE_SUPABASE_URL` | `keepalive.yml` | Supabase → Project Settings → API |
 | Variables | `VITE_SUPABASE_ANON_KEY` | `keepalive.yml` | Supabase → Project Settings → API (anon/publishable key — intentionally public, hence a Variable not a Secret) |
-| Secrets | `SUPABASE_SERVICE_ROLE_KEY` | `purge-deletions.yml` | Supabase → Project Settings → API (**service role** — full bypass of RLS, a Secret and never a Variable, and never in the frontend) |
+| Secrets | `SUPABASE_SERVICE_ROLE_KEY` | `purge-deletions.yml` | Supabase → Project Settings → API (**service role** — full bypass of RLS, a Secret and never a Variable, and never in the frontend). Missing it fails the run as a 401 saying "No API key found in request", which reads like a broken endpoint: GitHub resolves an unset secret to an empty string and the header goes out blank. The workflow now checks first and says which name is missing |
 | Secrets | `SUPABASE_DB_URL` | `backup.yml` | Supabase → Project Settings → Database → Connection string (pooler host is in `supabase/.temp/pooler-url` after linking; password isn't stored anywhere in the repo) |
 
 These two GitHub Variables are separate from the four Netlify env vars
