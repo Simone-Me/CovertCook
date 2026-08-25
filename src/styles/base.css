@@ -344,3 +344,296 @@ input.is-taken {
 .welcome h2 {
   margin: 0;
 }
+
+/* The way out of a dinner, at the foot of the roster. Set apart from the list
+   above it by a rule rather than by colour: it is not a warning, it is simply
+   not part of reading who else is here. */
+.leave-seat {
+  border-top: 1px dashed var(--border);
+  padding-top: 12px;
+  margin-top: 4px;
+}
+
+/* Somebody asking to be let out, marked in the host's own roster so the
+   request is where the decision gets taken. */
+.chef-leaving {
+  font-size: 12px;
+  color: var(--danger);
+  border: 1px solid var(--danger);
+  border-radius: 999px;
+  padding: 1px 8px;
+  margin-right: 6px;
+}
+
+/* The one card on the settings page where a wrong click is expensive. The red
+   is the border and not the background: this is a boundary to notice, not an
+   error that has already happened. */
+.card--danger {
+  border-color: var(--danger);
+  border-width: 2px;
+}
+
+/* A dinner still in your list but no longer yours to open. Dimmed rather than
+   struck through: it happened, and it is still part of your history. */
+.card--left {
+  opacity: 0.65;
+  cursor: default;
+}
+
+/* Something that went right, said once. The error box's calm opposite. */
+.notice {
+  color: var(--ok);
+  background: var(--bg-elevated);
+  border: 1px solid var(--ok);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+/* The food grid: three to a row, which is what lets a tile be large enough to
+   recognise a picture in rather than a label to read. */
+.tag-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.tag-tile {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 4px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.tag-tile img {
+  width: 72px;
+  height: 72px;
+}
+
+.tag-tile__name {
+  text-align: center;
+}
+
+/* Chosen: a ring AND a tick. The colour is the third signal, never the only
+   one. */
+.tag-tile.is-on {
+  border-color: var(--ok);
+  border-width: 2px;
+  padding: 9px 3px 7px;
+}
+
+.tag-tile__mark {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: var(--bg);
+  font-size: 11px;
+}
+
+.tag-typed {
+  margin: 0;
+  padding-left: 18px;
+  font-size: 14px;
+}
+
+.tag-typed li {
+  margin-bottom: 4px;
+}
+
+.linkish {
+  background: none;
+  border: 0;
+  padding: 0 0 0 8px;
+  color: var(--accent);
+  font-size: 13px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* A question and the grid that answers it, kept together so the grid is
+   visibly the answer to the line above rather than a second thing on the
+   page. <fieldset> because that is what a group of controls with one label
+   is, and screen readers read the legend before every option inside. */
+.ask {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin: 0 0 12px;
+}
+
+.ask legend {
+  padding: 0 6px;
+  /* The question is the heading of its own section, so it is sized like one:
+     it was competing with the help text underneath at 15px. */
+  /* No display face is defined in this app, so it inherits the body one and
+     only the size and weight change. */
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.ask .row {
+  margin-bottom: 10px;
+}
+
+/* A stored dietary label. The icon is small here — this is a list to read,
+   not a grid to tap — and a typed label has none, which is the difference
+   that matters: only a coded one is checked against a dish. */
+.food-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.food-label img {
+  width: 22px;
+  height: 22px;
+}
+
+.food-label--typed {
+  color: var(--text);
+}
+
+/* A declared set, read like a line on a menu. */
+.declared {
+  margin-bottom: 14px;
+}
+
+.declared__title {
+  /* A hairline under the heading, in ink. The coloured bar that was here read
+     as a warning stripe across a settings page — too much weight for a label,
+     and the wrong colour for half of what it labelled. */
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--text);
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.declared__empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.declared__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.declared__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+/* Picture over word, the way the grid shows it, so the declared list and the
+   grid that filled it look like the same thing. */
+.food-label--stacked {
+  flex-direction: column;
+  gap: 2px;
+  width: 68px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+.food-label--stacked img {
+  width: 48px;
+  height: 48px;
+}
+
+/* A tint of green, with ink text: a diet is a rule to respect, not a danger
+   to avoid, and a filled button in the alarm colour said the opposite. */
+button.tone-diet {
+  background: var(--diet-bg);
+  border-color: var(--diet);
+  color: var(--text);
+}
+
+button.tone-diet.secondary {
+  background: transparent;
+  color: var(--text);
+  border-color: var(--border);
+}
+
+/* How far through signing up you are. A bar and the words: the bar is read at
+   a glance and the words are read by anybody the bar does not reach. */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.steps__bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.steps__fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.steps__text {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.small-italic {
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* The headings inside the explanation: smaller than the page title, larger
+   than the text they introduce. */
+.welcome__h {
+  margin: 12px 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* The author's paragraph, set apart from the app's own voice by measure and
+   colour rather than by a label saying "a note from the author". */
+.welcome__why {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+/* The build number: present for anybody who needs it, quiet for everybody
+   else. */
+.app-foot__version {
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
+}

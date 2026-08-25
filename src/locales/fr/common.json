@@ -67,14 +67,15 @@
       "checking": "Vérification…",
       "free": "Libre — il est à vous.",
       "taken": "Déjà pris. Essayez-en un autre.",
-      "changeLater": "C'est ainsi que tout le monde vous connaîtra. Le changer plus tard est prévu dans la version Pro.",
+      "changeLater": "Le changer plus tard est prévu dans la version Pro.",
       "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
     },
-    "passwordLabel": "Mot de passe"
+    "passwordLabel": "Mot de passe",
+    "step": "Étape {{n}} sur {{total}}"
   },
   "dietary": {
     "title": "Vos restrictions alimentaires",
-    "help": "Ce que vous ne pouvez pas manger — jamais un diagnostic, juste ce qu'il faut savoir pour cuisiner pour vous.",
+    "help": "Déclarer une allergie, un régime ou une contrainte alimentaire permet d’informer tous les convives et d’adapter les plats en conséquence. Votre santé compte pour nous, pour que vous puissiez partager ce moment comme tout le monde.",
     "noRestrictions": "Je n'ai aucune restriction alimentaire",
     "addEntry": "Ajouter une restriction",
     "kind": {
@@ -88,7 +89,8 @@
     "required": "Cochez « aucune restriction » ou ajoutez au moins une entrée.",
     "panelTitle": "Panneau diététique du dîner",
     "panelEmpty": "Personne n'a signalé de restriction pour ce dîner.",
-    "gridAlt": "Espace réservé — icônes d'allergènes à venir"
+    "gridAlt": "Espace réservé — icônes d'allergènes à venir",
+    "whoSeesIt": "Ce que vous déclarez est visible par tous les convives, et rappelé à la personne qui écrit votre recette pendant qu’elle l’écrit. Si quelque chose est faux ou que vous préférez le retirer, l’adresse de contact est en pied de page."
   },
   "rounds": {
     "myRounds": "Mes dîners",
@@ -127,7 +129,10 @@
       "TIMED": "Après le dîner",
       "TIMEDHint": "Vous fixez un délai et les résultats se publient tout seuls à son échéance.",
       "DISABLED": "Pas de vote",
-      "DISABLEDHint": "Celui-ci est sans retour : le vote sera indisponible pour ce dîner et ne pourra pas être activé ensuite."
+      "DISABLEDHint": "Celui-ci est sans retour : le vote sera indisponible pour ce dîner et ne pourra pas être activé ensuite.",
+      "MANUAL": "À main levée",
+      "MANUALHint": "Pas de téléphones à table : les plats sont classés à main levée, et vous saisissez le décompte.",
+      "chosenWhenOpening": "Choisi à l’ouverture du vote, pas maintenant — et modifiable tant que personne n’a voté."
     },
     "nameTheme": {
       "label": "Thème des pseudonymes",
@@ -236,7 +241,9 @@
       "no": "Non",
       "noLimit": "Sans limite",
       "themes": "Thème de la table",
-      "themesSoon": "Noël, solstice d'été, et d'autres à venir. Pro — le décor de la soirée uniquement ; rien sur la façon de jouer."
+      "themesSoon": "Noël, solstice d'été, et d'autres à venir. Pro — le décor de la soirée uniquement ; rien sur la façon de jouer.",
+      "venueEditable": "Modifiable dans les paramètres du dîner",
+      "venueHere": "les modifier"
     },
     "entryPoints": {
       "writeRecipe": "Écrire votre recette",
@@ -353,7 +360,9 @@
         "RESULTS": "Annoncez le résultat",
         "ARCHIVED": "Plus rien à faire",
         "CANCELLED": "Ce dîner a été annulé"
-      }
+      },
+      "empty": "vide",
+      "whatIsItToggle": "Qu’est-ce que le passe ?"
     },
     "lateJoinerShort": "Ajouter quelqu'un maintenant change les partenaires de deux chefs.",
     "briefProgress": "{{done}} recettes écrites sur {{total}}",
@@ -369,7 +378,27 @@
       "keeps": "Rien n'est effacé. Chaque recette déjà écrite et chaque message déjà envoyé sont conservés, et reviennent dès que les inscriptions se referment.",
       "pauses": "Pendant que la porte est ouverte, les chefs ne peuvent ni écrire ni lire les recettes. Cela reprend dès que vous avancez.",
       "changes": "Deux choses changent : si vous avez choisi des plats précis, leur nombre doit correspondre au nouveau nombre de chefs — et insérer le nouveau venu dans la chaîne fait qu'un chef se retrouve avec une autre recette que celle qu'il avait."
-    }
+    },
+    "leave": {
+      "now": "Quitter ce dîner",
+      "ask": "Demander à sortir",
+      "confirmNow": "Quitter ce dîner ?",
+      "confirmAsk": "Demander au Executive Chef de vous laisser sortir ?",
+      "whyNow": "Personne n’a encore été attribué à personne, vous pouvez donc simplement partir. Le dîner passe dans vos archives et votre place se libère.",
+      "whyAsk": "Les recettes sont déjà distribuées, et la soirée de trois autres personnes repose sur votre binôme. Le Executive Chef décide de ce que coûte votre départ : reconnecter la chaîne, ou un plat de moins. Tant qu’il n’a pas répondu, vous cuisinez toujours.",
+      "asked": "Vous avez demandé à sortir. Le Executive Chef est prévenu et décidera — d’ici là rien n’a changé et on vous attend toujours à table.",
+      "stayAfterAll": "Finalement, je reste",
+      "requested": "a demandé à sortir"
+    },
+    "left": {
+      "done": "Vous avez quitté {{name}}. Ce dîner est passé dans vos archives, et il n’y a plus rien à ouvrir.",
+      "LEFT": "Vous êtes parti",
+      "REMOVED": "Retiré",
+      "noLongerIn": "Vous n’êtes plus à ce dîner. Il reste dans vos archives, mais il n’y a plus rien à ouvrir."
+    },
+    "chefCount_one": "{{count}} chef",
+    "chefCount_other": "{{count}} chefs",
+    "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne."
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
@@ -572,7 +601,11 @@
     "locale": {
       "en": "English",
       "fr": "Français"
-    }
+    },
+    "noneAllergy": "— aucune allergie déclarée",
+    "noneDiet": "— aucun régime déclaré",
+    "editAllergies": "Allergies",
+    "editDiets": "Régimes"
   },
   "board": {
     "pageTitle": "Messages",
@@ -725,6 +758,8 @@
     "turnOff": "Désactiver les notifications",
     "perRound": "Un seul réglage pour tous vos dîners et tous vos appareils. Le choix dîner par dîner viendra plus tard.",
     "moments": [
+      "Quelqu’un demande à entrer, ou prend une place, à un dîner que vous organisez",
+      "Votre demande d’entrée est acceptée",
       "Votre cuisinier est tiré — vous pouvez écrire sa recette",
       "La recette que vous devez cuisiner est arrivée",
       "Le vote en ligne s’ouvre",
@@ -732,12 +767,21 @@
     ],
     "state": {
       "checking": "Vérification de ce que cet appareil sait faire…",
-      "on": "Activées. Vous serez prévenu des quatre moments ci-dessous, et de rien d’autre.",
+      "on": "Activées. Vous serez prévenu des six moments ci-dessous, et de rien d’autre.",
       "off": "Désactivées. Les activer demande une fois l’autorisation à votre navigateur.",
       "denied": "Bloquées. Votre navigateur refuse à votre place et l’application ne peut plus le demander — il faut les réautoriser dans les réglages du site pour CovertCook.",
       "needs-install": "Ajoutez CovertCook à votre écran d’accueil et ouvrez-le depuis là. Sur iPhone et iPad, les notifications n’existent que dans l’application installée — c’est la règle d’Apple, pas la nôtre.",
       "unsupported": "Ce navigateur ne gère pas les notifications. Rien n’est cassé : il ne peut simplement pas.",
       "unconfigured": "Pas encore disponible sur ce déploiement."
+    },
+    "aside": {
+      "checking": "…",
+      "on": "Activées",
+      "off": "Désactivées",
+      "denied": "Bloquées",
+      "needs-install": "Nécessite l’app installée",
+      "unsupported": "Indisponible",
+      "unconfigured": "Indisponible"
     }
   },
   "account": {
@@ -758,13 +802,62 @@
   },
   "welcome": {
     "title": "Bienvenue dans CovertCook",
-    "lead": "L’application pour organiser un dîner entre amis et le cuisiner ensemble — sauf que personne ne choisit son propre plat.",
+    "lead": "L’application pour organiser un dîner entre amis — sauf que personne ne choisit son propre plat. Prêt à relever le défi ?",
+    "howTitle": "Comment ça marche ?",
     "how": [
       "Quelqu’un crée un dîner et invite la table.",
-      "Chacun se voit attribuer en secret une autre personne pour qui cuisiner, et lui écrit une recette.",
-      "Personne ne sait qui a écrit la sienne. Chacun cuisine ce qu’on lui a donné et l’apporte.",
-      "On mange, on classe les plats, et c’est seulement là qu’on découvre qui a choisi quoi."
+      "Vous écrivez une recette pour un autre convive — et quelqu’un écrit la vôtre, sans que ni l’un ni l’autre ne sache qui.",
+      "Chacun cuisine ce qu’on lui a donné et l’apporte.",
+      "On mange, on classe les plats selon nos goûts, et c’est seulement là qu’on découvre qui a choisi quoi."
     ],
-    "next": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé. Un dîner d’exemple guidé arrivera bientôt ici."
+    "whyTitle": "Pourquoi ça existe ?",
+    "why": [
+      "J’ai créé cette application pour mes amis. On aime les repas en famille : partager un bon moment, se passer des recettes et des astuces. On voulait se retrouver autour d’un jeu et faire découvrir aux autres nos plats préférés — et quelle meilleure façon d’apprendre une recette que de la faire soi-même ?",
+      "Que vous aimiez cuisiner ou que vous mangiez toujours les trois mêmes plats tout prêts, j’espère que vous prendrez plaisir à préparer la recette que quelqu’un a eu envie de partager avec vous."
+    ],
+    "start": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé.",
+    "next": "Un dîner d’exemple guidé arrivera bientôt ici.",
+    "readAgain": "Comment fonctionne CovertCook"
+  },
+  "food": {
+    "allergyQuestion": "Êtes-vous allergique à un aliment ?",
+    "dietQuestion": "Suivez-vous un régime particulier ?",
+    "yes": "Oui",
+    "no": "Non",
+    "pickOne": "Choisissez-en au moins un, ou répondez non.",
+    "answerBoth": "Répondez aux deux questions avant de continuer.",
+    "typedNotChecked": "Écrit à la main : le cuisinier le lit, mais ce n’est pas vérifié automatiquement contre un plat.",
+    "allergen": {
+      "GLUTEN": "Gluten",
+      "CRUSTACEANS": "Crustacés",
+      "EGG": "Œuf",
+      "FISH": "Poisson",
+      "PEANUTS": "Arachides",
+      "SOY": "Soja",
+      "MILK": "Lait",
+      "NUTS": "Fruits à coque",
+      "CELERY": "Céleri",
+      "MUSTARD": "Moutarde",
+      "SESAME": "Sésame",
+      "SULPHITES": "Sulfites",
+      "LUPIN": "Lupin",
+      "MOLLUSCS": "Mollusques",
+      "OTHER": "Autre chose",
+      "otherPlaceholder": "Précisez — kiwi, nickel, autre"
+    },
+    "diet": {
+      "VEGETARIAN": "Végétarien",
+      "VEGAN": "Végan",
+      "PESCATARIAN": "Pescétarien",
+      "NO_MEAT": "Sans viande",
+      "NO_BEEF": "Sans bœuf",
+      "NO_DAIRY": "Sans produits laitiers",
+      "HALAL": "Halal",
+      "KOSHER": "Casher",
+      "NO_ALCOHOL": "Sans alcool",
+      "NO_SMOKING": "Sans tabac",
+      "OTHER": "Autre chose",
+      "otherPlaceholder": "Précisez"
+    }
   }
 }

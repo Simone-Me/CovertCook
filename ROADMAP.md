@@ -252,3 +252,332 @@ opens. The second part is free — Supabase auth already spans both.
 
 iOS is a separate and stricter story, and worth treating as its own
 decision rather than assuming it follows.
+
+---
+
+## 5. The recipe book
+
+**Nothing is built.** The question asked is the right one and it has a
+gate in front of it that decides the whole shape.
+
+### The gate: nobody can read anybody else's recipe today
+
+`briefs` has **no SELECT policy at all** — not a narrow one, none. The only
+reader is `get_my_brief`, which returns the recipe written *for you*. The
+ballot shows dish names, never bodies. So "collect the recipes of the other
+chefs" is not a feature that reads existing data: it needs a **new, deliberate
+exposure**, an RPC that opens every brief of a round to its members once that
+round has reached `RESULTS`.
+
+That is defensible — after the reveal, who wrote what is announced, everyone
+has eaten every dish, and the secrecy has done its job — but it is a change to
+what the app has promised so far, so it is a decision and not an implementation
+detail. **Recommendation: yes, gated on `RESULTS` and on membership**, because
+the alternative (each person can only keep the one recipe they cooked) makes a
+book of four entries a year, which nobody opens twice.
+
+### Copy the recipe, reference the person
+
+**Revised.** Reference-only was the right answer while rounds were permanent.
+Since old dinners may eventually be deleted, a book of references would empty
+itself the day that happens — the one outcome a recipe book must never have.
+
+So the entry splits in two, and the split is the whole design:
+
+- **The recipe is copied.** Title, ingredients, method, link, allergen tags —
+  frozen at the moment of saving. It is text, it is not personal data in any
+  meaningful sense, and it must outlive the dinner it came from. A saved
+  recipe is a copy in your kitchen, not a bookmark to somebody else's.
+- **The author is a reference.** `profile_id`, never a snapshot of their name.
+  Erasure anonymises a profile, and a frozen name would keep somebody in ten
+  other people's books after they asked to be forgotten. Referenced, they
+  become "Former guest" there — which is exactly what erasure is for.
+- **The pseudonym is copied**, because it is not an identity: "Chef Basilic"
+  was the name you knew them by *that evening*, and it means nothing outside
+  that dinner. It is a label on the card, never a filter (see below).
+
+Cost of copying: a recipe saved by six people is stored six times. At a few
+kilobytes each, six copies of a recipe is smaller than one photograph.
+
+### Deleting from the book, and taking it with you
+
+Two more things the sketch asked for, and both are right:
+
+- **Delete an entry**, with a warning that says the truth: if the dinner it
+  came from is gone, nothing can bring it back. That is a real
+  irreversibility and the confirmation should say so rather than saying "are
+  you sure".
+- **Download the book**, and — separately — **download everything** before
+  erasing an account. The second is not a nicety: GDPR Article 20 gives a
+  right to portability in a structured, machine-readable format, and the
+  natural moment to offer it is beside the delete button, not buried. Both
+  are the same mechanism: an RPC that assembles the JSON, a file the browser
+  saves. Recipes should come out as **both** — JSON for completeness and
+  plain text/Markdown for a human who just wants to cook from it.
+
+### What the design as sketched is missing
+
+Six things, in the order they will bite:
+
+1. **The pseudonym is per-round and reused.** "Chef Basilic" is a different
+   person in every dinner. Storing it is fine as a label on the card — it is
+   the name you knew them by that evening — but **filtering by it across the
+   book is wrong**: it would group strangers together. The filter has to be on
+   the real name, which is why the author stays a reference even though the
+   recipe is a copy.
+2. **The recipe you wrote is not the recipe you cooked.** Two different things,
+   both worth keeping, and they need different labels. "Received" alone loses
+   half of what a person made that evening.
+3. **Ingredients live in their own table.** `brief_ingredients` is the shopping
+   list; a saved recipe without it is half a recipe.
+4. **`contains_tags` travels with it.** Cooking it again, for different people,
+   makes the allergens matter again — the one piece of data in this app that
+   is not decoration.
+5. **Only submitted briefs, only finished rounds.** A draft is not a recipe,
+   and a round short of `RESULTS` would leak an author.
+6. **One save per recipe per person.** Unique on (profile, brief), or the
+   button becomes a counter.
+
+### The recipe as one thing
+
+Shown as it will be cooked from: **name, ingredients, method, link if there is
+one, allergen tags** — one card, not four fields. That means the ingredients
+must be copied with it (`brief_ingredients` is a separate table today), and it
+settles what "one save per person per recipe" means: the same recipe cannot be
+saved twice by the same person, so the button is a switch and never a counter.
+
+### What still needs deciding
+
+1. **Where the save button lives.** The end-of-dinner menu is the obvious
+   place — the full list of dishes is already there — but the same button has
+   to exist inside the book for a recipe saved and then deleted by mistake.
+   Probably: save from the menu, and nothing else.
+2. **Whether the note is per-entry or per-recipe.** Per-entry: it is *your*
+   comment on *your* copy.
+3. **What happens to a recipe whose author never submitted it.** Nothing to
+   save; the button should not appear.
+4. **Sorting the book by default** — most recent dinner first, almost
+   certainly, since that is what somebody is looking for after an evening.
+
+### Is it too much work?
+
+No, and the reason is that the filtering does not need a server. Ten saves a
+dinner, a few dinners a year: a few dozen rows. Sorting and searching them
+happens in the browser on data already loaded, so "filterable by cook, date,
+dish" costs a text input and an `Array.filter`, not an index.
+
+The real work is one migration (a `recipe_book` table plus the RESULTS-gated
+RPC), a button on the results screen, and the book page. **One to two days.**
+
+### Shape it in this order
+
+1. **Save what you cooked and what you wrote** — no new exposure, works
+   immediately.
+2. **Save anybody's, from the results screen** — the RPC above; this is the
+   inclusive version and the one worth having.
+3. **Your own recipes, typed in** — the table stops being a list of references
+   and gains rows that carry their own text. The day it also fills a brief you
+   are writing, the book stops being an archive and becomes a tool.
+
+---
+
+## 6. Advertising
+
+Asked as a hypothetical, answered with the arithmetic, because the arithmetic
+is what settles it.
+
+### What it would pay
+
+This app is used in bursts: a host runs perhaps four dinners a year, eight
+people each, and a person opens it a handful of times per dinner. Call it
+~150 page views per dinner across the whole table — generous. At EU display
+rates for non-commercial content (**€0.50–3 CPM**, and the low end is likelier
+for an audience nobody is trying to sell kitchens to), a dinner produces
+**€0.10–0.45**.
+
+Against the same evening, the per-dinner unlock in §2 was priced at €3, of
+which about €1.85 survives fees and tax. **Ads pay roughly ten times less per
+dinner than one €3 unlock**, and they need the same traffic to get there:
+break-even on the fixed costs in §2 would take something like **4,000 dinners
+a year**.
+
+### What it would cost, beyond the money
+
+- **A consent banner.** EEA traffic needs a certified CMP before a single ad
+  loads. The product's whole manner is a clean table; the first thing every
+  guest would meet is a cookie dialog.
+- **Ad tech next to allergy data.** This app holds Article 9 health data. Ads
+  mean third-party scripts and identifiers on the same pages, and the burden
+  of proving none of it leaks. That is a real audit, not a checkbox.
+- **A real domain.** AdSense wants a site you own; a `*.netlify.app`
+  subdomain is not one.
+- **The tone.** A tablecloth with a banner on it reads as cheap in a way a €3
+  unlock does not, and this product is almost entirely tone.
+
+**Recommendation: no, and not later either at this scale.** Ads are a
+volume business — they start making sense in the hundreds of thousands of
+views a month, which is a different application with a different audience. If
+this ever wants money, §2's per-dinner unlock is better per person, cheaper to
+build, and does not put a stranger's script next to somebody's allergies.
+
+---
+
+## 7. What comes next, in the order it should be built
+
+Written as steps rather than as a list of wants, because three of the things
+below depend on the one above them and doing them in the wrong order means
+building something twice.
+
+### Step 1 — the results screen becomes a menu
+
+No schema, no new data: the results already know the dish, the course and the
+score. What changes is that they stop being a leaderboard and become **a menu
+card**, courses as sections — starters, mains, desserts, drinks — with the
+score printed where a price would be. A round in FREE mode has no courses, so
+it is one carte générale instead. Nothing else in the app is a better fit for
+the tablecloth than a menu, and it is the screen the evening ends on.
+
+Doing this first is not aesthetics: **step 2 hangs its save button off this
+screen**, so its layout has to exist before the button has anywhere to live.
+
+### Step 2 — the recipe book
+
+§5 has the design. Sequence inside it:
+
+1. The table and the RESULTS-gated RPC that opens a round's recipes to its
+   members.
+2. The save flow on the menu: a switch that arms saving, the dish names
+   inviting a tap, a wine ring marking each chosen one, one confirm that saves
+   the lot, and a line saying where they went.
+3. The book itself in the profile: one card per recipe, filters in the
+   browser, delete with a warning that says the truth.
+4. Export — the book, and everything, the second being what Article 20 asks
+   for anyway.
+
+### Step 3 — the host's alert centre
+
+`host_alerts` already exists with the right kinds (`CANNOT_COOK`, `NO_BRIEF`,
+`DROPOUT`, `REPORTED_MESSAGE`) and a page to read them. What is missing is
+that nothing tells the host they are there, and that a reported message has no
+answer beyond reading it.
+
+**The design decision inside this one**, and it is the interesting one:
+**moderate by pseudonym, not by name.** The host should see the message before
+they see who wrote it — knowing the author first is how a host's opinion of a
+person decides whether a message was inappropriate. And they do not need the
+name to act: a warning is delivered to a seat, a removal removes a seat.
+Identity is only needed to reach somebody outside the game, which is a
+different and much rarer act — a deliberate reveal, logged in `audit_log`,
+never a side effect of opening an alert.
+
+This is also the work that satisfies the store requirement in
+`DISTRIBUTION.md` §1: report, block, and a published moderation policy are
+mandatory the day free-text chat ships, and this is where they live.
+
+### Step 4 — the album, and only then any deletion
+
+A photo of the table at the end, one per dinner, becoming an album of every
+evening. Attractive, and the one feature here that changes the arithmetic in
+§2 of nothing and §3 of everything: **text is free, photographs are not.**
+
+Three things it drags in, none of them optional:
+
+- **Storage, not the database.** A Supabase bucket with its own policies. The
+  free tier is 1 GB; at ~200 KB a photo that is a few thousand dinners, which
+  is further away than it sounds but not infinite.
+- **EXIF.** A phone photograph carries GPS coordinates. Uploading one
+  unstripped publishes the address of somebody's flat to everybody at the
+  table. Strip it in the browser, before upload, always.
+- **It is user-generated content.** A photograph is the kind of UGC the stores
+  write their rules for; report and remove have to exist for it too, which is
+  another reason step 3 comes first.
+
+**And only after the album is real can old dinners be deleted.** The argument
+for deletion is that a recipe worth keeping is in somebody's book and a dinner
+worth remembering is in the album — both have to exist and be *used* before
+that is true. Deleting first would prove it false.
+
+---
+
+## 8. Choosing what you cannot eat, in pictures
+
+**Built, 2026-08-24** — all seven. The manifest, the two grids, the sign-up
+flow and the profile, which now uses the same component from the same file
+rather than a free-text field that could disagree with it about what an
+allergen is called.
+
+The shape is settled: at sign-up and in the profile, two yes/no questions, each
+opening a grid of large icons with the name underneath, tapped to select and
+marked when chosen. Nothing below argues with that. These are the seven things
+it does not yet say, and each of them changes what gets built.
+
+### 1. The grid must write codes, not words
+
+This is the one that matters most, and it is invisible until it breaks.
+`README.md` records the current simplification: allergy matching is
+**exact-string**. So a French player writing *céleri* and an English one
+writing *celery* are two different allergens today, and a dish declared safe
+for one is not checked against the other.
+
+A grid fixes this for free **if each tile writes a stable code** — `CELERY`,
+`GLUTEN`, `PEANUT` — with the translated word shown to the reader and never
+stored. Store the visible label instead and the grid becomes a prettier way of
+producing the same bug in two languages.
+
+### 2. Severity: decided — there is only one
+
+Raised as a gap, answered by choosing deliberately not to have it. **Every
+allergy the grid records is `ALLERGY_SEVERE`.** Better to plan a dinner around
+somebody who turns out to have been mildly allergic than to under-read the one
+that mattered, and a two-way switch invites exactly that under-reading: nobody
+wants to be the person marking themselves *severe*, so a mild default would be
+chosen by people it is wrong for.
+
+`ALLERGY_MILD` stays in the enum. Rows already carry it, and removing an enum
+value that live data references is not a migration, it is an outage — the same
+reason `BRIEFS_CLOSED` survived `0035`.
+
+One consequence, stated rather than discovered: with everything severe, the
+panel stops distinguishing weights and shows every allergy at full strength.
+That is the intended reading and not a bug to fix later.
+
+### 3. Question two asks about diets — decided
+
+Not "preferences": a **diet**. The word matters because the two facts behave
+differently — a diet constrains what a cook may put on the plate, a dislike
+only colours it — and the vaguer word invited both into one answer.
+
+Which leaves `DISLIKE` unasked at sign-up, and that is fine: the profile can
+grow it later, for people who care enough to go looking. What must not happen
+is a dislike arriving through the diet question and being read by a cook as a
+rule.
+
+### 4. "Other" is a tile — decided
+
+Fourteen allergens is the legal list, not the human one; kiwi, nickel and
+histamine exist. The last tile in each grid opens a text field, and what it
+writes is a free-text label exactly as `dietary_entries` holds today.
+
+The one rule that comes with it: a typed label cannot be matched against a
+dish's `contains_tags`, because those are codes. So a typed allergy is shown to
+the cook in words and never silently checked — the panel has to say which of
+the two it is, or somebody will trust a check that never ran.
+
+### 5. No is an answer, not a skip
+
+Both "no"s together are `has_no_restrictions = true`, which `complete_signup`
+already requires as the alternative to at least one entry. The two questions
+map onto it exactly — but the flag has to be written by answering, never by
+walking past the screen.
+
+### 6. Selected cannot be a colour
+
+A chosen tile needs a ring **and** a mark, not a tint: one in twelve men reads
+red-green poorly, and this is the screen where being wrong about what you
+selected has consequences.
+
+### 7. One component, two places
+
+Sign-up and the profile must render the same grid from the same file. Two
+copies drift, and the day they drift is the day somebody's profile says
+something their sign-up did not.

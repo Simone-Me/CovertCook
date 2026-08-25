@@ -1,17 +1,29 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { isPastRound, useMyRounds, type MyRoundRow } from './hooks'
 import { getMyInvitations, respondToInvitation } from '../../lib/rpc'
 import { peekJoinCode } from '../../lib/pendingJoin'
+import { HowItWorks } from './HowItWorks'
+import { Fold } from '../../components/Fold'
 
 function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
   const { t } = useTranslation()
-  return (
-    <Link to={`/rounds/${round.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
-      <div className="card" style={{ borderLeft: `4px solid ${round.accent_color}` }}>
+
+  // A dinner you left keeps its card and loses its link. There is nothing
+  // behind it any more — the roster, the briefs and the chat all check for an
+  // active seat and refuse — so a door that opens onto an error would be
+  // worse than no door. It stays in the list because a dinner that vanishes
+  // reads as data lost rather than as a room left (0051).
+  const left = round.member_status !== 'ACTIVE'
+
+  const card = (
+      <div
+        className={`card${left ? ' card--left' : ''}`}
+        style={{ borderLeft: `4px solid ${round.accent_color}` }}
+      >
         <div className="row" style={{ justifyContent: 'space-between' }}>
           <strong>
             {round.accent_emoji} {round.name}
@@ -25,11 +37,19 @@ function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
             )}
           </strong>
           <span className="row">
-            {!round.approved && <span className="badge">{t('rounds.pendingApproval')}</span>}
+            {left && <span className="badge">{t(`rounds.left.${round.member_status}`)}</span>}
+            {!left && !round.approved && <span className="badge">{t('rounds.pendingApproval')}</span>}
             <span className="badge">{t(`rounds.phase.${round.status}`)}</span>
           </span>
         </div>
       </div>
+  )
+
+  if (left) return card
+
+  return (
+    <Link to={`/rounds/${round.id}`} style={{ textDecoration: 'none', color: 'inherit' }}>
+      {card}
     </Link>
   )
 }
@@ -38,6 +58,7 @@ export function MyRoundsPage() {
   const { t } = useTranslation()
   const { profile } = useAuth()
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const { data: rounds, isLoading } = useMyRounds(profile?.id)
 
@@ -49,6 +70,10 @@ export function MyRoundsPage() {
     if (pendingCode) navigate(`/join?code=${encodeURIComponent(pendingCode)}`, { replace: true })
   }, [pendingCode, navigate])
 
+  // Said on arrival rather than on the page being left: the round page
+  // disappears at the same moment, so a message shown there would be gone
+  // before it was read.
+  const leftName = (location.state as { leftRound?: string } | null)?.leftRound ?? null
   const [showPast, setShowPast] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
@@ -99,6 +124,8 @@ export function MyRoundsPage() {
 
       {error && <div className="error">{error}</div>}
 
+      {leftName && <p className="notice">{t('rounds.left.done', { name: leftName })}</p>}
+
       {/* Shown only when there's something in it — an empty inbox on a
           first-run screen is noise, not reassurance. */}
       {invitations && invitations.length > 0 && (
@@ -132,22 +159,12 @@ export function MyRoundsPage() {
 
       {isLoading && <p className="muted">…</p>}
 
-      {/* First run, and the only screen where the app has to explain itself.
-          A muted one-line tagline was doing that job badly: somebody who has
-          just made an account and sees an empty list needs to know what the
-          thing is for before they are asked to press "create". The guided
-          demo dinner that will eventually live here is a later job — this is
-          the words, not the tour. */}
+      {/* First run: the app explains itself, at length, because somebody who
+          has just made an account and sees an empty list needs to know what
+          the thing is for before being asked to press "create". */}
       {rounds && rounds.length === 0 && (
         <div className="card stack welcome">
-          <h2>{t('welcome.title')}</h2>
-          <p>{t('welcome.lead')}</p>
-          <ol className="howto__steps">
-            {(t('welcome.how', { returnObjects: true }) as string[]).map((step) => (
-              <li key={step}>{step}</li>
-            ))}
-          </ol>
-          <p className="muted">{t('welcome.next')}</p>
+          <HowItWorks />
         </div>
       )}
 
@@ -156,6 +173,15 @@ export function MyRoundsPage() {
           <RoundCard key={r.id} round={r} isHost={r.host_id === profile?.id} />
         ))}
       </div>
+
+      {/* And it does not vanish the moment somebody joins a dinner: that is
+          precisely when they have seen enough of the app to have questions
+          about it. Folded, at the foot, out of the way. */}
+      {rounds && rounds.length > 0 && (
+        <Fold title={t('welcome.readAgain')}>
+          <HowItWorks compact />
+        </Fold>
+      )}
 
       {past.length > 0 && (
         <div className="stack">

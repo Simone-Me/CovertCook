@@ -15,9 +15,12 @@ const LANGS = [
  *
  * It changes i18next only. Once an account exists the profile writes the
  * choice to the row and that becomes the source of truth; until then there is
- * no row to write to, and i18next's own detector remembers it locally.
+ * no row to write to, and i18next's own detector remembers it locally — which
+ * is what `onChange` is for: the profile passes the writer, and the same two
+ * buttons then do both jobs. Two controls that look different for the same
+ * choice was the reason to unify them.
  */
-export function LanguageSwitch() {
+export function LanguageSwitch({ onChange }: { onChange?: (code: 'fr' | 'en') => void } = {}) {
   const { t, i18n } = useTranslation()
   const current = i18n.language.startsWith('en') ? 'en' : 'fr'
 
@@ -30,7 +33,7 @@ export function LanguageSwitch() {
           type="button"
           className={`langswitch__opt${current === lang.code ? ' is-on' : ''}`}
           aria-pressed={current === lang.code}
-          onClick={() => i18n.changeLanguage(lang.code)}
+          onClick={() => (onChange ? onChange(lang.code) : i18n.changeLanguage(lang.code))}
         >
           {lang.label}
         </button>

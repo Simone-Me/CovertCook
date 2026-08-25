@@ -1,6 +1,6 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams, Link, Navigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Link, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
@@ -13,6 +13,7 @@ import {
   previousPhaseFor,
   updateRoundDetails,
   getExclusionPairs,
+  listRoundPeople,
   addExclusionPair,
   removeExclusionPair,
   getSlots,
@@ -50,6 +51,20 @@ export function RoundSettingsPage() {
   const queryClient = useQueryClient()
 
   const { data: round, isLoading } = useRound(roundId)
+
+  // A link that names a field should arrive at that field. The browser cannot
+  // do it on its own here: the anchor does not exist yet when the URL is read,
+  // because the page is still waiting for the round — and the sections are
+  // folded, so scrolling to a closed one would land on a heading. Open it and
+  // then scroll, once there is something to scroll to.
+  const { hash } = useLocation()
+  useEffect(() => {
+    if (!hash || !round) return
+    const target = document.querySelector(hash)
+    if (!target) return
+    target.closest('details')?.setAttribute('open', '')
+    target.scrollIntoView({ block: 'center' })
+  }, [hash, round])
   const { data: members } = useRoundMembers(roundId)
   const [location, setLocation] = useState<string | null>(null)
   const [city, setCity] = useState<string | null>(null)
@@ -65,6 +80,19 @@ export function RoundSettingsPage() {
   const [exclusionB, setExclusionB] = useState('')
   const [newSlotCourse, setNewSlotCourse] = useState<Course>('STARTER')
 
+  // Real names, host-only, from a function that never returns a pseudonym
+  // (0053). Naming the pair by pseudonym would have forced the host to work
+  // out which pseudonym is which person before they could exclude anybody —
+  // exactly the knowledge the anonymity exists to withhold.
+  const { data: people } = useQuery({
+    queryKey: ['rounds', roundId, 'people'],
+    // `enabled` cannot lean on isHost: that is derived after the early
+    // return, and a hook may not appear on some renders and not others. The
+    // function refuses non-hosts anyway.
+    enabled: !!roundId,
+    queryFn: () => listRoundPeople(roundId as string),
+  })
+
   const { data: exclusions, refetch: refetchExclusions } = useQuery({
     queryKey: ['rounds', roundId, 'exclusion-pairs'],
     enabled: !!roundId,
@@ -78,7 +106,10 @@ export function RoundSettingsPage() {
 
   if (isLoading || !round) return <p className="muted">…</p>
 
-  const isHost = round.host_id === profile?.id
+  // Same rule as the round page: over is over, and the forms below would each
+  // come back with the same refusal from the database.
+  const frozen = round.status === 'ARCHIVED' || round.status === 'CANCELLED'
+  const isHost = round.host_id === profile?.id && !frozen
   if (!isHost) {
     return <Navigate to={`/rounds/${roundId}`} replace />
   }
@@ -97,7 +128,10 @@ export function RoundSettingsPage() {
     round.slot_mode === 'FREE'
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved) ?? []
   const activeApprovedCount = activeMembers.length
-  const memberName = (id: string) => activeMembers.find((m) => m.id === id)?.secret_name ?? id
+
+
+  const memberName = (id: string) =>
+    people?.find((p) => p.member_id === id)?.display_name ?? id
 
   async function onSaveDetails(e: React.FormEvent) {
     e.preventDefault()
@@ -267,8 +301,16 @@ export function RoundSettingsPage() {
             <dt>{t('rounds.voting.label')}</dt>
             <dd>
               {t(`rounds.voting.${round.voting_mode}`)}
-              {round.voting_mode === 'DISABLED' && (
+              {/* MANUAL arrived with 0040 and never got a line here, so the
+                  row printed its own key. The note underneath is the rule
+                  rather than a live state: the method is settled when the vote
+                  opens, and stays changeable until somebody has actually voted
+                  (0043, 0045) — which is a thing worth knowing before the
+                  evening, not a status to look up during it. */}
+              {round.voting_mode === 'DISABLED' ? (
                 <span className="fixed-note">{t('rounds.settings.votingNeverOn')}</span>
+              ) : (
+                <span className="fixed-note">{t('rounds.voting.chosenWhenOpening')}</span>
               )}
             </dd>
 
@@ -420,17 +462,17 @@ export function RoundSettingsPage() {
           <form onSubmit={onAddExclusion} className="row">
             <select value={exclusionA} onChange={(e) => setExclusionA(e.target.value)}>
               <option value="">—</option>
-              {activeMembers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.secret_name}
+              {people?.map((p) => (
+                <option key={p.member_id} value={p.member_id}>
+                  {p.display_name}
                 </option>
               ))}
             </select>
             <select value={exclusionB} onChange={(e) => setExclusionB(e.target.value)}>
               <option value="">—</option>
-              {activeMembers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.secret_name}
+              {people?.map((p) => (
+                <option key={p.member_id} value={p.member_id}>
+                  {p.display_name}
                 </option>
               ))}
             </select>

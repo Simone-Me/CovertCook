@@ -271,10 +271,12 @@ defended against on every write path.
 Mail is now only what Auth owns — **password reset and address change**.
 Everything else that used to want an email is a notification instead.
 
-**The four moments, and nothing else** (`0048`):
+**Six moments, and nothing else** (`0048`, `0052`):
 
 | Moment | Who gets it | Sent when |
 |---|---|---|
+| Somebody is at the door | the host alone | a request to join arrives, or a seat is taken in a round that needs no approval |
+| You are at the table | the one person who asked | the host approves them |
 | Your cook has been chosen | everyone in the round but the host | the round reaches `ASSIGNED` |
 | Your recipe has arrived | the one cook it was written for | its author submits — `0035` lands it then, so waiting for a phase would rebuild the stall `0035` removed |
 | Voting is open | everyone but the host | the round reaches `VOTING`, **and only for an online ballot** — a hand-counted one is announced out loud by somebody standing up |
@@ -282,9 +284,19 @@ Everything else that used to want an email is a notification instead.
 
 Dinner starting, a settings change, a phase nudged backwards: silent. A
 notification nobody acts on is how an app teaches people to ignore the ones
-that matter. And "your recipe has arrived" never says who wrote it — the text
-is composed in the Edge Function precisely so no caller can put a name on a
-lock screen.
+that matter.
+
+**No push carries a name.** "Your recipe has arrived" never says who wrote it,
+and the two at the door say how many, not who — the host's approval screen
+shows the real name of whoever is asking, but that is a screen they chose to
+open, not a lock screen a stranger reads over their shoulder. The text is
+composed in the Edge Function precisely so no caller can put a name on one. The
+dinner's name is carried, because a host running two of them needs to know
+which door this is.
+
+The two door moments are addressed by **membership**, not by round, and
+authorised in SQL: you may announce your own arrival and nobody else's, and
+only the host of that seat's round may announce that it was approved.
 
 The switch in the profile is **one switch, all dinners, all devices**. The
 subscription rows are per browser because that is what the Push API gives us,
@@ -332,7 +344,7 @@ nothing here should ever be committed):
 |---|---|---|---|
 | Variables | `VITE_SUPABASE_URL` | `keepalive.yml` | Supabase → Project Settings → API |
 | Variables | `VITE_SUPABASE_ANON_KEY` | `keepalive.yml` | Supabase → Project Settings → API (anon/publishable key — intentionally public, hence a Variable not a Secret) |
-| Secrets | `SUPABASE_SERVICE_ROLE_KEY` | `purge-deletions.yml` | Supabase → Project Settings → API (**service role** — full bypass of RLS, a Secret and never a Variable, and never in the frontend) |
+| Secrets | `SUPABASE_SERVICE_ROLE_KEY` | `purge-deletions.yml` | Supabase → Project Settings → API (**service role** — full bypass of RLS, a Secret and never a Variable, and never in the frontend). Missing it fails the run as a 401 saying "No API key found in request", which reads like a broken endpoint: GitHub resolves an unset secret to an empty string and the header goes out blank. The workflow now checks first and says which name is missing |
 | Secrets | `SUPABASE_DB_URL` | `backup.yml` | Supabase → Project Settings → Database → Connection string (pooler host is in `supabase/.temp/pooler-url` after linking; password isn't stored anywhere in the repo) |
 
 These two GitHub Variables are separate from the four Netlify env vars
@@ -482,6 +494,20 @@ names, migration numbers, bugs found and fixed) see
   since `0046`: it is checked while you type at sign-up (free, taken) and
   held by a case-insensitive index, so an approval is never a choice between
   two identical strangers.
+- **A finished dinner is a record**: once a round is `ARCHIVED` or
+  `CANCELLED`, every table that belongs to it refuses writes — the name, the
+  date, the roster, the courses, the recipes, the board, the ballots. Enforced
+  by triggers rather than by a check in each RPC (`0054`): there are a dozen
+  write paths and the one that gets forgotten is the hole. The move *into*
+  archived is the last write a round accepts. The Executive Chef keeps the
+  title and loses the powers, and the interface says so rather than offering
+  controls that would only produce a refusal.
+- **Leaving a dinner**: while the door is still open you simply go, and the
+  round moves to your archive. Once the lottery has run, three other people's
+  evening is built on your pairing, so leaving becomes a request the Executive
+  Chef answers — marked in their own roster, withdrawable until they do, and
+  answered with the same choice below. A round you left or were removed from
+  stays visible among your past dinners rather than vanishing (`0050`).
 - **When someone drops out**: removing a cook after the lottery has run is
   a choice, not an automatic repair. *Reconnect* closes the chain so
   everyone still has a dish to make, at the cost of handing one cook a

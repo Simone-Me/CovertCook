@@ -4,6 +4,7 @@ import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { Turnstile } from '../../components/Turnstile'
+import { PasswordField } from '../../components/PasswordField'
 
 export function SignInPage() {
   const { t } = useTranslation()
@@ -36,17 +37,21 @@ export function SignInPage() {
           <label htmlFor="email">{t('auth.email')}</label>
           <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
         </div>
-        <div>
-          <label htmlFor="password">{t('auth.passwordLabel')}</label>
-          <input
-            id="password"
-            type="password"
-            required
-            minLength={10}
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-          />
-        </div>
+        {/* The same field as the two places a password is chosen, so the eye
+            is where it is expected. Two differences, both deliberate:
+            `current-password` tells a manager to offer the saved one rather
+            than generate a new one, and there is no minimum length — a
+            sign-in form must never hold somebody's own password against a
+            rule written after they chose it. The old minLength={10} did
+            exactly that: an account made under the previous rule could not
+            even submit the form. */}
+        <PasswordField
+          id="password"
+          label={t('auth.passwordLabel')}
+          value={password}
+          onChange={setPassword}
+          autoComplete="current-password"
+        />
         <Turnstile onVerify={setCaptchaToken} />
         <button type="submit" disabled={submitting}>
           {t('auth.signIn')}

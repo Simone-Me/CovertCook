@@ -59,6 +59,226 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-24 (16)
+
+**Added: the two moments at the door** (`0052`), and four interface fixes.
+
+The four moments in `0048` all happen once a dinner is under way. The door has
+its own pair, and they are the two where waiting in silence is worst: somebody
+asks to join — only the Executive Chef can answer, and they are running the
+evening in their head rather than refreshing a roster — and a request is
+accepted, after the person who asked has been staring at "waiting for approval"
+with nothing to do about it.
+
+*Addressed by membership, not by round.* `join_round` hands the client a
+membership id and nothing else, and approving is about one person, so passing
+the seat is passing what the caller actually has. The round is derived in SQL,
+where it can be authorised in the same query: **you may announce your own
+arrival and nobody else's** — checked against the joiner's own profile, not
+against membership of the round, so a player already inside cannot make the
+host's phone ring on somebody else's behalf — and only the host of that seat's
+round may announce that it was approved, gated on the seat actually being
+approved so the message cannot arrive before the thing it announces.
+
+*Request or arrival is the database's call.* A round that needs approval
+produces one, a round that does not produces the other, and the seat already
+knows which — so the client does not guess and cannot be wrong.
+
+*No names on a lock screen.* The host's approval screen shows who is asking,
+because approving a pseudonym is approving nobody (`0015`) — but that is a
+screen they chose to open, not something a stranger reads over their shoulder
+on a train. The dinner's name is carried instead: a host with two running needs
+to know which door this is, and neither side learns anything from it they did
+not already know.
+
+*And an empty audience is a normal answer, not a failure.* The host may have
+notifications off; the caller may not be entitled to send this. Both come back
+the same way, on purpose.
+
+**Also fixed**, all four reported from use:
+
+- `MANUAL` arrived as a fourth voting mode in `0040` and never got a
+  translation, so the settings row printed `rounds.voting.MANUAL` at the
+  reader. It has one now, plus a note that says the **rule** rather than a
+  state: the method is settled when the vote opens and stays changeable until
+  somebody has voted (`0043`, `0045`).
+- The venue block ended in a bare "Dinner settings" link, which reads as a
+  place rather than as an answer to "can I still change this?". It is a
+  sentence now, and the link lands on the venue fields — the settings page
+  opens the fold the hash names and scrolls to it, which the browser cannot do
+  alone because the anchor does not exist until the round has loaded.
+- An empty pass in `DRAFT` was a blank space above a paragraph explaining what
+  the pass is, and the two read as one thing. The word says the state, a rule
+  separates it, and the explanation moved behind a question mark: it earns one
+  reading and then gets in the way. The glyph is a placeholder until
+  `public/loupe_question.webp` is committed — it is not in the repo yet, and a
+  missing image is worse than a character.
+- The notifications list in the profile says six moments now, because a list
+  that is not complete is a promise that is not kept.
+
+**Verified:** `0001` → `0052` replayed into a throwaway Postgres 16. The host
+is told, in the host's own language, with the dinner's name and the request
+flag; ringing the bell on somebody else's behalf reaches nobody; nothing goes
+back to the person waiting until the seat is actually approved; after approval
+it reaches exactly them, in their language; a player cannot announce an
+approval; a seat taken without approval reports as an arrival rather than a
+request; and the account switch silences all of it like everything else. Build
+and lint clean.
+
+---
+
+## 2026-08-24 (15)
+
+**Fixed: the archive was empty, and leaving said nothing** (`0051`).
+
+Two separate bugs behind one symptom.
+
+*RLS was hiding the round from the person who left it.* `0050` sorted LEFT and
+REMOVED memberships into the archive and the archive stayed empty, because
+`is_round_member` (`0002`) answers only for an ACTIVE, approved seat and the
+rounds SELECT policy is built on it. The moment a seat is marked LEFT, the
+round row itself becomes unreadable to that person: the client asked, RLS
+returned nothing, and the card had no data to draw.
+
+Loosening `is_round_member` would have been the wrong fix by a wide margin —
+it gates the briefs, the chat, the roster, the pass and the ballots, so
+widening it hands a departed player the inside of a dinner they walked out of.
+Instead there is a second policy on `rounds` alone. Postgres ORs policies of
+the same command, so it adds exactly one thing: a former member can read the
+round **row** — name, date, status — and nothing else in the schema moves.
+
+*And the card no longer pretends to be a door.* It keeps its place in the list
+and loses its link, dimmed rather than struck through: everything behind it
+checks for an active seat and refuses, so opening it could only produce an
+error. A dinner that vanishes reads as data lost; a dinner you cannot open
+reads as a room you left.
+
+*Leaving now says so.* The confirmation is shown on the page you land on, not
+the one you are leaving — that page unmounts in the same tick, so a message
+there would be gone before it could be read.
+
+**Verified** on a throwaway Postgres 16 with RLS actually enabled and the
+`authenticated` role assumed, rather than as the owner who bypasses it: an
+active member reads the round; after leaving they still read the row and its
+name; the roster refuses them with "not a member of this round" and the slots
+return nothing; and a stranger sees nothing at all.
+
+---
+
+## 2026-08-24 (14)
+
+**Fixed: `42501 permission denied for table round_members`** — the rounds list,
+from the moment `0050` was deployed.
+
+`round_members` is the one table in this schema with **column-level** grants:
+`0032` revoked the table and handed the columns back one at a time, so that
+`secret_name` could never leak by being selected. The consequence, which is
+easy to forget precisely because it is invisible in the table definition: a
+column added later is unreadable from the client until somebody grants it, and
+asking for one fails the **entire** query — with a message naming the table
+rather than the column, which sends you looking at RLS policies that are fine.
+
+`useMyRounds` asked for `removal_requested_at`, added in `0050`, and never used
+it. It is gone from the query, and granting it would have been the wrong fix
+anyway: who asked to leave is for that person and the host, and a column grant
+cannot express that. `list_round_members` decides it instead, which is why the
+round page can read it and the list cannot. The reasoning now sits in a comment
+at the query, so the column is not re-added by somebody who sees a field on the
+table and assumes it is readable.
+
+Audited the other direct table reads at the same time: `profiles`,
+`dietary_entries` and `rounds` hold table-level grants, so columns added to
+them — `notifications_enabled`, `deletion_requested_at` — reach the client
+without anything further. `round_members` is the exception, and the only one.
+
+---
+
+## 2026-08-24 (13)
+
+**The eye is on the sign-in form too**, which is the screen where it matters
+most: signing up you are inventing a password and can retype it, signing in you
+are recalling one and a single invisible typo reads as "wrong password".
+
+Two differences from the two places a password is *chosen*, both deliberate.
+`autoComplete="current-password"` tells a manager to offer the saved one rather
+than generate a new one. And there is no minimum length — **the old
+`minLength={10}` was a latent lockout**: a sign-in form that enforces the
+current rule refuses to submit for anybody whose password predates it, and the
+browser blocks it before the server ever gets to say whether it was right. A
+sign-in form checks nothing; it asks.
+
+---
+
+## 2026-08-24 (12)
+
+**Added: leaving a dinner** (`0050`), **and a bug in `0049` that review
+caught.**
+
+*The rule was already written; what was missing was the door and the receipt.*
+`leave_round` has always known that while the round is DRAFT/OPEN/LOCKED
+nobody depends on you — you go, and that is the end of it — and that once the
+lottery has run you are a link in a chain three other people's evening is built
+on, so leaving becomes a request the Executive Chef answers. There was no
+button anywhere in the app for either, and the post-assignment branch returned
+silently: you pressed, and the screen looked exactly as it had a second before.
+The same failure shape as the confirmation resend.
+
+So the request is stamped on the membership now, where both sides see it: the
+player is told it is waiting, the host sees who is asking **in their own
+roster**, next to the name, rather than by digging through the alerts page.
+Pressing it twice returns `ALREADY_REQUESTED` and raises no second alert —
+somebody who hears nothing back will press again, and that is a person being
+reasonable. Withdrawing is one button, and it resolves the host's alert too,
+because a question with nobody behind it is worse than no question.
+
+*A round you left no longer vanishes.* `useMyRounds` filtered on
+`status = 'ACTIVE'`, so walking out deleted the dinner from your account
+entirely — you could not even see that it had happened. LEFT and REMOVED rows
+are fetched now and sort into the archive: two ways for a dinner to be over,
+it ended or you are no longer at it.
+
+*`list_round_members` gains one column, on purpose.* It hands back an explicit
+list precisely so a new column cannot leak by being added to the table, which
+means the request had to be added deliberately — and only for the two people
+entitled to it, the person who asked and the host who answers.
+
+### The `0049` bug, found by review
+
+`anonymise_profile` marked **every** active membership LEFT, including in
+rounds whose assignment already exists — exactly what `leave_round` refuses to
+do. The reason turns out to be sharper than consistency: `remove_member` starts
+by checking the member is ACTIVE and raises otherwise, so erasure emptied the
+seat and locked the only function that can repair the chain out of it in the
+same breath. The host would have been handed a DROPOUT alert they could not
+act on. It now mirrors `leave_round` exactly.
+
+Two other review notes did not survive checking, and are recorded so they are
+not raised again: `filename: 'sw.ts'` does not ship a `.ts` URL — the plugin
+compiles it and emits `dist/sw.js`, which the build output states on every run
+— and `self.__WB_MANIFEST` does type-check today. The second one got an
+explicit declaration anyway: it was working through ambient types, which is a
+thing to depend on rather than to state.
+
+**Also:** the profile page folds. Three sections that had become one long
+scroll — notifications, dietary, deleting your account — arrive closed, each
+closed row still showing its current answer, because folding away the choices
+should not fold away the choice you already made. The language dropdown is
+gone: it is the same two buttons the sign-in and sign-up pages use, since a
+dropdown that hides one of its two options behind a click was never the better
+control. And the account-deletion card carries a red border — the border and
+not the background, because it is a boundary to notice, not an error that has
+already happened.
+
+**Verified:** `0001` → `0050` replayed into a throwaway Postgres 16. Leaving
+before the lottery returns `LEFT` and empties the seat; after it returns
+`REQUESTED`, the seat stays ACTIVE and one alert is raised; pressing again
+returns `ALREADY_REQUESTED` and still one alert; withdrawing clears both the
+stamp and the alert. And the `0049` fix: after erasure in an ASSIGNED round the
+seat is still ACTIVE with the host told and the reason `ACCOUNT_DELETED`.
+Build and lint clean.
+
+---
+
 ## 2026-08-24 (11)
 
 **Added: password rules that prefer length, the missing half of the password

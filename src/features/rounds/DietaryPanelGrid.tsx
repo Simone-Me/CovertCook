@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import type { DietaryKind, DietaryPanelEntry } from '../../lib/rpc'
+import { FoodLabel } from '../../components/FoodLabel'
 
 // Simple geometric glyphs, distinguished by shape (not just color, for
 // colorblind-safe legibility) so each dietary_kind reads differently at a
@@ -66,7 +67,10 @@ export function DietaryPanelGrid({ entries }: { entries: DietaryPanelEntry[] | u
           <div className="allergy-placeholder" title={t(`dietary.kind.${d.kind}`)} aria-label={t(`dietary.kind.${d.kind}`)}>
             <KindIcon kind={d.kind} />
           </div>
-          <span>{d.label}</span>
+          {/* Since the grid, a label is either one of our codes or something
+              somebody typed. FoodLabel is what keeps CELERY from reaching a
+              French table as the English word it is stored as. */}
+          <FoodLabel label={d.label} />
         </div>
       ))}
     </div>

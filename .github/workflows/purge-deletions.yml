@@ -18,6 +18,23 @@ jobs:
   purge:
     runs-on: ubuntu-latest
     steps:
+      # Without this the run fails as a 401 from PostgREST — "No API key found
+      # in request" — which reads like the endpoint is wrong when the actual
+      # cause is an empty secret interpolating to nothing. GitHub resolves a
+      # missing secret to the empty string and says nothing about it.
+      - name: Check the service role key is configured
+        env:
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          URL: ${{ vars.VITE_SUPABASE_URL }}
+        run: |
+          missing=""
+          [ -z "$KEY" ] && missing="$missing SUPABASE_SERVICE_ROLE_KEY (Settings -> Secrets and variables -> Actions -> Secrets)"
+          [ -z "$URL" ] && missing="$missing VITE_SUPABASE_URL (same page, Variables tab)"
+          if [ -n "$missing" ]; then
+            echo "Not configured:$missing"
+            exit 1
+          fi
+
       - name: Purge accounts whose thirty days are up
         run: |
           response=$(curl -s -w "\n%{http_code}" -X POST \

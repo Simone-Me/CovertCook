@@ -51,12 +51,18 @@ const ROUND_COLUMNS =
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing
 // lives in a round, and one person cancelling shouldn't erase it.
-export function isPastRound(r: Pick<RoundRow, 'status'>) {
+export function isPastRound(r: Pick<RoundRow, 'status'> & { member_status?: string }) {
+  // Two ways for a dinner to be over: it ended, or you are no longer at it.
+  if (r.member_status && r.member_status !== 'ACTIVE') return true
   return r.status === 'CANCELLED' || r.status === 'ARCHIVED'
 }
 
 export interface MyRoundRow extends RoundRow {
   approved: boolean
+  /** Your own standing in this round, which is not the round's own status:
+   *  a dinner still running is over as far as somebody who walked out of it
+   *  is concerned. */
+  member_status: 'ACTIVE' | 'LEFT' | 'REMOVED'
 }
 
 export function useMyRounds(uid: string | undefined) {
@@ -64,16 +70,32 @@ export function useMyRounds(uid: string | undefined) {
     queryKey: ['rounds', 'mine', uid],
     enabled: !!uid,
     queryFn: async () => {
+      // LEFT and REMOVED rows are fetched too. Filtering them out made a
+      // dinner you walked out of vanish from your account entirely, which
+      // reads as data loss rather than as leaving — you can no longer even
+      // see that it happened. They belong in the archive.
+      //
+      // NOT `removal_requested_at`, and not by oversight. round_members has
+      // column-level grants (0032 revoked the table and handed the columns
+      // back one by one so secret_name could never leak), so a column added
+      // later is unreadable here until somebody grants it — asking for one
+      // fails the whole query with "permission denied for table
+      // round_members", naming the table rather than the column. Granting it
+      // would also be wrong: who asked to leave is for that person and the
+      // host, and a column grant cannot say that. list_round_members decides
+      // it instead, which is why the round page reads it and this list does
+      // not.
       const { data, error } = await supabase
         .from('round_members')
-        .select(`approved, rounds(${ROUND_COLUMNS})`)
+        .select(`approved, status, rounds(${ROUND_COLUMNS})`)
         .eq('profile_id', uid as string)
-        .eq('status', 'ACTIVE')
+        .in('status', ['ACTIVE', 'LEFT', 'REMOVED'])
         .order('joined_at', { ascending: false })
       if (error) throw error
       return (data ?? []).map((m) => ({
         ...(m.rounds as unknown as RoundRow),
         approved: m.approved,
+        member_status: m.status,
       })) as MyRoundRow[]
     },
   })
@@ -98,7 +120,11 @@ export function useRound(roundId: string | undefined) {
 export interface RoundMemberRow {
   id: string
   round_id: string
-  profile_id: string
+  // Null for everybody but you, unless the round is OPEN, you are a SPY host,
+  // or the reveal has happened (0053). It used to be present for every member
+  // beside their pseudonym, and profiles are readable by co-members — two
+  // calls and a join gave up the whole mapping.
+  profile_id: string | null
   // Null while sign-ups are still open: the roster is revealed to everyone at
   // once when the door closes, so that arrival order can't be read back as
   // identity (0032). Your own name is always present.
@@ -106,6 +132,9 @@ export interface RoundMemberRow {
   role: 'HOST' | 'PLAYER'
   status: 'ACTIVE' | 'LEFT' | 'REMOVED'
   approved: boolean
+  /** Set when this player has asked to be let out of a round whose chain
+   *  already exists (0050). Visible only to them and to the host. */
+  removal_requested_at: string | null
 }
 
 export function useRoundMembers(roundId: string | undefined) {

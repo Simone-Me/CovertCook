@@ -1,8 +1,9 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Link, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { supabase } from '../../lib/supabase'
 import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
@@ -17,6 +18,9 @@ import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import {
   advancePhase,
+  cancelLeaveRequest,
+  leaveRound,
+  notifyApproved,
   notifyRoundPhase,
   approveMember,
   rejectMember,
@@ -56,12 +60,16 @@ type OpenDrawer = 'chefs' | 'allergies' | 'info' | null
 export function RoundHomePage() {
   const { t } = useTranslation()
   const { roundId } = useParams()
+  const navigate = useNavigate()
   const { profile } = useAuth()
   const queryClient = useQueryClient()
 
   const { data: round, isLoading: roundLoading } = useRound(roundId)
-  const { data: members } = useRoundMembers(roundId)
+  const { data: members, error: membersError } = useRoundMembers(roundId)
   const [error, setError] = useState<string | null>(null)
+  const [passHelp, setPassHelp] = useState(false)
+  const [leaveConfirm, setLeaveConfirm] = useState(false)
+  const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteNote, setInviteNote] = useState<string | null>(null)
@@ -151,9 +159,93 @@ export function RoundHomePage() {
     refetchInterval: 30000,
   })
 
+  // The Executive Chef is the one person at this table who is not anonymous:
+  // PRESENTATION.md has them standing apart from the pseudonyms, the roster
+  // already marks which seat is theirs, and organising is a public act. So the
+  // roster names them — and names nobody else.
+  const { data: hostName } = useQuery({
+    queryKey: ['profiles', round?.host_id],
+    enabled: !!round?.host_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', round?.host_id as string)
+        .maybeSingle()
+      return (data?.display_name as string | undefined) ?? null
+    },
+  })
+
+  // 0051 made the round row readable to somebody who left it, so that it could
+  // sit in their archive — which also made this page reachable by URL, by the
+  // back button, or by a link somebody still had open. Everything inside
+  // refuses a former member, so the roster call comes back 42501 and the page
+  // used to render around a hole. It says what happened instead.
+  const notAMember =
+    membersError instanceof Error && /not a member of this round/i.test(membersError.message)
+
+  if (notAMember) {
+    return (
+      <div className="stack sheet">
+        <h1>{round?.name ?? t('rounds.myRounds')}</h1>
+        <p className="muted">{t('rounds.left.noLongerIn')}</p>
+        <Link to="/">
+          <button type="button">{t('rounds.myRounds')}</button>
+        </Link>
+      </div>
+    )
+  }
+
   if (roundLoading || !round) return <p className="muted">…</p>
 
-  const isHost = round.host_id === profile?.id
+  // A dinner that has been archived or cancelled is a record (0054): the
+  // database refuses every write to it, so the host's controls would only lead
+  // to an error. Folding that into isHost turns the whole page read-only in
+  // one line — the Executive Chef keeps the title and loses the powers, which
+  // is what being over means.
+  const frozen = round.status === 'ARCHIVED' || round.status === 'CANCELLED'
+  const isHost = round.host_id === profile?.id && !frozen
+
+
+  // Your own seat in this round, which the roster query already knows about.
+  const myMembership = members?.find((m) => m.profile_id === profile?.id)
+  const leaveIsFree = ['DRAFT', 'OPEN', 'LOCKED'].includes(round.status)
+  const leaveAsked = !!myMembership?.removal_requested_at
+  const isFinished = ['RESULTS', 'ARCHIVED', 'CANCELLED'].includes(round.status)
+
+  async function onLeave() {
+    if (!roundId) return
+    setLeaveBusy(true)
+    try {
+      const outcome = await leaveRound(roundId)
+      setLeaveConfirm(false)
+      // Walking out means this round is no longer one of yours: the list has
+      // to be re-read, or you are left looking at a dinner you have left.
+      await queryClient.invalidateQueries({ queryKey: ['rounds'] })
+      // The confirmation belongs on the page you land on, not the one you are
+      // leaving: this page unmounts in the same tick.
+      if (outcome === 'LEFT') {
+        navigate('/', { replace: true, state: { leftRound: round?.name } })
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setLeaveBusy(false)
+    }
+  }
+
+  async function onCancelLeave() {
+    if (!roundId) return
+    setLeaveBusy(true)
+    try {
+      await cancelLeaveRequest(roundId)
+      await queryClient.invalidateQueries({ queryKey: ['rounds'] })
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setLeaveBusy(false)
+    }
+  }
   const pendingById = new Map((pendingMembers ?? []).map((p) => [p.member_id, p]))
   const phaseIdx = ROUND_PHASE_ORDER.indexOf(round.status)
   const assigned = phaseIdx >= ROUND_PHASE_ORDER.indexOf('ASSIGNED')
@@ -161,6 +253,10 @@ export function RoundHomePage() {
   const shareLink = `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE') ?? []
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
+
+  const rosterMeta = hostName
+    ? `${t('rounds.chefCount', { count: activeApprovedCount })} — ${t('rounds.executiveChef')} : ${hostName}`
+    : t('rounds.chefCount', { count: activeApprovedCount })
   const pendingCount = pendingMembers?.length ?? 0
 
   // While the door is open the server sends no names but your own (0032), so
@@ -366,6 +462,9 @@ export function RoundHomePage() {
   async function onApprove(memberId: string) {
     if (!roundId) return
     await approveMember(roundId, memberId)
+    // The person who asked has been looking at "waiting for approval" with
+    // nothing they can do about it. Tell them the door opened.
+    void notifyApproved(memberId)
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'pending-members'] })
   }
@@ -420,6 +519,10 @@ export function RoundHomePage() {
         <div className="paper">
           <RoundProgress round={round} isHost={isHost} />
         </div>
+
+        {/* Said once, so the missing controls read as a rule rather than as
+            something broken. */}
+        {frozen && <p className="notice">{t('rounds.frozen')}</p>}
 
         {error && <div className="error">{error}</div>}
 
@@ -524,10 +627,31 @@ export function RoundHomePage() {
             about a door they had shut themselves — that guidance moved to
             settings, where somebody actually goes looking for it. */}
         {round.status === 'DRAFT' && (
-          <div className="stack">
-            <span className="pass__section-title">{t('rounds.pass.whatIsIt')}</span>
-            <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
-          </div>
+          <>
+            {/* An empty pass in DRAFT was a blank space above a paragraph
+                explaining what the pass is, and the two read as one thing. The
+                word says the state, the rule below separates it, and the
+                explanation is behind the question mark — because it is worth
+                reading once and never again. */}
+            <p className="pass__empty" style={{ margin: 0 }}>
+              <em>{t('rounds.pass.empty')}</em>
+            </p>
+            <hr className="pass__rule" />
+            <div className="stack">
+              <button
+                type="button"
+                className="pass__help"
+                aria-expanded={passHelp}
+                onClick={() => setPassHelp((v) => !v)}
+              >
+                <Icon name="help" size={18} />
+                <span>{t('rounds.pass.whatIsItToggle')}</span>
+              </button>
+              {passHelp && (
+                <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
+              )}
+            </div>
+          </>
         )}
 
         {/* Courses are decided once the table is final, not while it is still
@@ -739,7 +863,7 @@ export function RoundHomePage() {
         <Envelope
           icon={<Icon name="chefs" />}
           name={t('rounds.drawers.chefs')}
-          meta={t('rounds.seatCount', { count: activeApprovedCount })}
+          meta={rosterMeta}
           badge={isHost && pendingCount > 0 ? pendingCount : undefined}
           tilt={1}
           onOpen={() => toggle('chefs')}
@@ -758,6 +882,11 @@ export function RoundHomePage() {
                         so without a mark there is no way to tell which
                         stranger you are. A wine ring, the same trace the
                         cloth picks up as the evening goes on. */}
+                    {/* A request to be let out, marked where the host is
+                        already looking at who is in the room. */}
+                    {isHost && m.removal_requested_at && (
+                      <span className="chef-leaving">{t('rounds.leave.requested')}</span>
+                    )}
                     {name ? (
                       <span className={m.profile_id === profile?.id ? 'chef-you' : undefined}>
                         {name}
@@ -808,6 +937,42 @@ export function RoundHomePage() {
 
               {rosterCovered && (
                 <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>
+              )}
+
+              {/* Your own way out, at the bottom of the roster because that is
+                  where you are looking at who is in the room. What it does
+                  depends entirely on when you press it, and the words change
+                  with it rather than staying vague: while the door is open you
+                  simply go; once the lottery has run, three other people's
+                  evening is built on your pairing, so it becomes a request the
+                  Executive Chef answers. */}
+              {!isHost && myMembership?.status === 'ACTIVE' && !isFinished && (
+                <div className="stack leave-seat">
+                  {leaveAsked ? (
+                    <>
+                      <p className="muted" style={{ margin: 0 }}>{t('rounds.leave.asked')}</p>
+                      <button type="button" className="secondary" disabled={leaveBusy} onClick={onCancelLeave}>
+                        {t('rounds.leave.stayAfterAll')}
+                      </button>
+                    </>
+                  ) : leaveConfirm ? (
+                    <InlineConfirm
+                      title={t(leaveIsFree ? 'rounds.leave.confirmNow' : 'rounds.leave.confirmAsk')}
+                      confirmLabel={t(leaveIsFree ? 'rounds.leave.now' : 'rounds.leave.ask')}
+                      busy={leaveBusy}
+                      onConfirm={onLeave}
+                      onCancel={() => setLeaveConfirm(false)}
+                    >
+                      <p className="confirmbox__why">
+                        {t(leaveIsFree ? 'rounds.leave.whyNow' : 'rounds.leave.whyAsk')}
+                      </p>
+                    </InlineConfirm>
+                  ) : (
+                    <button type="button" className="secondary" onClick={() => setLeaveConfirm(true)}>
+                      {t(leaveIsFree ? 'rounds.leave.now' : 'rounds.leave.ask')}
+                    </button>
+                  )}
+                </div>
               )}
 
 
@@ -876,10 +1041,15 @@ export function RoundHomePage() {
           <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
         )}
 
+        {/* The count on the flap, and nothing at all when it is zero: a badge
+            reading 0 is a thing to check, and there is nothing to check. It is
+            the one envelope where knowing there is something inside changes
+            whether you open it before you start cooking. */}
         <Envelope
           icon={<Icon name="allergies" />}
           name={t('rounds.drawers.allergies')}
           meta={t('dietary.panelTitle')}
+          badge={dietaryPanel && dietaryPanel.length > 0 ? dietaryPanel.length : undefined}
           tilt={2}
           onOpen={() => toggle('allergies')}
         >
@@ -938,7 +1108,21 @@ export function RoundHomePage() {
                   </>
                 )}
               </dl>
-              {isHost && <Link to={`/rounds/${roundId}/settings`}>{t('rounds.settings.title')}</Link>}
+              {/* Was a bare "Dinner settings" link, which reads as a place
+                  rather than as an answer to the question the reader actually
+                  has, which is "can I still change this?". The sentence says
+                  yes, and the link lands on the venue fields instead of the
+                  top of a long page. */}
+              {isHost && (
+                <p className="muted editable-note">
+                  <em>
+                    {t('rounds.settings.venueEditable')} —{' '}
+                    <Link to={`/rounds/${roundId}/settings#location`}>
+                      {t('rounds.settings.venueHere')}
+                    </Link>
+                  </em>
+                </p>
+              )}
               {isHost && assigned && <Link to={`/rounds/${roundId}/alerts`}>{t('alerts.title')}</Link>}
             </div>
           )}

@@ -2,14 +2,17 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
+import { Fold } from '../../components/Fold'
+import { FoodLabel } from '../../components/FoodLabel'
+import { FoodTagGrid } from '../../components/FoodTagGrid'
+import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
+import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
-import { SUPPORTED_LOCALES, type SupportedLocale } from '../../lib/i18n'
+import { type SupportedLocale } from '../../lib/i18n'
 import { cancelAccountDeletion, requestAccountDeletion, type DietaryKind } from '../../lib/rpc'
 import { currentPushState, disablePush, enablePush, type PushState } from '../../lib/push'
-
-const KINDS: DietaryKind[] = ['ALLERGY_SEVERE', 'ALLERGY_MILD', 'DIET', 'DISLIKE']
 
 interface DietaryRow {
   id: string
@@ -28,8 +31,9 @@ export function ProfilePage() {
   const { profile, session, refreshProfile } = useAuth()
   const queryClient = useQueryClient()
 
-  const [kind, setKind] = useState<DietaryKind>('ALLERGY_SEVERE')
-  const [label, setLabel] = useState('')
+  const [openSet, setOpenSet] = useState<'allergy' | 'diet' | null>(null)
+  const [draftCodes, setDraftCodes] = useState<string[]>([])
+  const [draftTyped, setDraftTyped] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [push, setPush] = useState<PushState | null>(null)
@@ -116,24 +120,27 @@ export function ProfilePage() {
     },
   })
 
-  async function onAdd() {
-    if (!label.trim() || !profile?.id) return
-    setError(null)
-    setBusy(true)
-    try {
-      const { error } = await supabase
-        .from('dietary_entries')
-        .insert({ profile_id: profile.id, kind, label: label.trim() })
-      if (error) throw error
-      setLabel('')
-      await queryClient.invalidateQueries({ queryKey: ['dietary'] })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
-    } finally {
-      setBusy(false)
+  const kindsFor = (which: 'allergy' | 'diet'): DietaryKind[] =>
+    which === 'allergy' ? ['ALLERGY_SEVERE', 'ALLERGY_MILD'] : ['DIET']
+
+  // Opening loads what is stored into a draft. Closing the other one first is
+  // the whole point of the switch: two open panels are two sets of pending
+  // changes, and only one of them would ever get confirmed.
+  function beginEditing(which: 'allergy' | 'diet') {
+    if (openSet === which) {
+      setOpenSet(null)
+      return
     }
+    const kinds = kindsFor(which)
+    const mine = (entries ?? []).filter((e) => kinds.includes(e.kind))
+    setDraftCodes(mine.filter((e) => isFoodCode(e.label)).map((e) => e.label))
+    setDraftTyped(mine.filter((e) => !isFoodCode(e.label)).map((e) => e.label))
+    setOpenSet(which)
   }
 
+  // One write, at the end, from the difference between what was stored and
+  // what the draft says. Saving on every tap made a mis-tap a change to
+  // somebody's medical record with no moment to look at it first.
   async function onRemove(id: string) {
     setError(null)
     try {
@@ -142,6 +149,42 @@ export function ProfilePage() {
       await queryClient.invalidateQueries({ queryKey: ['dietary'] })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
+    }
+  }
+
+  async function onConfirm() {
+    if (!openSet || !profile?.id) return
+    const kinds = kindsFor(openSet)
+    const stored = (entries ?? []).filter((e) => kinds.includes(e.kind))
+    const wanted = [...draftCodes.filter((c) => c !== OTHER_CODE), ...draftTyped]
+
+    const toRemove = stored.filter((e) => !wanted.includes(e.label)).map((e) => e.id)
+    const toAdd = wanted.filter((label) => !stored.some((e) => e.label === label))
+
+    setError(null)
+    setBusy(true)
+    try {
+      if (toRemove.length) {
+        const { error } = await supabase.from('dietary_entries').delete().in('id', toRemove)
+        if (error) throw error
+      }
+      if (toAdd.length) {
+        const { error } = await supabase.from('dietary_entries').insert(
+          toAdd.map((label) => ({
+            profile_id: profile.id,
+            // Every allergen the grid records is severe, here as at sign-up.
+            kind: openSet === 'allergy' ? 'ALLERGY_SEVERE' : 'DIET',
+            label,
+          })),
+        )
+        if (error) throw error
+      }
+      await queryClient.invalidateQueries({ queryKey: ['dietary'] })
+      setOpenSet(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -186,23 +229,18 @@ export function ProfilePage() {
           <label>{t('profile.signedInAs')}</label>
           <strong>{session?.user.email}</strong>
         </div>
-        <div>
-          <label htmlFor="locale">{t('app.language')}</label>
-          <select
-            id="locale"
-            value={profile?.locale ?? i18n.resolvedLanguage ?? 'en'}
-            onChange={(e) => onLocale(e.target.value as SupportedLocale)}
-          >
-            {SUPPORTED_LOCALES.map((l) => (
-              <option key={l} value={l}>
-                {t(`profile.locale.${l}`)}
-              </option>
-            ))}
-          </select>
-        </div>
+        {/* The same two buttons the sign-in and sign-up pages use. A dropdown
+            here and a pair of buttons there were two controls for one choice,
+            and with two languages a dropdown hides half of what it offers
+            behind a click. */}
+        <LanguageSwitch onChange={(code) => onLocale(code as SupportedLocale)} />
       </div>
 
-      <h2>{t('push.title')}</h2>
+      {/* Folded, all three of them. The page had become one long scroll where
+          every setting shouted at once; they arrive closed and you open the
+          one you came for. The closed row still says what the current answer
+          is, or folding would hide the choice as well as the choices. */}
+      <Fold title={t('push.title')} aside={t(`push.aside.${shownPush}`)}>
       {/* One switch, and it is per device: this is the phone you are holding,
           not your account. The permission prompt is raised by the button and
           never on load — a refusal cannot be taken back by the site, only by
@@ -222,58 +260,93 @@ export function ProfilePage() {
         <p className="muted">{t('push.perRound')}</p>
       </div>
 
-      <h2>{t('dietary.title')}</h2>
+      </Fold>
+
+      <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>
       {/* Round-wide, not per-dinner: a brief is checked against every
           diner's restrictions, so this list follows you into every round
           you join. Changing it here changes it everywhere. */}
       <p className="muted">{t('profile.dietaryHelp')}</p>
 
-      <div className="stack">
-        {entries?.length === 0 && <p className="muted">{t('profile.noRestrictions')}</p>}
-        {entries?.map((e) => (
-          <div key={e.id} className="card row" style={{ justifyContent: 'space-between' }}>
-            <span>
-              <strong>{e.label}</strong>
-              <span className="muted"> — {t(`dietary.kind.${e.kind}`)}</span>
-            </span>
-            <button type="button" className="secondary" onClick={() => onRemove(e.id)}>
-              {t('actions.remove')}
+      {/* What is declared, laid out like a menu rather than as a list of rows
+          with their category spelled out beside each one: two headings, the
+          pictures under them, the word under each picture. */}
+      <DeclaredList
+        title={t('dietary.kind.ALLERGY_SEVERE')}
+        empty={t('profile.noneAllergy')}
+        entries={(entries ?? []).filter((e) => e.kind !== 'DIET' && e.kind !== 'DISLIKE')}
+        onRemove={onRemove}
+      />
+      <DeclaredList
+        title={t('dietary.kind.DIET')}
+        empty={t('profile.noneDiet')}
+        entries={(entries ?? []).filter((e) => e.kind === 'DIET')}
+        onRemove={onRemove}
+        tone="diet"
+      />
+
+      {/* One panel at a time, and neither open by default. Both grids at once
+          is a wall of eighty pictures on a settings page; and opening the
+          second has to close the first, or the button stops being a switch and
+          becomes two independent toggles that look like one. */}
+      <div className="row">
+        <button
+          type="button"
+          className={openSet === 'allergy' ? '' : 'secondary'}
+          aria-expanded={openSet === 'allergy'}
+          onClick={() => beginEditing('allergy')}
+        >
+          {t('profile.editAllergies')}
+        </button>
+        <button
+          type="button"
+          className={`tone-diet${openSet === 'diet' ? '' : ' secondary'}`}
+          aria-expanded={openSet === 'diet'}
+          onClick={() => beginEditing('diet')}
+        >
+          {t('profile.editDiets')}
+        </button>
+      </div>
+
+      {openSet && (
+        <div className="card stack">
+          {/* Nothing is written while you tap. The old version saved on every
+              touch, which made a mis-tap a change to somebody's medical
+              record and left no moment to look at what you had chosen. */}
+          <FoodTagGrid
+            tags={openSet === 'allergy' ? ALLERGENS : DIETS}
+            selected={draftCodes}
+            onToggle={(code) =>
+              setDraftCodes((prev) =>
+                prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+              )
+            }
+            namespace={openSet === 'allergy' ? 'food.allergen' : 'food.diet'}
+            otherValues={draftTyped}
+            onOtherAdd={(v) => setDraftTyped((prev) => [...prev, v])}
+            onOtherRemove={(v) => setDraftTyped((prev) => prev.filter((x) => x !== v))}
+          />
+
+          {openSet === 'allergy' && <p className="muted">{t('dietary.whoSeesIt')}</p>}
+
+          <div className="row">
+            <button type="button" disabled={busy} onClick={() => void onConfirm()}>
+              {t('actions.confirm')}
+            </button>
+            <button type="button" className="secondary" onClick={() => setOpenSet(null)}>
+              {t('actions.cancel')}
             </button>
           </div>
-        ))}
-      </div>
-
-      <div className="card stack">
-        <label htmlFor="new-kind">{t('dietary.addEntry')}</label>
-        <select id="new-kind" value={kind} onChange={(e) => setKind(e.target.value as DietaryKind)}>
-          {KINDS.map((k) => (
-            <option key={k} value={k}>
-              {t(`dietary.kind.${k}`)}
-            </option>
-          ))}
-        </select>
-        <div className="row">
-          <input
-            placeholder={t('dietary.label')}
-            value={label}
-            onChange={(e) => setLabel(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && onAdd()}
-          />
-          <button type="button" disabled={busy || !label.trim()} onClick={onAdd}>
-            {t('actions.add')}
-          </button>
         </div>
-      </div>
+      )}
 
-      <button type="button" className="secondary" onClick={() => supabase.auth.signOut()}>
-        {t('auth.signOut')}
-      </button>
+      </Fold>
 
-      <h2>{t('account.title')}</h2>
+      <Fold title={t('account.title')}>
       {/* Required by both stores and by GDPR, and it has to be here rather
           than in an email to support: the whole point is that it does not
           depend on anybody answering. */}
-      <div className="card stack">
+      <div className="card stack card--danger">
         {deletionDue ? (
           <>
             <p>{t('account.pending', { date: deletionDue.toLocaleDateString(i18n.language) })}</p>
@@ -304,6 +377,67 @@ export function ProfilePage() {
           </>
         )}
       </div>
+      </Fold>
+
+      <button type="button" className="secondary" onClick={() => supabase.auth.signOut()}>
+        {t('auth.signOut')}
+      </button>
+    </div>
+  )
+}
+
+
+/**
+ * One declared set, laid out like a line on a menu: the heading, then the
+ * pictures with their names under them.
+ *
+ * The list this replaces printed the category beside every single row —
+ * "Celery — Severe allergy", "Peanuts — Severe allergy" — which is the same
+ * word four times and none of it new. Grouping says it once.
+ *
+ * The empty line is a sentence rather than a blank space: nothing declared and
+ * nothing loaded look identical when both are empty, and one of them means a
+ * cook can stop worrying.
+ */
+function DeclaredList({
+  title,
+  empty,
+  entries,
+  onRemove,
+  tone,
+}: {
+  title: string
+  empty: string
+  entries: DietaryRow[]
+  onRemove: (id: string) => void
+  tone?: 'diet'
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="declared">
+      <h3 className={`declared__title${tone === 'diet' ? ' tone-diet' : ''}`}>{title}</h3>
+      {entries.length === 0 ? (
+        <p className="declared__empty">
+          <em>{empty}</em>
+        </p>
+      ) : (
+        <ul className="declared__list">
+          {entries.map((e) => (
+            <li key={e.id}>
+              <FoodLabel label={e.label} stacked />
+              <button
+                type="button"
+                className="linkish"
+                onClick={() => onRemove(e.id)}
+                aria-label={`${t('actions.remove')} ${e.label}`}
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }

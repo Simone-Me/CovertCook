@@ -79,6 +79,26 @@ export async function notifyMyCook(roundId: string) {
   await notify(roundId, 'BRIEF_RECEIVED')
 }
 
+// The two at the door (0052), addressed by membership rather than by round:
+// joining hands back a membership id, and approving is about one person. Which
+// of "asked to join" and "took a seat" this was is decided in the database from
+// the seat itself, not guessed here.
+export async function notifyHostOfArrival(memberId: string) {
+  await notifyMember(memberId, 'JOIN_REQUESTED')
+}
+
+export async function notifyApproved(memberId: string) {
+  await notifyMember(memberId, 'JOIN_APPROVED')
+}
+
+async function notifyMember(memberId: string, kind: 'JOIN_REQUESTED' | 'JOIN_APPROVED') {
+  try {
+    await supabase.functions.invoke('send-push', { body: { member_id: memberId, kind } })
+  } catch {
+    // Same posture as the rest: the door already opened.
+  }
+}
+
 async function notify(roundId: string, kind: NotifiedMoment) {
   try {
     await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind } })
@@ -104,6 +124,20 @@ export async function requestAccountDeletion(): Promise<string> {
 export async function cancelAccountDeletion() {
   const res = await supabase.rpc('cancel_account_deletion')
   return unwrap(res)
+}
+
+// Who is actually at this table, by name, for the host alone (0053).
+// Deliberately carries no pseudonym: excluding a pair is a statement about two
+// people, and pairing that list with the roster's would hand the host the
+// mapping the round is keeping from them.
+export interface RoundPerson {
+  member_id: string
+  display_name: string
+}
+
+export async function listRoundPeople(roundId: string): Promise<RoundPerson[]> {
+  const res = await supabase.rpc('list_round_people', { p_round_id: roundId })
+  return unwrap<RoundPerson[]>(res)
 }
 
 // Web push subscriptions. Writes go through RPCs rather than a table policy
@@ -283,9 +317,19 @@ export async function joinRound(input: { code: string; turnstileTicket: string }
   return unwrap<string>(res) // round_members id
 }
 
-export async function leaveRound(roundId: string) {
-  const res = await supabase.rpc('leave_round', { p_round_id: roundId })
+// What leaving costs depends on when you go (0050): before the lottery the
+// seat empties on the spot; after it, this is a request the Executive Chef
+// answers, and the answer decides whether the chain is reconnected.
+export type LeaveOutcome = 'LEFT' | 'REQUESTED' | 'ALREADY_REQUESTED'
+
+export async function cancelLeaveRequest(roundId: string) {
+  const res = await supabase.rpc('cancel_leave_request', { p_round_id: roundId })
   return unwrap(res)
+}
+
+export async function leaveRound(roundId: string): Promise<LeaveOutcome> {
+  const res = await supabase.rpc('leave_round', { p_round_id: roundId })
+  return unwrap<LeaveOutcome>(res)
 }
 
 export async function approveMember(roundId: string, memberId: string) {

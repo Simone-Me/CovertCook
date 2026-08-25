@@ -19,12 +19,18 @@
 // tap on it opens.
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches } from 'workbox-precaching'
+import { precacheAndRoute, cleanupOutdatedCaches, type PrecacheEntry } from 'workbox-precaching'
 import { registerRoute } from 'workbox-routing'
-import { NetworkFirst } from 'workbox-strategies'
+import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
-declare const self: ServiceWorkerGlobalScope
+// `__WB_MANIFEST` is a build-time placeholder the plugin replaces with the
+// precache list, not part of ServiceWorkerGlobalScope. It type-checks today
+// through ambient types, which is a thing to depend on rather than to state —
+// so it is stated.
+declare const self: ServiceWorkerGlobalScope & {
+  __WB_MANIFEST: (string | PrecacheEntry)[]
+}
 
 self.skipWaiting()
 clientsClaim()
@@ -37,6 +43,18 @@ registerRoute(
   new NetworkFirst({
     cacheName: 'covertcook-api-get',
     plugins: [new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 })],
+  }),
+)
+
+// The allergen and diet tiles, kept out of the precache (vite.config.ts) because
+// they are a third of the app for a screen seen at sign-up. CacheFirst rather
+// than NetworkFirst: an icon of a peanut does not change, so once it is on the
+// device there is no reason to ask about it again.
+registerRoute(
+  ({ url }) => url.pathname.startsWith('/allergy/') || url.pathname.startsWith('/diet/'),
+  new CacheFirst({
+    cacheName: 'covertcook-food-icons',
+    plugins: [new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 90 })],
   }),
 )
 
