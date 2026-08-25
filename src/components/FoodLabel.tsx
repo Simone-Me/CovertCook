@@ -17,8 +17,18 @@ import { foodIconSrc, isFoodCode } from '../lib/foodTags'
 export function FoodLabel({ label, stacked = false }: { label: string; stacked?: boolean }) {
   const { t } = useTranslation()
 
+  // Anything not in the manifest is either a legacy row from before the grid
+  // or something typed into "other". Both get the Other picture and their own
+  // words: without a picture they read as a note somebody left rather than as
+  // a declaration, and in a grid of pictures that is the one that gets
+  // skipped.
   if (!isFoodCode(label)) {
-    return <em className="food-label food-label--typed">{label}</em>
+    return (
+      <span className={`food-label food-label--typed${stacked ? ' food-label--stacked' : ''}`}>
+        <img src="/allergy/other.webp" alt="" aria-hidden="true" loading="lazy" />
+        <em>{label}</em>
+      </span>
+    )
   }
 
   const cls = stacked ? 'food-label food-label--stacked' : 'food-label'

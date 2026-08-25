@@ -24,7 +24,12 @@ export function AppFooter() {
   return (
     <footer className="app-foot">
       <p className="app-foot__row">
-        <span>© {YEAR} CovertCook</span>
+        {/* The build, next to the name. Somebody reporting "it still does the
+            thing" needs a way to say which build they are looking at, and
+            asking them to open a console is asking them not to report it. */}
+        <span>
+          © {YEAR} CovertCook <span className="app-foot__version">{__APP_VERSION__}</span>
+        </span>
         <Link to="/legal/terms">{t('legal.terms')}</Link>
         <Link to="/legal/privacy">{t('legal.privacy')}</Link>
         <a href="mailto:contact@opus35.fr">{t('legal.contact')}</a>

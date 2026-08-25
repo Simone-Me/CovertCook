@@ -394,7 +394,9 @@
       "done": "Vous avez quitté {{name}}. Ce dîner est passé dans vos archives, et il n’y a plus rien à ouvrir.",
       "LEFT": "Vous êtes parti",
       "REMOVED": "Retiré"
-    }
+    },
+    "chefCount_one": "{{count}} chef",
+    "chefCount_other": "{{count}} chefs"
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",

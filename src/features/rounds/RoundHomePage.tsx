@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { supabase } from '../../lib/supabase'
 import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
@@ -158,9 +159,28 @@ export function RoundHomePage() {
     refetchInterval: 30000,
   })
 
+  // The Executive Chef is the one person at this table who is not anonymous:
+  // PRESENTATION.md has them standing apart from the pseudonyms, the roster
+  // already marks which seat is theirs, and organising is a public act. So the
+  // roster names them — and names nobody else.
+  const { data: hostName } = useQuery({
+    queryKey: ['profiles', round?.host_id],
+    enabled: !!round?.host_id,
+    queryFn: async () => {
+      const { data } = await supabase
+        .from('profiles')
+        .select('display_name')
+        .eq('id', round?.host_id as string)
+        .maybeSingle()
+      return (data?.display_name as string | undefined) ?? null
+    },
+  })
+
   if (roundLoading || !round) return <p className="muted">…</p>
 
   const isHost = round.host_id === profile?.id
+
+
   // Your own seat in this round, which the roster query already knows about.
   const myMembership = members?.find((m) => m.profile_id === profile?.id)
   const leaveIsFree = ['DRAFT', 'OPEN', 'LOCKED'].includes(round.status)
@@ -207,6 +227,10 @@ export function RoundHomePage() {
   const shareLink = `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE') ?? []
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
+
+  const rosterMeta = hostName
+    ? `${t('rounds.chefCount', { count: activeApprovedCount })} — ${t('rounds.executiveChef')} : ${hostName}`
+    : t('rounds.chefCount', { count: activeApprovedCount })
   const pendingCount = pendingMembers?.length ?? 0
 
   // While the door is open the server sends no names but your own (0032), so
@@ -809,7 +833,7 @@ export function RoundHomePage() {
         <Envelope
           icon={<Icon name="chefs" />}
           name={t('rounds.drawers.chefs')}
-          meta={t('rounds.seatCount', { count: activeApprovedCount })}
+          meta={rosterMeta}
           badge={isHost && pendingCount > 0 ? pendingCount : undefined}
           tilt={1}
           onOpen={() => toggle('chefs')}

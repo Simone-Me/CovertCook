@@ -28,10 +28,12 @@
   --ok: #4a7c59;
   /* Diets are not dangers. They were reading in the same red as an allergy,
      which spends the alarm on a preference and leaves nothing louder for the
-     thing that actually sends somebody to hospital. Amber says "mind this"
-     where red says "do not". */
-  --diet: #b8620f;
-  --diet-bg: #fdf1e3;
+     thing that actually sends somebody to hospital. Amber was the first
+     answer and it fought with the cloth; a tint of the app's own green sits
+     with it, and the text stays ink so the button is legible rather than
+     shouted. */
+  --diet: #4a7c59;
+  --diet-bg: #eaf1ea;
 
   /* the table */
   --cloth-check: rgba(198, 32, 44, 0.5);

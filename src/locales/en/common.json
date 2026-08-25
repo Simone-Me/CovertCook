@@ -394,7 +394,9 @@
       "done": "You have left {{name}}. It is in your past dinners now, and there is nothing left to open.",
       "LEFT": "You left",
       "REMOVED": "Removed"
-    }
+    },
+    "chefCount_one": "{{count}} chef",
+    "chefCount_other": "{{count}} chefs"
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",

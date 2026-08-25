@@ -13,6 +13,7 @@ import {
   previousPhaseFor,
   updateRoundDetails,
   getExclusionPairs,
+  listRoundPeople,
   addExclusionPair,
   removeExclusionPair,
   getSlots,
@@ -79,6 +80,19 @@ export function RoundSettingsPage() {
   const [exclusionB, setExclusionB] = useState('')
   const [newSlotCourse, setNewSlotCourse] = useState<Course>('STARTER')
 
+  // Real names, host-only, from a function that never returns a pseudonym
+  // (0053). Naming the pair by pseudonym would have forced the host to work
+  // out which pseudonym is which person before they could exclude anybody —
+  // exactly the knowledge the anonymity exists to withhold.
+  const { data: people } = useQuery({
+    queryKey: ['rounds', roundId, 'people'],
+    // `enabled` cannot lean on isHost: that is derived after the early
+    // return, and a hook may not appear on some renders and not others. The
+    // function refuses non-hosts anyway.
+    enabled: !!roundId,
+    queryFn: () => listRoundPeople(roundId as string),
+  })
+
   const { data: exclusions, refetch: refetchExclusions } = useQuery({
     queryKey: ['rounds', roundId, 'exclusion-pairs'],
     enabled: !!roundId,
@@ -111,7 +125,10 @@ export function RoundSettingsPage() {
     round.slot_mode === 'FREE'
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved) ?? []
   const activeApprovedCount = activeMembers.length
-  const memberName = (id: string) => activeMembers.find((m) => m.id === id)?.secret_name ?? id
+
+
+  const memberName = (id: string) =>
+    people?.find((p) => p.member_id === id)?.display_name ?? id
 
   async function onSaveDetails(e: React.FormEvent) {
     e.preventDefault()
@@ -442,17 +459,17 @@ export function RoundSettingsPage() {
           <form onSubmit={onAddExclusion} className="row">
             <select value={exclusionA} onChange={(e) => setExclusionA(e.target.value)}>
               <option value="">—</option>
-              {activeMembers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.secret_name}
+              {people?.map((p) => (
+                <option key={p.member_id} value={p.member_id}>
+                  {p.display_name}
                 </option>
               ))}
             </select>
             <select value={exclusionB} onChange={(e) => setExclusionB(e.target.value)}>
               <option value="">—</option>
-              {activeMembers.map((m) => (
-                <option key={m.id} value={m.id}>
-                  {m.secret_name}
+              {people?.map((p) => (
+                <option key={p.member_id} value={p.member_id}>
+                  {p.display_name}
                 </option>
               ))}
             </select>

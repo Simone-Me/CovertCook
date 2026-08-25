@@ -518,14 +518,15 @@ input.is-taken {
 }
 
 .declared__title {
-  margin: 0 0 6px;
+  /* A hairline under the heading, in ink. The coloured bar that was here read
+     as a warning stripe across a settings page — too much weight for a label,
+     and the wrong colour for half of what it labelled. */
+  margin: 0 0 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--text);
   font-size: 15px;
   font-weight: 600;
-  color: var(--danger);
-}
-
-.declared__title.tone-diet {
-  color: var(--diet);
+  color: var(--text);
 }
 
 .declared__empty {
@@ -565,17 +566,18 @@ input.is-taken {
   height: 48px;
 }
 
-/* Amber, not red: a diet is a rule to respect, not a danger to avoid. */
-.tone-diet {
+/* A tint of green, with ink text: a diet is a rule to respect, not a danger
+   to avoid, and a filled button in the alarm colour said the opposite. */
+button.tone-diet {
+  background: var(--diet-bg);
   border-color: var(--diet);
-  background: var(--diet);
-  color: var(--accent-contrast);
+  color: var(--text);
 }
 
 button.tone-diet.secondary {
   background: transparent;
-  color: var(--diet);
-  border-color: var(--diet);
+  color: var(--text);
+  border-color: var(--border);
 }
 
 /* How far through signing up you are. A bar and the words: the bar is read at
@@ -627,4 +629,11 @@ button.tone-diet.secondary {
   font-size: 14px;
   line-height: 1.55;
   color: var(--text);
+}
+
+/* The build number: present for anybody who needs it, quiet for everybody
+   else. */
+.app-foot__version {
+  opacity: 0.65;
+  font-variant-numeric: tabular-nums;
 }
