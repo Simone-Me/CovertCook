@@ -393,7 +393,8 @@
     "left": {
       "done": "You have left {{name}}. It is in your past dinners now, and there is nothing left to open.",
       "LEFT": "You left",
-      "REMOVED": "Removed"
+      "REMOVED": "Removed",
+      "noLongerIn": "You are no longer at this dinner. It stays in your past dinners, but there is nothing left to open."
     },
     "chefCount_one": "{{count}} chef",
     "chefCount_other": "{{count}} chefs"

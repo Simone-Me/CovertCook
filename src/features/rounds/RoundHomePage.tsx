@@ -65,7 +65,7 @@ export function RoundHomePage() {
   const queryClient = useQueryClient()
 
   const { data: round, isLoading: roundLoading } = useRound(roundId)
-  const { data: members } = useRoundMembers(roundId)
+  const { data: members, error: membersError } = useRoundMembers(roundId)
   const [error, setError] = useState<string | null>(null)
   const [passHelp, setPassHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
@@ -175,6 +175,26 @@ export function RoundHomePage() {
       return (data?.display_name as string | undefined) ?? null
     },
   })
+
+  // 0051 made the round row readable to somebody who left it, so that it could
+  // sit in their archive — which also made this page reachable by URL, by the
+  // back button, or by a link somebody still had open. Everything inside
+  // refuses a former member, so the roster call comes back 42501 and the page
+  // used to render around a hole. It says what happened instead.
+  const notAMember =
+    membersError instanceof Error && /not a member of this round/i.test(membersError.message)
+
+  if (notAMember) {
+    return (
+      <div className="stack sheet">
+        <h1>{round?.name ?? t('rounds.myRounds')}</h1>
+        <p className="muted">{t('rounds.left.noLongerIn')}</p>
+        <Link to="/">
+          <button type="button">{t('rounds.myRounds')}</button>
+        </Link>
+      </div>
+    )
+  }
 
   if (roundLoading || !round) return <p className="muted">…</p>
 
