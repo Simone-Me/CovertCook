@@ -511,3 +511,120 @@ input.is-taken {
 .food-label--typed {
   color: var(--text);
 }
+
+/* A declared set, read like a line on a menu. */
+.declared {
+  margin-bottom: 14px;
+}
+
+.declared__title {
+  margin: 0 0 6px;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--danger);
+}
+
+.declared__title.tone-diet {
+  color: var(--diet);
+}
+
+.declared__empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.declared__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.declared__list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 2px;
+}
+
+/* Picture over word, the way the grid shows it, so the declared list and the
+   grid that filled it look like the same thing. */
+.food-label--stacked {
+  flex-direction: column;
+  gap: 2px;
+  width: 68px;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.15;
+}
+
+.food-label--stacked img {
+  width: 48px;
+  height: 48px;
+}
+
+/* Amber, not red: a diet is a rule to respect, not a danger to avoid. */
+.tone-diet {
+  border-color: var(--diet);
+  background: var(--diet);
+  color: var(--accent-contrast);
+}
+
+button.tone-diet.secondary {
+  background: transparent;
+  color: var(--diet);
+  border-color: var(--diet);
+}
+
+/* How far through signing up you are. A bar and the words: the bar is read at
+   a glance and the words are read by anybody the bar does not reach. */
+.steps {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 4px;
+}
+
+.steps__bar {
+  flex: 1;
+  height: 4px;
+  border-radius: 999px;
+  background: var(--border);
+  overflow: hidden;
+}
+
+.steps__fill {
+  display: block;
+  height: 100%;
+  background: var(--accent);
+}
+
+.steps__text {
+  font-size: 12px;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+.small-italic {
+  font-size: 12px;
+  font-style: italic;
+}
+
+/* The headings inside the explanation: smaller than the page title, larger
+   than the text they introduce. */
+.welcome__h {
+  margin: 12px 0 4px;
+  font-size: 16px;
+  font-weight: 600;
+}
+
+/* The author's paragraph, set apart from the app's own voice by measure and
+   colour rather than by a label saying "a note from the author". */
+.welcome__why {
+  margin: 0 0 8px;
+  font-size: 14px;
+  line-height: 1.55;
+  color: var(--text);
+}

@@ -26,6 +26,12 @@
   --danger: #b3261e;
   --danger-bg: #fbeceb;
   --ok: #4a7c59;
+  /* Diets are not dangers. They were reading in the same red as an allergy,
+     which spends the alarm on a preference and leaves nothing louder for the
+     thing that actually sends somebody to hospital. Amber says "mind this"
+     where red says "do not". */
+  --diet: #b8620f;
+  --diet-bg: #fdf1e3;
 
   /* the table */
   --cloth-check: rgba(198, 32, 44, 0.5);

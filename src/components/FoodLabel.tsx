@@ -14,12 +14,14 @@ import { foodIconSrc, isFoodCode } from '../lib/foodTags'
  * by way of italics and no icon. Without this, a code would reach the screen as
  * the bare word CELERY, in English, at a French table.
  */
-export function FoodLabel({ label }: { label: string }) {
+export function FoodLabel({ label, stacked = false }: { label: string; stacked?: boolean }) {
   const { t } = useTranslation()
 
   if (!isFoodCode(label)) {
     return <em className="food-label food-label--typed">{label}</em>
   }
+
+  const cls = stacked ? 'food-label food-label--stacked' : 'food-label'
 
   const src = foodIconSrc(label)
   const name = t(`food.allergen.${label}`, {
@@ -27,7 +29,7 @@ export function FoodLabel({ label }: { label: string }) {
   })
 
   return (
-    <span className="food-label">
+    <span className={cls}>
       {src && <img src={src} alt="" aria-hidden="true" loading="lazy" />}
       <span>{name}</span>
     </span>

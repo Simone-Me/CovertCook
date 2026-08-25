@@ -23,6 +23,23 @@ const NAME_CHECK_DEBOUNCE_MS = 400
 
 type NameState = 'idle' | 'checking' | 'free' | 'taken'
 
+/**
+ * Where you are in signing up. Three forms, and the mail confirmation between
+ * the first and the second is not one of them — it is a wait, and numbering a
+ * wait would tell somebody they have four things to do when they have three.
+ */
+function Steps({ n }: { n: number }) {
+  const { t } = useTranslation()
+  return (
+    <div className="steps" aria-label={t('auth.step', { n, total: 3 })}>
+      <div className="steps__bar">
+        <span className="steps__fill" style={{ width: `${(n / 3) * 100}%` }} />
+      </div>
+      <span className="steps__text">{t('auth.step', { n, total: 3 })}</span>
+    </div>
+  )
+}
+
 export function SignUpPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -221,8 +238,13 @@ export function SignUpPage() {
     return (
       <div className="stack sheet">
         <LanguageSwitch />
-        <h1>{t(profileStep === 'food' ? 'dietary.title' : 'auth.name.pageTitle')}</h1>
-        <p className="muted">{t(profileStep === 'food' ? 'dietary.help' : 'auth.name.pageHelp')}</p>
+        <Steps n={profileStep === 'food' ? 2 : 3} />
+        <h1>{t('dietary.title')}</h1>
+        {/* One sentence where three used to be — a page lead, a line over the
+            allergy question and another over the diet one, all saying a
+            version of the same thing. It also stops implying a private dinner
+            party: this is friends cooking for each other. */}
+        {profileStep === 'food' && <p className="muted">{t('dietary.help')}</p>}
         {error && <div className="error">{error}</div>}
         <form onSubmit={onDietarySubmit} className="stack">
           {profileStep === 'food' ? (
@@ -235,7 +257,6 @@ export function SignUpPage() {
               so celery and celeri stop being two different allergens. */}
           <fieldset className="ask">
             <legend>{t('food.allergyQuestion')}</legend>
-            <p className="muted">{t('food.allergyHelp')}</p>
             <div className="row">
               <button
                 type="button"
@@ -272,11 +293,11 @@ export function SignUpPage() {
             {typedAllergies.length > 0 && (
               <p className="muted">{t('food.typedNotChecked')}</p>
             )}
+            {hasAllergies && <p className="muted">{t('dietary.whoSeesIt')}</p>}
           </fieldset>
 
           <fieldset className="ask">
             <legend>{t('food.dietQuestion')}</legend>
-            <p className="muted">{t('food.dietHelp')}</p>
             <div className="row">
               <button
                 type="button"
@@ -348,7 +369,7 @@ export function SignUpPage() {
             <p id="displayName-status" className={`field-status is-${nameState}`}>
               {nameState !== 'idle' && t(`auth.name.${nameState}`)}
             </p>
-            <p className="muted">{t('auth.name.changeLater')}</p>
+            <p className="muted small-italic">{t('auth.name.changeLater')}</p>
           </div>
 
               <button
@@ -374,6 +395,7 @@ export function SignUpPage() {
   return (
     <div className="stack sheet">
       <LanguageSwitch />
+      <Steps n={1} />
       <h1>{t('auth.signUp')}</h1>
       {error && <div className="error">{error}</div>}
       <form onSubmit={onAccountSubmit} className="stack">

@@ -987,10 +987,15 @@ export function RoundHomePage() {
           <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
         )}
 
+        {/* The count on the flap, and nothing at all when it is zero: a badge
+            reading 0 is a thing to check, and there is nothing to check. It is
+            the one envelope where knowing there is something inside changes
+            whether you open it before you start cooking. */}
         <Envelope
           icon={<Icon name="allergies" />}
           name={t('rounds.drawers.allergies')}
           meta={t('dietary.panelTitle')}
+          badge={dietaryPanel && dietaryPanel.length > 0 ? dietaryPanel.length : undefined}
           tilt={2}
           onOpen={() => toggle('allergies')}
         >

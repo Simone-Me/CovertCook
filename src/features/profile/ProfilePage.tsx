@@ -31,8 +31,9 @@ export function ProfilePage() {
   const { profile, session, refreshProfile } = useAuth()
   const queryClient = useQueryClient()
 
-  const [set, setSet] = useState<'allergy' | 'diet'>('allergy')
-  const [otherOpen, setOtherOpen] = useState(false)
+  const [openSet, setOpenSet] = useState<'allergy' | 'diet' | null>(null)
+  const [draftCodes, setDraftCodes] = useState<string[]>([])
+  const [draftTyped, setDraftTyped] = useState<string[]>([])
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
   const [push, setPush] = useState<PushState | null>(null)
@@ -119,64 +120,27 @@ export function ProfilePage() {
     },
   })
 
-  // What is already stored, split the way the grid needs it: codes drive the
-  // tiles, typed labels are listed underneath because no picture can stand for
-  // them.
-  const kindsInSet: DietaryKind[] =
-    set === 'allergy' ? ['ALLERGY_SEVERE', 'ALLERGY_MILD'] : ['DIET']
-  const inSet = (entries ?? []).filter((e) => kindsInSet.includes(e.kind))
-  const chosenCodes = inSet.filter((e) => isFoodCode(e.label)).map((e) => e.label)
-  const typedLabels = inSet.filter((e) => !isFoodCode(e.label)).map((e) => e.label)
-  if (otherOpen && !chosenCodes.includes(OTHER_CODE)) chosenCodes.push(OTHER_CODE)
+  const kindsFor = (which: 'allergy' | 'diet'): DietaryKind[] =>
+    which === 'allergy' ? ['ALLERGY_SEVERE', 'ALLERGY_MILD'] : ['DIET']
 
-  async function onToggleTag(code: string) {
-    if (!profile?.id) return
-    // The Other tile has nothing to store on its own: it opens the field, and
-    // what gets stored is whatever is typed into it.
-    if (code === OTHER_CODE) {
-      setOtherOpen((v) => !v)
+  // Opening loads what is stored into a draft. Closing the other one first is
+  // the whole point of the switch: two open panels are two sets of pending
+  // changes, and only one of them would ever get confirmed.
+  function beginEditing(which: 'allergy' | 'diet') {
+    if (openSet === which) {
+      setOpenSet(null)
       return
     }
-    const existing = inSet.find((e) => e.label === code)
-    setError(null)
-    setBusy(true)
-    try {
-      const { error } = existing
-        ? await supabase.from('dietary_entries').delete().eq('id', existing.id)
-        : await supabase.from('dietary_entries').insert({
-            profile_id: profile.id,
-            // Every allergen the grid records is severe, here as at sign-up.
-            kind: set === 'allergy' ? 'ALLERGY_SEVERE' : 'DIET',
-            label: code,
-          })
-      if (error) throw error
-      await queryClient.invalidateQueries({ queryKey: ['dietary'] })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
-    } finally {
-      setBusy(false)
-    }
+    const kinds = kindsFor(which)
+    const mine = (entries ?? []).filter((e) => kinds.includes(e.kind))
+    setDraftCodes(mine.filter((e) => isFoodCode(e.label)).map((e) => e.label))
+    setDraftTyped(mine.filter((e) => !isFoodCode(e.label)).map((e) => e.label))
+    setOpenSet(which)
   }
 
-  async function onAddTyped(value: string) {
-    if (!profile?.id || !value.trim()) return
-    setError(null)
-    setBusy(true)
-    try {
-      const { error } = await supabase.from('dietary_entries').insert({
-        profile_id: profile.id,
-        kind: set === 'allergy' ? 'ALLERGY_SEVERE' : 'DIET',
-        label: value.trim(),
-      })
-      if (error) throw error
-      await queryClient.invalidateQueries({ queryKey: ['dietary'] })
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
-    } finally {
-      setBusy(false)
-    }
-  }
-
+  // One write, at the end, from the difference between what was stored and
+  // what the draft says. Saving on every tap made a mis-tap a change to
+  // somebody's medical record with no moment to look at it first.
   async function onRemove(id: string) {
     setError(null)
     try {
@@ -185,6 +149,42 @@ export function ProfilePage() {
       await queryClient.invalidateQueries({ queryKey: ['dietary'] })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
+    }
+  }
+
+  async function onConfirm() {
+    if (!openSet || !profile?.id) return
+    const kinds = kindsFor(openSet)
+    const stored = (entries ?? []).filter((e) => kinds.includes(e.kind))
+    const wanted = [...draftCodes.filter((c) => c !== OTHER_CODE), ...draftTyped]
+
+    const toRemove = stored.filter((e) => !wanted.includes(e.label)).map((e) => e.id)
+    const toAdd = wanted.filter((label) => !stored.some((e) => e.label === label))
+
+    setError(null)
+    setBusy(true)
+    try {
+      if (toRemove.length) {
+        const { error } = await supabase.from('dietary_entries').delete().in('id', toRemove)
+        if (error) throw error
+      }
+      if (toAdd.length) {
+        const { error } = await supabase.from('dietary_entries').insert(
+          toAdd.map((label) => ({
+            profile_id: profile.id,
+            // Every allergen the grid records is severe, here as at sign-up.
+            kind: openSet === 'allergy' ? 'ALLERGY_SEVERE' : 'DIET',
+            label,
+          })),
+        )
+        if (error) throw error
+      }
+      await queryClient.invalidateQueries({ queryKey: ['dietary'] })
+      setOpenSet(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : t('errors.generic'))
+    } finally {
+      setBusy(false)
     }
   }
 
@@ -268,54 +268,77 @@ export function ProfilePage() {
           you join. Changing it here changes it everywhere. */}
       <p className="muted">{t('profile.dietaryHelp')}</p>
 
-      <div className="stack">
-        {entries?.length === 0 && <p className="muted">{t('profile.noRestrictions')}</p>}
-        {entries?.map((e) => (
-          <div key={e.id} className="card row" style={{ justifyContent: 'space-between' }}>
-            <span>
-              <FoodLabel label={e.label} />
-              <span className="muted"> — {t(`dietary.kind.${e.kind}`)}</span>
-            </span>
-            <button type="button" className="secondary" onClick={() => onRemove(e.id)}>
-              {t('actions.remove')}
+      {/* What is declared, laid out like a menu rather than as a list of rows
+          with their category spelled out beside each one: two headings, the
+          pictures under them, the word under each picture. */}
+      <DeclaredList
+        title={t('dietary.kind.ALLERGY_SEVERE')}
+        empty={t('profile.noneAllergy')}
+        entries={(entries ?? []).filter((e) => e.kind !== 'DIET' && e.kind !== 'DISLIKE')}
+        onRemove={onRemove}
+      />
+      <DeclaredList
+        title={t('dietary.kind.DIET')}
+        empty={t('profile.noneDiet')}
+        entries={(entries ?? []).filter((e) => e.kind === 'DIET')}
+        onRemove={onRemove}
+        tone="diet"
+      />
+
+      {/* One panel at a time, and neither open by default. Both grids at once
+          is a wall of eighty pictures on a settings page; and opening the
+          second has to close the first, or the button stops being a switch and
+          becomes two independent toggles that look like one. */}
+      <div className="row">
+        <button
+          type="button"
+          className={openSet === 'allergy' ? '' : 'secondary'}
+          aria-expanded={openSet === 'allergy'}
+          onClick={() => beginEditing('allergy')}
+        >
+          {t('profile.editAllergies')}
+        </button>
+        <button
+          type="button"
+          className={`tone-diet${openSet === 'diet' ? '' : ' secondary'}`}
+          aria-expanded={openSet === 'diet'}
+          onClick={() => beginEditing('diet')}
+        >
+          {t('profile.editDiets')}
+        </button>
+      </div>
+
+      {openSet && (
+        <div className="card stack">
+          {/* Nothing is written while you tap. The old version saved on every
+              touch, which made a mis-tap a change to somebody's medical
+              record and left no moment to look at what you had chosen. */}
+          <FoodTagGrid
+            tags={openSet === 'allergy' ? ALLERGENS : DIETS}
+            selected={draftCodes}
+            onToggle={(code) =>
+              setDraftCodes((prev) =>
+                prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
+              )
+            }
+            namespace={openSet === 'allergy' ? 'food.allergen' : 'food.diet'}
+            otherValues={draftTyped}
+            onOtherAdd={(v) => setDraftTyped((prev) => [...prev, v])}
+            onOtherRemove={(v) => setDraftTyped((prev) => prev.filter((x) => x !== v))}
+          />
+
+          {openSet === 'allergy' && <p className="muted">{t('dietary.whoSeesIt')}</p>}
+
+          <div className="row">
+            <button type="button" disabled={busy} onClick={() => void onConfirm()}>
+              {t('actions.confirm')}
+            </button>
+            <button type="button" className="secondary" onClick={() => setOpenSet(null)}>
+              {t('actions.cancel')}
             </button>
           </div>
-        ))}
-      </div>
-
-      {/* The same grid as sign-up, from the same file. A free-text field here
-          and a grid there meant the two screens could disagree about what an
-          allergen is called — and only one of the two spellings was ever
-          matched against a dish. */}
-      <div className="card stack">
-        <div className="row">
-          <button
-            type="button"
-            className={set === 'allergy' ? '' : 'secondary'}
-            aria-pressed={set === 'allergy'}
-            onClick={() => setSet('allergy')}
-          >
-            {t('dietary.kind.ALLERGY_SEVERE')}
-          </button>
-          <button
-            type="button"
-            className={set === 'diet' ? '' : 'secondary'}
-            aria-pressed={set === 'diet'}
-            onClick={() => setSet('diet')}
-          >
-            {t('dietary.kind.DIET')}
-          </button>
         </div>
-
-        <FoodTagGrid
-          tags={set === 'allergy' ? ALLERGENS : DIETS}
-          selected={chosenCodes}
-          onToggle={onToggleTag}
-          namespace={set === 'allergy' ? 'food.allergen' : 'food.diet'}
-          otherValues={typedLabels}
-          onOtherAdd={(value) => void onAddTyped(value)}
-        />
-      </div>
+      )}
 
       </Fold>
 
@@ -359,6 +382,62 @@ export function ProfilePage() {
       <button type="button" className="secondary" onClick={() => supabase.auth.signOut()}>
         {t('auth.signOut')}
       </button>
+    </div>
+  )
+}
+
+
+/**
+ * One declared set, laid out like a line on a menu: the heading, then the
+ * pictures with their names under them.
+ *
+ * The list this replaces printed the category beside every single row —
+ * "Celery — Severe allergy", "Peanuts — Severe allergy" — which is the same
+ * word four times and none of it new. Grouping says it once.
+ *
+ * The empty line is a sentence rather than a blank space: nothing declared and
+ * nothing loaded look identical when both are empty, and one of them means a
+ * cook can stop worrying.
+ */
+function DeclaredList({
+  title,
+  empty,
+  entries,
+  onRemove,
+  tone,
+}: {
+  title: string
+  empty: string
+  entries: DietaryRow[]
+  onRemove: (id: string) => void
+  tone?: 'diet'
+}) {
+  const { t } = useTranslation()
+
+  return (
+    <div className="declared">
+      <h3 className={`declared__title${tone === 'diet' ? ' tone-diet' : ''}`}>{title}</h3>
+      {entries.length === 0 ? (
+        <p className="declared__empty">
+          <em>{empty}</em>
+        </p>
+      ) : (
+        <ul className="declared__list">
+          {entries.map((e) => (
+            <li key={e.id}>
+              <FoodLabel label={e.label} stacked />
+              <button
+                type="button"
+                className="linkish"
+                onClick={() => onRemove(e.id)}
+                aria-label={`${t('actions.remove')} ${e.label}`}
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   )
 }
