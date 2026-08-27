@@ -5,6 +5,7 @@ import { useAuth } from '../../lib/auth'
 import { useRound } from './hooks'
 import { getHostAlerts, getReportedMessages, resolveHostAlert } from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
+import { formatMoment, machineMoment } from '../../lib/datetime'
 
 export function HostAlertsPage() {
   const { t } = useTranslation()
@@ -45,7 +46,14 @@ export function HostAlertsPage() {
           <div key={a.id} className="card row" style={{ justifyContent: 'space-between' }}>
             <div>
               <strong>{t(`alerts.kind.${a.kind}`)}</strong>
-              <div className="muted">{new Date(a.created_at).toLocaleString()}</div>
+              {/* In the reader's zone and the reader's language. It used to
+                  be a bare toLocaleString(), which takes the language from
+                  the phone rather than from the account — French app, English
+                  dates. The zone was already right and always has been: the
+                  column stores an instant, not a wall clock (lib/datetime). */}
+              <time className="muted" dateTime={machineMoment(a.created_at)}>
+                {formatMoment(a.created_at, profile?.locale ?? 'en')}
+              </time>
             </div>
             <button type="button" className="secondary" onClick={() => onResolve(a.id)}>
               {t('alerts.resolve')}

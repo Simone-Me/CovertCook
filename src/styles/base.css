@@ -33,6 +33,18 @@ main {
   flex: 1;
   padding: 16px;
   padding-bottom: 32px;
+  /* Nothing laid on the cloth may widen the page. The app is a column of a
+     fixed width and everything decorative — props, stains, tilted envelopes —
+     is placed relative to it; one piece hanging over the right edge is enough
+     to turn every screen into something that pans. Down the page is the only
+     direction this app scrolls. */
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  main {
+    overflow-x: hidden;
+  }
 }
 
 h1 {
@@ -517,16 +529,37 @@ input.is-taken {
   margin-bottom: 14px;
 }
 
+/* The heading and the button that adds to it, on one line. The hairline
+   belongs to the row rather than to the words, so the button sits above it
+   with the heading instead of floating beside a rule that stops short. */
+.declared__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--text);
+}
+
 .declared__title {
   /* A hairline under the heading, in ink. The coloured bar that was here read
      as a warning stripe across a settings page — too much weight for a label,
      and the wrong colour for half of what it labelled. */
-  margin: 0 0 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--text);
+  margin: 0;
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
+}
+
+/* Small, and only as wide as the word. A full-width button under the list
+   read as the page's main action; this one is a label's companion. */
+button.declared__add {
+  flex: none;
+  width: auto;
+  margin: 0;
+  padding: 4px 14px;
+  font-size: 13px;
 }
 
 .declared__empty {
@@ -564,6 +597,44 @@ input.is-taken {
 .food-label--stacked img {
   width: 48px;
   height: 48px;
+}
+
+/* A list of yes-or-no answers about this device. Monospaced marks in their own
+   column so the eye runs down the ticks and stops at the cross — which is the
+   only line on the list anybody needs to read. */
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.checklist li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.checklist li > span:first-child {
+  flex: none;
+  width: 1.1em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text-muted);
+}
+
+.checklist li.is-ok > span:first-child {
+  color: var(--ok);
+}
+
+.checklist li.is-bad > span:first-child {
+  color: var(--accent);
+}
+
+.checklist li.is-bad {
+  font-weight: 600;
 }
 
 /* A tint of green, with ink text: a diet is a rule to respect, not a danger

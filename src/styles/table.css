@@ -251,6 +251,38 @@
   pointer-events: none;
 }
 
+/* The room the props stand in, and — this is the point — its edge.
+ *
+ * The objects are placed to run off the sides on purpose: a plate half out of
+ * frame is what says the screen is a detail of a bigger table. But "runs off
+ * the edge" and "is not there" are the same thing only if something actually
+ * cuts it off. Nothing did, so on a phone the plate and the glass at their
+ * negative offsets widened the document instead: the dinner opened able to
+ * pan sideways into empty cloth, and a swipe meant to scroll the page slid it
+ * right and left the paper hanging off-centre.
+ *
+ * `clip` rather than `hidden` deliberately. Both cut the picture at the same
+ * line; only `hidden` makes this a scroll container, which would have moved
+ * the panning problem in here rather than removed it, and would have cost the
+ * sticky header its anchor.
+ */
+.table-scene {
+  position: relative;
+  min-height: 100%;
+  /* The page's own padding, given back as the frame's, so the cloth reaches
+     the screen edge and the props are cut there rather than 16px early. */
+  margin: -16px;
+  padding: 16px;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+@supports not (overflow: clip) {
+  .table-scene {
+    overflow-x: hidden;
+  }
+}
+
 /* Removing a chef is the rarest thing in the roster and used to be the
    loudest. A small mark you have to aim at, with the choice it opens
    serving as the confirmation. */
@@ -1035,6 +1067,26 @@
 .menucard__course.is-now .menucard__name {
   font-weight: 700;
   color: var(--accent);
+}
+
+/* Your line on the menu. Bold and coloured was enough on the phase menu,
+   where the reader is looking for the current course; it was not enough in
+   the brief editor, where the reader is not looking for anything yet and has
+   to be told which of five courses became theirs. So the row itself is
+   marked — a bar in the margin and a tint behind it — and the word beside it
+   says what the mark means, because colour alone says "this one is different"
+   and never says why. */
+.menucard__course.is-yours {
+  margin: 0 -10px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  background: var(--bg-elevated);
+}
+
+.menucard__course.is-yours .menucard__course-kind {
+  color: var(--accent);
+  font-weight: 700;
 }
 
 /* Still to come: present, but clearly not yet. */

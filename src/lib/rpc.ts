@@ -163,6 +163,65 @@ export async function forgetPushSubscription(endpoint: string) {
   return unwrap(res)
 }
 
+// What the server knows about this browser, without the server having to hand
+// back the keys that would let anything push to it (0056). `this_device` is the
+// answer to the question that matters — the browser is holding a subscription,
+// did it ever arrive here? — and `devices` separates "nothing works" from
+// "nothing works on THIS phone".
+export interface MyPushDevices {
+  this_device: boolean
+  devices: number
+  last_seen: string | null
+}
+
+export async function myPushDevices(endpoint: string | null): Promise<MyPushDevices> {
+  const res = await supabase.rpc('my_push_devices', { p_endpoint: endpoint })
+  const rows = unwrap<MyPushDevices[]>(res)
+  return rows[0] ?? { this_device: false, devices: 0, last_seen: null }
+}
+
+export interface TestPushResult {
+  sent: number
+  audience: number
+  pruned?: number
+  reason?: string
+  notifications_enabled?: boolean
+}
+
+/**
+ * The one push in this app that goes to the person who asked for it.
+ *
+ * Loud on failure, unlike every other notify() here. Those are fired at a
+ * moment that has already happened and must never make a dinner look broken,
+ * so they swallow everything — which is correct, and is also exactly why
+ * "nothing arrives" has been impossible to diagnose: the six ways it can fail
+ * server-side all look identical from a phone that stays quiet.
+ *
+ * This one is called by somebody staring at the screen waiting for it, so
+ * every failure comes back with its own words, including the one hiding
+ * inside a non-2xx body (the client SDK gives you a FunctionsHttpError and
+ * keeps the response — 'send-push is not configured' lives in there, and it
+ * is the single most likely answer).
+ */
+export async function sendTestPush(): Promise<TestPushResult> {
+  const { data, error } = await supabase.functions.invoke('send-push', { body: { kind: 'TEST' } })
+  if (error) {
+    const context = (error as { context?: Response }).context
+    let message = error.message
+    if (context && typeof context.json === 'function') {
+      try {
+        const detail = (await context.json()) as { error?: string }
+        if (detail?.error) message = detail.error
+      } catch {
+        // Not a JSON body — a gateway page, or nothing at all. The SDK's own
+        // description of the failure is then the best there is.
+      }
+    }
+    throw new Error(message)
+  }
+  return data as TestPushResult
+}
+
 export async function completeSignup(input: {
   displayName: string
   locale: string

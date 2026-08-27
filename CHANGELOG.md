@@ -59,6 +59,97 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-27 (1)
+
+**Fixed: the recipe that was refused by a constraint name** (`0055`), **the
+notification nobody could test** (`0056`), and three interface faults.
+
+*The recipe.* `0028` relaxed what a submittable recipe has to contain and
+relaxed it in `submit_brief`. It did not touch the table, which still carried
+the rule `0028` was replacing as an inline check — and an inline check is named
+by counting, so that one was `briefs_check1`. The function said yes, ran its
+`update … set status = 'SUBMITTED'`, and the row was refused on the way out.
+What the sender read was `new row for relation "briefs" violates check
+constraint "briefs_check1"`: a constraint they cannot see, in a table they do
+not know about, saying nothing about which of the four fields in front of them
+was wrong. Every recipe with a link and a short method hit it.
+
+The table now drops that rule — **by what it says, not by what it is called**,
+because `briefs_check1` is a name Postgres handed out by counting and a restore
+in another declaration order would have put the same rule under another number.
+What replaces it is deliberately weaker: a CHECK sees one row and cannot count
+that row's ingredients, so the ingredient half of the rule lives in
+`submit_brief`, which can.
+
+*And every refusal now names a field.* `DISH_NAME_MISSING`,
+`PROCEDURE_TOO_SHORT`, `INGREDIENTS_MISSING`, `LINK_MALFORMED`,
+`ALREADY_SUBMITTED`, `DIETARY_CONFLICT|<label>` — codes the interface
+translates and points at an input, checked in the same order the form reads in.
+The frontend checks all of them at once *before* the call and says what is
+missing in words; the database checks them one at a time on the way in, because
+the frontend is a convenience and this is the rule.
+
+*One tightening, on purpose.* "Written out" now means the method **and** the
+list, where it used to be either. A cook handed seven ingredients and no method
+has been given a shopping trip, not a recipe. A link still stands alone: it
+carries both, and asking somebody to retype them beside it is asking twice.
+
+*The notification nobody could test.* Push has seven links between a dinner and
+a lock screen and six of them failed the same way — the phone stayed quiet. The
+worst is not a bug at all: `push_audience_for_round` excludes whoever caused the
+notification, on purpose, so a host stepping their own dinner through every
+phase is correctly excluded from all four moments and will never receive a
+thing. There was no way to tell that apart from a broken install.
+
+`0056` adds one audience of one, addressed to the caller's own devices, and
+**Profile → Notifications → "Notifications are not arriving?"** asks each link
+separately before sending a real one: home screen or tab, API present,
+worker running, permission granted, deployment signed, browser subscribed,
+server informed. The first cross carries the fix rather than the diagnosis —
+including the two that are not ours (iOS has no Push API in a Safari tab, and
+Brave ships "Use Google services for push messaging" switched **off**, which
+makes a perfect subscription deliver nothing).
+
+It repairs as it goes: a subscription the browser holds and the server never
+stored is invisible from both ends, and re-sending it is a no-op in every other
+case, so it is not a second button.
+
+*And the settings screen can no longer hang.* `navigator.serviceWorker.ready`
+neither rejects nor times out, so where registration was refused — a private
+window, strict shields — the push panel sat on "Checking what this device can
+do…" for the rest of the session, with no button and no explanation. It is now
+raced against six seconds and reports `no-worker`.
+
+*Three interface faults.*
+
+The dinner **could be panned sideways**. The props are placed to run off the
+edges on purpose, but nothing cut them off, so on a phone they widened the
+document instead: a swipe meant to scroll slid the page right and left the
+paper off-centre. `.table-scene` clips them — `overflow-x: clip` rather than
+`hidden`, which would have made it a scroll container and moved the problem
+rather than removed it.
+
+The **assigned course was a grey sentence** between two other grey sentences,
+which is a thing people read past and then write a starter for a dessert slot.
+It is printed as the menu it is, with your line marked.
+
+The **buttons that add an allergy or a diet** sat below both lists, asking the
+reader to work out which button belonged to which heading, and then opened the
+grid in a third place further from the list the longer that list got. Each
+heading now carries its own, and the grid opens under the list it changes.
+
+*Also:* `lib/datetime.ts` writes down why the database says `+00` and why that
+is not two hours wrong — `timestamptz` stores an instant, not a wall clock, and
+the browser is the only participant that knows where the reader is standing.
+The README has the long version, including why pinning the server to Paris
+would move `current_date` and redraw which day a fridge note belongs to.
+
+*Tested:* `smoke_test8.sql`. Its first section is the exact recipe that used to
+come back as `briefs_check1`, and the reproduction was run against the pre-`0055`
+schema first to be sure the diagnosis was the fault and not a theory about it.
+
+---
+
 ## 2026-08-24 (16)
 
 **Added: the two moments at the door** (`0052`), and four interface fixes.

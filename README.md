@@ -324,6 +324,82 @@ public half in Netlify as `VITE_VAPID_PUBLIC_KEY`, then
 and `npx supabase functions deploy send-push`. Rotating that pair silently
 kills every existing subscription.
 
+### When nothing arrives
+
+There are seven links between a dinner and a lock screen and, until `0056`,
+six of them failed the same way: the phone stayed quiet. **Profile →
+Notifications → "Notifications are not arriving?"** asks each one separately
+and then sends a real notification to your own devices — the only push in the
+app that goes to the person who triggered it, and the only proof that the whole
+chain works.
+
+The three that are not bugs, and account for most reports:
+
+- **You are the only one testing.** `push_audience_for_round` excludes whoever
+  caused the notification, on purpose — being interrupted by your own button
+  press is noise. A host stepping their own dinner through every phase is
+  correctly excluded from all four of them and will never receive a thing. The
+  self-test exists because of this one.
+- **iOS in a Safari tab.** The Push API is simply absent until the app is added
+  to the home screen and opened from that icon. Apple's rule, not ours.
+- **Brave.** Web push there rides on Google's service, which Brave ships
+  switched **off**: Settings → Privacy and security → "Use Google services for
+  push messaging". Until that is on, registration succeeds, the subscription
+  looks perfect, and nothing is ever delivered. Chrome on the same phone works,
+  which is what makes it look like a site bug.
+
+The three that are: no `VITE_VAPID_PUBLIC_KEY` on the deployment (the switch
+reports itself unavailable); the Edge Function missing its secrets (`send-push
+is not configured` — invisible in normal use, because every real notify() call
+swallows its errors so a dinner never looks broken); and a subscription the
+browser holds but the server never stored, which the test repairs before it
+sends.
+
+`no-worker` is the seventh: the service worker never registered, which private
+windows enforce outright. It used to present as the settings screen saying
+"Checking what this device can do…" for ever, because `navigator.serviceWorker
+.ready` neither rejects nor times out — it is now raced against a six-second
+timeout so the screen can say what happened.
+
+---
+
+## Time, and why the database says `+00`
+
+Every `_at` column here is `timestamptz`, and the thing worth knowing is that
+**`timestamptz` does not store a time zone**. It stores an instant. The `+00`
+in the Supabase table editor is that session rendering the instant, and
+Postgres sessions there default to UTC.
+
+So a sign-up at 17:11 in Paris in summer, read back as `15:11+00`, is not two
+hours wrong — it is the same instant spelled in another zone, the way 5 km and
+3.1 miles are the same distance. Nothing was lost and nothing needs correcting.
+
+**Why the server is not set to Paris.** It could be — `alter database … set
+timezone = 'Europe/Paris'` changes what new sessions render, the dashboard
+included — and it would still not be a fix:
+
+- there is no "the" time zone for an app whose diners are not all in one place,
+  and picking one only moves the confusion to whoever is not in it;
+- it would move things that are not about display at all. `current_date` and
+  the `::date` casts in `0001`, `0015`, `0019` and `0030` decide which *day* a
+  fridge note or an invitation belongs to, and pinning the server to Paris
+  redraws that boundary at 22:00 or 23:00 UTC depending on the season.
+
+UTC on the server is not a default nobody got round to changing. It is the one
+choice with no opinion about where anybody is standing.
+
+**The conversion happens in the browser**, which is the only participant that
+knows the answer: the phone knows its own zone and knows about summer time.
+`new Date(iso).toLocaleString(locale)` renders the stored instant as 17:11 in
+Paris and 11:11 in New York from one row, with no zone stored anywhere and
+nothing to migrate when somebody travels. `src/lib/datetime.ts` holds the
+formatters and the reasoning; the locale is passed explicitly (the account's
+choice, not the phone's) and the zone deliberately is not.
+
+The one value that travels the other way is the dinner's date and time, typed
+into a `datetime-local` input: that one *is* in the typist's own zone, and
+`new Date(value).toISOString()` is what turns it back into an instant.
+
 ---
 
 ## CI/CD & required GitHub configuration
@@ -396,8 +472,11 @@ host-tools RPCs that only got a frontend later (`splice_member`,
 `set_pairing`, `remove_member` post-assignment, exclusion pairs, the menu
 RPCs, `host_alerts` resolve). `smoke_test4.sql` covers pending-member
 identity, `smoke_test5.sql` both removal modes, `smoke_test6.sql` round
-setup and invitations, and `smoke_test7.sql` the board plus allergens
-informing rather than blocking.
+setup and invitations, `smoke_test7.sql` the board plus allergens
+informing rather than blocking, and `smoke_test8.sql` what a recipe must
+contain (`0055`) plus the push self-test's audience (`0056`) — its first
+section is the exact recipe that used to come back as
+`violates check constraint "briefs_check1"`.
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -422,7 +501,7 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 ```
 
 Then `db reset` again before each of `smoke_test3.sql` through
-`smoke_test7.sql`.
+`smoke_test8.sql`.
 
 **Prefer `npx supabase migration up --local` over `db reset` while anyone
 is using the app.** It applies pending migrations against the existing

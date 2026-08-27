@@ -19,7 +19,8 @@
     "add": "Ajouter",
     "remove": "Retirer",
     "ok": "OK",
-    "no": "Non, laisser"
+    "no": "Non, laisser",
+    "close": "Fermer"
   },
   "auth": {
     "signIn": "Se connecter",
@@ -452,8 +453,44 @@
     "labelDishWhy": "Il contient {{items}}, et quelqu'un à cette table a dit que ça comptait pour lui. Un carton près du plat lui permet de décider lui-même.",
     "needsMore": "Un nom, et soit un lien soit la recette écrite.",
     "errors": {
-      "DISH_NAME_LENGTH": "Le plat a besoin d'un nom d'au moins trois caractères.",
-      "RECIPE_TOO_EMPTY": "Ajoutez un lien, ou écrivez la recette."
+      "DISH_NAME_MISSING": "Le plat n’a pas encore de nom. C’est la première chose que votre cuisinier verra.",
+      "DISH_NAME_LENGTH": "Le plat a besoin d’un nom d’au moins trois caractères.",
+      "PROCEDURE_MISSING": "La préparation est vide. Écrivez comment faire, ou collez plutôt un lien vers une recette.",
+      "PROCEDURE_TOO_SHORT": "La préparation est trop courte pour être cuisinée. Une ligne ou deux suffisent — ou collez un lien.",
+      "INGREDIENTS_MISSING": "Aucun ingrédient listé. Votre cuisinier doit faire les courses — ou collez un lien qui les liste.",
+      "RECIPE_TOO_EMPTY": "Ajoutez un lien, ou écrivez la recette.",
+      "LINK_MALFORMED": "Ce lien doit commencer par http:// ou https://.",
+      "ALREADY_SUBMITTED": "Cette recette est déjà envoyée, et une recette envoyée ne se modifie plus.",
+      "DEADLINE_PASSED": "L’échéance des recettes est passée pour ce dîner.",
+      "ROUND_NOT_ACCEPTING": "Ce dîner n’accepte pas de recettes en ce moment.",
+      "NOTHING_WRITTEN": "Rien n’a encore été enregistré. Enregistrez d’abord un brouillon.",
+      "DIETARY_CONFLICT": "Ce plat contient {{items}}, et quelqu’un à cette table ne peut pas en manger. Changez la recette — le dîner est partagé.",
+      "constraint": {
+        "briefs_check": "Le plat a besoin d’un nom de trois à quatre-vingts caractères.",
+        "briefs_check1": "La préparation est trop courte pour la base de ce dîner, qui n’a pas encore été mise à jour. Collez un lien, ou écrivez deux lignes de plus.",
+        "briefs_check3": "Le contrôle des allergènes n’a pas tourné sur cette recette. Rouvrez-la et enregistrez-la à nouveau.",
+        "briefs_submitted_recipe_not_empty": "Une recette a besoin d’un lien ou d’une préparation écrite avant d’être envoyée.",
+        "briefs_external_url_check": "Ce lien doit commencer par http:// ou https://.",
+        "brief_ingredients_name_check": "Un des ingrédients est vide. Supprimez la ligne vide, ou remplissez-la."
+      }
+    },
+    "theMenu": "Le menu de ce soir",
+    "yours": "À vous",
+    "sendFinal": "Envoyer — définitif",
+    "submitConfirmTitle": "Envoyer cette recette ? Elle ne pourra plus être modifiée.",
+    "submitConfirmWhy": "Elle arrive chez votre cuisinier à l’instant où vous l’envoyez, et le formulaire se verrouille. Pas de correction, pas de retour en arrière, pas de deuxième version — relisez-la une fois avant d’appuyer.",
+    "summaryDish": "Plat : {{name}}",
+    "summaryLink": "Un lien à suivre : {{url}}",
+    "summaryWritten": "Écrite, avec {{n}} ingrédient(s) listé(s)",
+    "summaryFor": "Cuisinée par : {{name}}",
+    "missingIntro": "Pas encore prête à partir — il manque : {{items}}.",
+    "missing": {
+      "dishName": "le nom du plat",
+      "dishNameShort": "un nom de plat plus long (trois lettres au moins)",
+      "ingredients": "les ingrédients (ou un lien à la place)",
+      "procedure": "la préparation (ou un lien à la place)",
+      "procedureShort": "une préparation plus complète — une ligne ou deux, pas un mot",
+      "linkMalformed": "un lien commençant par http:// ou https://"
     }
   },
   "chat": {
@@ -772,7 +809,8 @@
       "denied": "Bloquées. Votre navigateur refuse à votre place et l’application ne peut plus le demander — il faut les réautoriser dans les réglages du site pour CovertCook.",
       "needs-install": "Ajoutez CovertCook à votre écran d’accueil et ouvrez-le depuis là. Sur iPhone et iPad, les notifications n’existent que dans l’application installée — c’est la règle d’Apple, pas la nôtre.",
       "unsupported": "Ce navigateur ne gère pas les notifications. Rien n’est cassé : il ne peut simplement pas.",
-      "unconfigured": "Pas encore disponible sur ce déploiement."
+      "unconfigured": "Pas encore disponible sur ce déploiement.",
+      "no-worker": "Le service en arrière-plan n’a pas démarré sur cet appareil : rien ne peut lui être remis. Rechargez l’app — la navigation privée le bloque net, et Brave demande d’activer son réglage de messagerie push."
     },
     "aside": {
       "checking": "…",
@@ -781,7 +819,38 @@
       "denied": "Bloquées",
       "needs-install": "Nécessite l’app installée",
       "unsupported": "Indisponible",
-      "unconfigured": "Indisponible"
+      "unconfigured": "Indisponible",
+      "no-worker": "À l’arrêt"
+    },
+    "test": {
+      "open": "Les notifications n’arrivent pas ?",
+      "title": "Tester cet appareil",
+      "why": "Sept maillons séparent un dîner de votre écran verrouillé, et quand l’un casse, le téléphone reste simplement silencieux. On les interroge un par un, puis on vous en envoie une pour de vrai.",
+      "check": {
+        "installed": "Ouverte depuis l’écran d’accueil, pas dans un onglet",
+        "api": "Ce navigateur a l’API de notifications",
+        "worker": "Le service en arrière-plan tourne",
+        "permission": "Vous avez autorisé les notifications",
+        "key": "Ce déploiement a une clé de signature",
+        "subscribed": "Ce navigateur détient un abonnement",
+        "server": "CovertCook a cet abonnement enregistré"
+      },
+      "fix": {
+        "installed": "Sur iPhone et iPad, c’est toute la réponse : Partager → Sur l’écran d’accueil, puis ouvrez CovertCook depuis cette icône. Les notifications n’existent pas dans un onglet Safari — règle d’Apple, pas la nôtre.",
+        "api": "Ce navigateur ne peut pas recevoir de notifications web. Rien n’est cassé ; essayez l’app installée sur un autre navigateur.",
+        "worker": "Le service en arrière-plan n’a jamais démarré. Rechargez l’app. Il est bloqué net en navigation privée, et Brave exige Paramètres → Confidentialité → « Utiliser les services Google pour la messagerie push » avant toute notification web.",
+        "permission": "Activez les notifications avec l’interrupteur ci-dessus. Si votre navigateur a déjà refusé, il ne redemandera pas — autorisez d’abord CovertCook dans les réglages du site.",
+        "key": "Ce déploiement n’a pas de clé de signature (VITE_VAPID_PUBLIC_KEY) : aucune notification ne peut en partir. Rien à faire depuis ce téléphone.",
+        "subscribed": "Coupez puis rallumez les notifications avec l’interrupteur ci-dessus — c’est ce qui demande une nouvelle adresse au navigateur.",
+        "server": "Ce navigateur a une adresse que le serveur n’a jamais reçue. Appuyez sur « Envoyer une notification de test » : elle est renvoyée juste avant l’envoi.",
+        "none": ""
+      },
+      "recheck": "Vérifier à nouveau",
+      "send": "Envoyer une notification de test",
+      "sent": "Envoyée. Elle devrait apparaître en quelques secondes — si rien n’arrive maintenant, le problème est entre votre téléphone et son service de push (Apple ou Google), pas dans cette app.",
+      "noRow": "Le serveur n’a d’adresse pour aucun de vos appareils. Coupez puis rallumez les notifications avec l’interrupteur ci-dessus.",
+      "refused": "Le serveur a essayé {{audience}} appareil(s) et tous ont été refusés. En général, la clé de signature a changé depuis votre abonnement : coupez puis rallumez les notifications pour obtenir une nouvelle adresse.",
+      "accountOff": "Votre compte a aussi les notifications coupées : rien d’autre que ce test ne serait parti."
     }
   },
   "account": {

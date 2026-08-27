@@ -43,6 +43,9 @@ type Kind =
   | 'JOIN_REQUESTED'
   | 'JOIN_ARRIVED'
   | 'JOIN_APPROVED'
+  // Not a moment in a dinner at all: the one push somebody asks for out loud,
+  // to find out whether any of the others could ever arrive (0056).
+  | 'TEST'
 
 const KINDS: Kind[] = [
   'ASSIGNED',
@@ -52,6 +55,7 @@ const KINDS: Kind[] = [
   'JOIN_REQUESTED',
   'JOIN_ARRIVED',
   'JOIN_APPROVED',
+  'TEST',
 ]
 
 // Which moments are announced from a membership rather than a round. For these
@@ -97,6 +101,12 @@ const COPY: Record<Kind, Record<'en' | 'fr', { title: string; body: string }>> =
     en: { title: 'You are at the table', body: '{round} — your request was accepted.' },
     fr: { title: 'Vous êtes à table', body: '{round} — votre demande a été acceptée.' },
   },
+  // Says what it is. A test notification that looks like a real one teaches
+  // people to distrust the real ones.
+  TEST: {
+    en: { title: 'CovertCook — test', body: 'Notifications work on this device. Nothing is happening at any dinner.' },
+    fr: { title: 'CovertCook — test', body: 'Les notifications marchent sur cet appareil. Il ne se passe rien à aucun dîner.' },
+  },
 }
 
 function fail(status: number, message: string) {
@@ -129,7 +139,9 @@ Deno.serve(async (req) => {
   } catch {
     return fail(400, 'expected a JSON body')
   }
-  if (!body.round_id && !body.member_id) return fail(400, 'round_id or member_id is required')
+  if (!body.round_id && !body.member_id && body.kind !== 'TEST') {
+    return fail(400, 'round_id or member_id is required')
+  }
 
   // An unknown moment is not a generic notification, it is nothing: the caller
   // asked for something this app has decided not to interrupt people about.
@@ -150,6 +162,45 @@ Deno.serve(async (req) => {
   if (!uid) return fail(401, 'not authenticated')
 
   const asService = createClient(url, serviceKey)
+
+  // ---- The self-test: addressed to the caller's own devices ----
+  //
+  // Every other branch below answers "who else should hear about this?". This
+  // one answers "can I hear anything at all?", so it is the caller's own rows
+  // and nobody else's — there is no id to pass and therefore nothing to aim.
+  //
+  // It reports rather than refuses. No devices, notifications switched off, a
+  // push service that rejected the endpoint: each of those is a different
+  // fault with a different fix, and a 4xx that flattened them into "no" would
+  // leave the person exactly where they started.
+  if (kind === 'TEST') {
+    const { data, error } = await asService.rpc('push_audience_for_me', { p_uid: uid })
+    if (error) return fail(500, error.message)
+
+    const rows = (data ?? []) as {
+      endpoint: string
+      p256dh: string
+      auth: string
+      locale: string
+      notifications_enabled: boolean
+    }[]
+
+    if (!rows.length) {
+      return new Response(
+        JSON.stringify({ sent: 0, audience: 0, reason: 'no_subscription_on_server' }),
+        { status: 200, headers: { 'Content-Type': 'application/json' } },
+      )
+    }
+
+    const response = await deliver(rows, 'TEST', '', undefined, '/profile', 'covertcook-test')
+    // The account switch does not stop the test — it is asked for by hand —
+    // but it does stop everything else, so it travels back with the result.
+    const detail = await response.json()
+    return new Response(
+      JSON.stringify({ ...detail, notifications_enabled: rows[0].notifications_enabled }),
+      { status: 200, headers: { 'Content-Type': 'application/json' } },
+    )
+  }
 
   // ---- The door: addressed by membership, authorised inside the database ----
   if (DOOR_KINDS.includes(kind)) {
@@ -254,6 +305,11 @@ Deno.serve(async (req) => {
     // Only the door copy names the dinner; the four in-play moments are read
     // by somebody already inside one.
     roundName?: string,
+    // Where a tap lands, and what a second push of the same sort replaces.
+    // Derived from the round for everything that belongs to one; passed in for
+    // the self-test, which belongs to a person rather than to a dinner.
+    openUrl?: string,
+    tag?: string,
   ) {
     webpush.setVapidDetails(subject!, publicKey!, privateKey!)
 
@@ -269,10 +325,10 @@ Deno.serve(async (req) => {
             JSON.stringify({
               title: copy.title,
               body: copy.body.replace('{round}', roundName ?? ''),
-              url: `/rounds/${roundId}`,
+              url: openUrl ?? `/rounds/${roundId}`,
               // One notification per round per moment: a second push about the
               // same transition replaces the first rather than stacking.
-              tag: `round-${roundId}-${copyKind}`,
+              tag: tag ?? `round-${roundId}-${copyKind}`,
             }),
           )
           sent++

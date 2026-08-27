@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
@@ -12,7 +12,16 @@ import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
 import { type SupportedLocale } from '../../lib/i18n'
 import { cancelAccountDeletion, requestAccountDeletion, type DietaryKind } from '../../lib/rpc'
-import { currentPushState, disablePush, enablePush, type PushState } from '../../lib/push'
+import {
+  currentPushState,
+  diagnosePush,
+  disablePush,
+  enablePush,
+  resendSubscription,
+  type PushDiagnosis,
+  type PushState,
+} from '../../lib/push'
+import { sendTestPush, type TestPushResult } from '../../lib/rpc'
 
 interface DietaryRow {
   id: string
@@ -214,6 +223,40 @@ export function ProfilePage() {
     }
   }
 
+  // One panel, rendered under whichever heading opened it. Both grids at once
+  // is a wall of eighty pictures on a settings page, and opening the second
+  // has to close the first, or the button stops being a switch and becomes
+  // two independent toggles that look like one.
+  const editor = openSet && (
+    <div className="card stack">
+      {/* Nothing is written while you tap. The old version saved on every
+          touch, which made a mis-tap a change to somebody's medical record
+          and left no moment to look at what you had chosen. */}
+      <FoodTagGrid
+        tags={openSet === 'allergy' ? ALLERGENS : DIETS}
+        selected={draftCodes}
+        onToggle={(code) =>
+          setDraftCodes((prev) => (prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code]))
+        }
+        namespace={openSet === 'allergy' ? 'food.allergen' : 'food.diet'}
+        otherValues={draftTyped}
+        onOtherAdd={(v) => setDraftTyped((prev) => [...prev, v])}
+        onOtherRemove={(v) => setDraftTyped((prev) => prev.filter((x) => x !== v))}
+      />
+
+      {openSet === 'allergy' && <p className="muted">{t('dietary.whoSeesIt')}</p>}
+
+      <div className="row">
+        <button type="button" disabled={busy} onClick={() => void onConfirm()}>
+          {t('actions.confirm')}
+        </button>
+        <button type="button" className="secondary" onClick={() => setOpenSet(null)}>
+          {t('actions.cancel')}
+        </button>
+      </div>
+    </div>
+  )
+
   return (
     <div className="stack sheet">
       <BackToTable />
@@ -260,6 +303,16 @@ export function ProfilePage() {
         <p className="muted">{t('push.perRound')}</p>
       </div>
 
+      {/* The one push that goes to the person who asked for it.
+          Everything else here happens at a moment in a dinner, to somebody
+          else, and cannot be made to happen on purpose — which is why "I get
+          no notifications" has been unanswerable. Worse: the audience for a
+          phase change excludes whoever caused it, so a host testing on their
+          own is correctly and permanently excluded from their own dinner.
+          This is the way to find out whether the chain works, without needing
+          five friends and a dinner. */}
+      <PushTest state={shownPush} />
+
       </Fold>
 
       <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>
@@ -270,75 +323,51 @@ export function ProfilePage() {
 
       {/* What is declared, laid out like a menu rather than as a list of rows
           with their category spelled out beside each one: two headings, the
-          pictures under them, the word under each picture. */}
+          pictures under them, the word under each picture.
+
+          The button that adds to a set now sits on that set's own heading,
+          and the grid opens directly underneath it. It used to be a pair of
+          buttons below both lists, which asked the reader to work out which
+          button belonged to which heading — and then opened the grid in a
+          third place, below both of them, further from the list it was
+          about the longer that list got. */}
       <DeclaredList
         title={t('dietary.kind.ALLERGY_SEVERE')}
         empty={t('profile.noneAllergy')}
         entries={(entries ?? []).filter((e) => e.kind !== 'DIET' && e.kind !== 'DISLIKE')}
         onRemove={onRemove}
-      />
+        action={
+          <button
+            type="button"
+            className={`declared__add${openSet === 'allergy' ? '' : ' secondary'}`}
+            aria-expanded={openSet === 'allergy'}
+            onClick={() => beginEditing('allergy')}
+          >
+            {openSet === 'allergy' ? t('actions.close') : t('actions.add')}
+          </button>
+        }
+      >
+        {openSet === 'allergy' && editor}
+      </DeclaredList>
       <DeclaredList
         title={t('dietary.kind.DIET')}
         empty={t('profile.noneDiet')}
         entries={(entries ?? []).filter((e) => e.kind === 'DIET')}
         onRemove={onRemove}
         tone="diet"
-      />
-
-      {/* One panel at a time, and neither open by default. Both grids at once
-          is a wall of eighty pictures on a settings page; and opening the
-          second has to close the first, or the button stops being a switch and
-          becomes two independent toggles that look like one. */}
-      <div className="row">
-        <button
-          type="button"
-          className={openSet === 'allergy' ? '' : 'secondary'}
-          aria-expanded={openSet === 'allergy'}
-          onClick={() => beginEditing('allergy')}
-        >
-          {t('profile.editAllergies')}
-        </button>
-        <button
-          type="button"
-          className={`tone-diet${openSet === 'diet' ? '' : ' secondary'}`}
-          aria-expanded={openSet === 'diet'}
-          onClick={() => beginEditing('diet')}
-        >
-          {t('profile.editDiets')}
-        </button>
-      </div>
-
-      {openSet && (
-        <div className="card stack">
-          {/* Nothing is written while you tap. The old version saved on every
-              touch, which made a mis-tap a change to somebody's medical
-              record and left no moment to look at what you had chosen. */}
-          <FoodTagGrid
-            tags={openSet === 'allergy' ? ALLERGENS : DIETS}
-            selected={draftCodes}
-            onToggle={(code) =>
-              setDraftCodes((prev) =>
-                prev.includes(code) ? prev.filter((c) => c !== code) : [...prev, code],
-              )
-            }
-            namespace={openSet === 'allergy' ? 'food.allergen' : 'food.diet'}
-            otherValues={draftTyped}
-            onOtherAdd={(v) => setDraftTyped((prev) => [...prev, v])}
-            onOtherRemove={(v) => setDraftTyped((prev) => prev.filter((x) => x !== v))}
-          />
-
-          {openSet === 'allergy' && <p className="muted">{t('dietary.whoSeesIt')}</p>}
-
-          <div className="row">
-            <button type="button" disabled={busy} onClick={() => void onConfirm()}>
-              {t('actions.confirm')}
-            </button>
-            <button type="button" className="secondary" onClick={() => setOpenSet(null)}>
-              {t('actions.cancel')}
-            </button>
-          </div>
-        </div>
-      )}
+        action={
+          <button
+            type="button"
+            className={`declared__add tone-diet${openSet === 'diet' ? '' : ' secondary'}`}
+            aria-expanded={openSet === 'diet'}
+            onClick={() => beginEditing('diet')}
+          >
+            {openSet === 'diet' ? t('actions.close') : t('actions.add')}
+          </button>
+        }
+      >
+        {openSet === 'diet' && editor}
+      </DeclaredList>
 
       </Fold>
 
@@ -398,6 +427,10 @@ export function ProfilePage() {
  * The empty line is a sentence rather than a blank space: nothing declared and
  * nothing loaded look identical when both are empty, and one of them means a
  * cook can stop worrying.
+ *
+ * `action` sits on the heading itself — the button that adds to this set,
+ * beside the name of the set it adds to — and `children` is what that button
+ * opens, directly beneath the list it changes.
  */
 function DeclaredList({
   title,
@@ -405,18 +438,25 @@ function DeclaredList({
   entries,
   onRemove,
   tone,
+  action,
+  children,
 }: {
   title: string
   empty: string
   entries: DietaryRow[]
   onRemove: (id: string) => void
   tone?: 'diet'
+  action?: ReactNode
+  children?: ReactNode
 }) {
   const { t } = useTranslation()
 
   return (
     <div className="declared">
-      <h3 className={`declared__title${tone === 'diet' ? ' tone-diet' : ''}`}>{title}</h3>
+      <div className="declared__head">
+        <h3 className={`declared__title${tone === 'diet' ? ' tone-diet' : ''}`}>{title}</h3>
+        {action}
+      </div>
       {entries.length === 0 ? (
         <p className="declared__empty">
           <em>{empty}</em>
@@ -437,6 +477,141 @@ function DeclaredList({
             </li>
           ))}
         </ul>
+      )}
+      {children}
+    </div>
+  )
+}
+
+
+/**
+ * Where it breaks, said as a place.
+ *
+ * Two halves, and the order matters. The checks run on this device and cost
+ * nothing, so they run when the panel opens: they can already answer four of
+ * the seven ways push fails, and three of those need no server at all. Then
+ * the button, which is the only half that can prove the whole chain — a
+ * notification that actually arrives is the only evidence that every link
+ * between a database row and a lock screen is intact.
+ *
+ * Written to be read out loud to somebody over a phone, because that is what
+ * happens to it: each line is a question with a yes or a no, and the failures
+ * carry the fix rather than the diagnosis.
+ */
+function PushTest({ state }: { state: PushState | 'checking' }) {
+  const { t } = useTranslation()
+  const [report, setReport] = useState<PushDiagnosis | null>(null)
+  const [result, setResult] = useState<TestPushResult | null>(null)
+  const [failure, setFailure] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+  const [open, setOpen] = useState(false)
+
+  async function check() {
+    setFailure(null)
+    setBusy(true)
+    try {
+      setReport(await diagnosePush())
+    } catch (err) {
+      setFailure(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  async function onOpen() {
+    setOpen(true)
+    await check()
+  }
+
+  // Repair, then test. A subscription the server never received is the one
+  // fault where the phone and the database each look perfectly fine on their
+  // own, and re-sending it is a no-op in every other case — so it is not worth
+  // a second button, or a decision anybody has to make.
+  async function onTest() {
+    setFailure(null)
+    setResult(null)
+    setBusy(true)
+    try {
+      await resendSubscription()
+      setResult(await sendTestPush())
+      setReport(await diagnosePush())
+    } catch (err) {
+      setFailure(err instanceof Error ? err.message : String(err))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  if (!open) {
+    return (
+      <button type="button" className="secondary" onClick={onOpen}>
+        {t('push.test.open')}
+      </button>
+    )
+  }
+
+  const lines: { key: string; ok: boolean | null; detail?: string }[] = report
+    ? [
+        { key: 'installed', ok: report.standalone },
+        { key: 'api', ok: report.supported },
+        { key: 'worker', ok: report.serviceWorker === 'active', detail: report.serviceWorker },
+        { key: 'permission', ok: report.permission === 'granted', detail: report.permission },
+        { key: 'key', ok: report.vapidConfigured },
+        { key: 'subscribed', ok: report.subscribed, detail: report.pushService ?? undefined },
+        { key: 'server', ok: report.knownToServer },
+      ]
+    : []
+
+  return (
+    <div className="card stack">
+      <strong>{t('push.test.title')}</strong>
+      <p className="muted">{t('push.test.why')}</p>
+
+      {failure && <div className="error">{failure}</div>}
+
+      <ul className="checklist">
+        {lines.map((line) => (
+          <li key={line.key} className={line.ok === true ? 'is-ok' : line.ok === false ? 'is-bad' : ''}>
+            <span aria-hidden="true">{line.ok === true ? '✓' : line.ok === false ? '✕' : '?'}</span>
+            <span>
+              {t(`push.test.check.${line.key}`)}
+              {line.detail && <span className="muted"> — {line.detail}</span>}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      {/* The first failing line, turned into the thing to do about it. One
+          instruction, not seven: a checklist with three crosses on it is a
+          diagnosis, and a diagnosis is not a fix. */}
+      {report && (
+        <p className="muted">
+          {t(`push.test.fix.${lines.find((l) => l.ok === false)?.key ?? 'none'}`, { defaultValue: '' })}
+        </p>
+      )}
+
+      <div className="row">
+        <button type="button" className="secondary" disabled={busy} onClick={check}>
+          {t('push.test.recheck')}
+        </button>
+        <button type="button" disabled={busy || state !== 'on'} onClick={onTest}>
+          {t('push.test.send')}
+        </button>
+      </div>
+
+      {/* What the server did, in the server's own numbers. `audience: 0` and
+          `sent: 0` are different faults — nothing to send to, versus something
+          to send to that refused — and collapsing them into "it didn't work"
+          is how this stayed a mystery for a month. */}
+      {result && (
+        <p className={result.sent > 0 ? 'muted' : 'notice'}>
+          {result.sent > 0
+            ? t('push.test.sent')
+            : result.reason === 'no_subscription_on_server'
+              ? t('push.test.noRow')
+              : t('push.test.refused', { audience: result.audience })}
+          {result.notifications_enabled === false && ` ${t('push.test.accountOff')}`}
+        </p>
       )}
     </div>
   )

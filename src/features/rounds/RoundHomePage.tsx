@@ -500,7 +500,7 @@ export function RoundHomePage() {
   }
 
   return (
-    <div className="cloth" style={{ position: 'relative', minHeight: '100%', margin: -16, padding: 16 }}>
+    <div className="cloth table-scene">
       <TableProps status={round.status} />
 
       <div className="stack" style={{ position: 'relative', zIndex: 2, gap: 11 }}>

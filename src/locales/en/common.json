@@ -19,7 +19,8 @@
     "add": "Add",
     "remove": "Remove",
     "ok": "OK",
-    "no": "No, leave it"
+    "no": "No, leave it",
+    "close": "Close"
   },
   "auth": {
     "signIn": "Sign in",
@@ -452,8 +453,44 @@
     "labelDishWhy": "It contains {{items}}, and somebody at this table has said that matters to them. A card by the dish is what lets them decide for themselves.",
     "needsMore": "A name, and either a link or the recipe written out.",
     "errors": {
+      "DISH_NAME_MISSING": "The dish has no name yet. That is the one thing your cook sees first.",
       "DISH_NAME_LENGTH": "The dish needs a name of at least three characters.",
-      "RECIPE_TOO_EMPTY": "Add a link, or write out the recipe."
+      "PROCEDURE_MISSING": "The method is empty. Write how to make it, or paste a link to a recipe instead.",
+      "PROCEDURE_TOO_SHORT": "The method is too short to cook from. A line or two is plenty — or paste a link instead.",
+      "INGREDIENTS_MISSING": "No ingredients listed. Your cook has to shop for this — or paste a link that lists them.",
+      "RECIPE_TOO_EMPTY": "Add a link, or write out the recipe.",
+      "LINK_MALFORMED": "That link has to start with http:// or https://.",
+      "ALREADY_SUBMITTED": "This recipe has already been sent, and a sent recipe cannot be changed.",
+      "DEADLINE_PASSED": "The deadline for recipes has passed for this dinner.",
+      "ROUND_NOT_ACCEPTING": "This dinner is not taking recipes right now.",
+      "NOTHING_WRITTEN": "Nothing has been saved yet. Save a draft first.",
+      "DIETARY_CONFLICT": "This dish contains {{items}}, and somebody at this table cannot eat it. Change the recipe — the dinner is shared.",
+      "constraint": {
+        "briefs_check": "The dish needs a name of between three and eighty characters.",
+        "briefs_check1": "The method is too short for this dinner’s database, which has not been updated yet. Paste a link, or write a couple more lines.",
+        "briefs_check3": "The allergen check has not run on this recipe. Reopen it and save it again.",
+        "briefs_submitted_recipe_not_empty": "A recipe needs a link or a written method before it can be sent.",
+        "briefs_external_url_check": "That link has to start with http:// or https://.",
+        "brief_ingredients_name_check": "One of the ingredients is blank. Remove the empty line, or fill it in."
+      }
+    },
+    "theMenu": "Tonight’s menu",
+    "yours": "Yours",
+    "sendFinal": "Send — final",
+    "submitConfirmTitle": "Send this recipe? It cannot be changed afterwards.",
+    "submitConfirmWhy": "It reaches your cook the moment you send it, and the form locks. There is no editing, no unsending and no second version — so read it back once before you press.",
+    "summaryDish": "Dish: {{name}}",
+    "summaryLink": "A link to follow: {{url}}",
+    "summaryWritten": "Written out, with {{n}} ingredient(s) listed",
+    "summaryFor": "Cooked by: {{name}}",
+    "missingIntro": "Not ready to send yet — still missing: {{items}}.",
+    "missing": {
+      "dishName": "the dish name",
+      "dishNameShort": "a longer dish name (at least three letters)",
+      "ingredients": "the ingredients (or a link instead)",
+      "procedure": "the method (or a link instead)",
+      "procedureShort": "a fuller method — a line or two, not a word",
+      "linkMalformed": "a link that starts with http:// or https://"
     }
   },
   "chat": {
@@ -772,7 +809,8 @@
       "denied": "Blocked. Your browser is refusing on your behalf and the app cannot ask again — it has to be re-allowed in the site settings for CovertCook.",
       "needs-install": "Add CovertCook to your home screen and open it from there. On iPhone and iPad, notifications only exist in the installed app — this is Apple’s rule, not ours.",
       "unsupported": "This browser has no notification support. Nothing is broken; it simply cannot.",
-      "unconfigured": "Not available on this deployment yet."
+      "unconfigured": "Not available on this deployment yet.",
+      "no-worker": "The app’s background worker did not start on this device, so nothing can be delivered to it. Reload the app — and note that private windows block it outright, and Brave needs its push messaging setting switched on."
     },
     "aside": {
       "checking": "…",
@@ -781,7 +819,38 @@
       "denied": "Blocked",
       "needs-install": "Needs the installed app",
       "unsupported": "Unavailable",
-      "unconfigured": "Unavailable"
+      "unconfigured": "Unavailable",
+      "no-worker": "Not running"
+    },
+    "test": {
+      "open": "Notifications are not arriving?",
+      "title": "Test this device",
+      "why": "Push has seven links between a dinner and your lock screen, and when one is broken the phone just stays quiet. This asks each of them, then sends you one for real.",
+      "check": {
+        "installed": "Opened from the home screen, not in a browser tab",
+        "api": "This browser has the notification API",
+        "worker": "The app’s background worker is running",
+        "permission": "You have allowed notifications",
+        "key": "This deployment has a signing key",
+        "subscribed": "This browser holds a subscription",
+        "server": "CovertCook has that subscription on file"
+      },
+      "fix": {
+        "installed": "On iPhone and iPad this is the whole answer: Share → Add to Home Screen, then open CovertCook from that icon. Notifications do not exist in a Safari tab — Apple’s rule, not ours.",
+        "api": "This browser cannot receive web notifications at all. Nothing here is broken; try the installed app on another browser.",
+        "worker": "The background worker never started. Reload the app. It is blocked outright in private windows, and Brave needs Settings → Privacy → “Use Google services for push messaging” switched on before any web push can arrive.",
+        "permission": "Turn notifications on with the switch above. If your browser has already refused, it will not ask again — allow CovertCook in the site settings first.",
+        "key": "This deployment has no signing key set (VITE_VAPID_PUBLIC_KEY), so no notification can be sent from it. Nothing you can do from this phone.",
+        "subscribed": "Turn notifications off and back on with the switch above — that is what asks the browser for a fresh address.",
+        "server": "This browser has an address the server never received. Press “Send a test notification” — it hands it over again before it sends.",
+        "none": ""
+      },
+      "recheck": "Check again",
+      "send": "Send a test notification",
+      "sent": "Sent. It should appear within a few seconds — if nothing arrives now, the fault is between your phone and its push service (Apple’s or Google’s), not in this app.",
+      "noRow": "The server has no address for any of your devices. Turn notifications off and on again with the switch above.",
+      "refused": "The server tried {{audience}} device(s) and every one was refused. That usually means the signing key has changed since you subscribed: turn notifications off and on again to get a fresh address.",
+      "accountOff": "Your account also has notifications switched off, so nothing but this test would have been sent."
     }
   },
   "account": {
