@@ -451,7 +451,6 @@
     "freeChoice": "Choix libre — le plat que vous voulez.",
     "labelDish": "Mettez un carton à côté de ce plat",
     "labelDishWhy": "Il contient {{items}}, et quelqu'un à cette table a dit que ça comptait pour lui. Un carton près du plat lui permet de décider lui-même.",
-    "needsMore": "Un nom, et soit un lien soit la recette écrite.",
     "errors": {
       "DISH_NAME_MISSING": "Le plat n’a pas encore de nom. C’est la première chose que votre cuisinier verra.",
       "DISH_NAME_LENGTH": "Le plat a besoin d’un nom d’au moins trois caractères.",
@@ -491,7 +490,8 @@
       "procedure": "la préparation (ou un lien à la place)",
       "procedureShort": "une préparation plus complète — une ligne ou deux, pas un mot",
       "linkMalformed": "un lien commençant par http:// ou https://"
-    }
+    },
+    "submitConfirmLabel": "Oui — envoyer"
   },
   "chat": {
     "title": "Messages",

@@ -451,7 +451,6 @@
     "freeChoice": "Free choice — any dish you like.",
     "labelDish": "Put a card next to this dish",
     "labelDishWhy": "It contains {{items}}, and somebody at this table has said that matters to them. A card by the dish is what lets them decide for themselves.",
-    "needsMore": "A name, and either a link or the recipe written out.",
     "errors": {
       "DISH_NAME_MISSING": "The dish has no name yet. That is the one thing your cook sees first.",
       "DISH_NAME_LENGTH": "The dish needs a name of at least three characters.",
@@ -491,7 +490,8 @@
       "procedure": "the method (or a link instead)",
       "procedureShort": "a fuller method — a line or two, not a word",
       "linkMalformed": "a link that starts with http:// or https://"
-    }
+    },
+    "submitConfirmLabel": "Yes — send it"
   },
   "chat": {
     "title": "Messages",
