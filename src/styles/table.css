@@ -482,6 +482,49 @@
   transition: transform 0.18s ease, color 0.18s ease;
 }
 
+/* The one thing in the header row that is asking for something.
+   Deliberately not styled like the profile chip beside it: that one is a place
+   you can go, this one is work that is waiting, and if they looked alike the
+   difference would have to be read rather than seen. It is absent entirely
+   when the count is zero — a badge permanently showing nothing is how people
+   learn to stop looking at a corner of the screen. */
+.alert-pip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.alert-pip:hover,
+.alert-pip:focus-visible {
+  filter: brightness(1.08);
+}
+
+.alert-pip__count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A reported phrase, quoted rather than restated. It is somebody's words on a
+   moderation screen and it should look like a quotation, not like the app
+   saying it. */
+.reported__body {
+  margin: 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--border);
+  background: var(--bg);
+  font-style: italic;
+  overflow-wrap: anywhere;
+}
+
 .app-logo__back {
   display: inline-block;
   width: 0;

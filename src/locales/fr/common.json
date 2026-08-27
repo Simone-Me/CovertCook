@@ -312,7 +312,8 @@
       "AWAITING_APPROVAL": "Vous avez déjà demandé à rejoindre. L'Executive Chef n'a pas encore répondu — le dîner apparaîtra ici dès qu'il l'aura fait.",
       "PREVIOUSLY_LEFT": "Vous avez quitté ce dîner. Demandez à l'Executive Chef de vous rajouter.",
       "WAS_REMOVED": "L'Executive Chef vous a retiré de ce dîner.",
-      "ROUND_FULL": "Ce dîner est complet."
+      "ROUND_FULL": "Ce dîner est complet.",
+      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner."
     },
     "chainChoice": {
       "intro": "La chaîne est déjà faite. Retirer un maillon laisse deux extrémités libres — décidez ce qu'elles deviennent.",
@@ -631,7 +632,9 @@
       "DROPOUT": "Un participant s'est désisté",
       "REPORTED_MESSAGE": "Un message a été signalé",
       "OTHER": "Autre"
-    }
+    },
+    "waiting_one": "{{count}} chose vous attend",
+    "waiting_other": "{{count}} choses vous attendent"
   },
   "errors": {
     "generic": "Une erreur est survenue. Réessayez.",
@@ -794,7 +797,56 @@
       ]
     },
     "draftNote": "Un brouillon, écrit à partir de ce que fait réellement l'application. Il n'a pas été relu par un juriste, et il devra l'être avant que CovertCook facture quoi que ce soit — le panneau diététique contient des données de santé, et toute vente entraîne TVA européenne et droit de rétractation.",
-    "by": "par"
+    "by": "par",
+    "moderation": "Modération",
+    "moderationDoc": {
+      "title": "Modération",
+      "updated": "2026-08-27",
+      "sections": [
+        {
+          "heading": "Ce que ce texte couvre",
+          "body": [
+            "CovertCook permet d’écrire à trois endroits : le fil privé avec la personne pour qui vous cuisinez, le fil privé avec celle qui cuisine pour vous, et le frigo que toute la table lit. Tout ce qui s’y écrit aujourd’hui est choisi dans une liste de phrases toutes faites ; le jour où le texte libre s’ouvrira, cette page s’y appliquera telle quelle.",
+            "Elle couvre aussi les recettes elles-mêmes, écrites par un convive et lues par un autre."
+          ]
+        },
+        {
+          "heading": "Ce qui est interdit",
+          "body": [
+            "Les insultes, le harcèlement, les menaces, et tout ce qui vise quelqu’un pour ce qu’il est plutôt que pour ce qu’il a cuisiné. Les contenus sexuels. Les tentatives d’identifier un convive qui joue à couvert, ou de le faire identifier par un autre. Se servir d’une recette pour faire manger à quelqu’un ce qu’il a déclaré ne pas pouvoir manger.",
+            "Cette dernière règle est la seule propre à cette application, et c’est la plus grave. Le panneau alimentaire existe parce qu’une table partagée signifie qu’un plat atteint tout le monde."
+          ]
+        },
+        {
+          "heading": "Signaler",
+          "body": [
+            "Chaque message porte un drapeau. Le signaler l’envoie au Chef exécutif de ce dîner — la personne qui l’organise — et à personne d’autre. Celui qui signale n’est jamais nommé.",
+            "Le Chef exécutif voit la phrase avant de voir de quelle place elle vient, et peut agir sans jamais apprendre qui l’a écrite."
+          ]
+        },
+        {
+          "heading": "Ce que le Chef exécutif peut faire",
+          "body": [
+            "Envoyer un avertissement à la place, que la personne lit sur la page du dîner. Retirer la place du dîner — le même contrôle que lorsque quelqu’un se désiste. Les deux visent une place, pas un nom.",
+            "Il peut aussi dévoiler l’auteur d’un message signalé. Cela exige une raison écrite et reste inscrit définitivement dans le journal du dîner, avec le nom de qui l’a demandé. Cela existe pour joindre quelqu’un hors du jeu — pas pour décider quoi faire dedans."
+          ]
+        },
+        {
+          "heading": "Bloquer",
+          "body": [
+            "N’importe qui peut bloquer n’importe qui, depuis le frigo, sans apprendre de qui il s’agit. Les phrases d’une personne bloquée disparaissent aussitôt de votre frigo, et aucun de vous deux ne peut prendre place à un dîner où l’autre se trouve déjà.",
+            "Bloquer n’interrompt pas un dîner en cours : la soirée de trois autres personnes repose sur la chaîne, et un blocage ne peut pas la faire s’effondrer. L’effet est complet au dîner suivant."
+          ]
+        },
+        {
+          "heading": "Contester, et nous joindre",
+          "body": [
+            "Un avertissement ou un retrait est la décision d’un hôte sur une soirée. Si vous la jugez injuste, écrivez à contact@opus35.fr en précisant le dîner ; le journal enregistre chaque acte de modération, y compris ceux où nous nous sommes trompés.",
+            "Tout ce qui est urgent — une menace, un mineur en danger, un contenu qui relève de la police plutôt que de nous — va à la même adresse, et est lu par une personne."
+          ]
+        }
+      ]
+    }
   },
   "push": {
     "title": "Notifications",
@@ -965,5 +1017,34 @@
     "forgetLastCopy": "Le dîner d’où elle vient n’existe plus. C’est la seule copie qui reste, et la retirer est sans retour, pour personne.",
     "exportMarkdown": "Télécharger en texte",
     "exportJson": "Télécharger en JSON"
+  },
+  "moderation": {
+    "byPseudonym": "Vous voyez ce qui a été dit avant de savoir qui l’a dit, et chaque action ici vise une place à table plutôt qu’une personne. C’est voulu : connaître l’auteur d’abord, c’est laisser l’idée qu’on se fait de quelqu’un décider si son message était déplacé — et aucun nom n’est nécessaire pour avertir une place ou la retirer.",
+    "namesAreKnown": "Ce dîner n’est pas à couvert : vous savez déjà qui est où. Les actions ci-dessous visent quand même la place, et le dévoilement reste enregistré — c’est ce qui le rend vérifiable après coup.",
+    "fromSeat": "De {{name}}",
+    "alreadyWarned": "déjà averti à ce sujet",
+    "warn": "Envoyer un avertissement",
+    "warnReason": "Ce qu’il ou elle doit savoir (facultatif — transmis mot pour mot)",
+    "sendWarning": "Envoyer",
+    "reveal": "Dévoiler l’auteur",
+    "revealTitle": "Dévoiler cet auteur ?",
+    "revealWhy": "Tout le reste de cette page fonctionne sans nom. Pas ceci, et c’est enregistré : le dévoilement, qui l’a demandé et la raison que vous donnez sont inscrits dans le journal du dîner, définitivement. Servez-vous-en pour joindre quelqu’un hors du jeu — pas pour décider quoi faire dedans.",
+    "revealReason": "Pourquoi vous avez besoin du nom",
+    "revealConfirm": "Dévoiler, et l’inscrire",
+    "revealed": "Écrit par {{name}}. Ce dévoilement a été enregistré.",
+    "youWereWarned": "Un mot du Chef exécutif",
+    "warningNoReason": "Rien de plus n’a été précisé.",
+    "warningRead": "J’ai lu",
+    "blockedTitle": "Personnes que vous avez bloquées",
+    "blockHelp": "On bloque à un dîner, sur la place, sans jamais avoir à apprendre qui est la personne. Ses messages quittent votre frigo aussitôt, et aucun de vous deux ne peut prendre place à un dîner où l’autre est déjà. Cela n’interrompt pas un dîner en cours — la soirée de trois autres personnes repose sur la chaîne.",
+    "noBlocks": "Personne. Que ça dure.",
+    "unblock": "Débloquer",
+    "block": "Bloquer cette personne",
+    "errors": {
+      "REVEAL_NEEDS_A_REASON": "Écrivez pourquoi le nom vous est nécessaire. C’est enregistré avec le dévoilement.",
+      "REVEAL_ONLY_FOR_REPORTED": "Seul l’auteur d’un message signalé peut être dévoilé.",
+      "CANNOT_BLOCK_YOURSELF": "Cette place est la vôtre.",
+      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner."
+    }
   }
 }

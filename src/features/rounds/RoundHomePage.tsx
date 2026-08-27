@@ -7,6 +7,7 @@ import { supabase } from '../../lib/supabase'
 import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
+import { MyWarnings } from './MyWarnings'
 import { Envelope } from './Envelope'
 import { CutleryLink } from '../../components/CutleryLink'
 import { Icon } from '../../components/Icon'
@@ -523,6 +524,12 @@ export function RoundHomePage() {
         {/* Said once, so the missing controls read as a rule rather than as
             something broken. */}
         {frozen && <p className="notice">{t('rounds.frozen')}</p>}
+
+        {/* A warning from the Executive Chef, on the page it is about, where
+            the person it was sent to will actually be. It stays until they say
+            they have read it — a moderation notice that scrolls away unread is
+            a moderation notice that never happened. */}
+        <MyWarnings roundId={roundId as string} />
 
         {error && <div className="error">{error}</div>}
 

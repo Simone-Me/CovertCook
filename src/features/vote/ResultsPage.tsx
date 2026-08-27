@@ -242,14 +242,14 @@ export function ResultsPage() {
       {assignment && (
         <>
           <h2>{t('results.whoCookedForYou')}</h2>
-          <ChatThread pairingId={assignment.pairing_id} />
+          <ChatThread pairingId={assignment.pairing_id} roundId={roundId} />
         </>
       )}
 
       {myBrief && (
         <>
           <h2>{t('results.whoYouCookedFor')}</h2>
-          <ChatThread pairingId={myBrief.pairing_id} />
+          <ChatThread pairingId={myBrief.pairing_id} roundId={roundId} />
         </>
       )}
     </div>

@@ -99,6 +99,19 @@ async function notifyMember(memberId: string, kind: 'JOIN_REQUESTED' | 'JOIN_APP
   }
 }
 
+// The mirror image of the four moments (0059): those exclude whoever caused
+// them, this one is the host and only the host. Fired by whoever caused the
+// alert — reporting a phrase, backing out of a dish — and silent on failure
+// like the rest, because the alert is already in the table whether or not a
+// push service was reachable.
+export async function notifyHostOfAlert(roundId: string) {
+  try {
+    await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind: 'HOST_ALERT' } })
+  } catch {
+    // The alert is recorded. The interruption is a courtesy.
+  }
+}
+
 async function notify(roundId: string, kind: NotifiedMoment) {
   try {
     await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind } })
@@ -670,8 +683,11 @@ export async function getThread(pairingId: string) {
   return unwrap<ThreadMessage[]>(res)
 }
 
-export async function reportMessage(messageId: string) {
+export async function reportMessage(messageId: string, roundId?: string) {
   const res = await supabase.rpc('report_message', { p_message_id: messageId })
+  // Not awaited: reporting has already happened, and it must not appear to have
+  // failed because a push service was slow (0059).
+  if (roundId) void notifyHostOfAlert(roundId)
   return unwrap(res)
 }
 
@@ -683,6 +699,11 @@ export interface ReportedMessage {
   body: string
   slot_value: string | null
   created_day: string
+  // The seat, and the name it wore that evening (0059). Enough to warn and
+  // enough to remove; deliberately not enough to know who it was.
+  author_member_id: string
+  author_secret_name: string | null
+  already_warned: boolean
 }
 
 export async function getReportedMessages(roundId: string) {
@@ -914,6 +935,92 @@ export async function getHostAlerts(roundId: string) {
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data ?? []) as HostAlert[]
+}
+
+// ---------------------------------------------------------------------------
+// Moderation, by seat (supabase/migrations/0059_moderation_by_seat.sql)
+// ---------------------------------------------------------------------------
+
+// What is waiting, across every dinner this person runs. The one notification
+// surface in this app that is not a push: the host has work to do rather than
+// news to read, and work belongs in the app that holds it.
+export interface OpenAlerts {
+  round_id: string
+  round_name: string
+  open_alerts: number
+  newest_at: string
+}
+
+export async function myOpenAlerts() {
+  const res = await supabase.rpc('my_open_alerts')
+  return unwrap<OpenAlerts[]>(res)
+}
+
+// Enough to act on, and deliberately not enough to name: the seat and the
+// pseudonym it wore that evening. Which is all a warning or a removal needs.
+export async function warnMember(input: {
+  roundId: string
+  memberId: string
+  messageId?: string | null
+  reason?: string | null
+}) {
+  const res = await supabase.rpc('warn_member', {
+    p_round_id: input.roundId,
+    p_member_id: input.memberId,
+    p_message_id: input.messageId ?? null,
+    p_reason: input.reason ?? null,
+  })
+  return unwrap(res)
+}
+
+export interface MyWarning {
+  id: string
+  reason: string | null
+  created_at: string
+}
+
+export async function myWarnings(roundId: string) {
+  const res = await supabase.rpc('my_warnings', { p_round_id: roundId })
+  return unwrap<MyWarning[]>(res)
+}
+
+export async function acknowledgeWarning(id: string) {
+  const res = await supabase.rpc('acknowledge_warning', { p_id: id })
+  return unwrap(res)
+}
+
+// The one act here that needs a name, and therefore the one that is recorded.
+// Requires a reason in writing and writes AUTHOR_REVEALED to audit_log — never
+// a side effect of opening an alert.
+export async function revealMessageAuthor(messageId: string, reason: string): Promise<string> {
+  const res = await supabase.rpc('reveal_message_author', {
+    p_message_id: messageId,
+    p_reason: reason,
+  })
+  return unwrap<string>(res)
+}
+
+// Blocked by seat, so you never have to learn who somebody is to decide you
+// would rather not sit with them again.
+export async function blockMember(memberId: string) {
+  const res = await supabase.rpc('block_member', { p_member_id: memberId })
+  return unwrap(res)
+}
+
+export async function unblockUser(profileId: string) {
+  const res = await supabase.rpc('unblock_user', { p_profile_id: profileId })
+  return unwrap(res)
+}
+
+export interface BlockedUser {
+  profile_id: string
+  display_name: string
+  created_at: string
+}
+
+export async function listMyBlocks() {
+  const res = await supabase.rpc('list_my_blocks')
+  return unwrap<BlockedUser[]>(res)
 }
 
 export async function resolveHostAlert(alertId: string) {
@@ -1195,6 +1302,10 @@ export interface BoardMessage {
   author_name: string
   is_mine: boolean
   reported: boolean
+  // The seat behind the pseudonym (0059), so a phrase can be blocked without
+  // anybody being named. Opaque: it adds nothing a reader did not already have
+  // from `author_name`.
+  author_member_id: string
 }
 
 export async function getBoard(roundId: string) {

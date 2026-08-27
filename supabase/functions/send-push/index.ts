@@ -46,6 +46,11 @@ type Kind =
   // Not a moment in a dinner at all: the one push somebody asks for out loud,
   // to find out whether any of the others could ever arrive (0056).
   | 'TEST'
+  // The mirror image of the four above (0059). Those exclude the host on
+  // purpose — being interrupted by your own button press is noise. This one is
+  // the host and nobody else, because the host is the only person here with
+  // work to do rather than news to read.
+  | 'HOST_ALERT'
 
 const KINDS: Kind[] = [
   'ASSIGNED',
@@ -56,6 +61,7 @@ const KINDS: Kind[] = [
   'JOIN_ARRIVED',
   'JOIN_APPROVED',
   'TEST',
+  'HOST_ALERT',
 ]
 
 // Which moments are announced from a membership rather than a round. For these
@@ -100,6 +106,13 @@ const COPY: Record<Kind, Record<'en' | 'fr', { title: string; body: string }>> =
   JOIN_APPROVED: {
     en: { title: 'You are at the table', body: '{round} — your request was accepted.' },
     fr: { title: 'Vous êtes à table', body: '{round} — votre demande a été acceptée.' },
+  },
+  // Says that something is waiting and never what it is. An alert can be a
+  // reported message, and the first line of a reported message is the last
+  // thing that should appear on a lock screen on a train.
+  HOST_ALERT: {
+    en: { title: 'Something needs you', body: '{round} — an alert is waiting in your dinner.' },
+    fr: { title: 'Quelque chose vous attend', body: '{round} — une alerte attend dans votre dîner.' },
   },
   // Says what it is. A test notification that looks like a real one teaches
   // people to distrust the real ones.
@@ -199,6 +212,48 @@ Deno.serve(async (req) => {
     return new Response(
       JSON.stringify({ ...detail, notifications_enabled: rows[0].notifications_enabled }),
       { status: 200, headers: { 'Content-Type': 'application/json' } },
+    )
+  }
+
+  // ---- The host's own alerts: addressed by round, answered by the database --
+  //
+  // Anyone at the table may cause an alert — reporting a phrase, backing out of
+  // a dish — so anyone at the table may make the host's phone ring, and nobody
+  // else can. That rule lives in the audience function rather than here,
+  // alongside the query it constrains.
+  if (kind === 'HOST_ALERT') {
+    if (!body.round_id) return fail(400, 'round_id is required for this kind')
+
+    const { data, error } = await asService.rpc('push_audience_for_round_host', {
+      p_round_id: body.round_id,
+      p_actor: uid,
+    })
+    if (error) return fail(500, error.message)
+
+    const rows = (data ?? []) as {
+      endpoint: string
+      p256dh: string
+      auth: string
+      locale: string
+      round_name: string
+    }[]
+
+    if (!rows.length) {
+      return new Response(JSON.stringify({ sent: 0, audience: 0 }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
+
+    return await deliver(
+      rows,
+      'HOST_ALERT',
+      body.round_id,
+      rows[0].round_name,
+      `/rounds/${body.round_id}/alerts`,
+      // One tag for the lot: five reported phrases in an evening is one thing
+      // to go and look at, not five lock-screen notifications.
+      `round-${body.round_id}-HOST_ALERT`,
     )
   }
 

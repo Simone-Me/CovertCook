@@ -54,6 +54,9 @@ function AppRoutes() {
     <Routes>
       <Route path="/legal/terms" element={<LegalPage page="terms" />} />
       <Route path="/legal/privacy" element={<LegalPage page="privacy" />} />
+      {/* Required by both stores the day free-text chat ships, and published
+          before it rather than after (DISTRIBUTION §1). */}
+      <Route path="/legal/moderation" element={<LegalPage page="moderation" />} />
       <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
       <Route
         path="/signup"

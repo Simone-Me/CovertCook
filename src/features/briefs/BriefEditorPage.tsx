@@ -563,7 +563,7 @@ export function BriefEditorPage() {
       {assignment && (
         <>
           <h2>{t('chat.title')}</h2>
-          <ChatThread pairingId={assignment.pairing_id} />
+          <ChatThread pairingId={assignment.pairing_id} roundId={roundId} />
         </>
       )}
     </div>

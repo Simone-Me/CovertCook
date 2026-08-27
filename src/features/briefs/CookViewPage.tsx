@@ -146,7 +146,7 @@ export function CookViewPage() {
       </div>
 
       <h2>{t('chat.title')}</h2>
-      <ChatThread pairingId={brief.pairing_id} />
+      <ChatThread pairingId={brief.pairing_id} roundId={roundId} />
     </div>
   )
 }

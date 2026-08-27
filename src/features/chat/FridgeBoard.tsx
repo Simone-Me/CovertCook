@@ -7,6 +7,8 @@ import {
   getMessageTemplates,
   markBoardRead,
   postToBoard,
+  blockMember,
+  notifyHostOfAlert,
   reportBoardMessage,
   type MessageTemplate,
 } from '../../lib/rpc'
@@ -174,6 +176,18 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
 
   async function onReport(messageId: string) {
     await reportBoardMessage(messageId)
+    // The host is told there is something waiting rather than left to find it
+    // (0059). Not awaited: the report is already recorded.
+    void notifyHostOfAlert(roundId)
+    await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'board'] })
+  }
+
+  // By seat, so nobody has to learn who somebody is to decide they would rather
+  // not sit with them again. Their phrases leave this board immediately; the
+  // dinner already under way is untouched, because three other people's evening
+  // is built on the chain.
+  async function onBlock(memberId: string) {
+    await blockMember(memberId)
     await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'board'] })
   }
 
@@ -202,15 +216,26 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
                     <span className="muted">{t('chat.reported')}</span>
                   ) : (
                     !m.is_mine && (
-                      <button
-                        type="button"
-                        className="chef-remove"
-                        title={t('chat.report')}
-                        aria-label={t('chat.report')}
-                        onClick={() => onReport(m.message_id)}
-                      >
-                        ⚑
-                      </button>
+                      <>
+                        <button
+                          type="button"
+                          className="chef-remove"
+                          title={t('chat.report')}
+                          aria-label={t('chat.report')}
+                          onClick={() => onReport(m.message_id)}
+                        >
+                          ⚑
+                        </button>
+                        <button
+                          type="button"
+                          className="chef-remove"
+                          title={t('moderation.block')}
+                          aria-label={t('moderation.block')}
+                          onClick={() => onBlock(m.author_member_id)}
+                        >
+                          🚫
+                        </button>
+                      </>
                     )
                   )}
                 </span>

@@ -1,6 +1,8 @@
 import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
+import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../lib/auth'
+import { myOpenAlerts } from '../lib/rpc'
 
 // The round switcher that used to live here is gone. It solved a problem
 // this product doesn't have: people run one dinner at a time, and every
@@ -15,6 +17,25 @@ export function AppHeader() {
   const { t } = useTranslation()
   const { session, profile } = useAuth()
 
+  // The in-app half of telling the host (0059). A push is for the phone in a
+  // pocket; this is for the app already open, where an alert should not have to
+  // wait for somebody to think of visiting a page. It is only ever here for a
+  // host with something unresolved — everybody else has news to read, and news
+  // is what the six push moments and the envelopes are for.
+  //
+  // Polled rather than subscribed: a realtime channel held open on every screen
+  // costs a connection for a badge that changes a handful of times an evening.
+  const { data: alerts } = useQuery({
+    queryKey: ['my-open-alerts'],
+    enabled: !!session,
+    queryFn: myOpenAlerts,
+    refetchInterval: 60_000,
+    refetchOnWindowFocus: true,
+  })
+
+  const waiting = (alerts ?? []).reduce((total, round) => total + round.open_alerts, 0)
+  const first = alerts?.[0]
+
   return (
     <header className="app-header">
       {/* The name was already a link home, but nothing said so — it read as
@@ -27,6 +48,21 @@ export function AppHeader() {
         <img className="app-logo__mark" src="/logo.webp" alt="" aria-hidden="true" width={26} height={26} />
         <span className="app-logo__name">{t('app.name')}</span>
       </Link>
+      {/* Between the way home and the way to yourself, because it is neither:
+          it is the one thing in this row that is asking for something. Absent
+          entirely when there is nothing waiting — a badge that is always there
+          showing zero teaches people to stop reading it. */}
+      {session && waiting > 0 && first && (
+        <Link
+          to={`/rounds/${first.round_id}/alerts`}
+          className="alert-pip"
+          aria-label={t('alerts.waiting', { count: waiting })}
+          title={t('alerts.waiting', { count: waiting })}
+        >
+          <span aria-hidden="true">🔔</span>
+          <span className="alert-pip__count">{waiting}</span>
+        </Link>
+      )}
       {session && (
         <Link to="/profile" className="badge" style={{ textDecoration: 'none' }}>
           {profile?.display_name ?? t('profile.title')}
