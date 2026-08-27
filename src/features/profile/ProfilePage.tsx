@@ -358,7 +358,13 @@ export function ProfilePage() {
         action={
           <button
             type="button"
-            className={`declared__add tone-diet${openSet === 'diet' ? '' : ' secondary'}`}
+            // The same colour as the one above it, deliberately. The green
+            // tint was making a point about diets — a rule to respect, not a
+            // danger — but the point belongs to the tiles and the labels,
+            // which carry it already. On two buttons doing the identical job,
+            // one heading apart, two colours only asked what the difference
+            // was.
+            className={`declared__add${openSet === 'diet' ? '' : ' secondary'}`}
             aria-expanded={openSet === 'diet'}
             onClick={() => beginEditing('diet')}
           >

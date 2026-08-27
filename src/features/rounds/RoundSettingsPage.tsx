@@ -520,7 +520,13 @@ export function RoundSettingsPage() {
 
       {canCancel && (
         <Fold title={t('rounds.settings.dangerZone')}>
-          <div className="card stack">
+          {/* The same red border the account deletion carries in the profile.
+              Cancelling a dinner ends it for everyone at it — the recipes, the
+              chain, the messages — and it was sitting in a plain card that
+              looked like the settings above it. Two irreversible things in one
+              app should announce themselves the same way, or the reader has to
+              learn the warning twice. */}
+          <div className="card stack card--danger">
             {/* The consequence is read here, next to the button, rather than
                 in a dialog that has already covered the page it is about. */}
             {cancelling ? (
