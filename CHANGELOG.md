@@ -59,6 +59,101 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-27 (3)
+
+**Moderation by seat** (`0059`) **and the album** (`0060`). Steps 3 and 4 of
+`ROADMAP.md` §7, which completes the four.
+
+*Half of step 3 turned out to be built already, and not by accident.*
+"Moderate by pseudonym, not by name" was the design decision inside it —
+and `pairings` has no player SELECT policy at all, and `get_reported_messages`
+returned a pairing id and a direction. The host could not name an author if they
+wanted to. So the work was the opposite of hiding something: giving the host
+enough to **act**. The seat, and the pseudonym it wore that evening.
+
+On that seat: a warning, which is the action that was missing entirely — between
+reading a reported phrase and ending somebody's evening there was nothing at
+all. It is read on the dinner's own page and dismissed by a deliberate press,
+because a moderation notice that scrolls away unread is one that never happened.
+Removal stays where it already lives, on the roster, with the choice about the
+chain it forces.
+
+*The one act that hands over a name looks like one.* `reveal_message_author`
+refuses without a written reason, works only on a message somebody actually
+reported, and writes `AUTHOR_REVEALED` to `audit_log` with the reason and who
+asked. It is for reaching somebody outside the game — never a side effect of
+opening an alert.
+
+*And the promise has a limit, which the page says out loud.* By-seat only
+anonymises in `ANONYMOUS` rounds; in `SPY` the host sees every name by
+definition and in `OPEN` everybody does. The sentence above the reported
+messages is worded for whichever is true, rather than implying a protection the
+round never offered.
+
+*Blocking.* By seat as well, so nobody has to learn who somebody is to decide
+they would rather not sit with them again. Their phrases leave your board at
+once, their photographs leave your album, and neither of you can take a seat at
+a dinner the other is already at — checked in both directions, and the blocked
+person is never told, because telling them is how a block becomes an argument.
+It does not end a dinner under way: three other people's evening is built on the
+chain, and one block cannot be allowed to collapse it.
+
+*Telling the host.* A push kind that is the mirror image of the other four —
+those exclude whoever caused the moment, this one is the host and nobody else —
+and the in-app half, a count in the header for a host with something
+unresolved. Polled while the app is open, and absent entirely at zero, because a
+badge permanently showing nothing is how people learn to stop looking at a
+corner of the screen.
+
+*The album.* One photograph of the table per person per dinner. One **each**
+rather than one per dinner, which would have asked immediately who gets to be
+the photographer; adding again replaces, so nothing accumulates and the cost of
+an evening is bounded by a number known in advance.
+
+**EXIF is the whole of why this file is careful.** A phone photograph carries
+GPS coordinates, and uploading one untouched publishes the address of somebody's
+flat to everybody at the dinner. It is stripped in the browser, before a byte
+leaves it — the only place it *can* be done — and stripped by **re-drawing
+rather than by editing**: a library that removes the tags it knows about
+guarantees "the ones we thought of are gone", and what is wanted is "nothing but
+pixels left". Decoding and re-encoding the canvas builds a file from scratch, so
+there is no metadata to miss. Orientation is the one thing that must survive,
+and it does, baked into the pixels by `createImageBitmap(…, { imageOrientation:
+'from-image' })` — otherwise half the photographs arrive lying on their side.
+
+The bucket is private and reading goes through a signed URL that lasts an hour.
+A public bucket hands out a link that works forever for anybody who has ever
+seen it, long after the dinner and the app are done with it.
+
+*And the CSP, which is the half-day this would otherwise have cost somebody.*
+`public/_headers` declared `img-src 'self' data: blob:`, so a Supabase storage
+URL is blocked and the picture never appears — while `connect-src` already
+allowed the same host, so the **upload works perfectly** and only the display
+breaks, with nothing wrong in the network tab and one line in the console. The
+storage host is now in `img-src`, in the same commit as the bucket.
+
+*Two tables deliberately outside 0054's freeze,* for the same reason as
+`saved_recipes`: a photograph is taken at the end of a dinner and an album is
+looked at afterwards, so freezing them with the round would refuse the write at
+exactly the moment anybody makes it. `smoke_test11.sql` §7 proves it.
+
+*What is deliberately still not built* is the last line of step 4: deleting old
+dinners. The argument for it is that a recipe worth keeping is in a book and an
+evening worth remembering is in an album — both now exist, and neither has been
+used yet. Deleting first would prove the argument false.
+
+*Also:* the moderation policy the stores require the day free-text chat ships,
+published now rather than then. That row in `DISTRIBUTION.md` §1 was the warning
+of the whole document — ship chat and you owe report, block and a policy in the
+same release. The coupling is gone; chat can ship on its own schedule.
+
+*Tested:* `smoke_test10.sql` and `smoke_test11.sql`, both driven end to end
+against Postgres 16. The album's bucket policies are the one thing in the set
+that a bare Postgres cannot run, so `0060` skips them when the `storage` schema
+is absent rather than being untestable outside a full local stack.
+
+---
+
 ## 2026-08-27 (2)
 
 **The evening ends on a menu** (`0057`), **and you can keep the recipes**

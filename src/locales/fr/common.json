@@ -1046,5 +1046,25 @@
       "CANNOT_BLOCK_YOURSELF": "Cette place est la vôtre.",
       "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner."
     }
+  },
+  "album": {
+    "title": "La table, à la fin",
+    "profileTitle": "Votre album",
+    "empty": "Aucune photo de cette table pour l’instant.",
+    "profileEmpty": "Rien encore. À la fin d’un dîner vous pouvez ajouter une photo de la table, et chaque soirée où vous étiez se retrouve ici.",
+    "add": "Ajouter votre photo",
+    "replace": "Remplacer votre photo",
+    "working": "Préparation…",
+    "remove": "Retirer",
+    "removed": "retirée",
+    "altFallback": "Une photo de {{name}}",
+    "exifNote": "Une photo chacun. Les données de localisation sont retirées dans votre navigateur avant tout envoi — une photo de téléphone transporte l’adresse où elle a été prise, et personne à un dîner n’a besoin de la vôtre.",
+    "errors": {
+      "NOT_AN_IMAGE": "Ce n’est pas une image.",
+      "TOO_LARGE": "Ce fichier est trop lourd pour être ouvert sans risque. En dessous de 12 Mo, tout va bien.",
+      "UNREADABLE": "Cette image n’a pas pu être lue sur cet appareil.",
+      "ALBUM_NOT_OPEN_YET": "L’album s’ouvre en même temps que le dîner.",
+      "PHOTO_PATH_MISMATCH": "Quelque chose s’est mal passé pendant l’envoi. Réessayez."
+    }
   }
 }

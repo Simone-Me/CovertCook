@@ -1046,5 +1046,25 @@
       "CANNOT_BLOCK_YOURSELF": "That seat is yours.",
       "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner."
     }
+  },
+  "album": {
+    "title": "The table, at the end",
+    "profileTitle": "Your album",
+    "empty": "No photographs of this table yet.",
+    "profileEmpty": "Nothing yet. At the end of a dinner you can add one photograph of the table, and every evening you were at collects here.",
+    "add": "Add your photograph",
+    "replace": "Replace your photograph",
+    "working": "Preparing…",
+    "remove": "Remove",
+    "removed": "removed",
+    "altFallback": "A photograph from {{name}}",
+    "exifNote": "One photograph each. Location data is stripped in your browser before anything is uploaded — a photo from a phone carries the address it was taken at, and nobody at a dinner needs yours.",
+    "errors": {
+      "NOT_AN_IMAGE": "That is not an image.",
+      "TOO_LARGE": "That file is too big to open safely. Anything under 12 MB is fine.",
+      "UNREADABLE": "That image could not be read on this device.",
+      "ALBUM_NOT_OPEN_YET": "The album opens when the dinner does.",
+      "PHOTO_PATH_MISMATCH": "Something went wrong with the upload. Try again."
+    }
   }
 }

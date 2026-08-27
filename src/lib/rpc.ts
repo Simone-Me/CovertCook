@@ -938,6 +938,107 @@ export async function getHostAlerts(roundId: string) {
 }
 
 // ---------------------------------------------------------------------------
+// The album (supabase/migrations/0060_the_album.sql)
+// ---------------------------------------------------------------------------
+
+export interface DinnerPhoto {
+  id: string
+  storage_path: string
+  caption: string | null
+  taken_by: string | null
+  is_mine: boolean
+  reported: boolean
+  hidden: boolean
+  created_at: string
+}
+
+export interface AlbumEntry {
+  id: string
+  round_id: string
+  round_name: string
+  dinner_at: string | null
+  storage_path: string
+  caption: string | null
+  is_mine: boolean
+  created_at: string
+}
+
+const PHOTO_BUCKET = 'dinner-photos'
+
+/**
+ * Upload the bytes, then record the row.
+ *
+ * In that order, and the caller must have stripped the file first
+ * (lib/photo.ts) — this function takes a Blob and asks no questions about where
+ * it came from, so the one place that guarantee can be made is the one place it
+ * is made.
+ *
+ * The path is the round's folder plus a random name. That prefix is the whole
+ * of what the storage policies check, and `record_photo` refuses a row whose
+ * path claims a different dinner, so the two agree or neither happens.
+ */
+export async function uploadPhoto(roundId: string, blob: Blob, caption?: string): Promise<string> {
+  const path = `${roundId}/${crypto.randomUUID()}.jpg`
+  const { error } = await supabase.storage.from(PHOTO_BUCKET).upload(path, blob, {
+    contentType: 'image/jpeg',
+    upsert: false,
+  })
+  if (error) throw new Error(error.message)
+
+  const res = await supabase.rpc('record_photo', {
+    p_round_id: roundId,
+    p_path: path,
+    p_caption: caption ?? null,
+  })
+  return unwrap<string>(res)
+}
+
+/**
+ * A URL that works for an hour and then does not.
+ *
+ * The bucket is private on purpose: a public URL is one that keeps working for
+ * anybody who has ever seen it, long after the dinner and the app are done with
+ * it. An hour is longer than anybody looks at an album and short enough that a
+ * link pasted somewhere else dies on its own.
+ */
+export async function photoUrl(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(path, 3600)
+  if (error) return null
+  return data?.signedUrl ?? null
+}
+
+export async function deletePhotoObject(path: string) {
+  // Best effort, and deliberately not awaited into a failure: `hide_photo` has
+  // already taken the picture out of everybody's album, so a bucket that
+  // refuses the delete leaves bytes nobody can reach rather than a photograph
+  // still on screen.
+  await supabase.storage.from(PHOTO_BUCKET).remove([path])
+}
+
+export async function listRoundPhotos(roundId: string) {
+  const res = await supabase.rpc('list_round_photos', { p_round_id: roundId })
+  return unwrap<DinnerPhoto[]>(res)
+}
+
+export async function myAlbum() {
+  const res = await supabase.rpc('my_album')
+  return unwrap<AlbumEntry[]>(res)
+}
+
+export async function reportPhoto(photoId: string, roundId: string) {
+  const res = await supabase.rpc('report_photo', { p_id: photoId })
+  // Same pipeline as a reported phrase (0059), so the host finds both in one
+  // inbox and is told about both the same way.
+  void notifyHostOfAlert(roundId)
+  return unwrap(res)
+}
+
+export async function hidePhoto(photoId: string) {
+  const res = await supabase.rpc('hide_photo', { p_id: photoId })
+  return unwrap(res)
+}
+
+// ---------------------------------------------------------------------------
 // Moderation, by seat (supabase/migrations/0059_moderation_by_seat.sql)
 // ---------------------------------------------------------------------------
 

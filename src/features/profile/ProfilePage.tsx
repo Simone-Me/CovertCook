@@ -9,6 +9,7 @@ import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { RecipeBook } from './RecipeBook'
 import { BlockedList } from './BlockedList'
+import { Album } from './Album'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
@@ -384,6 +385,10 @@ export function ProfilePage() {
         {openSet === 'diet' && editor}
       </DeclaredList>
 
+      </Fold>
+
+      <Fold title={t('album.profileTitle')}>
+        <Album />
       </Fold>
 
       <Fold title={t('moderation.blockedTitle')}>

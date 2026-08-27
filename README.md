@@ -476,10 +476,13 @@ setup and invitations, `smoke_test7.sql` the board plus allergens
 informing rather than blocking, and `smoke_test8.sql` what a recipe must
 contain (`0055`) plus the push self-test's audience (`0056`) — its first
 section is the exact recipe that used to come back as
-`violates check constraint "briefs_check1"` — and `smoke_test9.sql` the
+`violates check constraint "briefs_check1"` — `smoke_test9.sql` the
 results menu (`0057`) and the recipe book (`0058`), including the two cases
-that are invisible when they break: a dish nobody cooked still reaching the
-menu, and a second save writing nothing.
+that are invisible when they break — a dish nobody cooked still reaching the
+menu, and a second save writing nothing — `smoke_test10.sql` moderation by seat
+(`0059`), and `smoke_test11.sql` the album (`0060`), whose bucket policies are
+the one thing in the set that needs a running local stack rather than a bare
+Postgres.
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -504,7 +507,7 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 ```
 
 Then `db reset` again before each of `smoke_test3.sql` through
-`smoke_test9.sql`.
+`smoke_test11.sql`.
 
 **Prefer `npx supabase migration up --local` over `db reset` while anyone
 is using the app.** It applies pending migrations against the existing
@@ -581,6 +584,24 @@ names, migration numbers, bugs found and fixed) see
   recipe — gated on membership and on the results actually being published. It
   says who *wrote* each dish and never who *cooked* it, because those two facts
   side by side are the chain.
+- **Moderation, by seat** (`0059`): a reported phrase reaches the Executive
+  Chef with the seat it came from and the pseudonym that seat wore — never a
+  name, because knowing the author first is how an opinion of somebody decides
+  whether their message was out of line. They can warn the seat (read on the
+  dinner's own page, dismissed deliberately) or remove it from the roster. The
+  one act that hands over a name refuses without a written reason and writes
+  itself to `audit_log`. Anybody can block anybody from the board without
+  learning who they are: their phrases and photographs go, and neither of you
+  can take a seat where the other already is. The host is told there is
+  something waiting, by push and by a count in the header. Policy at
+  `/legal/moderation`.
+- **The album** (`0060`): one photograph of the table per person per dinner,
+  gathered into an album of every evening. Location data is stripped **in the
+  browser** before a byte is uploaded — a phone photograph carries the address
+  it was taken at — by decoding and re-encoding rather than by editing tags, so
+  what is left is pixels and nothing else. The bucket is private and reading
+  goes through short-lived signed URLs, so no photograph outlives the app in a
+  URL somebody pasted somewhere.
 - **Host tools**: round settings (venue/date/time), pause or cancel a
   round, a roster with approve/reject/remove, a spoiler-gated view of the
   whole assignment chain, and an inbox for player-reported issues.
