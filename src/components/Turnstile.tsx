@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import { captchaConfigured, captchaSiteKey } from '../lib/captcha'
 
 declare global {
   interface Window {
@@ -10,21 +11,6 @@ declare global {
 }
 
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-const PLACEHOLDER_SITE_KEY = 'replace-with-turnstile-site-key'
-
-/**
- * Does this deployment have a captcha at all?
- *
- * Exported because it decides more than whether to draw a widget: with no site
- * key there is nothing to verify, so the join path skips the Edge Function
- * entirely and `join_round` takes no ticket (0063). One condition, read in both
- * places, or the two disagree and joining breaks in a way that points at
- * neither.
- */
-export function captchaConfigured(): boolean {
-  const key = import.meta.env.VITE_TURNSTILE_SITE_KEY
-  return !!key && key !== PLACEHOLDER_SITE_KEY
-}
 
 /**
  * Renders a Cloudflare Turnstile widget and calls onVerify with the token
@@ -36,7 +22,7 @@ export function captchaConfigured(): boolean {
 export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
   const containerId = useId()
   const widgetId = useRef<string | null>(null)
-  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+  const siteKey = captchaSiteKey()
 
   useEffect(() => {
     // Nothing to draw and nothing to send. It used to hand back a placeholder
@@ -50,6 +36,7 @@ export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
     function render() {
       const el = document.getElementById(containerId)
       if (!el || !window.turnstile || cancelled) return
+      if (!siteKey) return
       widgetId.current = window.turnstile.render(el, { sitekey: siteKey, callback: onVerify })
     }
 

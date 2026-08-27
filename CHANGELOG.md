@@ -59,6 +59,81 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-27 (7)
+
+**Everybody reads in their own language** (`0064`), **shared costs** (`0065`),
+and two copy buttons instead of one.
+
+*The language bug is the important one, and it was found by using the app.* The
+canned phrases exist for exactly one reason: so that two people who share no
+language can still say something to each other at a dinner. The writer picks
+from a list, the reader gets the same thought in their own words — that is the
+whole argument for a closed vocabulary over free text. And it did not work. A
+message stored the id of **one locale's row**, because the French sentence and
+the English sentence are two rows with two ids, so a French cook picked "Goûte
+avant de servir" and an English diner opened the fridge and read it in French.
+
+A phrase is a thought, not a string. `message_templates` now carries a
+`template_key` shared across locales, and every reader resolves it against
+their own — the fridge, the private threads, and the reported phrases the host
+is deciding what to do about, which matters most of the three. `template_id`
+stays exactly as it was: still a true record of what the writer chose, and now
+enough to find the thought behind it.
+
+The keys are derived by position rather than typed out fifty-six times, because
+every seed in this repo inserts the two locales in the same order — and because
+that is an assumption rather than a guarantee, the migration **refuses to run**
+if any group has a different number of phrases per locale, which is the one way
+position-pairing could silently key the wrong sentences together. Verified in
+`smoke_test13.sql` against the actual pairs, not just the counts.
+
+*Shared costs.* A budget each, agreed when the dinner is created — before the
+roulette, before the recipes. That timing is the feature: a recipe written for
+a €10 dinner is a different recipe, so the budget shapes what people write
+rather than passing judgement on their receipts afterwards. Everybody records
+what they spent beside the shopping list they were actually given, and at the
+end the app says who should hand what to whom.
+
+**The one real decision was what to show while the dinner is running, and it is
+not a per-person list.** The case for one is genuine: seeing that everyone else
+is at €12 would let somebody about to spend €40 reconsider. The case against is
+that it is a leaderboard about money between friends, it invites exactly the
+comparison the feature exists to remove, and the person who has overspent finds
+out in front of everybody who has not. So: your own number, the table's
+average, and the budget. "Everyone is around twelve and I am at thirty-five" is
+the half that steers; "Marta is at thirty-five" is the half that starts an
+argument at a table Marta is sitting at. The individual numbers appear at
+settlement, because nobody can be asked for eight euros without being told why,
+and by then the dinner is a memory rather than a competition.
+
+Money is integer cents everywhere, including in the input box. The remainder
+that does not divide — three people and €58.00 is 1933 each and one cent over —
+is handed to whoever spent most, because they are the ones owed money and being
+owed a cent less is the smallest unfairness available. The balances sum to
+**exactly** zero, and the test asserts it rather than assuming it: a settlement
+that invents or loses a cent is one nobody can be asked to act on.
+
+*One note on where this sits.* `ROADMAP.md` §2 says free stays a whole product
+and Pro sells flavour only — tables and themes — because a table should never
+be split into paying and non-paying players. Splitting the bill is neither
+flavour nor a game mechanic, so it does not sit cleanly on either side of that
+line; it is labelled Pro as asked and works today, and the switch is in one
+place for the day that decision is revisited.
+
+*Also:* the share row printed the code and had one "Copy" button that copied
+the **link**, which is two things and one control. Two buttons now, each saying
+what it takes — a link opens the app on the right screen with the code already
+in it, and the code alone is what you read out at a table or paste into a group
+chat that mangles links — and both say "Copied!" for two seconds, because the
+clipboard is the one operation in a browser with no visible result of its own.
+
+*Tested:* `smoke_test13.sql` — a French phrase read in English and proved to be
+the same thought, the budget refusing to move once the roulette has run, the
+running view showing no per-person figures, and the settlement summing to zero
+twice in a row with the same answer.
+
+---
+
 ## 2026-08-27 (6)
 
 **`verify-turnstile` has no imports any more**, and that is the fix rather than

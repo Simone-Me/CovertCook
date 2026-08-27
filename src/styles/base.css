@@ -558,6 +558,65 @@ input.is-taken {
 }
 
 /* ---------------------------------------------------------------------------
+ * Shared costs. Numbers in a column, right-aligned and tabular, because the
+ * only thing anybody does on this screen is compare one figure against another.
+ * ------------------------------------------------------------------------- */
+
+.costs__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.costs__row strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.costs__over {
+  color: var(--danger);
+}
+
+.costs__settlement {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.costs__settlement li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 4px 10px;
+  align-items: baseline;
+  font-size: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.costs__settlement li:last-child {
+  border-bottom: none;
+}
+
+/* Your own line, marked the way the chain marks your own node. */
+.costs__settlement li.is-me .costs__who {
+  font-weight: 700;
+}
+
+.costs__settlement strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Owed and owing are the same fact from two sides, and they are the one place
+   in this app where green and red mean money rather than danger. */
+.costs__owed { color: var(--ok); }
+.costs__owes { color: var(--accent); }
+
+/* ---------------------------------------------------------------------------
  * The album. Photographs of a table, laid out the way photographs of a table
  * end up on one — a row you push along, not a grid that reflows.
  * ------------------------------------------------------------------------- */

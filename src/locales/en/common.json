@@ -281,7 +281,8 @@
       "vote": "Vote the menu",
       "results": "Results",
       "allergies": "Allergies",
-      "info": "The dinner"
+      "info": "The dinner",
+      "costs": "The costs"
     },
     "waiting": {
       "assignment": "Opens once the Executive Chef spins the roulette",
@@ -407,7 +408,9 @@
     "chefCount_other": "{{count}} chefs",
     "frozen": "This dinner is over. It stays here to be read — the recipes, the menu and the results — and nothing about it can be changed any more, by anybody.",
     "deletesOn": "This dinner deletes itself on {{date}}.",
-    "deletesWhatSurvives": "What you keep: every recipe you put in your book, and the photograph you added to the album. The rest — the chain, the messages, the ballots — goes with the dinner."
+    "deletesWhatSurvives": "What you keep: every recipe you put in your book, and the photograph you added to the album. The rest — the chain, the messages, the ballots — goes with the dinner.",
+    "copyCode": "Copy the code",
+    "copyLink": "Copy the link"
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",
@@ -1076,6 +1079,37 @@
       "UNREADABLE": "That image could not be read on this device.",
       "ALBUM_NOT_OPEN_YET": "The album opens when the dinner does.",
       "PHOTO_PATH_MISMATCH": "Something went wrong with the upload. Try again."
+    }
+  },
+  "costs": {
+    "label": "Shared costs",
+    "on": "On",
+    "share": "Split what the dinner costs",
+    "budgetPerHead": "Budget each (optional)",
+    "budgetHint": "Agreed now rather than at the end, so it shapes what people write. Leave it empty to split the costs with no ceiling.",
+    "perHead": "{{amount}} each",
+    "agreed": "Agreed for this dinner: {{amount}} each.",
+    "yourList": "What you were asked to buy",
+    "whatYouSpent": "What you spent, all in",
+    "notePlaceholder": "A note, if you want one",
+    "save": "Save what I spent",
+    "saved": "Saved.",
+    "you": "You",
+    "average": "Average at this table",
+    "total": "The whole dinner",
+    "reported": "{{reported}} of {{people}} have said.",
+    "overBudget": "You are over the agreed budget. Nothing stops you — it just means the others will be settling up towards you.",
+    "amountInvalid": "Write an amount like 12.50.",
+    "settlementTitle": "Settling up",
+    "square": "square",
+    "isOwed": "is owed {{amount}}",
+    "owes": "owes {{amount}}",
+    "settlementNote": "Everybody pays the same share of the whole dinner. The app does not move any money — it only says who should hand what to whom.",
+    "errors": {
+      "COSTS_NOT_SHARED": "This dinner does not split its costs.",
+      "SETTLEMENT_TOO_EARLY": "The bill comes after the food.",
+      "BUDGET_TOO_LATE": "The roulette has run and people are writing against this budget — it cannot move now.",
+      "AMOUNT_INVALID": "Write an amount like 12.50."
     }
   }
 }

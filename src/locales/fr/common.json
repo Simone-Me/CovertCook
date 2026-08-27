@@ -281,7 +281,8 @@
       "vote": "Votez le menu",
       "results": "Résultats",
       "allergies": "Allergies",
-      "info": "Le dîner"
+      "info": "Le dîner",
+      "costs": "Les frais"
     },
     "waiting": {
       "assignment": "S'ouvre quand l'Executive Chef lance la roulette",
@@ -407,7 +408,9 @@
     "chefCount_other": "{{count}} chefs",
     "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne.",
     "deletesOn": "Ce dîner s’effacera le {{date}}.",
-    "deletesWhatSurvives": "Ce que vous gardez : chaque recette mise dans votre carnet, et la photo que vous avez ajoutée à l’album. Le reste — la chaîne, les messages, les votes — part avec le dîner."
+    "deletesWhatSurvives": "Ce que vous gardez : chaque recette mise dans votre carnet, et la photo que vous avez ajoutée à l’album. Le reste — la chaîne, les messages, les votes — part avec le dîner.",
+    "copyCode": "Copier le code",
+    "copyLink": "Copier le lien"
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
@@ -1076,6 +1079,37 @@
       "UNREADABLE": "Cette image n’a pas pu être lue sur cet appareil.",
       "ALBUM_NOT_OPEN_YET": "L’album s’ouvre en même temps que le dîner.",
       "PHOTO_PATH_MISMATCH": "Quelque chose s’est mal passé pendant l’envoi. Réessayez."
+    }
+  },
+  "costs": {
+    "label": "Frais partagés",
+    "on": "Activé",
+    "share": "Partager ce que coûte le dîner",
+    "budgetPerHead": "Budget par personne (facultatif)",
+    "budgetHint": "Convenu maintenant plutôt qu’à la fin, pour qu’il oriente ce que chacun écrit. Laissez vide pour partager les frais sans plafond.",
+    "perHead": "{{amount}} chacun",
+    "agreed": "Convenu pour ce dîner : {{amount}} chacun.",
+    "yourList": "Ce qu’on vous a demandé d’acheter",
+    "whatYouSpent": "Ce que vous avez dépensé, tout compris",
+    "notePlaceholder": "Une note, si vous voulez",
+    "save": "Enregistrer ma dépense",
+    "saved": "Enregistré.",
+    "you": "Vous",
+    "average": "Moyenne à cette table",
+    "total": "Le dîner entier",
+    "reported": "{{reported}} sur {{people}} ont répondu.",
+    "overBudget": "Vous dépassez le budget convenu. Rien ne vous en empêche — cela veut simplement dire que les autres vous rembourseront.",
+    "amountInvalid": "Écrivez un montant comme 12,50.",
+    "settlementTitle": "Le partage",
+    "square": "à l’équilibre",
+    "isOwed": "doit recevoir {{amount}}",
+    "owes": "doit {{amount}}",
+    "settlementNote": "Chacun paie la même part du dîner entier. L’app ne déplace aucun argent — elle dit seulement qui doit donner quoi à qui.",
+    "errors": {
+      "COSTS_NOT_SHARED": "Ce dîner ne partage pas ses frais.",
+      "SETTLEMENT_TOO_EARLY": "L’addition vient après le repas.",
+      "BUDGET_TOO_LATE": "La roulette a tourné et les recettes s’écrivent sur ce budget — il ne bouge plus.",
+      "AMOUNT_INVALID": "Écrivez un montant comme 12,50."
     }
   }
 }

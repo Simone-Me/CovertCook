@@ -976,6 +976,93 @@ export function roundDeletesAt(finishedAt: string | null): Date | null {
 }
 
 // ---------------------------------------------------------------------------
+// Shared costs (supabase/migrations/0065_shared_costs.sql)
+// ---------------------------------------------------------------------------
+
+export type CostMode = 'NONE' | 'SHARED'
+
+/**
+ * Money is integer cents, everywhere, all the way to the input box.
+ *
+ * A float would be fine for a while and then be wrong by a cent in a way nobody
+ * could reproduce, on the one screen where being wrong by a cent is the whole
+ * of what people notice.
+ */
+export function toCents(text: string): number | null {
+  const cleaned = text.trim().replace(',', '.')
+  if (cleaned === '') return null
+  if (!/^\d+(\.\d{0,2})?$/.test(cleaned)) return null
+  return Math.round(Number(cleaned) * 100)
+}
+
+export function fromCents(cents: number, locale = 'en', currency = 'EUR'): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100)
+}
+
+export async function setCostSettings(input: {
+  roundId: string
+  mode: CostMode
+  budgetPerHead: number | null
+  currency?: string
+}) {
+  const res = await supabase.rpc('set_cost_settings', {
+    p_round_id: input.roundId,
+    p_mode: input.mode,
+    p_budget_per_head: input.budgetPerHead,
+    p_currency: input.currency ?? 'EUR',
+  })
+  return unwrap(res)
+}
+
+export async function recordExpense(roundId: string, amountCents: number, note?: string | null) {
+  const res = await supabase.rpc('record_expense', {
+    p_round_id: roundId,
+    p_amount_cents: amountCents,
+    p_note: note ?? null,
+  })
+  return unwrap(res)
+}
+
+/**
+ * What everybody may see while the dinner is running.
+ *
+ * Your own number, the table's total and average, and the budget — and
+ * deliberately no per-person list. The steering signal without the comparison:
+ * "everyone is around twelve and I am at thirty-five" is useful, "Marta is at
+ * thirty-five" starts an argument at a table she is sitting at.
+ */
+export interface CostsSoFar {
+  currency: string
+  budget_per_head: number | null
+  my_spend_cents: number
+  total_cents: number
+  average_cents: number
+  people: number
+  reported: number
+}
+
+export async function costsSoFar(roundId: string) {
+  const res = await supabase.rpc('costs_so_far', { p_round_id: roundId })
+  const rows = unwrap<CostsSoFar[]>(res)
+  return rows[0] ?? null
+}
+
+export interface Settlement {
+  member_id: string
+  who: string
+  is_me: boolean
+  spent_cents: number
+  share_cents: number
+  // Positive: owed. Negative: owes. They sum to exactly zero.
+  balance_cents: number
+}
+
+export async function settleCosts(roundId: string) {
+  const res = await supabase.rpc('settle_costs', { p_round_id: roundId })
+  return unwrap<Settlement[]>(res)
+}
+
+// ---------------------------------------------------------------------------
 // The album (supabase/migrations/0060_the_album.sql)
 // ---------------------------------------------------------------------------
 

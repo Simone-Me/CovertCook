@@ -576,10 +576,12 @@ that are invisible when they break — a dish nobody cooked still reaching the
 menu, and a second save writing nothing — `smoke_test10.sql` moderation by seat
 (`0059`), `smoke_test11.sql` the album (`0060`), whose bucket policies are
 the one thing in the set that needs a running local stack rather than a bare
-Postgres, and `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —
+Postgres, `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —
 where the *survivors* are the point, not the deletion: it proves the book and
 the album still hold everything after the dinner they came from is gone — plus
-joining with and without a captcha (`0063`).
+joining with and without a captcha (`0063`), and `smoke_test13.sql` the canned
+phrases arriving in the reader's language (`0064`) and the cost settlement
+summing to exactly zero (`0065`).
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -604,7 +606,7 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 ```
 
 Then `db reset` again before each of `smoke_test3.sql` through
-`smoke_test12.sql`.
+`smoke_test13.sql`.
 
 **Prefer `npx supabase migration up --local` over `db reset` while anyone
 is using the app.** It applies pending migrations against the existing
@@ -654,6 +656,22 @@ names, migration numbers, bugs found and fixed) see
   carry what. A card is what a host would actually do, and an adult with an
   allergy is better served by knowing than by one dish silently never
   existing.
+- **Everybody reads in their own language** (`0064`). The canned phrases exist
+  so that two people who share no language can still talk at a dinner — and
+  until now a message stored the id of *one locale's* row, so a French cook's
+  "goûte avant de servir" reached an English diner in French, which defeated the
+  entire point. A message now references the thought and the reader's own locale
+  chooses the sentence. Applies to the fridge, to the private threads, and to
+  the reported phrases the host has to make a decision about.
+- **Shared costs** (`0065`, labelled Pro). A budget each, agreed when the
+  dinner is created — before the roulette, so it shapes the recipes people
+  write rather than judging their receipts afterwards. Everybody records what
+  they spent beside the shopping list they were given, and at the end the app
+  says who should hand what to whom, split evenly to the cent. **While the
+  dinner runs, nobody sees anybody else's number**: your own, the table's
+  average and the budget. The average is the steering signal; a per-person
+  leaderboard about money between friends is the argument the feature exists to
+  prevent.
 - **The board**: one channel the whole table reads and posts to, from a
   short list of ready-made cheerful phrases. Nothing is attributed —
   identical phrases collapse into one line with a count, so the board is
