@@ -59,6 +59,48 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-27 (6)
+
+**`verify-turnstile` has no imports any more**, and that is the fix rather than
+a tidy-up.
+
+The runtime's own log said what was happening, once anybody read it:
+
+```
+serving the request with supabase/functions/verify-turnstile
+wall clock duration warning: isolate: …
+early termination has been triggered: isolate: …
+```
+
+Found, started, and **killed for taking too long**. Not missing, not
+undeployed, not a bad specifier — a boot that never finished. An Edge Function
+fetches its remote imports on every cold start, so a single
+`import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'` made the
+door to every dinner depend on the container being able to reach a package
+registry. On a machine where it cannot — Docker Desktop with restricted
+networking, a proxy, a firewall, an aeroplane — the isolate hangs on that line
+until the wall clock runs out, and the browser gets a non-2xx with nothing in
+it. Yesterday's swap of `jsr:` for `esm.sh` moved which registry it could not
+reach and fixed nothing; the honest note is that it was the wrong diagnosis.
+
+The function existed to do **one INSERT**. One INSERT does not need a client
+library: PostgREST is one HTTP call away and the service role key is already in
+the environment. So it now boots instantly and depends on nothing but the stack
+it belongs to. The Cloudflare call it does make is given a ten-second
+`AbortSignal.timeout` for the same reason — a captcha service that hangs must
+not become a door that hangs, and an explicit 502 the interface can read beats
+an isolate killed mid-flight.
+
+`send-push` and `send-email` keep their imports: one needs `web-push` to sign a
+VAPID payload and the other `standardwebhooks` to verify a signature, and
+neither stands between somebody and a seat at a table.
+
+Between this and `0063` — which stopped the frontend calling the function at all
+when no captcha is configured — joining a dinner on a stack with no internet and
+no Edge Functions running now works.
+
+---
+
 ## 2026-08-27 (5)
 
 **Joining a dinner stops depending on an Edge Function that has nothing to do**

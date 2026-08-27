@@ -495,17 +495,36 @@ the recipe book is `0058`, the album is `0060`: an app pointed at a database
 that stopped at `0045` fails on the first of those, at sign-up, and looks
 like the login is broken.
 
-**"Edge Function returned a non-2xx status code" is the same kind of lie**, and
-it was two of them at once. That sentence is the SDK's, and the function's own
-answer — which says what is actually wrong — was on the error object where
-nothing read it; `src/lib/functions.ts` now reads it, for every function call in
-the app. And a `503` from `verify-turnstile` on a local stack means the edge
-runtime is not serving it, which since `0063` no longer stops anybody joining a
-dinner. If you do need to see why a function will not boot:
+**"Edge Function returned a non-2xx status code" is the same kind of lie.** That
+sentence is the SDK's, and the function's own answer — which says what is
+actually wrong — was on the error object where nothing read it;
+`src/lib/functions.ts` now reads it, for every function call in the app.
+
+**And when a function is reached but still answers non-2xx, read the runtime's
+own log before anything else:**
 
 ```bash
 docker logs supabase_edge_runtime_covertcook --tail 50
 ```
+
+Three lines together mean one specific thing, and it is not what it looks like:
+
+```
+serving the request with supabase/functions/verify-turnstile
+wall clock duration warning: isolate: …
+early termination has been triggered: isolate: …
+```
+
+The function was found, started, and **killed for taking too long**. It is not
+missing and it did not fail to deploy. The usual cause is a remote import: an
+Edge Function fetches its imports on every cold start, so one
+`import … from 'https://esm.sh/…'` makes that function depend on the container
+being able to reach a package registry — and on a machine where it cannot
+(restricted Docker networking, a proxy, a firewall, no internet) the isolate
+hangs on the import until the runtime kills it. `verify-turnstile` therefore has
+**no imports at all**: it makes one INSERT, and one INSERT does not need a
+client library. `send-push` and `send-email` keep theirs, because they genuinely
+need them and neither stands between somebody and a seat at a table.
 
 To see what a database actually has, ask the CLI rather than guessing:
 
