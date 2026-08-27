@@ -59,6 +59,84 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-27 (2)
+
+**The evening ends on a menu** (`0057`), **and you can keep the recipes**
+(`0058`). Steps 1 and 2 of `ROADMAP.md` §7, in that order and for the reason
+given there: step 2 hangs its save control off step 1's layout.
+
+*The menu.* The results were a leaderboard — a stack of cards, `#1 Tarte
+tatin` in bold, the course in grey underneath, the points on the right. All
+true, and the same shape a sports app uses, on the one screen an evening ends
+on. They are now the carte: courses as sections, dishes as lines, the score
+printed where a price would be, which is the only place on a menu the eye
+already knows to look for a number. A round in FREE mode has no courses, so it
+is one carte générale rather than a heading invented over every dish.
+
+Two things a decorative shape must not lose. **Who won** — the dinner's first
+place carries a drop of wax, and the best of each course is already named in
+words by its award, so there is one mark and not two saying the same thing.
+And **what never arrived**: a dish whose cook left is excluded from the ballot
+(`0016`), so it has no `results` row and reached the old leaderboard not at
+all. On a list of five that is invisible. On a menu it is a hole, and the
+reader concludes the app lost something. `get_results` now returns those
+dishes too, carrying `served = false`, and the carte strikes them off the way a
+kitchen strikes a line off the service menu. It is dropped and recreated rather
+than replaced, because `create or replace` refuses to change the row type an
+OUT-parameter function returns.
+
+*The book.* `briefs` has no SELECT policy — not a narrow one, none — and the
+only reader has ever been `get_my_brief`. So keeping other people's recipes is
+not a feature that reads existing data: it is a **new, deliberate exposure**,
+and `list_round_recipes` is it, gated on membership and on the results being
+published, which is the same gate the scores use because the control lives on
+the same screen. It says who **wrote** each dish and never who **cooked** it:
+those two facts side by side are the chain, and the chain is the game.
+
+*Copy the recipe, reference the person.* The recipe is copied whole —
+title, ingredients, method, link, allergen tags — because the day old dinners
+can be deleted, a book of references empties itself, which is the one thing a
+recipe book must never do. The author is a reference, never a frozen name, so
+somebody who later asks to be forgotten becomes "Former guest" in ten other
+people's books rather than staying named in them. The pseudonym is copied as a
+label and is deliberately **not** a filter: "Chef Basilic" is a different
+person at every dinner, and filtering a book by it would collect strangers
+under one heading.
+
+*Its own table, and that is not a preference.* `0054` puts triggers on every
+table belonging to a round, refusing all writes once it is archived. A "saved"
+flag inside `briefs` would have been refused by the database at exactly the
+moment somebody saves a recipe from a finished dinner — which is the only
+moment anybody ever does it. `saved_recipes` is deliberately absent from that
+trigger list, and `smoke_test9.sql` §6 proves a save still works on an archived
+dinner.
+
+*The save flow.* A switch arms the menu, the dish names become the control —
+not a checkbox beside each one, which would be a form with a menu drawn behind
+it — a wine ring marks what you chose, one confirm writes the lot, and a line
+says where they went with a way to get there. Arming a second time comes back
+with what is already in the book **already ticked**: one save per person per
+recipe is enforced by a unique index, so a panel that came back empty would
+invite four taps and then report "0 saved", which reads as a failure. The
+invitation to tap is a fifth of a degree of lean, and it is off entirely under
+`prefers-reduced-motion`, where a dotted underline carries it instead — motion
+sickness is not a preference the app gets to weigh against a nice effect.
+
+*Also fixed on the way past.* `get_results` has always raised two named
+refusals — the results are not ready, or the Executive Chef has them and has
+not announced them — and nothing had ever handled either: the page rendered an
+empty list. With an empty state that says "no dishes were recorded" that would
+have become quiet, wrong and confident, so both are now sentences. And the
+"still missing" list on the brief editor stops borrowing `.notice`, whose green
+says "this went right" over a list of fields somebody has yet to fill in.
+
+*Tested:* `smoke_test9.sql`, driven end to end against Postgres 16 — four
+recipes, one dish struck off, ballots through `get_ballot_options` so the test
+agrees with the app rather than with itself, and the double save that must
+write nothing the second time.
+
+---
+
 ## 2026-08-27 (1)
 
 **Fixed: the recipe that was refused by a constraint name** (`0055`), **the

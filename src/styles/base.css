@@ -392,6 +392,16 @@ input.is-taken {
   cursor: default;
 }
 
+/* Not finished, and not wrong either. The green of .notice says "this went
+   right", which is exactly the wrong thing to say over a list of fields
+   somebody still has to fill in — and the red of .error says they have made a
+   mistake, which they have not. Ink on the ordinary border: a statement of
+   where the form has got to. */
+.notice--wanting {
+  color: var(--text);
+  border-color: var(--border);
+}
+
 /* Something that went right, said once. The error box's calm opposite. */
 .notice {
   color: var(--ok);
@@ -522,6 +532,32 @@ input.is-taken {
 
 .food-label--typed {
   color: var(--text);
+}
+
+/* ---------------------------------------------------------------------------
+ * The recipe book. A card per recipe, folded, because thirty recipes open at
+ * once is a wall and the thing somebody came for is one of them.
+ * ------------------------------------------------------------------------- */
+
+.recipe__origin {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.recipe__ingredients {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* The method as it was typed. A recipe written in steps on separate lines is
+   a recipe in steps, and collapsing that whitespace would hand the cook one
+   paragraph to find their place in with wet hands. */
+.recipe__procedure {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
 }
 
 /* A declared set, read like a line on a menu. */

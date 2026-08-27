@@ -476,7 +476,10 @@ setup and invitations, `smoke_test7.sql` the board plus allergens
 informing rather than blocking, and `smoke_test8.sql` what a recipe must
 contain (`0055`) plus the push self-test's audience (`0056`) — its first
 section is the exact recipe that used to come back as
-`violates check constraint "briefs_check1"`.
+`violates check constraint "briefs_check1"` — and `smoke_test9.sql` the
+results menu (`0057`) and the recipe book (`0058`), including the two cases
+that are invisible when they break: a dish nobody cooked still reaching the
+menu, and a second save writing nothing.
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -501,7 +504,7 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 ```
 
 Then `db reset` again before each of `smoke_test3.sql` through
-`smoke_test8.sql`.
+`smoke_test9.sql`.
 
 **Prefer `npx supabase migration up --local` over `db reset` while anyone
 is using the app.** It applies pending migrations against the existing
@@ -562,8 +565,22 @@ names, migration numbers, bugs found and fixed) see
   quick action.
 - **Voting**: drag-and-drop dish ranking (Borda count) plus separate
   originality/brief-respect scores, with awards computed from the results.
-- **Results & reveal**: scores, awards, and — the actual twist — each
-  player's two chats unmask automatically, revealing who cooked for whom.
+- **Results & reveal**: the evening printed as the menu it was — courses as
+  sections, the score where a price would be, the dinner's first place sealed,
+  and a dish that never arrived struck off rather than missing (`0057`). Plus
+  the actual twist: each player's two chats unmask automatically, revealing who
+  cooked for whom.
+- **The recipe book** (`0058`): at the end of a dinner the menu arms, you tap
+  the dishes worth keeping, and one confirm copies them into a book in your
+  profile — searchable, filterable, exportable as text or JSON. The recipe is
+  **copied** so it outlives the dinner; the author is a **reference**, so
+  somebody who later erases their account becomes "Former guest" rather than
+  staying named in ten other people's books. This is also the app's one
+  deliberate exposure: `briefs` has no SELECT policy at all, and
+  `list_round_recipes` is the only thing that has ever opened somebody else's
+  recipe — gated on membership and on the results actually being published. It
+  says who *wrote* each dish and never who *cooked* it, because those two facts
+  side by side are the chain.
 - **Host tools**: round settings (venue/date/time), pause or cancel a
   round, a roster with approve/reject/remove, a spoiler-gated view of the
   whole assignment chain, and an inbox for player-reported issues.

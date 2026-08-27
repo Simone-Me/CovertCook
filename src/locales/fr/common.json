@@ -593,6 +593,13 @@
       "BEST_DRINK": "Meilleure boisson",
       "MOST_ORIGINAL": "Plus original",
       "BEST_BRIEF_RESPECT": "Meilleur respect de la recette"
+    },
+    "nothingServed": "Aucun plat n’a été enregistré pour ce dîner.",
+    "notServed": "non servi",
+    "winner": "Plat de la soirée",
+    "gate": {
+      "RESULTS_NOT_READY": "Les résultats n’existent pas encore — le dîner n’en est pas là.",
+      "RESULTS_NOT_PUBLISHED": "Le Chef exécutif a les résultats et ne les a pas encore annoncés. Patience."
     }
   },
   "chain": {
@@ -928,5 +935,35 @@
       "OTHER": "Autre chose",
       "otherPlaceholder": "Précisez"
     }
+  },
+  "book": {
+    "title": "Votre carnet de recettes",
+    "empty": "Rien de gardé pour l’instant. À la fin d’un dîner, le menu vous laisse garder les recettes qui méritent d’être refaites.",
+    "keepRecipes": "Garder des recettes de ce dîner",
+    "stopChoosing": "Terminé",
+    "armHelp": "Touchez les plats que vous voulez garder. Rien n’est enregistré avant votre confirmation.",
+    "saveCount": "Garder {{n}} recette(s)",
+    "inYourBook": "dans votre carnet",
+    "savedTo": "{{n}} recette(s) sont entrées dans votre carnet.",
+    "savedNothingNew": "Elles étaient déjà dans votre carnet.",
+    "openBook": "Ouvrir le carnet",
+    "search": "Chercher un plat, un dîner, un ingrédient",
+    "anyCourse": "Toutes les catégories",
+    "anyRole": "Tous les rôles",
+    "count": "{{shown}} sur {{total}}",
+    "relation": {
+      "COOKED": "Vous l’avez cuisinée",
+      "WROTE": "Vous l’avez écrite",
+      "TABLE": "De la table"
+    },
+    "writtenBy": "Écrite par {{name}} ({{pseudonym}})",
+    "formerGuest": "Ancien invité",
+    "forget": "Retirer de mon carnet",
+    "forgetTitle": "Retirer « {{name}} » de votre carnet ?",
+    "forgetConfirm": "La retirer",
+    "forgetRecoverable": "Ce dîner existe encore : vous pourrez regarder son menu et la reprendre.",
+    "forgetLastCopy": "Le dîner d’où elle vient n’existe plus. C’est la seule copie qui reste, et la retirer est sans retour, pour personne.",
+    "exportMarkdown": "Télécharger en texte",
+    "exportJson": "Télécharger en JSON"
   }
 }

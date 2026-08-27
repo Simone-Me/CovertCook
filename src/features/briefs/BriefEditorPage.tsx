@@ -512,7 +512,7 @@ export function BriefEditorPage() {
               have failed — the reader has to hold the whole thing in their
               head and audit their own form against it. This says the field. */}
           {!complete && (
-            <div className="notice">
+            <div className="notice notice--wanting">
               {t('briefs.missingIntro', { items: missing.map((k) => t(`briefs.missing.${k}`)).join(', ') })}
             </div>
           )}

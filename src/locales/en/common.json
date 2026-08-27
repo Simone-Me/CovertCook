@@ -593,6 +593,13 @@
       "BEST_DRINK": "Best drink",
       "MOST_ORIGINAL": "Most original",
       "BEST_BRIEF_RESPECT": "Best brief respect"
+    },
+    "nothingServed": "No dishes were recorded for this dinner.",
+    "notServed": "not served",
+    "winner": "Dish of the evening",
+    "gate": {
+      "RESULTS_NOT_READY": "The results are not in yet — the dinner has not reached that point.",
+      "RESULTS_NOT_PUBLISHED": "The Executive Chef has the results and has not announced them yet. Sit tight."
     }
   },
   "chain": {
@@ -928,5 +935,35 @@
       "OTHER": "Something else",
       "otherPlaceholder": "Name it"
     }
+  },
+  "book": {
+    "title": "Your recipe book",
+    "empty": "Nothing kept yet. At the end of a dinner, the menu lets you keep the recipes worth cooking again.",
+    "keepRecipes": "Keep recipes from this dinner",
+    "stopChoosing": "Done choosing",
+    "armHelp": "Tap the dishes you want to keep. Nothing is saved until you confirm.",
+    "saveCount": "Keep {{n}} recipe(s)",
+    "inYourBook": "in your book",
+    "savedTo": "{{n}} recipe(s) went into your book.",
+    "savedNothingNew": "Those were already in your book.",
+    "openBook": "Open the book",
+    "search": "Search a dish, a dinner, an ingredient",
+    "anyCourse": "Any course",
+    "anyRole": "Any role",
+    "count": "Showing {{shown}} of {{total}}",
+    "relation": {
+      "COOKED": "You cooked it",
+      "WROTE": "You wrote it",
+      "TABLE": "From the table"
+    },
+    "writtenBy": "Written by {{name}} ({{pseudonym}})",
+    "formerGuest": "Former guest",
+    "forget": "Remove from my book",
+    "forgetTitle": "Remove “{{name}}” from your book?",
+    "forgetConfirm": "Remove it",
+    "forgetRecoverable": "That dinner still exists, so you can keep this recipe again from its menu.",
+    "forgetLastCopy": "The dinner this came from is gone. This is the only copy left, and removing it cannot be undone by anyone.",
+    "exportMarkdown": "Download as text",
+    "exportJson": "Download as JSON"
   }
 }

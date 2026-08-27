@@ -727,13 +727,90 @@ export interface RoundResult {
   borda_points: number
   avg_rank: number | null
   first_places: number
-  final_rank: number
+  // Null for a dish that never reached the table: there is no rank to give a
+  // dish nobody could vote on (0057).
+  final_rank: number | null
   award_keys: string[]
+  served: boolean
 }
 
 export async function getResults(roundId: string) {
   const res = await supabase.rpc('get_results', { p_round_id: roundId })
   return unwrap<RoundResult[]>(res)
+}
+
+// ---------------------------------------------------------------------------
+// The recipe book (supabase/migrations/0058_the_recipe_book.sql)
+// ---------------------------------------------------------------------------
+
+// What a dish was to you that evening. "Received" alone loses half of what a
+// person made: the recipe you wrote and the recipe you cooked are two
+// different things and the book labels them differently.
+export type SavedRelation = 'COOKED' | 'WROTE' | 'TABLE'
+
+export interface RoundRecipe {
+  brief_id: string
+  dish_name: string
+  course: Course
+  procedure: string
+  external_url: string | null
+  contains_tags: string[]
+  ingredients: BriefIngredient[]
+  author_secret_name: string | null
+  // Null once that account has been erased. The card says "Former guest",
+  // which is what erasure is for.
+  author_display_name: string | null
+  relation: SavedRelation
+  already_saved: boolean
+}
+
+// The deliberate exposure (0058): every submitted recipe of one finished round,
+// to its members. Nothing else in this app has ever read somebody else's brief.
+export async function listRoundRecipes(roundId: string) {
+  const res = await supabase.rpc('list_round_recipes', { p_round_id: roundId })
+  return unwrap<RoundRecipe[]>(res)
+}
+
+// Returns how many rows were actually written, which is not always how many
+// were asked for: anything already in the book is skipped rather than
+// duplicated, and the sentence on screen reports what came back so it and the
+// book cannot disagree.
+export async function saveRecipes(roundId: string, briefIds: string[]): Promise<number> {
+  const res = await supabase.rpc('save_recipes', { p_round_id: roundId, p_brief_ids: briefIds })
+  return unwrap<number>(res)
+}
+
+export interface SavedRecipe {
+  id: string
+  source_brief_id: string | null
+  round_id: string | null
+  round_name: string
+  dinner_at: string | null
+  dish_name: string
+  course: Course
+  ingredients: BriefIngredient[]
+  procedure: string
+  external_url: string | null
+  contains_tags: string[]
+  author_display_name: string | null
+  author_secret_name: string | null
+  relation: SavedRelation
+  note: string | null
+  saved_at: string
+  // False once the dinner it came from is gone. "This is the last copy" and
+  // "you can save it again" are different sentences, and only one is true at
+  // a time.
+  origin_exists: boolean
+}
+
+export async function listMyRecipes() {
+  const res = await supabase.rpc('list_my_recipes')
+  return unwrap<SavedRecipe[]>(res)
+}
+
+export async function forgetRecipe(id: string) {
+  const res = await supabase.rpc('forget_recipe', { p_id: id })
+  return unwrap(res)
 }
 
 export async function markDishDelivery(roundId: string, briefId: string, delivered: boolean) {

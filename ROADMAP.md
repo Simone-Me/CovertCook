@@ -428,6 +428,10 @@ Written as steps rather than as a list of wants, because three of the things
 below depend on the one above them and doing them in the wrong order means
 building something twice.
 
+> **Steps 1 and 2 shipped on 2026-08-27** (`0057`, `0058`, `smoke_test9.sql`).
+> What follows is the design they were built from, kept as written. Steps 3 and
+> 4 are still ahead, in this order.
+
 ### Step 1 — the results screen becomes a menu
 
 No schema, no new data: the results already know the dish, the course and the

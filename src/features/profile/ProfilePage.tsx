@@ -7,6 +7,7 @@ import { FoodLabel } from '../../components/FoodLabel'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
+import { RecipeBook } from './RecipeBook'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
@@ -313,6 +314,13 @@ export function ProfilePage() {
           five friends and a dinner. */}
       <PushTest state={shownPush} />
 
+      </Fold>
+
+      {/* Above the dietary list on purpose: this is the one section of the
+          profile somebody opens because they want to, rather than because
+          something needs correcting. */}
+      <Fold title={t('book.title')}>
+        <RecipeBook />
       </Fold>
 
       <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>
