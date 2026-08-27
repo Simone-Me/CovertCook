@@ -402,6 +402,52 @@ into a `datetime-local` input: that one *is* in the typist's own zone, and
 
 ---
 
+## Branches, and why there isn't a `test` one
+
+The obvious shape for this is a long-lived `test` branch: feature branches off
+it, merge them in, try everything there, promote to `main` when it works. It is
+what most people describe when asked, and for one person shipping this app it is
+the wrong answer.
+
+**A long-lived integration branch has to be merged twice.** Every change goes
+into `test` and then into `main`, which means every conflict is resolved twice,
+and the second resolution is the one nobody is paying attention to. The two
+branches drift — a hotfix on `main`, a half-finished experiment on `test` — and
+after a fortnight "promote to `main`" stops being a merge and becomes an audit.
+That cost is real for a team of six. For one person it buys nothing at all,
+because there is nobody to isolate from.
+
+**What actually separates a test from production here is the database, not the
+branch.** Nothing on `main` can break a dinner on its own; a migration can. So
+the boundary that matters runs between the local Supabase stack and the
+deployed project, and it is already there.
+
+So: `main` is what is deployed. Work on a short-lived branch named for the thing
+it does, keep it open for days rather than weeks, and delete it when it merges.
+That is what `claude/feature-recipe-book-y2tqc0` is, and it is the whole
+convention.
+
+**Where to try things, in the order they cost anything:**
+
+1. **The local stack.** `npx supabase start` + `npx supabase db reset` +
+   `npm run dev`, with `.env.local` pointing at `http://127.0.0.1:54321`. Free,
+   instant, and safe to destroy. Nearly every question is answered here.
+2. **The SQL smoke tests**, for anything that is really a database question.
+   Twelve files, no browser, and they run against a bare Postgres.
+3. **A Netlify deploy preview**, which you get per pull request for nothing and
+   which is the only way to test the things a local build cannot reach — the
+   real service worker, an installed PWA, push on an actual phone.
+4. **A second Supabase project as staging**, if and when a migration ever
+   frightens you enough to want one. Free tier, one extra set of env vars in
+   Netlify. Worth doing before the first migration that touches live dinners;
+   not worth doing before that.
+
+The one rule that is not optional: **a migration reaches the deployed database
+before the frontend that needs it does.** Everything in the "database is
+behind" banner above exists because that order got reversed once.
+
+---
+
 ## CI/CD & required GitHub configuration
 
 The three workflows in `.github/workflows/` (`keepalive.yml`, `backup.yml`,
@@ -438,6 +484,23 @@ any migration you haven't pushed simply isn't there and the app fails
 with `Could not find the function public.…` — which reads like a code
 bug and isn't. Look at `VITE_SUPABASE_URL` specifically; `VITE_APP_BASE_URL`
 says `localhost` in both setups and will happily fool a quick grep.
+
+The app now says this out loud rather than leaving it in the console: any
+`PGRST202` raises a banner above every screen naming the cause and the two
+commands that fix it (`src/components/SchemaMismatch.tsx`). **`PGRST202` never
+means the function name is wrong** — PostgREST only reports functions the
+calling role can see, so it means the database in front of you does not have
+the migration that function arrives in. `display_name_available` is `0046`,
+the recipe book is `0058`, the album is `0060`: an app pointed at a database
+that stopped at `0045` fails on the first of those, at sign-up, and looks
+like the login is broken.
+
+To see what a database actually has, ask the CLI rather than guessing:
+
+```bash
+npx supabase migration list            # local stack
+npx supabase migration list --linked   # the deployed project, side by side
+```
 
 For local development it should read `http://127.0.0.1:54321`. Keep the
 production values in a second gitignored file (`.env.production-backup.local`)
@@ -480,9 +543,11 @@ section is the exact recipe that used to come back as
 results menu (`0057`) and the recipe book (`0058`), including the two cases
 that are invisible when they break — a dish nobody cooked still reaching the
 menu, and a second save writing nothing — `smoke_test10.sql` moderation by seat
-(`0059`), and `smoke_test11.sql` the album (`0060`), whose bucket policies are
+(`0059`), `smoke_test11.sql` the album (`0060`), whose bucket policies are
 the one thing in the set that needs a running local stack rather than a bare
-Postgres.
+Postgres, and `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —
+where the *survivors* are the point, not the deletion: it proves the book and
+the album still hold everything after the dinner they came from is gone.
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -507,7 +572,7 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 ```
 
 Then `db reset` again before each of `smoke_test3.sql` through
-`smoke_test11.sql`.
+`smoke_test12.sql`.
 
 **Prefer `npx supabase migration up --local` over `db reset` while anyone
 is using the app.** It applies pending migrations against the existing
@@ -595,6 +660,14 @@ names, migration numbers, bugs found and fixed) see
   can take a seat where the other already is. The host is told there is
   something waiting, by push and by a count in the header. Policy at
   `/legal/moderation`.
+- **Finished dinners delete themselves** (`0062`): twenty-one days after a
+  dinner is archived or cancelled, the whole round goes — the chain, the
+  threads, the ballots, the roster. What survives is what somebody chose to
+  keep: every recipe in their book and the photograph they added to the album,
+  both of which are **copies** precisely so this can be true (`0058`, `0061`).
+  The date is printed on the dinner and on its card in the list while it still
+  exists, next to what you keep. Run by a scheduled workflow, like the account
+  purge.
 - **The album** (`0060`): one photograph of the table per person per dinner,
   gathered into an album of every evening. Location data is stripped **in the
   browser** before a byte is uploaded — a phone photograph carries the address

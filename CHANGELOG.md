@@ -59,6 +59,82 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-27 (4)
+
+**Finished dinners delete themselves after twenty-one days** (`0062`) — and
+first, the migration that makes that honest (`0061`).
+
+*The order matters more than the feature.* The promise attached to deleting old
+dinners is "everything worth keeping is already in the recipe book and the
+album". The book kept it: `0058` copies the recipe and references only the
+author, exactly so a deleted dinner cannot empty it. **The album did not.**
+`dinner_photos` was written while rounds were permanent, and every road out of
+it led back through the round — cascading foreign keys on both sides,
+`my_album()` joining `rounds` for the name and `round_members` for "was I
+there", and a storage read policy asking `is_round_member`, which after the
+dinner is gone answers no for everybody. Shipping the deletion against that
+would have destroyed the thing the deletion was justified by, silently, three
+weeks after anybody could have noticed.
+
+So `0061` does to the album what `0058` did to the book: the dinner's name and
+date are copied onto the photograph, the owner is copied as a profile rather
+than a seat, both foreign keys become `on delete set null`, and the storage
+policy learns a second rule — you may read a photograph if you were at that
+table, **or if it is yours**. After a purge you keep your own photograph, with
+the evening's name printed on it. You do not keep everybody else's, and that
+asymmetry is the same one the book already had: a recipe is in your book
+because you chose to copy it; other people's photographs were shown to you
+because you were at the table, and the table is what is being deleted.
+
+*Twenty-one days from when it finished, not from the evening.* A `finished_at`
+stamp, set by a trigger rather than by a line in `advance_phase`, because there
+are several ways into ARCHIVED and a stamp only some of them set is worse than
+none. A host who takes a fortnight to publish the results does not find the
+dinner gone the day they do. Everything already archived gets today's date on
+migration, so the earliest any existing dinner can go is three weeks from the
+deploy rather than the same night.
+
+*The freeze had to be opened from the inside.* `0054` refuses INSERT, UPDATE
+**and DELETE** on every table belonging to a frozen round — which is what makes
+a finished dinner a record, and also means `delete from rounds` fails: the
+cascade is refused row by row. There is now one named door,
+`covertcook.purging`, set transaction-locally inside `purge_old_rounds` and
+nowhere else. A client cannot open it: PostgREST executes functions, never
+arbitrary SQL, and the one function that sets it is revoked from every client
+role. `smoke_test12.sql` §6 proves the door closes behind the purge.
+
+*And it is said before it happens*, on the dinner and on its card in the list:
+the date, and in the same breath what you keep. "This will be deleted" on its
+own reads as a loss rather than as a tidy-up.
+
+*Also: PGRST202 stops being a lost hour.* PostgREST answers "Could not find the
+function public.x in the schema cache" whenever the function is not visible to
+the calling role, and the first guess it invites is always a typo in the code.
+It almost never is — it means the app is talking to a database that has not run
+the migration that function arrives in. Locally that is `.env.local` still
+pointing at the deployed project. Every RPC in this app passes through one
+`unwrap`, so it is named there once, and raised as a banner above every screen
+with the two commands that fix it. The README now also says which migration the
+common casualties arrive in: an app pointed at a database that stopped at `0045`
+fails first on `display_name_available` (`0046`), at sign-up, and looks for all
+the world like the login is broken.
+
+*And the branch question, answered in the README.* No long-lived `test` branch:
+an integration branch has to be merged twice, every conflict is resolved twice,
+and the second resolution is the one nobody is paying attention to. That cost
+is real for a team and buys one person nothing, because there is nobody to be
+isolated from. What actually separates a test from production here is the
+database, not the branch — and that boundary already exists. `main` is what is
+deployed; branches are short and named for the thing they do; the four places to
+try something are listed in cost order. The one rule that is not optional: a
+migration reaches the deployed database before the frontend that needs it does.
+
+*Tested:* `smoke_test12.sql`, end to end against Postgres 16 — a whole dinner
+cooked, voted on, kept and photographed, then aged three weeks and purged, with
+the assertions on what is still there afterwards rather than on what is gone.
+
+---
+
 ## 2026-08-27 (3)
 
 **Moderation by seat** (`0059`) **and the album** (`0060`). Steps 3 and 4 of

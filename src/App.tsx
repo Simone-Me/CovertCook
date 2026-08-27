@@ -4,6 +4,7 @@ import { useAuth } from './lib/auth'
 import { rememberJoinCode } from './lib/pendingJoin'
 import { AppHeader } from './components/AppHeader'
 import { PendingJoinBanner } from './components/PendingJoinBanner'
+import { SchemaMismatch } from './components/SchemaMismatch'
 import { AppFooter } from './components/AppFooter'
 import { LegalPage } from './features/legal/LegalPage'
 import { SignInPage } from './features/auth/SignInPage'
@@ -184,6 +185,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppHeader />
+      {/* Above everything, because when it fires nothing below it is
+          trustworthy. */}
+      <SchemaMismatch />
       <PendingJoinBanner />
       {/* The tablecloth is the app, not one page of it. Every screen sits
           on it, and .sheet is the paper each one is written on — the rule

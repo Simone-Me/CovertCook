@@ -400,7 +400,9 @@
     },
     "chefCount_one": "{{count}} chef",
     "chefCount_other": "{{count}} chefs",
-    "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne."
+    "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne.",
+    "deletesOn": "Ce dîner s’effacera le {{date}}.",
+    "deletesWhatSurvives": "Ce que vous gardez : chaque recette mise dans votre carnet, et la photo que vous avez ajoutée à l’album. Le reste — la chaîne, les messages, les votes — part avec le dîner."
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
@@ -638,7 +640,11 @@
   },
   "errors": {
     "generic": "Une erreur est survenue. Réessayez.",
-    "notAuthenticated": "Vous devez être connecté."
+    "notAuthenticated": "Vous devez être connecté.",
+    "databaseBehind": {
+      "title": "Cette application parle à une base de données en retard sur elle.",
+      "body": "Une fonction dont elle a besoin n’est pas là. En local, c’est presque toujours .env.local qui pointe encore sur le projet déployé — VITE_SUPABASE_URL doit dire http://127.0.0.1:54321. Sinon les migrations n’ont pas été poussées : lancez `npx supabase db reset` en local, ou `npx supabase db push` sur le projet. Rien de ce que vous ferez dans l’app n’y changera quoi que ce soit."
+    }
   },
   "profile": {
     "title": "Profil",

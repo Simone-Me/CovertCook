@@ -35,8 +35,35 @@ export interface DietaryEntryInput {
   note?: string
 }
 
-function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
-  if (error) throw new Error(error.message)
+/**
+ * The one error worth translating before anything else sees it.
+ *
+ * PostgREST answers `PGRST202` — "Could not find the function public.x in the
+ * schema cache" — whenever the function is not there *for the role asking*.
+ * From the browser that is almost never a typo in the name: it means the app is
+ * talking to a database that has not run the migration the function arrives in.
+ * Locally that is `.env.local` still pointing at the deployed project; in
+ * production it is a deploy that went out ahead of its migrations.
+ *
+ * Left raw it reads like a bug in the code, and the search for it starts in
+ * exactly the wrong place — which is an hour, every time. So it is named here,
+ * once, at the only choke point every RPC in this file passes through.
+ */
+export const DATABASE_BEHIND = 'DATABASE_BEHIND'
+
+function unwrap<T>({ data, error }: { data: T | null; error: { message: string; code?: string } | null }): T {
+  if (error) {
+    if (error.code === 'PGRST202') {
+      // Announced as well as thrown. Every call site already renders
+      // `err.message` somewhere sensible, but this particular failure is not
+      // about the screen it happened on — it is about the whole app pointing at
+      // the wrong database — so it also raises a banner that outlives the page
+      // you were on when you found it.
+      window.dispatchEvent(new CustomEvent(DATABASE_BEHIND, { detail: error.message }))
+      throw new Error(`${DATABASE_BEHIND}: ${error.message}`)
+    }
+    throw new Error(error.message)
+  }
   return data as T
 }
 
@@ -937,6 +964,25 @@ export async function getHostAlerts(roundId: string) {
   return (data ?? []) as HostAlert[]
 }
 
+/**
+ * When a finished dinner deletes itself (0062).
+ *
+ * Twenty-one days from the moment it finished, not from the evening: a host who
+ * takes a fortnight to publish the results should not find it gone the day they
+ * do. Derived here from the same number the database uses rather than fetched,
+ * because it is one addition and a round trip for it would be silly — but the
+ * number lives in `round_deletes_at` in SQL, and if the policy ever changes,
+ * both have to move.
+ */
+export const ROUND_KEPT_DAYS = 21
+
+export function roundDeletesAt(finishedAt: string | null): Date | null {
+  if (!finishedAt) return null
+  const at = new Date(finishedAt)
+  if (Number.isNaN(at.getTime())) return null
+  return new Date(at.getTime() + ROUND_KEPT_DAYS * 24 * 60 * 60 * 1000)
+}
+
 // ---------------------------------------------------------------------------
 // The album (supabase/migrations/0060_the_album.sql)
 // ---------------------------------------------------------------------------
@@ -954,12 +1000,15 @@ export interface DinnerPhoto {
 
 export interface AlbumEntry {
   id: string
-  round_id: string
+  // Null once the dinner has been deleted (0062). The photograph and the
+  // evening's name survive it; there is simply nowhere to go back to.
+  round_id: string | null
   round_name: string
   dinner_at: string | null
   storage_path: string
   caption: string | null
   is_mine: boolean
+  dinner_exists: boolean
   created_at: string
 }
 

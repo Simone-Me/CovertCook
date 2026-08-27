@@ -8,6 +8,7 @@ import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { MyWarnings } from './MyWarnings'
+import { roundDeletesAt } from '../../lib/rpc'
 import { Envelope } from './Envelope'
 import { CutleryLink } from '../../components/CutleryLink'
 import { Icon } from '../../components/Icon'
@@ -205,6 +206,8 @@ export function RoundHomePage() {
   // one line — the Executive Chef keeps the title and loses the powers, which
   // is what being over means.
   const frozen = round.status === 'ARCHIVED' || round.status === 'CANCELLED'
+  // Only a finished dinner has a date; a live one has nothing to count down.
+  const deletesAt = roundDeletesAt(round.finished_at)
   const isHost = round.host_id === profile?.id && !frozen
 
 
@@ -524,6 +527,16 @@ export function RoundHomePage() {
         {/* Said once, so the missing controls read as a rule rather than as
             something broken. */}
         {frozen && <p className="notice">{t('rounds.frozen')}</p>}
+
+        {/* The countdown, on the dinner it is about. Two sentences: when it
+            goes, and what you keep — because "this will be deleted" on its own
+            reads as a loss rather than as a tidy-up. */}
+        {deletesAt && (
+          <div className="paper stack">
+            <strong>{t('rounds.deletesOn', { date: deletesAt.toLocaleDateString(profile?.locale ?? 'en') })}</strong>
+            <p className="muted" style={{ margin: 0 }}>{t('rounds.deletesWhatSurvives')}</p>
+          </div>
+        )}
 
         {/* A warning from the Executive Chef, on the page it is about, where
             the person it was sent to will actually be. It stays until they say

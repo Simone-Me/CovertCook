@@ -400,7 +400,9 @@
     },
     "chefCount_one": "{{count}} chef",
     "chefCount_other": "{{count}} chefs",
-    "frozen": "This dinner is over. It stays here to be read — the recipes, the menu and the results — and nothing about it can be changed any more, by anybody."
+    "frozen": "This dinner is over. It stays here to be read — the recipes, the menu and the results — and nothing about it can be changed any more, by anybody.",
+    "deletesOn": "This dinner deletes itself on {{date}}.",
+    "deletesWhatSurvives": "What you keep: every recipe you put in your book, and the photograph you added to the album. The rest — the chain, the messages, the ballots — goes with the dinner."
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",
@@ -638,7 +640,11 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
-    "notAuthenticated": "You must be signed in."
+    "notAuthenticated": "You must be signed in.",
+    "databaseBehind": {
+      "title": "This app is talking to a database that is behind it.",
+      "body": "A function it needs is not there. Locally that is almost always .env.local still pointing at the deployed project — VITE_SUPABASE_URL should read http://127.0.0.1:54321. Otherwise the migrations have not been pushed: run `npx supabase db reset` locally, or `npx supabase db push` against the project. Nothing you do in the app will fix it."
+    }
   },
   "profile": {
     "title": "Profile",

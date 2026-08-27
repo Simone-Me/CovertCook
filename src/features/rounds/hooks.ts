@@ -43,10 +43,14 @@ export interface RoundRow {
   manual_voters: number | null
   requires_approval: boolean
   max_players: number | null
+  // When the dinner stopped being live (0062). Null while it is still running.
+  // Twenty-one days after this the whole round deletes itself, so this is also
+  // what the countdown on a past dinner is computed from.
+  finished_at: string | null
 }
 
 const ROUND_COLUMNS =
-  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,manual_voters,requires_approval,max_players'
+  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,manual_voters,requires_approval,max_players,finished_at'
 
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing

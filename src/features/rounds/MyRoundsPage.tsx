@@ -4,13 +4,18 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { isPastRound, useMyRounds, type MyRoundRow } from './hooks'
+import { roundDeletesAt } from '../../lib/rpc'
 import { getMyInvitations, respondToInvitation } from '../../lib/rpc'
 import { peekJoinCode } from '../../lib/pendingJoin'
 import { HowItWorks } from './HowItWorks'
 import { Fold } from '../../components/Fold'
 
 function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
+
+  // Only on a dinner that is actually going: a live round has no finished_at
+  // and nothing to count down.
+  const deletesAt = roundDeletesAt(round.finished_at)
 
   // A dinner you left keeps its card and loses its link. There is nothing
   // behind it any more — the roster, the briefs and the chat all check for an
@@ -42,6 +47,15 @@ function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
             <span className="badge">{t(`rounds.phase.${round.status}`)}</span>
           </span>
         </div>
+        {/* Said on the card while the dinner still exists, because the first
+            anybody should learn of the rule is not a dinner that is no longer
+            there. What survives is named in the same breath as what does
+            not. */}
+        {deletesAt && (
+          <p className="muted" style={{ margin: '6px 0 0' }}>
+            {t('rounds.deletesOn', { date: deletesAt.toLocaleDateString(i18n.language) })}
+          </p>
+        )}
       </div>
   )
 

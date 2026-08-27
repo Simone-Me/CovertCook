@@ -33,20 +33,37 @@ export function Album() {
   }
 
   // Already ordered newest dinner first by the RPC, so grouping in order
-  // preserves that without a second sort.
-  const evenings: { roundId: string; name: string; at: string | null; photos: AlbumEntry[] }[] = []
+  // preserves that without a second sort. A deleted dinner has no id left, so
+  // the photo's own id stands in as the grouping key — one evening per surviving
+  // photograph, which is exactly what is left of it.
+  const evenings: { key: string; roundId: string | null; name: string; at: string | null; photos: AlbumEntry[] }[] = []
   for (const photo of photos) {
     const last = evenings[evenings.length - 1]
-    if (last && last.roundId === photo.round_id) last.photos.push(photo)
-    else evenings.push({ roundId: photo.round_id, name: photo.round_name, at: photo.dinner_at, photos: [photo] })
+    if (last && photo.round_id !== null && last.roundId === photo.round_id) last.photos.push(photo)
+    else
+      evenings.push({
+        key: photo.round_id ?? photo.id,
+        roundId: photo.round_id,
+        name: photo.round_name,
+        at: photo.dinner_at,
+        photos: [photo],
+      })
   }
 
   return (
     <div className="stack">
       {evenings.map((evening) => (
-        <div key={evening.roundId} className="stack">
+        <div key={evening.key} className="stack">
           <h3 className="album__evening">
-            <Link to={`/rounds/${evening.roundId}`}>{evening.name}</Link>
+            {/* A dinner that has been deleted keeps its name and loses its
+                link. There is nothing behind it any more, and a door onto an
+                error is worse than no door — the same rule the rounds list
+                uses for a dinner you left. */}
+            {evening.roundId ? (
+              <Link to={`/rounds/${evening.roundId}`}>{evening.name}</Link>
+            ) : (
+              <span>{evening.name}</span>
+            )}
             {evening.at && <span className="muted"> · {formatMoment(evening.at, i18n.language)}</span>}
           </h3>
           <div className="album">
