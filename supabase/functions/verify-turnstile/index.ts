@@ -3,10 +3,13 @@
 // (join_round, ...) can consume atomically. This function is the only
 // place TURNSTILE_SECRET_KEY and SUPABASE_SERVICE_ROLE_KEY are read — both
 // stay out of the frontend bundle entirely (§2 architectural rule 3).
-import { createClient } from 'jsr:@supabase/supabase-js@2'
+// esm.sh, like send-push and send-email. This function was the only one on
+// `jsr:` and the only one that answered 503 on a local stack — a specifier the
+// runtime cannot fetch is a worker that never boots, and a worker that never
+// boots is indistinguishable from a function that was never deployed.
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
-const DEV_PLACEHOLDER_TOKEN = 'dev-placeholder-token'
 
 interface VerifyRequest {
   token: string
@@ -47,32 +50,36 @@ Deno.serve(async (req) => {
 
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY')
 
-  // Local/dev fallback: no secret configured yet, and the frontend's
-  // Turnstile component (see src/components/Turnstile.tsx) only ever sends
-  // this exact placeholder when it has no real site key either — so this
-  // path can't be hit by a real deployment with real keys configured.
-  const devBypass = !secret && body.token === DEV_PLACEHOLDER_TOKEN
-
-  if (!devBypass) {
-    if (!secret) {
-      return new Response(JSON.stringify({ error: 'TURNSTILE_SECRET_KEY is not configured' }), {
-        status: 500,
-        headers: corsHeaders,
-      })
-    }
-
-    const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, response: body.token }),
+  // No bypass, and this is the point of 0063.
+  //
+  // There used to be one: with no secret configured, a placeholder token the
+  // frontend invented was accepted without being checked. It was documented as
+  // a development convenience and it was not — it accepted that token from
+  // anybody, anywhere, including a real deployment that had simply never had
+  // its keys set. What made it seem necessary was that joining a dinner went
+  // through here even when there was no captcha to verify.
+  //
+  // That is fixed where it belonged: `app_settings.captcha_required` decides,
+  // in the database, and with it false the frontend never calls this function
+  // at all. So this function now has exactly one job and does it properly.
+  if (!secret) {
+    return new Response(JSON.stringify({ error: 'TURNSTILE_SECRET_KEY is not configured' }), {
+      status: 500,
+      headers: corsHeaders,
     })
-    const verifyJson = await verifyRes.json()
-    if (!verifyJson.success) {
-      return new Response(JSON.stringify({ error: 'turnstile verification failed', detail: verifyJson['error-codes'] }), {
-        status: 403,
-        headers: corsHeaders,
-      })
-    }
+  }
+
+  const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ secret, response: body.token }),
+  })
+  const verifyJson = await verifyRes.json()
+  if (!verifyJson.success) {
+    return new Response(JSON.stringify({ error: 'turnstile verification failed', detail: verifyJson['error-codes'] }), {
+      status: 403,
+      headers: corsHeaders,
+    })
   }
 
   const supabase = createClient(

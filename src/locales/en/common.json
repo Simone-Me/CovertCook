@@ -313,7 +313,12 @@
       "PREVIOUSLY_LEFT": "You left this dinner. Ask the Executive Chef to add you back.",
       "WAS_REMOVED": "The Executive Chef removed you from this dinner.",
       "ROUND_FULL": "This dinner is full.",
-      "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner."
+      "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner.",
+      "TURNSTILE_SECRET_KEY is not configured": "The bot check is half configured on this deployment: the app is sending a real captcha token and the server has no key to check it against. Either set TURNSTILE_SECRET_KEY on the functions, or clear VITE_TURNSTILE_SITE_KEY so both sides use the development bypass.",
+      "turnstile verification failed": "The bot check refused this attempt. Reload the page and try the code again.",
+      "token and purpose are required": "The bot check never produced a token. Reload the page — and if it keeps happening, VITE_TURNSTILE_SITE_KEY is set to something Cloudflare does not recognise.",
+      "TURNSTILE_NO_TICKET": "The bot check answered without a ticket. Reload the page and try again.",
+      "CAPTCHA_REQUIRED": "This deployment asks for a bot check and the page did not provide one. Reload and try again."
     },
     "chainChoice": {
       "intro": "The chain is already built. Taking a link out leaves two loose ends — decide what happens to them.",

@@ -13,6 +13,20 @@ const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
 const PLACEHOLDER_SITE_KEY = 'replace-with-turnstile-site-key'
 
 /**
+ * Does this deployment have a captcha at all?
+ *
+ * Exported because it decides more than whether to draw a widget: with no site
+ * key there is nothing to verify, so the join path skips the Edge Function
+ * entirely and `join_round` takes no ticket (0063). One condition, read in both
+ * places, or the two disagree and joining breaks in a way that points at
+ * neither.
+ */
+export function captchaConfigured(): boolean {
+  const key = import.meta.env.VITE_TURNSTILE_SITE_KEY
+  return !!key && key !== PLACEHOLDER_SITE_KEY
+}
+
+/**
  * Renders a Cloudflare Turnstile widget and calls onVerify with the token
  * once solved. Until a real VITE_TURNSTILE_SITE_KEY is configured (see
  * .env.example), this calls onVerify with a dev placeholder immediately so
@@ -25,10 +39,11 @@ export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
   const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
 
   useEffect(() => {
-    if (!siteKey || siteKey === PLACEHOLDER_SITE_KEY) {
-      onVerify('dev-placeholder-token')
-      return
-    }
+    // Nothing to draw and nothing to send. It used to hand back a placeholder
+    // token that an Edge Function accepted without checking — which was not a
+    // bypass so much as an absence of protection with extra steps, and it is
+    // gone (0063).
+    if (!captchaConfigured()) return
 
     let cancelled = false
 
@@ -55,6 +70,6 @@ export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerId, siteKey])
 
-  if (!siteKey || siteKey === PLACEHOLDER_SITE_KEY) return null
+  if (!captchaConfigured()) return null
   return <div id={containerId} />
 }

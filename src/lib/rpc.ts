@@ -4,6 +4,7 @@
 // including the p_ prefix — PostgREST maps JSON keys to named function
 // arguments) only need to be spelled correctly once.
 import { supabase } from './supabase'
+import { invokeFunction } from './functions'
 
 // How someone gets a seat. CODE = share a code, anyone holding it can ask;
 // INVITE = the host names existing accounts, who accept or decline in-app.
@@ -244,22 +245,10 @@ export interface TestPushResult {
  * is the single most likely answer).
  */
 export async function sendTestPush(): Promise<TestPushResult> {
-  const { data, error } = await supabase.functions.invoke('send-push', { body: { kind: 'TEST' } })
-  if (error) {
-    const context = (error as { context?: Response }).context
-    let message = error.message
-    if (context && typeof context.json === 'function') {
-      try {
-        const detail = (await context.json()) as { error?: string }
-        if (detail?.error) message = detail.error
-      } catch {
-        // Not a JSON body — a gateway page, or nothing at all. The SDK's own
-        // description of the failure is then the best there is.
-      }
-    }
-    throw new Error(message)
-  }
-  return data as TestPushResult
+  // The body-reading that used to live here is now in invokeFunction, because
+  // it was never specific to this call: every Edge Function in this app
+  // answers with `{ error }` and the SDK discards all of them the same way.
+  return await invokeFunction<TestPushResult>('send-push', { kind: 'TEST' })
 }
 
 export async function completeSignup(input: {
@@ -408,7 +397,10 @@ export function previousPhaseFor(status: RoundStatus, votingEnabled: boolean): R
   return neighbourPhase(status, votingEnabled, -1)
 }
 
-export async function joinRound(input: { code: string; turnstileTicket: string }) {
+// The ticket is null on a deployment with no captcha configured (0063), where
+// `join_round` asks for none — and where the Edge Function that mints them is
+// not called at all.
+export async function joinRound(input: { code: string; turnstileTicket: string | null }) {
   const res = await supabase.rpc('join_round', {
     p_code: input.code,
     p_turnstile_ticket: input.turnstileTicket,

@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { invokeFunction } from './functions'
 
 /**
  * Exchanges a raw Cloudflare Turnstile widget token for a one-time
@@ -11,11 +11,15 @@ export async function getTurnstileTicket(
   purpose: 'JOIN_ROUND',
   subject: string,
 ): Promise<string> {
-  const { data, error } = await supabase.functions.invoke<{ ticket_id: string; error?: string }>(
-    'verify-turnstile',
-    { body: { token, purpose, subject } },
-  )
-  if (error) throw new Error(error.message)
-  if (!data?.ticket_id) throw new Error(data?.error ?? 'turnstile verification failed')
+  // invokeFunction reads the body the SDK discards, so a refusal from this
+  // function arrives as the sentence it wrote rather than as "non-2xx status
+  // code" — which was the whole of what somebody trying to join a dinner used
+  // to be told.
+  const data = await invokeFunction<{ ticket_id?: string; error?: string }>('verify-turnstile', {
+    token,
+    purpose,
+    subject,
+  })
+  if (!data?.ticket_id) throw new Error(data?.error ?? 'TURNSTILE_NO_TICKET')
   return data.ticket_id
 }

@@ -59,6 +59,57 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-27 (5)
+
+**Joining a dinner stops depending on an Edge Function that has nothing to do**
+(`0063`), and the Turnstile bypass is gone rather than documented.
+
+*The symptom* was `POST /functions/v1/verify-turnstile 503` on a local stack and
+nobody able to take a seat. *The problem underneath it* was worse: with no
+Turnstile keys configured, that function did nothing — it recognised a
+placeholder token the frontend had invented, skipped the verification entirely,
+and inserted a row. So a deployment with no captcha still could not seat anybody
+unless an Edge Function was up. The bypass had moved the dependency rather than
+removing it.
+
+And it was never protection. With no `TURNSTILE_SECRET_KEY` the old path
+accepted `dev-placeholder-token` from anybody, anywhere, production included —
+which is why `README.md` listed it as a simplification to remove before real
+use. It is removed now, and nothing is weaker for it, because there was nothing
+there.
+
+The question moved into the database, where it can be answered without a network
+call: `app_settings.captcha_required`, one row, readable by everyone and
+writable by no client role. False by default — `join_round` takes no ticket and
+the frontend never calls the function. True — a real token is verified against a
+real secret, a missing ticket is refused with `CAPTCHA_REQUIRED`, and the
+one-time ticket is burned exactly as before. **Turn it on in the same breath as
+setting the keys**: a site key with the flag off collects tokens nothing checks.
+
+*And "Edge Function returned a non-2xx status code" stops being a shrug.* That
+sentence is the SDK's; the function's own answer, which says what is actually
+wrong, arrives on the error object as `context` where nothing looked at it. So
+`{"error":"TURNSTILE_SECRET_KEY is not configured"}` — a perfectly clear 500 —
+reached the screen as a generic failure, and the search for the cause started in
+the client, which is the one place it was not. `src/lib/functions.ts` reads it,
+once, for every function call in the app; a function that fails to *boot*
+answers with something that is not JSON at all, and that comes back as its
+status and first line, which is still worth ten times the generic sentence. The
+self-test's private copy of that logic is gone with it.
+
+*Also:* `verify-turnstile` was the only function importing from `jsr:` while the
+other two use `esm.sh`. A specifier the runtime cannot fetch is a worker that
+never boots, and a worker that never boots is indistinguishable from a function
+that was never deployed — which is one plausible reading of that `503`. It now
+matches its neighbours.
+
+*Tested:* `smoke_test12.sql` §7 — the default accepting a null ticket, the flag
+turned on refusing it, a real ticket working, that same ticket refused the
+second time, and no client role able to write the setting. The other four suites
+re-run clean against the new `join_round`.
+
+---
+
 ## 2026-08-27 (4)
 
 **Finished dinners delete themselves after twenty-one days** (`0062`) — and

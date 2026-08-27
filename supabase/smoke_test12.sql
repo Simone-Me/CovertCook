@@ -208,5 +208,49 @@ select
   has_function_privilege('anon', 'purge_old_rounds(int)', 'execute'),
   has_function_privilege('authenticated', 'purge_old_rounds(int)', 'execute');
 
+-- ---------------------------------------------------------------------------
+\echo ''
+\echo '=== 7. joining without a captcha, and with one (0063) ==='
+-- The default: no captcha configured, so no ticket and no Edge Function
+-- anywhere in the path. This is the case that used to answer 503 and stop
+-- anybody taking a seat.
+set role authenticated;
+select _as('00000000-0000-0000-0000-000000001201');
+select create_round('Open Door', 'CODE', 'ANONYMOUS', 'FREE', null, null, 'Europe/Paris', null, false, false, 'LIVE') as door \gset
+select advance_phase(:'door'::uuid, 'OPEN');
+reset role;
+select join_code as door_code from rounds where id = :'door'::uuid \gset
+set role authenticated;
+
+\echo '--- captcha_required is false out of the box (expect f) ---'
+select captcha_required();
+
+\echo '--- so a null ticket is accepted, and a seat is taken ---'
+select _as('00000000-0000-0000-0000-000000001202');
+select join_round(:'door_code', null) is not null as took_a_seat;
+
+\echo '--- turn it on, and the same call is refused: expect CAPTCHA_REQUIRED ---'
+reset role;
+update app_settings set captcha_required = true where id;
+set role authenticated;
+select _as('00000000-0000-0000-0000-000000001203');
+select _refusal(format('select join_round(%L, null)', :'door_code'));
+
+\echo '--- with a real ticket it works again, and the ticket is burned ---'
+reset role;
+insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'door_code') returning id as tk \gset
+set role authenticated;
+select _as('00000000-0000-0000-0000-000000001203');
+select join_round(:'door_code', :'tk'::uuid) is not null as took_a_seat_with_a_ticket;
+
+\echo '--- and a used ticket is not a second seat: expect a refusal ---'
+select _refusal(format('select join_round(%L, %L::uuid)', :'door_code', :'tk'));
+
+\echo '--- nobody may write the setting, only read it (expect f, f) ---'
+reset role;
+select
+  has_table_privilege('anon', 'app_settings', 'update'),
+  has_table_privilege('authenticated', 'app_settings', 'update');
+
 \echo ''
 \echo '=== smoke test 12 complete ==='

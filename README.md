@@ -495,6 +495,18 @@ the recipe book is `0058`, the album is `0060`: an app pointed at a database
 that stopped at `0045` fails on the first of those, at sign-up, and looks
 like the login is broken.
 
+**"Edge Function returned a non-2xx status code" is the same kind of lie**, and
+it was two of them at once. That sentence is the SDK's, and the function's own
+answer — which says what is actually wrong — was on the error object where
+nothing read it; `src/lib/functions.ts` now reads it, for every function call in
+the app. And a `503` from `verify-turnstile` on a local stack means the edge
+runtime is not serving it, which since `0063` no longer stops anybody joining a
+dinner. If you do need to see why a function will not boot:
+
+```bash
+docker logs supabase_edge_runtime_covertcook --tail 50
+```
+
 To see what a database actually has, ask the CLI rather than guessing:
 
 ```bash
@@ -547,7 +559,8 @@ menu, and a second save writing nothing — `smoke_test10.sql` moderation by sea
 the one thing in the set that needs a running local stack rather than a bare
 Postgres, and `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —
 where the *survivors* are the point, not the deletion: it proves the book and
-the album still hold everything after the dinner they came from is gone.
+the album still hold everything after the dinner they came from is gone — plus
+joining with and without a captcha (`0063`).
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -777,8 +790,16 @@ themes are the paid side, because they are purely how the evening looks.
 - Allergy/diet matching is exact-string, not semantic: a diet like
   "vegan" needs every conflicting ingredient added by hand as its own tag,
   until a proper label→tags mapping exists.
-- Bot protection (Turnstile) has a dev-only bypass (both the frontend
-  widget and the `verify-turnstile` edge function recognise a placeholder
-  token) — inert the moment real site/secret keys are configured, but
-  must be removed entirely before this is used by anyone outside local
-  development.
+- ~~Bot protection (Turnstile) has a dev-only bypass~~ — **removed in `0063`.**
+  It was never really a dev-only bypass: with no `TURNSTILE_SECRET_KEY` set, the
+  edge function accepted a placeholder token the frontend had invented, from
+  anybody, in production as readily as on a laptop. What made it look necessary
+  was that joining a dinner went through that function *even with no captcha to
+  verify* — so a local stack whose edge runtime was not up answered `503` and
+  nobody could take a seat.
+  The question now lives in the database: `app_settings.captcha_required`,
+  false by default. With it false the frontend never calls the function and
+  `join_round` asks for no ticket; with it true a real token is verified
+  against a real secret and a missing ticket is refused. **Turn it on in the
+  same breath as setting the keys** — a site key with the flag off collects
+  tokens nothing checks.

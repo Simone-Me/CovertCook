@@ -313,7 +313,12 @@
       "PREVIOUSLY_LEFT": "Vous avez quitté ce dîner. Demandez à l'Executive Chef de vous rajouter.",
       "WAS_REMOVED": "L'Executive Chef vous a retiré de ce dîner.",
       "ROUND_FULL": "Ce dîner est complet.",
-      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner."
+      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner.",
+      "TURNSTILE_SECRET_KEY is not configured": "Le contrôle anti-robot est à moitié configuré sur ce déploiement : l’app envoie un vrai jeton et le serveur n’a aucune clé pour le vérifier. Définissez TURNSTILE_SECRET_KEY sur les fonctions, ou videz VITE_TURNSTILE_SITE_KEY pour que les deux côtés passent par le contournement de développement.",
+      "turnstile verification failed": "Le contrôle anti-robot a refusé cette tentative. Rechargez la page et réessayez le code.",
+      "token and purpose are required": "Le contrôle anti-robot n’a produit aucun jeton. Rechargez la page — et si cela persiste, VITE_TURNSTILE_SITE_KEY vaut quelque chose que Cloudflare ne reconnaît pas.",
+      "TURNSTILE_NO_TICKET": "Le contrôle anti-robot a répondu sans billet. Rechargez la page et réessayez.",
+      "CAPTCHA_REQUIRED": "Ce déploiement demande un contrôle anti-robot et la page n’en a pas fourni. Rechargez et réessayez."
     },
     "chainChoice": {
       "intro": "La chaîne est déjà faite. Retirer un maillon laisse deux extrémités libres — décidez ce qu'elles deviennent.",

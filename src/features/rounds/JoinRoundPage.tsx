@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import { joinRound, notifyHostOfArrival } from '../../lib/rpc'
 import { getTurnstileTicket } from '../../lib/turnstileTicket'
-import { Turnstile } from '../../components/Turnstile'
+import { Turnstile, captchaConfigured } from '../../components/Turnstile'
 import { BackToTable } from '../../components/BackToTable'
 import { takeJoinCode } from '../../lib/pendingJoin'
 
@@ -37,17 +37,29 @@ export function JoinRoundPage() {
   // same message a second time.
   const [done, setDone] = useState(false)
 
+  // "Nothing is stopping you" rather than "the captcha is solved". With no site
+  // key there is no widget, no token, and nothing to wait for — and the button
+  // used to sit disabled for ever waiting on one.
+  const captchaReady = !captchaConfigured() || !!captchaToken
+
   async function onSubmit(e?: React.FormEvent) {
     e?.preventDefault()
     setError(null)
-    if (!captchaToken) {
+    if (!captchaReady) {
       setError(t('rounds.waitingForCaptcha'))
       return
     }
     setSubmitting(true)
     try {
       const normalizedCode = code.trim().toUpperCase()
-      const ticket = await getTurnstileTicket(captchaToken, 'JOIN_ROUND', normalizedCode)
+      // No captcha configured means no Edge Function in the way of taking a
+      // seat. It used to be called anyway, to stamp a token the client had
+      // invented — so a stack with no functions running answered 503 and
+      // nobody could join a dinner that has no bot protection to speak of
+      // (0063).
+      const ticket = captchaConfigured()
+        ? await getTurnstileTicket(captchaToken as string, 'JOIN_ROUND', normalizedCode)
+        : null
       const memberId = await joinRound({ code: normalizedCode, turnstileTicket: ticket })
       // The Executive Chef is the only person who can act on a request, and
       // they are running the evening in their head rather than refreshing a
@@ -97,14 +109,14 @@ export function JoinRoundPage() {
           <p>{t('rounds.confirmJoin')}</p>
           <code style={{ fontSize: 20, letterSpacing: '0.08em' }}>{code}</code>
           <div className="row">
-            <button type="button" disabled={submitting || !captchaToken} onClick={() => onSubmit()}>
+            <button type="button" disabled={submitting || !captchaReady} onClick={() => onSubmit()}>
               {t('rounds.confirmJoinYes')}
             </button>
             <button type="button" className="secondary" onClick={() => setConfirming(false)}>
               {t('rounds.confirmJoinChange')}
             </button>
           </div>
-          {!captchaToken && <p className="muted">{t('rounds.waitingForCaptcha')}</p>}
+          {!captchaReady && <p className="muted">{t('rounds.waitingForCaptcha')}</p>}
         </div>
       ) : (
         <form onSubmit={onSubmit} className="stack">
@@ -119,10 +131,10 @@ export function JoinRoundPage() {
               style={{ textTransform: 'uppercase' }}
             />
           </div>
-          <button type="submit" disabled={submitting || !captchaToken}>
+          <button type="submit" disabled={submitting || !captchaReady}>
             {t('actions.submit')}
           </button>
-          {!captchaToken && <p className="muted">{t('rounds.waitingForCaptcha')}</p>}
+          {!captchaReady && <p className="muted">{t('rounds.waitingForCaptcha')}</p>}
         </form>
       )}
 
