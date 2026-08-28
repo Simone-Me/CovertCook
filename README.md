@@ -578,7 +578,10 @@ section is the exact recipe that used to come back as
 results menu (`0057`) and the recipe book (`0058`), including the two cases
 that are invisible when they break — a dish nobody cooked still reaching the
 menu, and a second save writing nothing — `smoke_test10.sql` moderation by seat
-(`0059`), `smoke_test11.sql` the album (`0060`, `0068`) — who may add the one
+(`0059`), `smoke_test14.sql` the results reaching the table rather than only the
+Executive Chef — a hand-counted dinner is the case where nothing opens them by
+itself, and the host's own screen cannot show that anything is wrong —
+`smoke_test11.sql` the album (`0060`, `0068`) — who may add the one
 photograph, and what the delegation picker is careful not to say — whose bucket policies are
 the one thing in the set that needs a running local stack rather than a bare
 Postgres, `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —

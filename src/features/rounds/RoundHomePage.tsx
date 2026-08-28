@@ -332,6 +332,33 @@ export function RoundHomePage() {
 
   const resultsOpen = phaseIdx >= ROUND_PHASE_ORDER.indexOf('RESULTS')
 
+  /**
+   * Whether the table can already read the results, asked the way the server
+   * asks it — `results_are_public` in SQL (0024). `get_results` refuses
+   * everybody but the host until this is true, so this is the question that
+   * decides whether the host is still holding something.
+   *
+   * IT USED TO BE `voting_mode === 'LIVE'`, and that is where a hand-counted
+   * dinner lost its evening. A MANUAL round never publishes itself: the host
+   * counted the hands at the table, the app showed the results to the host —
+   * who bypasses the gate — and refused them to everybody else, with the one
+   * control that would have opened them rendered only for LIVE rounds. Nobody
+   * was told, because from the host's screen it looked finished. TIMED had the
+   * same hole from the other side: a vote that closes early because everyone
+   * has voted (0043) reaches RESULTS with its deadline still in the future.
+   *
+   * Kept in step with the SQL by hand, which is the cost of not asking the
+   * database — worth it here because the answer is four columns the round row
+   * already carries, and the alternative is a round-trip on every screen.
+   */
+  const resultsShared =
+    round.results_published_at !== null ||
+    round.voting_mode === 'DISABLED' ||
+    round.status === 'ARCHIVED' ||
+    (round.voting_mode === 'TIMED' &&
+      round.voting_closes_at !== null &&
+      new Date(round.voting_closes_at) <= new Date())
+
   // The pass opens by itself only when the round is genuinely stuck on the
   // Executive Chef — an empty table, a menu that doesn't add up, a roulette
   // not yet spun, a dinner with no vote opened, results nobody has been
@@ -341,7 +368,7 @@ export function RoundHomePage() {
     ((round.status === 'OPEN' && activeApprovedCount < 3) ||
       (round.status === 'LOCKED' && !hasAssignment) ||
       round.status === 'DINNER' ||
-      (resultsOpen && !round.results_published_at && round.voting_mode === 'LIVE'))
+      (resultsOpen && !resultsShared))
 
   function toggle(which: Exclude<OpenDrawer, null>) {
     setOpen((cur) => (cur === which ? null : which))
@@ -821,7 +848,7 @@ export function RoundHomePage() {
 
         {/* Results exist but only the Executive Chef can see them: LIVE
             means reading the room first, then announcing. */}
-        {resultsOpen && !round.results_published_at && round.voting_mode === 'LIVE' && (
+        {resultsOpen && !resultsShared && (
           <div className="stack">
             <span className="pass__section-title">{t('vote.publish')}</span>
             <PassNote short={t('vote.hostOnly')} />

@@ -59,6 +59,48 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-28 (4)
+
+**The results reach the table, and not only the Executive Chef.**
+
+Reported from a real dinner: the vote finished, the host could read the
+results, and nobody else could. The server was doing exactly what it was told.
+`get_results` lets the host through unconditionally and everybody else only
+once `results_are_public` says so (`0025`) — and that function opens by itself
+for three cases and no more: a `TIMED` round past its deadline, a round that
+never voted at all, and a round that has been archived. Everything else waits
+for the host to press publish.
+
+**The control that presses it was rendered for `LIVE` rounds only.** One
+condition, in two places — the button itself and the rule that unfolds the
+host's pass:
+
+    resultsOpen && !round.results_published_at && round.voting_mode === 'LIVE'
+
+So a hand-counted dinner — the mode where the host counts hands at the table
+and types the tally in — reached its last screen with no way to open it. And
+the failure is invisible from the only screen that could fix it: the host opens
+the results, sees them, and has no reason to imagine anybody else is looking at
+a refusal. `TIMED` had the same hole from the other side, and it is the one that
+would have been hardest to reproduce: a vote that closes early because everyone
+has voted (`0043`) reaches `RESULTS` with its deadline still in the future, so
+it is neither published nor past its clock.
+
+The condition is now the same question `results_are_public` asks in SQL, asked
+of the round row the page already has. Kept in step by hand, which is the cost
+of not paying a round-trip for four columns that are already on screen — and
+the comment above it says so, because the next person to add a voting mode has
+to know there are two lists.
+
+*Tested:* `smoke_test14.sql`, which is the test that would have caught it — a
+`MANUAL` dinner to `RESULTS`, the host reading three dishes while both guests
+get `RESULTS_NOT_PUBLISHED`, a guest refused the publish, and then the whole
+table reading the same three. It asserts in SQL what the bug broke in React, on
+purpose: the gate is real and the host does bypass it, so the next person
+deciding which modes deserve a publish button has to walk past those two facts.
+
+---
+
 ## 2026-08-28 (3)
 
 **A migration that only fails where it matters** (`0062`, corrected).
