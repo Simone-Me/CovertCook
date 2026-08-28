@@ -318,11 +318,17 @@ export function ProfilePage() {
 
       </Fold>
 
-      {/* Above the dietary list on purpose: this is the one section of the
-          profile somebody opens because they want to, rather than because
-          something needs correcting. */}
+      {/* Above the dietary list on purpose, and next to each other: these two
+          are the only sections of the profile somebody opens because they want
+          to, rather than because something needs correcting. Everything below
+          them is maintenance — what you cannot eat, who you have blocked, how
+          to leave. The two things you kept come first. */}
       <Fold title={t('book.title')}>
         <RecipeBook />
+      </Fold>
+
+      <Fold title={t('album.profileTitle')}>
+        <Album />
       </Fold>
 
       <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>
@@ -385,10 +391,6 @@ export function ProfilePage() {
         {openSet === 'diet' && editor}
       </DeclaredList>
 
-      </Fold>
-
-      <Fold title={t('album.profileTitle')}>
-        <Album />
       </Fold>
 
       <Fold title={t('moderation.blockedTitle')}>

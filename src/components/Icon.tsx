@@ -23,6 +23,10 @@ const ICONS = {
   chain: 'diagram',
   winner: 'chef_winner_result',
   help: 'loupe_question',
+  // The jar the table drops its coins into. The costs drawer wore the map pin
+  // for a while, borrowed from the info drawer beside it — two envelopes with
+  // the same mark, one of them about money.
+  costs: 'jar_money',
 } as const
 
 export type IconName = keyof typeof ICONS

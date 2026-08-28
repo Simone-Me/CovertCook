@@ -52,10 +52,14 @@ export interface RoundRow {
   // Twenty-one days after this the whole round deletes itself, so this is also
   // what the countdown on a past dinner is computed from.
   finished_at: string | null
+  // The chef the Executive Chef handed the camera to (0068). Null means the
+  // host takes the photograph themselves. A profile rather than a seat, so it
+  // can never be joined back to a pseudonym.
+  photographer_profile_id: string | null
 }
 
 const ROUND_COLUMNS =
-  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency'
+  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency,photographer_profile_id'
 
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing

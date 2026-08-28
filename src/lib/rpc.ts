@@ -533,7 +533,39 @@ export async function getDietaryPanel(roundId: string) {
   return unwrap<DietaryPanelEntry[]>(res)
 }
 
-export type Course = 'STARTER' | 'MAIN' | 'DESSERT' | 'DRINK' | 'OTHER'
+export type Course =
+  | 'APERITIF'
+  | 'SNACK'
+  | 'STARTER'
+  | 'FIRST'
+  | 'MAIN'
+  | 'SIDE'
+  | 'CHEESE'
+  | 'DESSERT'
+  | 'DRINK'
+  | 'OTHER'
+
+/**
+ * The order a meal is eaten in, which is the order a menu is printed in.
+ *
+ * The same order the `course` enum declares (0066), so a list the database
+ * sorted and a list the client sorted agree. It lives here, once, because four
+ * screens used to carry their own copy of it and adding a course meant finding
+ * all four — the composer, the settings page, the recipe book's filter and the
+ * results menu. Alphabetical would put the dessert second.
+ */
+export const COURSES: Course[] = [
+  'APERITIF',
+  'SNACK',
+  'STARTER',
+  'FIRST',
+  'MAIN',
+  'SIDE',
+  'CHEESE',
+  'DESSERT',
+  'DRINK',
+  'OTHER',
+]
 
 // ---------------------------------------------------------------------------
 // Briefs (supabase/migrations/0007_briefs.sql)
@@ -559,12 +591,20 @@ export interface BriefIngredient {
   unit: string | null
 }
 
+/**
+ * The recipe you were dealt — or the empty place where it will be.
+ *
+ * `brief_id` is null until somebody submits (0067), and every field below it is
+ * null with it. The pairing and the course are true from the moment the
+ * roulette runs, which is what lets the cook's page exist — and lets the
+ * conversation on it exist — before the recipe does.
+ */
 export interface MyBrief {
   pairing_id: string
-  brief_id: string
-  dish_name: string
+  brief_id: string | null
+  dish_name: string | null
   course: Course
-  procedure: string
+  procedure: string | null
   external_url: string | null
   difficulty: number | null
   est_cost: string | null
@@ -1070,25 +1110,101 @@ export interface DinnerPhoto {
   id: string
   storage_path: string
   caption: string | null
+  // A real name, not a pseudonym (0068). The table is already told in words who
+  // holds the camera, so a pseudonym here would sit one line from that person's
+  // real name and hand over the mapping the anonymity exists to protect.
   taken_by: string | null
   is_mine: boolean
   reported: boolean
   hidden: boolean
+  // Already in your album, so the add control comes back pressed rather than
+  // inviting somebody to keep the same picture twice.
+  already_saved: boolean
   created_at: string
 }
 
+/** One line of the menu that was eaten, as the album prints it (0068). */
+export interface AlbumMenuLine {
+  course: Course
+  dish: string
+}
+
+/**
+ * One evening in your album — a **copy**, made when you pressed add (0068).
+ *
+ * Nothing arrives here by itself, and nothing here can be rewritten under you:
+ * the dinner can be purged and the photographer can swap the picture out, and
+ * what you kept stays what you kept. Same story as a recipe in the book (0058).
+ */
 export interface AlbumEntry {
   id: string
   // Null once the dinner has been deleted (0062). The photograph and the
-  // evening's name survive it; there is simply nowhere to go back to.
+  // evening's name survive it; there is simply nothing left behind it.
   round_id: string | null
   round_name: string
   dinner_at: string | null
   storage_path: string
   caption: string | null
-  is_mine: boolean
+  taken_by_name: string | null
   dinner_exists: boolean
-  created_at: string
+  // The evening itself: what was on the table, in the order it was eaten. The
+  // live menu while the dinner exists, the copy afterwards — which is what lets
+  // an album outlive everything it came from.
+  menu: AlbumMenuLine[]
+  saved_at: string
+}
+
+/**
+ * Raised by `record_photo` for anybody but the chef holding the camera — the
+ * Executive Chef included, once they have handed it over.
+ */
+export const NOT_THE_PHOTOGRAPHER = 'NOT_THE_PHOTOGRAPHER'
+
+/** Host-only. Real names, no seats and no pseudonyms — see 0068 part 2. */
+export interface TableChef {
+  profile_id: string
+  real_name: string
+}
+
+export async function listTableChefs(roundId: string) {
+  const res = await supabase.rpc('list_table_chefs', { p_round_id: roundId })
+  return unwrap<TableChef[]>(res)
+}
+
+/**
+ * Who holds the camera, to anybody at the table.
+ *
+ * Answers the right rather than the column: with nothing handed over it names
+ * the host, because that is who may actually do it.
+ */
+export async function getPhotographer(roundId: string) {
+  const res = await supabase.rpc('get_photographer', { p_round_id: roundId })
+  const rows = unwrap<TableChef[]>(res)
+  return rows[0] ?? null
+}
+
+/**
+ * Hand the camera over, or take it back. While it is handed over the host
+ * cannot take or replace the photograph — a right two people hold at once is a
+ * suggestion, not a handover.
+ */
+export async function setPhotographer(roundId: string, profileId: string | null) {
+  const res = await supabase.rpc('set_photographer', {
+    p_round_id: roundId,
+    p_profile_id: profileId,
+  })
+  return unwrap(res)
+}
+
+/** Keep this picture. The one act that puts anything in an album. */
+export async function savePhoto(photoId: string) {
+  const res = await supabase.rpc('save_photo', { p_photo_id: photoId })
+  return unwrap<string>(res)
+}
+
+export async function forgetPhoto(id: string) {
+  const res = await supabase.rpc('forget_photo', { p_id: id })
+  return unwrap(res)
 }
 
 const PHOTO_BUCKET = 'dinner-photos'

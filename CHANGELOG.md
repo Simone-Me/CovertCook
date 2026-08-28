@@ -59,6 +59,158 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-28
+
+**One photograph of the table, taken by somebody** (`0068`), **a menu with more
+than three courses** (`0066`), **a cook's page that exists before the recipe
+does** (`0067`), and the coin jar the costs drawer should always have worn.
+
+*Start with the bug, because it has been quietly emptying every album since
+`0061`.* That migration rewrote the photo bucket's read policy from
+`is_round_member(folder, uid)` into a pair of `EXISTS` over `dinner_photos`, so
+that a photograph could still be looked at after its dinner was purged. The
+logic was right. The privilege was not: `dinner_photos` has RLS on and — by
+design, said out loud in `0060` — **no policies and no grants**, because every
+read of it goes through a `SECURITY DEFINER` function. A storage policy is not
+one of those. It is evaluated as the caller, so the subquery ran as
+`authenticated`, hit a table it has no `SELECT` on, and the whole expression
+failed with "permission denied".
+
+The failure is invisible in exactly the way that matters. Uploading works. The
+row is written. `list_round_photos` — a definer function — returns it, and the
+tile appears. Then `createSignedUrl` is refused, the client turns that into a
+null URL, and the dashed placeholder sits there forever. **A photograph that
+uploaded successfully and cannot be looked at, with no error anywhere.** The
+policy now asks a definer function a yes/no question, which is the posture the
+rest of the schema already had.
+
+*And then the decision `0060` avoided.* It said so plainly: one photo per
+dinner "immediately asks who gets to be the photographer, so one each says
+everybody may add theirs". What one-each actually produces is four near
+identical pictures of the same table taken minutes apart, none of them the one
+anybody would have chosen, and a profile album that is a scroll of them — which
+is a camera roll, not an album. The question was worth asking rather than
+avoiding, and the dinner already has an answer: the person whose dinner it is.
+
+So it is **one photograph, and the Executive Chef's to take** — one more
+decision on a list that already holds the menu, the roulette, the vote and the
+door. And because the person running a dinner is usually the person carrying
+plates at the end of it, they can **hand the camera to one named chef**, who
+adds it from their own phone.
+
+**Handing it over means giving it up.** Choose, then confirm — two gestures,
+because the second one is the moment the host stops being able to take the
+photograph, and that is not something to do by brushing a select. While the
+handover stands the Executive Chef cannot upload or replace anything; they take
+it back the same way, by handing it to themselves. A right two people hold at
+once is not a handover, it is a suggestion, and the table would have no way of
+knowing whose job it actually was — which is why **everybody is told, in words,
+under the frame**: "Lena adds the photograph of this table". Somebody looking
+at an empty frame is already asking who they are waiting for.
+
+That line is also why the credit on the picture changed from a pseudonym to a
+real name. It used to be the seat's — correct when everybody added their own,
+and wrong the moment the table is told in words who holds the camera, because
+the pseudonym would then sit one line from that person's real name and hand
+over the mapping the whole design exists to protect. One public fact, said once.
+
+**That picker is the only place in the app that shows real names during a
+dinner, and how it does it is the interesting part.** A host cannot choose
+"Saffron" — they are choosing a person in a room. But `list_round_members`
+hands out `member_id` beside `secret_name` and withholds `profile_id` until the
+reveal, precisely so no client can build the map from a pseudonym to a person;
+a photographer stored as a `member_id`, picked from a list of real names, would
+hand the host that map in one join. So `list_table_chefs` returns **profile ids
+and real names, no seats and no pseudonyms**, ordered by name so position
+cannot be read as a correlation either, and the delegation is stored on
+`rounds` as a profile. The host learns nothing they did not already know: they
+approved every one of these people.
+
+*Nothing lands in an album by itself, and that is the second decision.* The
+photograph was arriving in the album of everybody who had been at the dinner,
+automatically, which sounds generous and is the same mistake one-each was: a
+folder that fills itself is not a keepsake. `saved_photos` is `saved_recipes`
+(`0058`) with a picture in it — there is an **add button under the photograph on
+the results screen**, exactly where the button that keeps a recipe already is,
+and pressing it is the only way anything reaches an album. Beside it, a second
+button that is a different act and had to be offered separately: **save to this
+device**, a file that outlives the account rather than a copy inside it. (It
+fetches the picture into a blob first — the signed URL is on another origin and
+browsers ignore `download` across origins, so a plain link would have quietly
+meant "open in a tab".)
+
+Like a recipe, what is kept is a **copy**: the dinner can be purged three weeks
+later (`0062`) and the photographer can swap the picture out at any point before
+that, and neither rewrites what somebody chose to keep. The one exception is
+moderation, and it is deliberate: taking a photograph down reaches the copies,
+because a removal that leaves the picture in nine albums has removed nothing.
+
+*The album stops being a list of doors, and becomes a list.* Its headings were
+links back to the dinner — and once the dinner is purged a heading is a door
+onto nothing; an album whose value is a link is an index. But full-width
+pictures are no better, because by the fourth dinner you are scrolling past
+photographs to find an evening you can already name. So it is **one line per
+evening, its name and its date**, and the triangle opens the one you came for:
+the photograph, who took it, and **the menu that was eaten**, printed under it.
+The same disclosure the settings use, for the same reason — read them one at a
+time. In the profile it now sits directly under the recipe book, both of them
+above everything else, because those two are the only sections anybody opens
+because they want to rather than because something needs correcting.
+
+*And the photo drawer on the round page came back out.* It was added an hour
+earlier in this same entry's work, on the reasoning that the picture is taken at
+the table and the results screen does not open until the vote is counted. True,
+and not worth a tenth envelope: the photograph reaches the app from a camera
+roll, not from a live viewfinder, and `preparePhoto` has never cared when the
+shutter was pressed. The album lives in exactly two places — the results screen,
+where it is offered, and the profile, if you kept it.
+
+*A menu has more than three courses.* `course` had held five values since
+`0001` — starter, main, dessert, drink, other — which is a schema written for
+the shape of a game rather than of a dinner. The moment a table of six composes
+a menu it runs out: the olives handed round standing up, the cheese, and the
+salad that came with the main are all "Other", and **Other is not a course, it
+is a shrug** — the results menu can only print it last, whatever it was. Five
+more, positioned in the enum with `ADD VALUE ... BEFORE/AFTER` so the database
+returns a menu already in the order it is eaten: aperitif, nibbles, starter,
+first course, main, side, cheese, dessert. Nibbles is there deliberately: it is
+a real assignment and it is the friendliest one to hand somebody who cannot
+cook, which is worth having in a game about cooking.
+
+*The cook's page before the recipe arrives.* It used to render one grey line —
+"no recipe to show yet" — and nothing else, and everything a cook in that
+position could actually **do** was behind it. The conversation with the person
+writing for them lives on that page and that page is its only door, so for
+exactly as long as there was something to ask about there was nowhere to ask
+it; the page appeared at the moment it stopped being needed. And the sentence
+for it has been in the database since `0010`, with a host alert wired to the
+back of it, unreachable.
+
+`get_my_brief` now starts from the pairing and left-joins the recipe, so the
+page exists from the moment the roulette runs. The layout stays and the content
+goes: same heading, same course on the badge — it was dealt, and it is true
+before anything is written — and the two sections ruled and blank, the way a
+page in a recipe book waiting to be filled in looks. What the shape says is
+that nothing is broken and nothing is lost. Under it, one tap: a reminder, to
+the chef writing for you and to the Executive Chef at the same time, without
+either being accused of anything.
+
+*Also:* the shared-costs drawer wore the map pin, borrowed from the info drawer
+directly beneath it — two envelopes with the same mark, one of them about
+money. It has a coin jar now, and the 512 px master went to `assets-src/icons/`
+where the other nine live, because everything left in `public/` is precached by
+the service worker and ships to every phone that installs the app.
+
+*Tested:* `smoke_test11.sql` rewritten around who may add the photograph — the
+Executive Chef refused on their own dinner once they have handed the camera
+over is the assertion that matters — what the picker is careful not to say, and
+that pressing add is the only way into an album. `smoke_test12.sql` proves both
+halves of the promise across the purge: Olga and Piet kept the evening and still
+have it, with its menu in the order it was eaten, and Rosa sat at the same table,
+kept nothing, and has nothing.
+
+---
+
 ## 2026-08-27 (7)
 
 **Everybody reads in their own language** (`0064`), **shared costs** (`0065`),

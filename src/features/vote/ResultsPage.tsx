@@ -10,16 +10,11 @@ import {
   getResults,
   listRoundRecipes,
   saveRecipes,
-  type Course,
+  COURSES,
   type RoundResult,
 } from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
 import { DinnerAlbum } from '../rounds/DinnerAlbum'
-import { useAuth } from '../../lib/auth'
-
-// The order a meal is eaten in, which is the order a menu is printed in.
-// Alphabetical would put the dessert second.
-const COURSE_ORDER: Course[] = ['STARTER', 'MAIN', 'DESSERT', 'DRINK', 'OTHER']
 
 /**
  * The evening, printed as the menu it was.
@@ -48,7 +43,6 @@ const COURSE_ORDER: Course[] = ['STARTER', 'MAIN', 'DESSERT', 'DRINK', 'OTHER']
 export function ResultsPage() {
   const { t } = useTranslation()
   const { roundId } = useParams()
-  const { profile } = useAuth()
 
   const queryClient = useQueryClient()
   // Armed, not always on. A menu where every dish is a control is a form; the
@@ -114,7 +108,7 @@ export function ResultsPage() {
   const dishes = results ?? []
   const sections =
     round?.slot_mode === 'CATEGORIES'
-      ? COURSE_ORDER.map((course) => ({ course, dishes: dishes.filter((d) => d.course === course) })).filter(
+      ? COURSES.map((course) => ({ course, dishes: dishes.filter((d) => d.course === course) })).filter(
           (section) => section.dishes.length > 0,
         )
       : [{ course: null, dishes }]
@@ -246,7 +240,7 @@ export function ResultsPage() {
           separate page: an album nobody is standing in front of at the moment
           the photograph exists is an album nobody fills. */}
       <h2>{t('album.title')}</h2>
-      <DinnerAlbum roundId={roundId as string} isHost={round?.host_id === profile?.id} />
+      {round && <DinnerAlbum round={round} />}
 
       {assignment && (
         <>

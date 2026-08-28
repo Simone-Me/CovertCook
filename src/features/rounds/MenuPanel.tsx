@@ -11,12 +11,11 @@ import {
   getMenuStatus,
   removeCourse,
   setSlotMode,
+  COURSES,
   type Course,
   type SlotMode,
 } from '../../lib/rpc'
 import { HostAction } from './HostAction'
-
-const COURSES: Course[] = ['STARTER', 'MAIN', 'DESSERT', 'DRINK', 'OTHER']
 
 // Composing the menu, next to the other things the Executive Chef is being
 // asked to do — not buried in a settings page they'd have to know to visit.

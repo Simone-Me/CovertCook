@@ -617,31 +617,20 @@ input.is-taken {
 .costs__owes { color: var(--accent); }
 
 /* ---------------------------------------------------------------------------
- * The album. Photographs of a table, laid out the way photographs of a table
- * end up on one — a row you push along, not a grid that reflows.
+ * The album. One photograph per dinner (0068), so this stopped being a strip
+ * you push along and became what it always wanted to be: a print, laid on the
+ * page at the size somebody would actually look at it.
  * ------------------------------------------------------------------------- */
 
-.album {
-  display: flex;
-  gap: 10px;
-  overflow-x: auto;
-  padding-bottom: 4px;
-  /* The one place in this app that scrolls sideways, and it says so by looking
-     like a strip of prints. Everything else is clipped (see `main`). */
-  scroll-snap-type: x proximity;
-}
-
 .album__tile {
-  flex: none;
-  width: 148px;
   margin: 0;
-  scroll-snap-align: start;
+  max-width: 340px;
 }
 
 .album__tile img {
   display: block;
-  width: 148px;
-  height: 148px;
+  width: 100%;
+  aspect-ratio: 1;
   object-fit: cover;
   border-radius: 3px;
   /* A print, not a thumbnail: a white edge and a shadow, the same light as
@@ -652,8 +641,9 @@ input.is-taken {
 }
 
 .album__pending {
-  width: 148px;
-  height: 148px;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1;
   border-radius: 3px;
   background: var(--bg-elevated);
   border: 1px dashed var(--border);
@@ -703,9 +693,64 @@ input.is-taken {
   cursor: pointer;
 }
 
-.album__evening {
-  font-size: 15px;
-  margin: 12px 0 0;
+/* Whose job the photograph is, and who took the one on screen. A caption
+   rather than a control: it answers a question somebody is already asking of
+   an empty frame. */
+.album__holder {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* Keeping it, and saving it. Two different acts on one picture — one makes a
+   copy in an album, the other a file on a phone — so they sit together under
+   the print rather than among the flag-and-remove marks in its caption. */
+.album__keep {
+  margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+ * One evening in the profile album, opened from the list. Everything here is
+ * copied at the moment somebody presses add, so it survives the dinner being
+ * deleted (0068).
+ * ------------------------------------------------------------------------- */
+
+.album__photo {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 4px solid var(--paper-solid, #fff);
+  box-shadow: 0 1px 2px rgba(120, 60, 30, 0.16), 0 6px 14px rgba(120, 60, 30, 0.16);
+  background: var(--bg-elevated);
+}
+
+/* The courses under the picture, printed rather than listed: the course in
+   small capitals where a menu puts it, the dish on the line under it. No
+   scores and no leader dots — the results page is where the evening is a
+   competition, and this is where it is a memory. */
+.album__menu {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.album__menu li {
+  margin-bottom: 6px;
+}
+
+.album__menu-course {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.album__menu-dish {
+  display: block;
 }
 
 /* ---------------------------------------------------------------------------
@@ -732,6 +777,28 @@ input.is-taken {
   margin: 0;
   white-space: pre-wrap;
   overflow-wrap: anywhere;
+}
+
+/* A section of the recipe that has not been written yet.
+ *
+ * Ruled lines rather than a spinner or a grey box: the cook's page keeps its
+ * headings and its shape while it waits (0067), and what belongs under a
+ * heading nobody has filled in is an empty ruled page. It is decoration in the
+ * strict sense — aria-hidden at every use — because the sentence explaining
+ * the wait is already above it in words. */
+.recipe__blank {
+  height: 72px;
+  border-radius: 2px;
+  opacity: 0.55;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 23px,
+    var(--border) 23px 24px
+  );
+}
+
+.recipe__blank--tall {
+  height: 120px;
 }
 
 /* A declared set, read like a line on a menu. */

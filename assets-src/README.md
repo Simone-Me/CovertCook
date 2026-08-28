@@ -24,6 +24,9 @@ The icons are **Flaticon's**, and their licence requires visible credit. That
 credit is in the app footer on every screen, not buried in an About page; if
 the footer ever loses it, the app is no longer allowed to use them.
 
+`jar_money.png` came in from outside this repo; whatever its licence requires is
+not recorded here, so check it before shipping the app anywhere new.
+
 To regenerate the icons after editing a master:
 
 ```

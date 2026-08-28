@@ -19,10 +19,9 @@ import {
   getSlots,
   addSlot,
   removeSlot,
+  COURSES,
   type Course,
 } from '../../lib/rpc'
-
-const COURSES: Course[] = ['STARTER', 'MAIN', 'DESSERT', 'DRINK', 'OTHER']
 
 const COMMON_TIMEZONES = [
   'Europe/Paris', 'Europe/London', 'Europe/Madrid', 'Europe/Berlin',

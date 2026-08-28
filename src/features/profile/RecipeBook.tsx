@@ -5,7 +5,7 @@ import { useAuth } from '../../lib/auth'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { FoodLabel } from '../../components/FoodLabel'
 import { formatMoment } from '../../lib/datetime'
-import { forgetRecipe, listMyRecipes, type SavedRecipe } from '../../lib/rpc'
+import { COURSES, forgetRecipe, listMyRecipes, type SavedRecipe } from '../../lib/rpc'
 
 /**
  * Everything you kept, from every dinner.
@@ -92,7 +92,7 @@ export function RecipeBook() {
       <div className="row">
         <select value={course} onChange={(e) => setCourse(e.target.value)} aria-label={t('briefs.course')}>
           <option value="ALL">{t('book.anyCourse')}</option>
-          {['STARTER', 'MAIN', 'DESSERT', 'DRINK', 'OTHER'].map((c) => (
+          {COURSES.map((c) => (
             <option key={c} value={c}>
               {t(`briefs.courseOption.${c}`)}
             </option>

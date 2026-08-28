@@ -78,11 +78,21 @@ select _as('00000000-0000-0000-0000-000000001201');
 select advance_phase(:'round_id'::uuid, 'BRIEFS_CLOSED');
 select advance_phase(:'round_id'::uuid, 'DINNER');
 
--- Two photographs, and Olga keeps every recipe.
+-- One photograph of the table (0068), taken by Olga because it is her dinner.
+-- Olga keeps every recipe, and Olga and Piet both keep the photograph. Rosa
+-- keeps nothing, which is the other half of the promise being tested: what
+-- survives is what somebody CHOSE to keep, and Rosa chose not to.
 select _as('00000000-0000-0000-0000-000000001201');
 select record_photo(:'round_id'::uuid, :'round_id' || '/olga.jpg', 'All of it');
+
+reset role;
+select id as the_photo from dinner_photos where round_id = :'round_id'::uuid \gset
+set role authenticated;
+select _as('00000000-0000-0000-0000-000000001201');
+select save_photo(:'the_photo'::uuid) is not null as olga_kept_it;
 select _as('00000000-0000-0000-0000-000000001202');
-select record_photo(:'round_id'::uuid, :'round_id' || '/piet.jpg');
+select save_photo(:'the_photo'::uuid) is not null as piet_kept_it;
+select _as('00000000-0000-0000-0000-000000001201');
 
 select _as('00000000-0000-0000-0000-000000001201');
 select advance_phase(:'round_id'::uuid, 'VOTING');
@@ -164,25 +174,39 @@ from list_my_recipes();
 -- ---------------------------------------------------------------------------
 \echo ''
 \echo '=== 5. and the album keeps what it promised ==='
-\echo '--- Olga keeps her own photograph, with the evening printed on it ---'
-select count(*) as photos, bool_and(is_mine) as all_mine,
+\echo '--- the evening survives whole for whoever kept it: the photograph, the ---'
+\echo '--- name, and the menu that was eaten under it (expect 1, t, f, 3) ---'
+select count(*) as photos,
        bool_and(round_name <> '') as still_named,
-       bool_or(dinner_exists) as any_dinner_left
+       bool_or(dinner_exists) as any_dinner_left,
+       max(jsonb_array_length(menu)) as courses_remembered
 from my_album();
 
-\echo '--- Piet keeps his, and only his (expect 1, t) ---'
-select _as('00000000-0000-0000-0000-000000001202');
-select count(*) as photos, bool_and(is_mine) as all_mine from my_album();
+\echo '--- and the menu is still in the order it was eaten (expect Panzanella, Cacio e pepe, Affogato) ---'
+select string_agg(line->>'dish', ' · ' order by i) as the_menu
+from my_album(), lateral jsonb_array_elements(menu) with ordinality as e(line, i);
 
-\echo '--- Rosa added none and has none (expect 0) ---'
+\echo '--- Piet took no photograph and kept it anyway, so he has it too (expect 1) ---'
+select _as('00000000-0000-0000-0000-000000001202');
+select count(*) as photos from my_album();
+
+-- THE OTHER HALF OF THE PROMISE, and the half that gives the first half its
+-- meaning. Nothing lands in an album because you were in the room: Rosa was at
+-- this dinner, saw the photograph on the results screen, and did not press add.
+-- She has nothing, and that is the feature — an album everything arrives in by
+-- itself is a folder, and nobody opens a folder twice.
+\echo '--- Rosa was at the same table and kept nothing (expect 0) ---'
 select _as('00000000-0000-0000-0000-000000001203');
 select count(*) as photos from my_album();
 
-\echo '--- and the bytes are still owned, so nothing is orphaned in the bucket ---'
+\echo '--- the photograph row outlives its dinner and the copies point at it ---'
+\echo '--- (expect 1 row, 1 still owned, 0 still attached, 2 kept) ---'
 reset role;
-select count(*) as photo_rows, count(taken_by_profile_id) as still_owned,
-       count(round_id) as still_attached
-from dinner_photos;
+select
+  (select count(*) from dinner_photos) as photo_rows,
+  (select count(taken_by_profile_id) from dinner_photos) as still_owned,
+  (select count(round_id) from dinner_photos) as still_attached,
+  (select count(*) from saved_photos) as kept_copies;
 
 -- ---------------------------------------------------------------------------
 \echo ''

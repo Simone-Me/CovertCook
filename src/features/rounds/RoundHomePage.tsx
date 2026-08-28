@@ -1088,7 +1088,7 @@ export function RoundHomePage() {
             says "nothing here" is an envelope people open once and resent. */}
         {round.cost_mode === 'SHARED' && (
           <Envelope
-            icon={<Icon name="where" />}
+            icon={<Icon name="costs" />}
             name={t('rounds.drawers.costs')}
             meta={
               round.budget_per_head !== null

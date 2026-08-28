@@ -27,7 +27,7 @@ cook, you don't know who chose yours, and you all find out at the end.
 | **Brief** | The recipe one Player writes *for another*. |
 | **Sender** | The Player who writes a Brief. |
 | **Cook** | The Player who receives it and must prepare it. |
-| **Slot** | A course to fill: starter / main / dessert / drink / other. |
+| **Slot** | A course to fill: aperitif / nibbles / starter / first course / main / side / cheese / dessert / drink / other (`0066`, in the order a meal is eaten). |
 | **Pairing** | The Sender → Cook link. |
 | **Chain** | The full cycle of pairings: A→B→C→…→A. |
 
@@ -574,7 +574,8 @@ section is the exact recipe that used to come back as
 results menu (`0057`) and the recipe book (`0058`), including the two cases
 that are invisible when they break — a dish nobody cooked still reaching the
 menu, and a second save writing nothing — `smoke_test10.sql` moderation by seat
-(`0059`), `smoke_test11.sql` the album (`0060`), whose bucket policies are
+(`0059`), `smoke_test11.sql` the album (`0060`, `0068`) — who may add the one
+photograph, and what the delegation picker is careful not to say — whose bucket policies are
 the one thing in the set that needs a running local stack rather than a bare
 Postgres, `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —
 where the *survivors* are the point, not the deletion: it proves the book and
@@ -680,7 +681,11 @@ names, migration numbers, bugs found and fixed) see
   acted on.
 - **Cooking**: each player sees the recipe written for them, with a
   canned-message chat to their pairing partner and a "can't cook this"
-  quick action.
+  quick action. **The page exists before the recipe does** (`0067`): same
+  heading, same course, the two sections ruled and blank, and one tap that
+  sends a reminder to the chef writing for you and to the Executive Chef at
+  once. It used to be a single grey line, with the conversation — the only
+  thing a cook in that position can act through — behind it.
 - **Voting**: drag-and-drop dish ranking (Borda count) plus separate
   originality/brief-respect scores, with awards computed from the results.
 - **Results & reveal**: the evening printed as the menu it was — courses as
@@ -713,13 +718,30 @@ names, migration numbers, bugs found and fixed) see
 - **Finished dinners delete themselves** (`0062`): twenty-one days after a
   dinner is archived or cancelled, the whole round goes — the chain, the
   threads, the ballots, the roster. What survives is what somebody chose to
-  keep: every recipe in their book and the photograph they added to the album,
-  both of which are **copies** precisely so this can be true (`0058`, `0061`).
+  keep — and *chose* is literal in both cases, it is a button under each of
+  them: every recipe in their book and every evening in their album — the
+  photograph, the dinner's name and date, and the menu that was eaten — all of
+  which are **copies** precisely so this can be true (`0058`, `0061`, `0068`).
   The date is printed on the dinner and on its card in the list while it still
   exists, next to what you keep. Run by a scheduled workflow, like the account
   purge.
-- **The album** (`0060`): one photograph of the table per person per dinner,
-  gathered into an album of every evening. Location data is stripped **in the
+- **The album** (`0060`, `0068`): **one photograph per dinner**, and it is the
+  Executive Chef's to take — they can hand the camera to one named chef, who
+  adds it from their own phone. **Handing it over means giving it up**: choose,
+  then confirm, and while it stands the host cannot upload or replace anything.
+  Everybody at the table is told in words, under the frame, whose job it is,
+  because somebody looking at an empty frame is already asking who they are
+  waiting for. That picker shows real names and deliberately no seats and no
+  pseudonyms: a photographer stored as a seat, chosen from a list of names,
+  would hand the host the map from a pseudonym to a person. **Nothing reaches
+  an album by itself** — an add button under the picture on the results screen,
+  exactly where the one that keeps a recipe is, plus a separate one that saves
+  the file to the device. What is kept is a **copy**, so the dinner being purged
+  and the photographer swapping the picture out change nothing; moderation is
+  the one thing that reaches the copies, because a removal that leaves the
+  picture in nine albums has removed nothing. The profile album is a **list of
+  evenings** — name and date — and the triangle opens the picture, its credit,
+  and the menu that was eaten under it. Location data is stripped **in the
   browser** before a byte is uploaded — a phone photograph carries the address
   it was taken at — by decoding and re-encoding rather than by editing tags, so
   what is left is pixels and nothing else. The bucket is private and reading

@@ -1,97 +1,129 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useQuery } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { Fold } from '../../components/Fold'
 import { formatMoment } from '../../lib/datetime'
-import { myAlbum, photoUrl, type AlbumEntry } from '../../lib/rpc'
+import { forgetPhoto, myAlbum, photoUrl, type AlbumEntry } from '../../lib/rpc'
 
 /**
- * Every evening, in one place.
+ * The evenings you chose to keep.
  *
- * Grouped by dinner rather than laid out as one long grid, because that is how
- * an album is indexed in somebody's head: not "photo 47" but "the one at
- * Marta's in March". The heading is the dinner, and it links back to it while
- * the dinner still exists.
+ * A LIST FIRST, PICTURES SECOND. An album of full-width photographs is a
+ * beautiful thing to scroll and a useless thing to look something up in: by the
+ * fourth dinner you are pushing past pictures to find a night you can already
+ * name. So the page is the index — one line per evening, its name and its date
+ * — and the triangle opens the one you came for. The same disclosure the
+ * settings use, for the same reason: read them one at a time.
  *
- * This is the argument for eventually deleting old dinners, and it has to exist
- * and be used before that argument is true: a recipe worth keeping is in a
- * book, an evening worth remembering is in an album. Deleting first would prove
- * it false.
+ * NOTHING IS HERE BY ACCIDENT. Being at a dinner does not put its photograph in
+ * your album; pressing add on the results screen does (0068), exactly as it
+ * does for a recipe (0058). That is what makes this worth opening — everything
+ * in it was chosen — and it is also what makes it survive: each row is a copy,
+ * so the dinner being purged three weeks later (0062) takes nothing from here.
  */
 export function Album() {
   const { t, i18n } = useTranslation()
   const { profile } = useAuth()
 
-  const { data: photos } = useQuery({
+  const { data: evenings } = useQuery({
     queryKey: ['my-album', profile?.id],
     enabled: !!profile?.id,
     queryFn: myAlbum,
   })
 
-  if (!photos || photos.length === 0) {
+  if (!evenings || evenings.length === 0) {
     return <p className="muted">{t('album.profileEmpty')}</p>
-  }
-
-  // Already ordered newest dinner first by the RPC, so grouping in order
-  // preserves that without a second sort. A deleted dinner has no id left, so
-  // the photo's own id stands in as the grouping key — one evening per surviving
-  // photograph, which is exactly what is left of it.
-  const evenings: { key: string; roundId: string | null; name: string; at: string | null; photos: AlbumEntry[] }[] = []
-  for (const photo of photos) {
-    const last = evenings[evenings.length - 1]
-    if (last && photo.round_id !== null && last.roundId === photo.round_id) last.photos.push(photo)
-    else
-      evenings.push({
-        key: photo.round_id ?? photo.id,
-        roundId: photo.round_id,
-        name: photo.round_name,
-        at: photo.dinner_at,
-        photos: [photo],
-      })
   }
 
   return (
     <div className="stack">
       {evenings.map((evening) => (
-        <div key={evening.key} className="stack">
-          <h3 className="album__evening">
-            {/* A dinner that has been deleted keeps its name and loses its
-                link. There is nothing behind it any more, and a door onto an
-                error is worse than no door — the same rule the rounds list
-                uses for a dinner you left. */}
-            {evening.roundId ? (
-              <Link to={`/rounds/${evening.roundId}`}>{evening.name}</Link>
-            ) : (
-              <span>{evening.name}</span>
-            )}
-            {evening.at && <span className="muted"> · {formatMoment(evening.at, i18n.language)}</span>}
-          </h3>
-          <div className="album">
-            {evening.photos.map((photo) => (
-              <ProfileTile key={photo.id} photo={photo} />
-            ))}
-          </div>
-        </div>
+        <Fold
+          key={evening.id}
+          title={evening.round_name}
+          aside={evening.dinner_at ? formatMoment(evening.dinner_at, i18n.language) : undefined}
+        >
+          <Evening evening={evening} />
+        </Fold>
       ))}
     </div>
   )
 }
 
-function ProfileTile({ photo }: { photo: AlbumEntry }) {
+function Evening({ evening }: { evening: AlbumEntry }) {
   const { t } = useTranslation()
+  const queryClient = useQueryClient()
+  const [confirming, setConfirming] = useState(false)
+  const [busy, setBusy] = useState(false)
+
   const { data: url } = useQuery({
-    queryKey: ['photo-url', photo.storage_path],
-    queryFn: () => photoUrl(photo.storage_path),
+    queryKey: ['photo-url', evening.storage_path],
+    queryFn: () => photoUrl(evening.storage_path),
     staleTime: 45 * 60 * 1000,
   })
 
+  async function onForget() {
+    setBusy(true)
+    try {
+      await forgetPhoto(evening.id)
+      await queryClient.invalidateQueries({ queryKey: ['my-album'] })
+    } finally {
+      setBusy(false)
+    }
+  }
+
   return (
-    <figure className="album__tile">
+    <div className="stack">
       {url ? (
-        <img src={url} alt={photo.caption ?? t('album.altFallback', { name: photo.round_name })} loading="lazy" />
+        <img
+          className="album__photo"
+          src={url}
+          alt={evening.caption ?? t('album.altFallback', { name: evening.round_name })}
+          loading="lazy"
+        />
       ) : (
         <div className="album__pending" aria-hidden="true" />
       )}
-    </figure>
+
+      {evening.taken_by_name && (
+        <p className="muted album__holder">
+          {t('album.takenBy', { name: evening.taken_by_name })}
+        </p>
+      )}
+
+      {/* The menu, printed under the photograph the way it would be under a
+          picture in a book. Absent rather than empty for a dinner nobody
+          recorded a dish for — a heading over nothing says something went
+          wrong, and nothing did. */}
+      {evening.menu.length > 0 && (
+        <ul className="album__menu">
+          {evening.menu.map((line, i) => (
+            <li key={i}>
+              <span className="album__menu-course">{t(`briefs.courseOption.${line.course}`)}</span>
+              <span className="album__menu-dish">{line.dish}</span>
+            </li>
+          ))}
+        </ul>
+      )}
+
+      {/* Asked, because this may be the last copy in the world: the dinner it
+          came from is usually already gone by the time anybody tidies an
+          album. Same care the recipe book takes over forgetting a recipe. */}
+      {confirming ? (
+        <div className="row">
+          <button type="button" disabled={busy} onClick={onForget}>
+            {t('album.forgetConfirm')}
+          </button>
+          <button type="button" className="secondary" onClick={() => setConfirming(false)}>
+            {t('actions.cancel')}
+          </button>
+        </div>
+      ) : (
+        <button type="button" className="secondary" onClick={() => setConfirming(true)}>
+          {t('album.forget')}
+        </button>
+      )}
+    </div>
   )
 }
