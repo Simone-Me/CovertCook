@@ -500,6 +500,7 @@
     "sendFinal": "Send — final",
     "submitConfirmTitle": "Send this recipe? It cannot be changed afterwards.",
     "submitConfirmWhy": "It reaches your cook the moment you send it, and the form locks. There is no editing, no unsending and no second version — so read it back once before you press.",
+    "submitConfirmAllergen": "It contains {{items}}, and somebody at this table has said that matters to them. It goes out as it is — the Executive Chef is told so it can be announced, and a card goes by the dish. Change it now if you would rather.",
     "summaryDish": "Dish: {{name}}",
     "summaryLink": "A link to follow: {{url}}",
     "summaryWritten": "Written out, with {{n}} ingredient(s) listed",

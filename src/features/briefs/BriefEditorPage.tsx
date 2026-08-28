@@ -555,6 +555,17 @@ export function BriefEditorPage() {
                 </li>
                 <li>{t('briefs.summaryFor', { name: assignment?.cook_display_name ?? assignment?.cook_secret_name ?? '' })}</li>
               </ul>
+              {/* The last moment it can still be changed. The panel above says
+                  the same thing while the recipe is being written, but the
+                  send is where somebody is actually deciding — and after it
+                  the form locks, so a sentence here is the difference between
+                  a choice and a discovery. It says what will happen, not what
+                  is wrong: the dish goes out and the table is told. */}
+              {matched.length > 0 && (
+                <p className="confirmbox__why">
+                  {t('briefs.submitConfirmAllergen', { items: matched.join(', ') })}
+                </p>
+              )}
             </InlineConfirm>
           )}
         </>

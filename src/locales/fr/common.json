@@ -500,6 +500,7 @@
     "sendFinal": "Envoyer — définitif",
     "submitConfirmTitle": "Envoyer cette recette ? Elle ne pourra plus être modifiée.",
     "submitConfirmWhy": "Elle arrive chez votre cuisinier à l’instant où vous l’envoyez, et le formulaire se verrouille. Pas de correction, pas de retour en arrière, pas de deuxième version — relisez-la une fois avant d’appuyer.",
+    "submitConfirmAllergen": "Il contient {{items}}, et quelqu’un à cette table a dit que cela compte pour lui. Le plat part tel quel — le Chef Exécutif est prévenu pour pouvoir l’annoncer, et une petite carte ira à côté du plat. Changez-le maintenant si vous préférez.",
     "summaryDish": "Plat : {{name}}",
     "summaryLink": "Un lien à suivre : {{url}}",
     "summaryWritten": "Écrite, avec {{n}} ingrédient(s) listé(s)",

@@ -84,13 +84,16 @@ select _as('00000000-0000-0000-0000-000000000503');
 select post_to_board(:'round_id'::uuid, :'phrase'::uuid);
 select post_to_board(:'round_id'::uuid, :'phrase2'::uuid);
 
-select said_by, body from get_board(:'round_id'::uuid) order by said_by desc;
+select author_name, body from get_board(:'round_id'::uuid) order by author_name, body;
 
 \echo '--- nothing in the result can say who wrote what ---'
-\echo '--- (get_board returns body, said_by, last_day and nothing else) ---'
-select count(*) as columns_returned
-from information_schema.columns
-where table_name = 'get_board';
+\echo '--- (a pseudonym and a seat, never a name — and the seat is what lets a ---'
+\echo '--- reported phrase be acted on without one: 0033 + 0059) ---'
+-- pg_get_function_result, not information_schema.columns: a function is not a
+-- table, so that query matched nothing and counted zero however the board was
+-- shaped. An assertion that passes when the answer is right and passes when it
+-- is wrong is not an assertion.
+select pg_get_function_result('get_board(uuid)'::regprocedure) as what_it_returns;
 
 \echo '--- but the author is on the row, so a report can be acted on ---'
 reset role;

@@ -59,6 +59,52 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-28 (2)
+
+**An allergen informs. It does not refuse.** (`0069`) — which `0029` already
+decided, at length, and which has been silently untrue since `0055`.
+
+*How a decision gets reversed without anybody deciding.* `0029` removed the
+hard block on purpose and argued it: a refusal at the send arrives at the one
+person who can do nothing about it — the sender has already written the recipe
+— and the guest with the allergy learns nothing at all. The dish is allowed,
+the Executive Chef is told which allergen is on the table so it can be said out
+loud, a card goes by the dish, and the person it concerns decides for
+themselves. That is what a host does.
+
+`0055` then rewrote `submit_brief` top to bottom for an unrelated and good
+reason — so a refusal names the field that is missing instead of saying
+"invalid" — and in retyping the function it carried the pre-`0029` check back
+in. Above it, this comment: *"Unchanged and deliberately so."* The first half of
+that sentence is true and the word "unchanged" is not, and it is exactly why
+nobody caught it: **a line claiming to preserve a decision, sitting on top of
+one reversing it, reads as a reason to move on.** A rewrite is not a safe
+refactor when the thing being rewritten is where a product decision lives.
+
+*What it looked like from inside the app, for a week.* The brief editor finds
+allergens in what somebody wrote and tells them, in these words: "It contains
+nuts, and somebody at this table has said that matters to them. A card by the
+dish is what lets them decide for themselves." Then the send button refused the
+recipe. The interface was running `0029` and the database was running `0028`,
+one screen apart.
+
+*And the test said so the whole time.* `smoke_test7` reads "this used to raise;
+expect it to succeed now" and has been failing since `0055` shipped — one
+`ERROR:` line in four hundred lines of psql output, in a suite that is read by
+eye. Two other assertions in that file were dead as well: it asked `get_board`
+for a `said_by` column that `0033` renamed three migrations later, and it
+"checked" the shape of a function with `select count(*) from
+information_schema.columns where table_name = 'get_board'` — which matches
+nothing, because a function is not a table, and therefore returned zero whether
+the answer was right or wrong. Both now assert the real thing.
+
+*Also:* the confirmation box before the send repeats the allergens, because
+that is the last moment the recipe can still be changed and the form locks
+behind it. It says what will happen — the dish goes out, the table is told —
+rather than what is wrong.
+
+---
+
 ## 2026-08-28
 
 **One photograph of the table, taken by somebody** (`0068`), **a menu with more

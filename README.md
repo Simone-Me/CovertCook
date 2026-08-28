@@ -90,10 +90,14 @@ question gets answered once instead of re-argued.
   that a direct REST read of these tables returns "permission denied," not
   just zero rows.
 - **Dietary restrictions are round-wide, not per-pairing.** Because it's a
-  shared buffet, a brief is validated against the union of every active
-  member's `ALLERGY_SEVERE`/`DIET` entries, not just its Cook's. Severe
-  allergies and diets hard-block submission; mild allergies and dislikes
-  only warn.
+  shared buffet, a brief is checked against the union of every active
+  member's `ALLERGY_SEVERE`/`DIET` entries, not just its Cook's. **The check
+  informs, it does not refuse** (`0029`, restored by `0069`): the allergens are
+  found in what the sender wrote and named back to them while they write, so
+  they can change the recipe; if they send it anyway the dish is served, the
+  Executive Chef is told which allergen is on the table so it can be announced,
+  and a card goes by the dish. A refusal at the send arrives at the one person
+  who can do nothing about it and tells the allergic guest nothing at all.
 - **Anonymity is layered**: secret names are assigned randomly (never in
   join order — that would leak identity), canned-template-only chat (no
   free text, so writing style can't out someone — planned to change, see

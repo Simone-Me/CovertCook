@@ -543,9 +543,10 @@ Add, cut or reword freely; more can be inserted later without a redeploy.
 | 10 | Ho tutto pronto. Forza a voi! | J'ai tout de prêt. Courage à vous ! | Everything's ready on my end. Good luck to you! |
 
 House rule for future phrases: **no jokes about health conditions**. This
-app hard-blocks briefs over severe allergies — a punchline about diets or
-illness reads badly right next to that, however affectionately meant.
-Everything else is fair game.
+app carries severe allergies to the table by name, so that the person they
+belong to can decide for themselves — a punchline about diets or illness
+reads badly right next to that, however affectionately meant. Everything
+else is fair game.
 
 ### 5. Voto
 
