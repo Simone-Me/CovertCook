@@ -59,6 +59,45 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-28 (3)
+
+**A migration that only fails where it matters** (`0062`, corrected).
+
+Pushing `0057`–`0069` to production stopped dead on the first one, with the
+freeze guard's own words: *"this dinner is over and can no longer be changed"*.
+The offending line is `0062`'s backfill —
+
+    update rounds set finished_at = now()
+    where status in ('ARCHIVED', 'CANCELLED') and finished_at is null;
+
+— which stamps every already-finished dinner so the twenty-one-day clock starts
+today rather than retroactively. **Stamping a finished dinner is an UPDATE on a
+frozen round**, which is precisely what `0054`'s trigger refuses, and the escape
+hatch that lets the purge through is taught to that trigger fifty lines further
+down the same file. The statement ran before the door it needs was cut.
+
+**And it passed everywhere it was ever tested.** `supabase db reset` applies
+migrations to an empty database: at that point in the file there are no archived
+rounds, the UPDATE matches zero rows, and a trigger that never fires cannot
+refuse. Thirteen smoke tests, every one of them green, and none of them could
+have caught it — the bug is not in the logic, it is in the *data the logic meets*,
+and the only database that has any is production.
+
+Reproduced before fixing rather than fixed hopefully: an archived dinner with
+its stamp cleared, then the statement as `0062` ran it (refused, same error,
+same trigger, same line) and then through the purge door (accepted, nothing left
+unstamped). The backfill now sits after the guards learn the hatch and opens it
+transaction-locally, shutting it again on the next line so that everything after
+is refused exactly as a client would be.
+
+*Editing a shipped migration, and why it is right here:* `0062` had never
+successfully applied anywhere except a freshly reset local database, where it
+was a no-op. There is no environment holding the broken version's effects, so
+there is nothing for a follow-up migration to correct — only a file that has
+never once done its job.
+
+---
+
 ## 2026-08-28 (2)
 
 **An allergen informs. It does not refuse.** (`0069`) — which `0029` already

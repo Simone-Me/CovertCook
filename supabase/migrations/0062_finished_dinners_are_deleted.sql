@@ -63,14 +63,17 @@ create trigger rounds_finished_at
   before update on rounds
   for each row execute function stamp_round_finished();
 
--- Everything already finished gets today's date rather than its real one.
+-- The backfill that used to live here has moved to the end of section 2, and
+-- moving it is a bug fix rather than tidying. It stamps every already-finished
+-- dinner — and stamping a finished dinner is an UPDATE on a frozen round, which
+-- is exactly what 0054's guard refuses. It cannot run until that guard has been
+-- taught the escape hatch a few lines below.
 --
--- Deliberately generous: the alternative is that this migration deploys and
--- every dinner older than three weeks disappears the same night, without anyone
--- having been told the rule exists or having had a chance to keep anything from
--- them. Three weeks from now is the earliest any existing dinner can go.
-update rounds set finished_at = now()
-where status in ('ARCHIVED', 'CANCELLED') and finished_at is null;
+-- IT PASSED EVERYWHERE IT WAS EVER TESTED. `supabase db reset` runs the
+-- migrations against an empty database, so at this point in the file there are
+-- no archived rounds, the UPDATE matches zero rows, and a trigger that never
+-- fires cannot refuse. It only fails where there is something to stamp — which
+-- is to say, only in production. See the CHANGELOG for 2026-08-28 (3).
 
 -- ---------------------------------------------------------------------------
 -- 2. The way through the freeze.
@@ -215,6 +218,27 @@ begin
   return coalesce(new, old);
 end;
 $$;
+
+-- Everything already finished gets today's date rather than its real one.
+--
+-- Deliberately generous: the alternative is that this migration deploys and
+-- every dinner older than three weeks disappears the same night, without anyone
+-- having been told the rule exists or having had a chance to keep anything from
+-- them. Three weeks from now is the earliest any existing dinner can go.
+--
+-- Through the same door the purge uses, and it has to be: an already-archived
+-- dinner is frozen, and stamping one is an update on a frozen round. The door
+-- is transaction-local — `set_config(..., true)` — and it is shut again on the
+-- next line rather than left open for the rest of the file, because everything
+-- after this point should be refused by the guards exactly as a client would
+-- be.
+do $$
+begin
+  perform set_config('covertcook.purging', 'on', true);
+  update rounds set finished_at = now()
+  where status in ('ARCHIVED', 'CANCELLED') and finished_at is null;
+  perform set_config('covertcook.purging', 'off', true);
+end $$;
 
 -- ---------------------------------------------------------------------------
 -- 3. The purge.
