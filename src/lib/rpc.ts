@@ -4,6 +4,7 @@
 // including the p_ prefix — PostgREST maps JSON keys to named function
 // arguments) only need to be spelled correctly once.
 import { supabase } from './supabase'
+import { invokeFunction } from './functions'
 
 // How someone gets a seat. CODE = share a code, anyone holding it can ask;
 // INVITE = the host names existing accounts, who accept or decline in-app.
@@ -35,8 +36,35 @@ export interface DietaryEntryInput {
   note?: string
 }
 
-function unwrap<T>({ data, error }: { data: T | null; error: { message: string } | null }): T {
-  if (error) throw new Error(error.message)
+/**
+ * The one error worth translating before anything else sees it.
+ *
+ * PostgREST answers `PGRST202` — "Could not find the function public.x in the
+ * schema cache" — whenever the function is not there *for the role asking*.
+ * From the browser that is almost never a typo in the name: it means the app is
+ * talking to a database that has not run the migration the function arrives in.
+ * Locally that is `.env.local` still pointing at the deployed project; in
+ * production it is a deploy that went out ahead of its migrations.
+ *
+ * Left raw it reads like a bug in the code, and the search for it starts in
+ * exactly the wrong place — which is an hour, every time. So it is named here,
+ * once, at the only choke point every RPC in this file passes through.
+ */
+export const DATABASE_BEHIND = 'DATABASE_BEHIND'
+
+function unwrap<T>({ data, error }: { data: T | null; error: { message: string; code?: string } | null }): T {
+  if (error) {
+    if (error.code === 'PGRST202') {
+      // Announced as well as thrown. Every call site already renders
+      // `err.message` somewhere sensible, but this particular failure is not
+      // about the screen it happened on — it is about the whole app pointing at
+      // the wrong database — so it also raises a banner that outlives the page
+      // you were on when you found it.
+      window.dispatchEvent(new CustomEvent(DATABASE_BEHIND, { detail: error.message }))
+      throw new Error(`${DATABASE_BEHIND}: ${error.message}`)
+    }
+    throw new Error(error.message)
+  }
   return data as T
 }
 
@@ -96,6 +124,19 @@ async function notifyMember(memberId: string, kind: 'JOIN_REQUESTED' | 'JOIN_APP
     await supabase.functions.invoke('send-push', { body: { member_id: memberId, kind } })
   } catch {
     // Same posture as the rest: the door already opened.
+  }
+}
+
+// The mirror image of the four moments (0059): those exclude whoever caused
+// them, this one is the host and only the host. Fired by whoever caused the
+// alert — reporting a phrase, backing out of a dish — and silent on failure
+// like the rest, because the alert is already in the table whether or not a
+// push service was reachable.
+export async function notifyHostOfAlert(roundId: string) {
+  try {
+    await supabase.functions.invoke('send-push', { body: { round_id: roundId, kind: 'HOST_ALERT' } })
+  } catch {
+    // The alert is recorded. The interruption is a courtesy.
   }
 }
 
@@ -161,6 +202,53 @@ export async function savePushSubscription(input: {
 export async function forgetPushSubscription(endpoint: string) {
   const res = await supabase.rpc('forget_push_subscription', { p_endpoint: endpoint })
   return unwrap(res)
+}
+
+// What the server knows about this browser, without the server having to hand
+// back the keys that would let anything push to it (0056). `this_device` is the
+// answer to the question that matters — the browser is holding a subscription,
+// did it ever arrive here? — and `devices` separates "nothing works" from
+// "nothing works on THIS phone".
+export interface MyPushDevices {
+  this_device: boolean
+  devices: number
+  last_seen: string | null
+}
+
+export async function myPushDevices(endpoint: string | null): Promise<MyPushDevices> {
+  const res = await supabase.rpc('my_push_devices', { p_endpoint: endpoint })
+  const rows = unwrap<MyPushDevices[]>(res)
+  return rows[0] ?? { this_device: false, devices: 0, last_seen: null }
+}
+
+export interface TestPushResult {
+  sent: number
+  audience: number
+  pruned?: number
+  reason?: string
+  notifications_enabled?: boolean
+}
+
+/**
+ * The one push in this app that goes to the person who asked for it.
+ *
+ * Loud on failure, unlike every other notify() here. Those are fired at a
+ * moment that has already happened and must never make a dinner look broken,
+ * so they swallow everything — which is correct, and is also exactly why
+ * "nothing arrives" has been impossible to diagnose: the six ways it can fail
+ * server-side all look identical from a phone that stays quiet.
+ *
+ * This one is called by somebody staring at the screen waiting for it, so
+ * every failure comes back with its own words, including the one hiding
+ * inside a non-2xx body (the client SDK gives you a FunctionsHttpError and
+ * keeps the response — 'send-push is not configured' lives in there, and it
+ * is the single most likely answer).
+ */
+export async function sendTestPush(): Promise<TestPushResult> {
+  // The body-reading that used to live here is now in invokeFunction, because
+  // it was never specific to this call: every Edge Function in this app
+  // answers with `{ error }` and the SDK discards all of them the same way.
+  return await invokeFunction<TestPushResult>('send-push', { kind: 'TEST' })
 }
 
 export async function completeSignup(input: {
@@ -309,7 +397,10 @@ export function previousPhaseFor(status: RoundStatus, votingEnabled: boolean): R
   return neighbourPhase(status, votingEnabled, -1)
 }
 
-export async function joinRound(input: { code: string; turnstileTicket: string }) {
+// The ticket is null on a deployment with no captcha configured (0063), where
+// `join_round` asks for none — and where the Edge Function that mints them is
+// not called at all.
+export async function joinRound(input: { code: string; turnstileTicket: string | null }) {
   const res = await supabase.rpc('join_round', {
     p_code: input.code,
     p_turnstile_ticket: input.turnstileTicket,
@@ -442,7 +533,39 @@ export async function getDietaryPanel(roundId: string) {
   return unwrap<DietaryPanelEntry[]>(res)
 }
 
-export type Course = 'STARTER' | 'MAIN' | 'DESSERT' | 'DRINK' | 'OTHER'
+export type Course =
+  | 'APERITIF'
+  | 'SNACK'
+  | 'STARTER'
+  | 'FIRST'
+  | 'MAIN'
+  | 'SIDE'
+  | 'CHEESE'
+  | 'DESSERT'
+  | 'DRINK'
+  | 'OTHER'
+
+/**
+ * The order a meal is eaten in, which is the order a menu is printed in.
+ *
+ * The same order the `course` enum declares (0066), so a list the database
+ * sorted and a list the client sorted agree. It lives here, once, because four
+ * screens used to carry their own copy of it and adding a course meant finding
+ * all four — the composer, the settings page, the recipe book's filter and the
+ * results menu. Alphabetical would put the dessert second.
+ */
+export const COURSES: Course[] = [
+  'APERITIF',
+  'SNACK',
+  'STARTER',
+  'FIRST',
+  'MAIN',
+  'SIDE',
+  'CHEESE',
+  'DESSERT',
+  'DRINK',
+  'OTHER',
+]
 
 // ---------------------------------------------------------------------------
 // Briefs (supabase/migrations/0007_briefs.sql)
@@ -468,12 +591,20 @@ export interface BriefIngredient {
   unit: string | null
 }
 
+/**
+ * The recipe you were dealt — or the empty place where it will be.
+ *
+ * `brief_id` is null until somebody submits (0067), and every field below it is
+ * null with it. The pairing and the course are true from the moment the
+ * roulette runs, which is what lets the cook's page exist — and lets the
+ * conversation on it exist — before the recipe does.
+ */
 export interface MyBrief {
   pairing_id: string
-  brief_id: string
-  dish_name: string
+  brief_id: string | null
+  dish_name: string | null
   course: Course
-  procedure: string
+  procedure: string | null
   external_url: string | null
   difficulty: number | null
   est_cost: string | null
@@ -611,8 +742,11 @@ export async function getThread(pairingId: string) {
   return unwrap<ThreadMessage[]>(res)
 }
 
-export async function reportMessage(messageId: string) {
+export async function reportMessage(messageId: string, roundId?: string) {
   const res = await supabase.rpc('report_message', { p_message_id: messageId })
+  // Not awaited: reporting has already happened, and it must not appear to have
+  // failed because a push service was slow (0059).
+  if (roundId) void notifyHostOfAlert(roundId)
   return unwrap(res)
 }
 
@@ -624,6 +758,11 @@ export interface ReportedMessage {
   body: string
   slot_value: string | null
   created_day: string
+  // The seat, and the name it wore that evening (0059). Enough to warn and
+  // enough to remove; deliberately not enough to know who it was.
+  author_member_id: string
+  author_secret_name: string | null
+  already_warned: boolean
 }
 
 export async function getReportedMessages(roundId: string) {
@@ -668,13 +807,90 @@ export interface RoundResult {
   borda_points: number
   avg_rank: number | null
   first_places: number
-  final_rank: number
+  // Null for a dish that never reached the table: there is no rank to give a
+  // dish nobody could vote on (0057).
+  final_rank: number | null
   award_keys: string[]
+  served: boolean
 }
 
 export async function getResults(roundId: string) {
   const res = await supabase.rpc('get_results', { p_round_id: roundId })
   return unwrap<RoundResult[]>(res)
+}
+
+// ---------------------------------------------------------------------------
+// The recipe book (supabase/migrations/0058_the_recipe_book.sql)
+// ---------------------------------------------------------------------------
+
+// What a dish was to you that evening. "Received" alone loses half of what a
+// person made: the recipe you wrote and the recipe you cooked are two
+// different things and the book labels them differently.
+export type SavedRelation = 'COOKED' | 'WROTE' | 'TABLE'
+
+export interface RoundRecipe {
+  brief_id: string
+  dish_name: string
+  course: Course
+  procedure: string
+  external_url: string | null
+  contains_tags: string[]
+  ingredients: BriefIngredient[]
+  author_secret_name: string | null
+  // Null once that account has been erased. The card says "Former guest",
+  // which is what erasure is for.
+  author_display_name: string | null
+  relation: SavedRelation
+  already_saved: boolean
+}
+
+// The deliberate exposure (0058): every submitted recipe of one finished round,
+// to its members. Nothing else in this app has ever read somebody else's brief.
+export async function listRoundRecipes(roundId: string) {
+  const res = await supabase.rpc('list_round_recipes', { p_round_id: roundId })
+  return unwrap<RoundRecipe[]>(res)
+}
+
+// Returns how many rows were actually written, which is not always how many
+// were asked for: anything already in the book is skipped rather than
+// duplicated, and the sentence on screen reports what came back so it and the
+// book cannot disagree.
+export async function saveRecipes(roundId: string, briefIds: string[]): Promise<number> {
+  const res = await supabase.rpc('save_recipes', { p_round_id: roundId, p_brief_ids: briefIds })
+  return unwrap<number>(res)
+}
+
+export interface SavedRecipe {
+  id: string
+  source_brief_id: string | null
+  round_id: string | null
+  round_name: string
+  dinner_at: string | null
+  dish_name: string
+  course: Course
+  ingredients: BriefIngredient[]
+  procedure: string
+  external_url: string | null
+  contains_tags: string[]
+  author_display_name: string | null
+  author_secret_name: string | null
+  relation: SavedRelation
+  note: string | null
+  saved_at: string
+  // False once the dinner it came from is gone. "This is the last copy" and
+  // "you can save it again" are different sentences, and only one is true at
+  // a time.
+  origin_exists: boolean
+}
+
+export async function listMyRecipes() {
+  const res = await supabase.rpc('list_my_recipes')
+  return unwrap<SavedRecipe[]>(res)
+}
+
+export async function forgetRecipe(id: string) {
+  const res = await supabase.rpc('forget_recipe', { p_id: id })
+  return unwrap(res)
 }
 
 export async function markDishDelivery(roundId: string, briefId: string, delivered: boolean) {
@@ -778,6 +994,378 @@ export async function getHostAlerts(roundId: string) {
     .order('created_at', { ascending: false })
   if (error) throw new Error(error.message)
   return (data ?? []) as HostAlert[]
+}
+
+/**
+ * When a finished dinner deletes itself (0062).
+ *
+ * Twenty-one days from the moment it finished, not from the evening: a host who
+ * takes a fortnight to publish the results should not find it gone the day they
+ * do. Derived here from the same number the database uses rather than fetched,
+ * because it is one addition and a round trip for it would be silly — but the
+ * number lives in `round_deletes_at` in SQL, and if the policy ever changes,
+ * both have to move.
+ */
+export const ROUND_KEPT_DAYS = 21
+
+export function roundDeletesAt(finishedAt: string | null): Date | null {
+  if (!finishedAt) return null
+  const at = new Date(finishedAt)
+  if (Number.isNaN(at.getTime())) return null
+  return new Date(at.getTime() + ROUND_KEPT_DAYS * 24 * 60 * 60 * 1000)
+}
+
+// ---------------------------------------------------------------------------
+// Shared costs (supabase/migrations/0065_shared_costs.sql)
+// ---------------------------------------------------------------------------
+
+export type CostMode = 'NONE' | 'SHARED'
+
+/**
+ * Money is integer cents, everywhere, all the way to the input box.
+ *
+ * A float would be fine for a while and then be wrong by a cent in a way nobody
+ * could reproduce, on the one screen where being wrong by a cent is the whole
+ * of what people notice.
+ */
+export function toCents(text: string): number | null {
+  const cleaned = text.trim().replace(',', '.')
+  if (cleaned === '') return null
+  if (!/^\d+(\.\d{0,2})?$/.test(cleaned)) return null
+  return Math.round(Number(cleaned) * 100)
+}
+
+export function fromCents(cents: number, locale = 'en', currency = 'EUR'): string {
+  return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100)
+}
+
+export async function setCostSettings(input: {
+  roundId: string
+  mode: CostMode
+  budgetPerHead: number | null
+  currency?: string
+}) {
+  const res = await supabase.rpc('set_cost_settings', {
+    p_round_id: input.roundId,
+    p_mode: input.mode,
+    p_budget_per_head: input.budgetPerHead,
+    p_currency: input.currency ?? 'EUR',
+  })
+  return unwrap(res)
+}
+
+export async function recordExpense(roundId: string, amountCents: number, note?: string | null) {
+  const res = await supabase.rpc('record_expense', {
+    p_round_id: roundId,
+    p_amount_cents: amountCents,
+    p_note: note ?? null,
+  })
+  return unwrap(res)
+}
+
+/**
+ * What everybody may see while the dinner is running.
+ *
+ * Your own number, the table's total and average, and the budget — and
+ * deliberately no per-person list. The steering signal without the comparison:
+ * "everyone is around twelve and I am at thirty-five" is useful, "Marta is at
+ * thirty-five" starts an argument at a table she is sitting at.
+ */
+export interface CostsSoFar {
+  currency: string
+  budget_per_head: number | null
+  my_spend_cents: number
+  total_cents: number
+  average_cents: number
+  people: number
+  reported: number
+}
+
+export async function costsSoFar(roundId: string) {
+  const res = await supabase.rpc('costs_so_far', { p_round_id: roundId })
+  const rows = unwrap<CostsSoFar[]>(res)
+  return rows[0] ?? null
+}
+
+export interface Settlement {
+  member_id: string
+  who: string
+  is_me: boolean
+  spent_cents: number
+  share_cents: number
+  // Positive: owed. Negative: owes. They sum to exactly zero.
+  balance_cents: number
+}
+
+export async function settleCosts(roundId: string) {
+  const res = await supabase.rpc('settle_costs', { p_round_id: roundId })
+  return unwrap<Settlement[]>(res)
+}
+
+// ---------------------------------------------------------------------------
+// The album (supabase/migrations/0060_the_album.sql)
+// ---------------------------------------------------------------------------
+
+export interface DinnerPhoto {
+  id: string
+  storage_path: string
+  caption: string | null
+  // A real name, not a pseudonym (0068). The table is already told in words who
+  // holds the camera, so a pseudonym here would sit one line from that person's
+  // real name and hand over the mapping the anonymity exists to protect.
+  taken_by: string | null
+  is_mine: boolean
+  reported: boolean
+  hidden: boolean
+  // Already in your album, so the add control comes back pressed rather than
+  // inviting somebody to keep the same picture twice.
+  already_saved: boolean
+  created_at: string
+}
+
+/** One line of the menu that was eaten, as the album prints it (0068). */
+export interface AlbumMenuLine {
+  course: Course
+  dish: string
+}
+
+/**
+ * One evening in your album — a **copy**, made when you pressed add (0068).
+ *
+ * Nothing arrives here by itself, and nothing here can be rewritten under you:
+ * the dinner can be purged and the photographer can swap the picture out, and
+ * what you kept stays what you kept. Same story as a recipe in the book (0058).
+ */
+export interface AlbumEntry {
+  id: string
+  // Null once the dinner has been deleted (0062). The photograph and the
+  // evening's name survive it; there is simply nothing left behind it.
+  round_id: string | null
+  round_name: string
+  dinner_at: string | null
+  storage_path: string
+  caption: string | null
+  taken_by_name: string | null
+  dinner_exists: boolean
+  // The evening itself: what was on the table, in the order it was eaten. The
+  // live menu while the dinner exists, the copy afterwards — which is what lets
+  // an album outlive everything it came from.
+  menu: AlbumMenuLine[]
+  saved_at: string
+}
+
+/**
+ * Raised by `record_photo` for anybody but the chef holding the camera — the
+ * Executive Chef included, once they have handed it over.
+ */
+export const NOT_THE_PHOTOGRAPHER = 'NOT_THE_PHOTOGRAPHER'
+
+/** Host-only. Real names, no seats and no pseudonyms — see 0068 part 2. */
+export interface TableChef {
+  profile_id: string
+  real_name: string
+}
+
+export async function listTableChefs(roundId: string) {
+  const res = await supabase.rpc('list_table_chefs', { p_round_id: roundId })
+  return unwrap<TableChef[]>(res)
+}
+
+/**
+ * Who holds the camera, to anybody at the table.
+ *
+ * Answers the right rather than the column: with nothing handed over it names
+ * the host, because that is who may actually do it.
+ */
+export async function getPhotographer(roundId: string) {
+  const res = await supabase.rpc('get_photographer', { p_round_id: roundId })
+  const rows = unwrap<TableChef[]>(res)
+  return rows[0] ?? null
+}
+
+/**
+ * Hand the camera over, or take it back. While it is handed over the host
+ * cannot take or replace the photograph — a right two people hold at once is a
+ * suggestion, not a handover.
+ */
+export async function setPhotographer(roundId: string, profileId: string | null) {
+  const res = await supabase.rpc('set_photographer', {
+    p_round_id: roundId,
+    p_profile_id: profileId,
+  })
+  return unwrap(res)
+}
+
+/** Keep this picture. The one act that puts anything in an album. */
+export async function savePhoto(photoId: string) {
+  const res = await supabase.rpc('save_photo', { p_photo_id: photoId })
+  return unwrap<string>(res)
+}
+
+export async function forgetPhoto(id: string) {
+  const res = await supabase.rpc('forget_photo', { p_id: id })
+  return unwrap(res)
+}
+
+const PHOTO_BUCKET = 'dinner-photos'
+
+/**
+ * Upload the bytes, then record the row.
+ *
+ * In that order, and the caller must have stripped the file first
+ * (lib/photo.ts) — this function takes a Blob and asks no questions about where
+ * it came from, so the one place that guarantee can be made is the one place it
+ * is made.
+ *
+ * The path is the round's folder plus a random name. That prefix is the whole
+ * of what the storage policies check, and `record_photo` refuses a row whose
+ * path claims a different dinner, so the two agree or neither happens.
+ */
+export async function uploadPhoto(roundId: string, blob: Blob, caption?: string): Promise<string> {
+  const path = `${roundId}/${crypto.randomUUID()}.jpg`
+  const { error } = await supabase.storage.from(PHOTO_BUCKET).upload(path, blob, {
+    contentType: 'image/jpeg',
+    upsert: false,
+  })
+  if (error) throw new Error(error.message)
+
+  const res = await supabase.rpc('record_photo', {
+    p_round_id: roundId,
+    p_path: path,
+    p_caption: caption ?? null,
+  })
+  return unwrap<string>(res)
+}
+
+/**
+ * A URL that works for an hour and then does not.
+ *
+ * The bucket is private on purpose: a public URL is one that keeps working for
+ * anybody who has ever seen it, long after the dinner and the app are done with
+ * it. An hour is longer than anybody looks at an album and short enough that a
+ * link pasted somewhere else dies on its own.
+ */
+export async function photoUrl(path: string): Promise<string | null> {
+  const { data, error } = await supabase.storage.from(PHOTO_BUCKET).createSignedUrl(path, 3600)
+  if (error) return null
+  return data?.signedUrl ?? null
+}
+
+export async function deletePhotoObject(path: string) {
+  // Best effort, and deliberately not awaited into a failure: `hide_photo` has
+  // already taken the picture out of everybody's album, so a bucket that
+  // refuses the delete leaves bytes nobody can reach rather than a photograph
+  // still on screen.
+  await supabase.storage.from(PHOTO_BUCKET).remove([path])
+}
+
+export async function listRoundPhotos(roundId: string) {
+  const res = await supabase.rpc('list_round_photos', { p_round_id: roundId })
+  return unwrap<DinnerPhoto[]>(res)
+}
+
+export async function myAlbum() {
+  const res = await supabase.rpc('my_album')
+  return unwrap<AlbumEntry[]>(res)
+}
+
+export async function reportPhoto(photoId: string, roundId: string) {
+  const res = await supabase.rpc('report_photo', { p_id: photoId })
+  // Same pipeline as a reported phrase (0059), so the host finds both in one
+  // inbox and is told about both the same way.
+  void notifyHostOfAlert(roundId)
+  return unwrap(res)
+}
+
+export async function hidePhoto(photoId: string) {
+  const res = await supabase.rpc('hide_photo', { p_id: photoId })
+  return unwrap(res)
+}
+
+// ---------------------------------------------------------------------------
+// Moderation, by seat (supabase/migrations/0059_moderation_by_seat.sql)
+// ---------------------------------------------------------------------------
+
+// What is waiting, across every dinner this person runs. The one notification
+// surface in this app that is not a push: the host has work to do rather than
+// news to read, and work belongs in the app that holds it.
+export interface OpenAlerts {
+  round_id: string
+  round_name: string
+  open_alerts: number
+  newest_at: string
+}
+
+export async function myOpenAlerts() {
+  const res = await supabase.rpc('my_open_alerts')
+  return unwrap<OpenAlerts[]>(res)
+}
+
+// Enough to act on, and deliberately not enough to name: the seat and the
+// pseudonym it wore that evening. Which is all a warning or a removal needs.
+export async function warnMember(input: {
+  roundId: string
+  memberId: string
+  messageId?: string | null
+  reason?: string | null
+}) {
+  const res = await supabase.rpc('warn_member', {
+    p_round_id: input.roundId,
+    p_member_id: input.memberId,
+    p_message_id: input.messageId ?? null,
+    p_reason: input.reason ?? null,
+  })
+  return unwrap(res)
+}
+
+export interface MyWarning {
+  id: string
+  reason: string | null
+  created_at: string
+}
+
+export async function myWarnings(roundId: string) {
+  const res = await supabase.rpc('my_warnings', { p_round_id: roundId })
+  return unwrap<MyWarning[]>(res)
+}
+
+export async function acknowledgeWarning(id: string) {
+  const res = await supabase.rpc('acknowledge_warning', { p_id: id })
+  return unwrap(res)
+}
+
+// The one act here that needs a name, and therefore the one that is recorded.
+// Requires a reason in writing and writes AUTHOR_REVEALED to audit_log — never
+// a side effect of opening an alert.
+export async function revealMessageAuthor(messageId: string, reason: string): Promise<string> {
+  const res = await supabase.rpc('reveal_message_author', {
+    p_message_id: messageId,
+    p_reason: reason,
+  })
+  return unwrap<string>(res)
+}
+
+// Blocked by seat, so you never have to learn who somebody is to decide you
+// would rather not sit with them again.
+export async function blockMember(memberId: string) {
+  const res = await supabase.rpc('block_member', { p_member_id: memberId })
+  return unwrap(res)
+}
+
+export async function unblockUser(profileId: string) {
+  const res = await supabase.rpc('unblock_user', { p_profile_id: profileId })
+  return unwrap(res)
+}
+
+export interface BlockedUser {
+  profile_id: string
+  display_name: string
+  created_at: string
+}
+
+export async function listMyBlocks() {
+  const res = await supabase.rpc('list_my_blocks')
+  return unwrap<BlockedUser[]>(res)
 }
 
 export async function resolveHostAlert(alertId: string) {
@@ -1059,6 +1647,10 @@ export interface BoardMessage {
   author_name: string
   is_mine: boolean
   reported: boolean
+  // The seat behind the pseudonym (0059), so a phrase can be blocked without
+  // anybody being named. Opaque: it adds nothing a reader did not already have
+  // from `author_name`.
+  author_member_id: string
 }
 
 export async function getBoard(roundId: string) {

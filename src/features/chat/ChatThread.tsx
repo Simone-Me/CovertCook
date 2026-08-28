@@ -17,7 +17,7 @@ import {
 // pairing_id is always exactly one conversation. Canned-template-only by
 // design (README §"Anonymity is layered"): no free text, so writing style
 // can't out someone before the reveal.
-export function ChatThread({ pairingId }: { pairingId: string }) {
+export function ChatThread({ pairingId, roundId }: { pairingId: string; roundId?: string }) {
   const { t } = useTranslation()
   const { profile } = useAuth()
   const queryClient = useQueryClient()
@@ -85,7 +85,10 @@ export function ChatThread({ pairingId }: { pairingId: string }) {
   }
 
   async function onReport(messageId: string) {
-    await reportMessage(messageId)
+    // The round travels with the report so the host can be told there is
+    // something waiting (0059). Optional, because a thread rendered without it
+    // still reports perfectly well — it just leaves the alert to be found.
+    await reportMessage(messageId, roundId)
     queryClient.invalidateQueries({ queryKey: ['thread', pairingId] })
   }
 

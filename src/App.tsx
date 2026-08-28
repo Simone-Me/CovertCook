@@ -4,6 +4,7 @@ import { useAuth } from './lib/auth'
 import { rememberJoinCode } from './lib/pendingJoin'
 import { AppHeader } from './components/AppHeader'
 import { PendingJoinBanner } from './components/PendingJoinBanner'
+import { SchemaMismatch } from './components/SchemaMismatch'
 import { AppFooter } from './components/AppFooter'
 import { LegalPage } from './features/legal/LegalPage'
 import { SignInPage } from './features/auth/SignInPage'
@@ -54,6 +55,9 @@ function AppRoutes() {
     <Routes>
       <Route path="/legal/terms" element={<LegalPage page="terms" />} />
       <Route path="/legal/privacy" element={<LegalPage page="privacy" />} />
+      {/* Required by both stores the day free-text chat ships, and published
+          before it rather than after (DISTRIBUTION §1). */}
+      <Route path="/legal/moderation" element={<LegalPage page="moderation" />} />
       <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
       <Route
         path="/signup"
@@ -181,6 +185,9 @@ export default function App() {
   return (
     <BrowserRouter>
       <AppHeader />
+      {/* Above everything, because when it fires nothing below it is
+          trustworthy. */}
+      <SchemaMismatch />
       <PendingJoinBanner />
       {/* The tablecloth is the app, not one page of it. Every screen sits
           on it, and .sheet is the paper each one is written on — the rule

@@ -251,6 +251,38 @@
   pointer-events: none;
 }
 
+/* The room the props stand in, and — this is the point — its edge.
+ *
+ * The objects are placed to run off the sides on purpose: a plate half out of
+ * frame is what says the screen is a detail of a bigger table. But "runs off
+ * the edge" and "is not there" are the same thing only if something actually
+ * cuts it off. Nothing did, so on a phone the plate and the glass at their
+ * negative offsets widened the document instead: the dinner opened able to
+ * pan sideways into empty cloth, and a swipe meant to scroll the page slid it
+ * right and left the paper hanging off-centre.
+ *
+ * `clip` rather than `hidden` deliberately. Both cut the picture at the same
+ * line; only `hidden` makes this a scroll container, which would have moved
+ * the panning problem in here rather than removed it, and would have cost the
+ * sticky header its anchor.
+ */
+.table-scene {
+  position: relative;
+  min-height: 100%;
+  /* The page's own padding, given back as the frame's, so the cloth reaches
+     the screen edge and the props are cut there rather than 16px early. */
+  margin: -16px;
+  padding: 16px;
+  overflow-x: clip;
+  overflow-y: visible;
+}
+
+@supports not (overflow: clip) {
+  .table-scene {
+    overflow-x: hidden;
+  }
+}
+
 /* Removing a chef is the rarest thing in the roster and used to be the
    loudest. A small mark you have to aim at, with the choice it opens
    serving as the confirmation. */
@@ -448,6 +480,49 @@
   color: inherit;
   font-weight: 600;
   transition: transform 0.18s ease, color 0.18s ease;
+}
+
+/* The one thing in the header row that is asking for something.
+   Deliberately not styled like the profile chip beside it: that one is a place
+   you can go, this one is work that is waiting, and if they looked alike the
+   difference would have to be read rather than seen. It is absent entirely
+   when the count is zero — a badge permanently showing nothing is how people
+   learn to stop looking at a corner of the screen. */
+.alert-pip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  flex: none;
+  padding: 3px 9px 3px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  line-height: 1.4;
+}
+
+.alert-pip:hover,
+.alert-pip:focus-visible {
+  filter: brightness(1.08);
+}
+
+.alert-pip__count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* A reported phrase, quoted rather than restated. It is somebody's words on a
+   moderation screen and it should look like a quotation, not like the app
+   saying it. */
+.reported__body {
+  margin: 0;
+  padding: 8px 12px;
+  border-left: 3px solid var(--border);
+  background: var(--bg);
+  font-style: italic;
+  overflow-wrap: anywhere;
 }
 
 .app-logo__back {
@@ -1037,9 +1112,204 @@
   color: var(--accent);
 }
 
+/* Your line on the menu. Bold and coloured was enough on the phase menu,
+   where the reader is looking for the current course; it was not enough in
+   the brief editor, where the reader is not looking for anything yet and has
+   to be told which of five courses became theirs. So the row itself is
+   marked — a bar in the margin and a tint behind it — and the word beside it
+   says what the mark means, because colour alone says "this one is different"
+   and never says why. */
+.menucard__course.is-yours {
+  margin: 0 -10px;
+  padding: 8px 10px;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 4px 4px 0;
+  background: var(--bg-elevated);
+}
+
+.menucard__course.is-yours .menucard__course-kind {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* Still to come: present, but clearly not yet. */
 .menucard__course:not(.is-done):not(.is-now) .menucard__name {
   opacity: 0.72;
+}
+
+/* ---------------------------------------------------------------------------
+ * The carte — the same card, printed as the evening's own menu (0057).
+ *
+ * Everything above serves the phase menu and the ballot, where a course is a
+ * step in a dinner. Here the courses are sections of a printed menu and each
+ * line carries a number, so the row needs the one piece of typography a menu
+ * cannot do without: a leader running from the name to the price. That is what
+ * makes a name and a number twelve centimetres apart read as one line instead
+ * of two columns.
+ * ------------------------------------------------------------------------- */
+
+.menucard--carte {
+  padding: 20px 20px 22px;
+}
+
+.menucard--carte .menucard__head {
+  font-size: 12px;
+  letter-spacing: 0.22em;
+}
+
+.menucard__section + .menucard__section {
+  margin-top: 20px;
+}
+
+/* Small caps over a hairline: a section on a menu announces itself and then
+   gets out of the way. It is deliberately quieter than the dish names — the
+   reader came for the dishes. */
+.menucard__section-title {
+  margin: 0 0 6px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--env-edge);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+/* On the carte the row is name — leader — price, and the name must not be
+   allowed to push the price off the end. */
+.menucard--carte .menucard__course {
+  align-items: baseline;
+  gap: 0;
+}
+
+.menucard--carte .menucard__name {
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.menucard__leader {
+  flex: 1 1 auto;
+  min-width: 12px;
+  height: 1px;
+  margin: 0 6px 0.28em;
+  align-self: flex-end;
+  /* Drawn, not typed. A row of full stops is forty characters a screen reader
+     has to announce; a gradient is nothing at all to it. */
+  background-image: radial-gradient(circle, var(--text-muted) 0.9px, transparent 1px);
+  background-size: 5px 2px;
+  background-repeat: repeat-x;
+  background-position: bottom;
+  opacity: 0.55;
+}
+
+.menucard__price {
+  flex: none;
+  font-size: 13px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* The dinner's first place. A drop of wax, not a medal: the best of each
+   course is already said in words underneath, and two marks saying one thing
+   is how a menu turns back into a scoreboard. */
+.menucard__seal {
+  display: inline-block;
+  margin-right: 6px;
+  color: var(--accent);
+  font-size: 10px;
+  line-height: 1;
+  vertical-align: 0.15em;
+}
+
+/* Struck off, the way a kitchen strikes a line off the service menu when it
+   goes off. Same treatment as a served course in the phase menu, under its own
+   name: in there the line through means "done", in here it means "never
+   arrived", and one class cannot honestly mean both. */
+.menucard__course.is-unserved .menucard__name {
+  text-decoration: line-through;
+  opacity: 0.5;
+}
+
+.menucard__course.is-unserved .menucard__price {
+  font-style: italic;
+}
+
+.menucard__awards {
+  margin: 2px 0 0;
+  font-size: 12px;
+  font-style: italic;
+  color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Choosing what to keep (0058).
+ *
+ * The menu becomes a control only while somebody is choosing, and the thing
+ * they press is the dish — not a checkbox beside it. A column of boxes down a
+ * carte is a form with a menu drawn behind it, and it would undo the whole
+ * point of printing the results this way.
+ * ------------------------------------------------------------------------- */
+
+.menucard__name--tappable {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+/* The invitation. A name that can be pressed leans very slightly, alternating
+   down the list so the carte looks like it has been picked up rather than
+   animated — the same reasoning as .tilt-* on the envelopes. Two degrees
+   would be a cartoon; a fifth of one is a page that has been handled. */
+.menucard--carte.is-arming .menucard__name--tappable {
+  animation: menu-invite 2.4s ease-in-out infinite;
+}
+
+.menucard--carte.is-arming .menucard__row:nth-child(even) .menucard__name--tappable {
+  animation-delay: 1.2s;
+}
+
+@keyframes menu-invite {
+  0%, 100% { transform: rotate(-0.2deg) translateY(0); }
+  50% { transform: rotate(0.2deg) translateY(-1px); }
+}
+
+/* Motion sickness is not a preference the app gets to weigh against a nice
+   effect: the operating system has already been told, and this reads it. The
+   invitation then has to be carried by something static, so the name keeps a
+   visible affordance — an underline that says "press me" without moving. */
+@media (prefers-reduced-motion: reduce) {
+  .menucard--carte.is-arming .menucard__name--tappable {
+    animation: none;
+    transform: none;
+    text-decoration: underline dotted;
+    text-underline-offset: 3px;
+  }
+}
+
+/* The ring a glass leaves on a menu. Drawn over the name, tilted, open at one
+   side the way a real one is where the base was lifted — a closed ellipse
+   reads as a border, and a border reads as a form field. */
+.menucard__ring {
+  position: absolute;
+  inset: -6px -10px;
+  border: 2px solid var(--wax);
+  border-radius: 50%;
+  opacity: 0.55;
+  transform: rotate(-2.5deg);
+  clip-path: polygon(0 0, 100% 0, 100% 62%, 82% 100%, 0 100%);
+  pointer-events: none;
+}
+
+.menucard__course.is-picked .menucard__price {
+  color: var(--accent);
 }
 
 .menucard__name {

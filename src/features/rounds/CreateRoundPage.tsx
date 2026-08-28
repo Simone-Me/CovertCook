@@ -4,6 +4,8 @@ import { Fold } from '../../components/Fold'
 import { useNavigate } from 'react-router-dom'
 import {
   createRound,
+  setCostSettings,
+  toCents,
   type RoundAccess,
   type RoundAnonymity,
   type SlotMode,
@@ -41,6 +43,11 @@ export function CreateRoundPage() {
   const [requiresApproval, setRequiresApproval] = useState(CLASSIC.requiresApproval)
   const [votingMode, setVotingMode] = useState<VotingMode>(CLASSIC.votingMode)
   const [slotMode, setSlotMode] = useState<SlotMode>(CLASSIC.slotMode)
+  // Shared costs (0065). Agreed here rather than at the end on purpose: a
+  // budget set before the roulette shapes the recipes people write, and one
+  // announced afterwards is a judgement passed on their receipts.
+  const [shareCosts, setShareCosts] = useState(false)
+  const [budget, setBudget] = useState('')
   const [limitPlayers, setLimitPlayers] = useState(false)
   const [maxPlayers, setMaxPlayers] = useState(8)
   const [error, setError] = useState<string | null>(null)
@@ -58,6 +65,16 @@ export function CreateRoundPage() {
           : CLASSIC),
         maxPlayers: limitPlayers ? maxPlayers : null,
       })
+      // A second call rather than four more arguments on create_round, which
+      // already takes eleven. The dinner exists either way; a budget that
+      // failed to save is a setting to fix, not a dinner to lose.
+      if (custom && shareCosts) {
+        await setCostSettings({
+          roundId,
+          mode: 'SHARED',
+          budgetPerHead: toCents(budget),
+        })
+      }
       navigate(`/rounds/${roundId}`, { replace: true })
     } catch (err) {
       setError(err instanceof Error ? err.message : t('errors.generic'))
@@ -180,6 +197,37 @@ export function CreateRoundPage() {
                 <option value="BRIGADE">{t('rounds.nameTheme.BRIGADE')}</option>
               </select>
               <p className="muted">{t(`rounds.nameTheme.${nameTheme}Hint`)}</p>
+            </Fold>
+
+            {/* Shared costs. Labelled Pro because that is where it is headed,
+                and working today because there is nothing to buy yet: the day
+                there is, this is the switch that moves. */}
+            <Fold
+              title={t('costs.label')}
+              aside={shareCosts ? t('costs.on') : t('pro.badge')}
+            >
+              <label className="row">
+                <input
+                  type="checkbox"
+                  style={{ width: 'auto' }}
+                  checked={shareCosts}
+                  onChange={(e) => setShareCosts(e.target.checked)}
+                />
+                <span>{t('costs.share')}</span>
+              </label>
+              {shareCosts && (
+                <div>
+                  <label htmlFor="budget">{t('costs.budgetPerHead')}</label>
+                  <input
+                    id="budget"
+                    inputMode="decimal"
+                    placeholder="0.00"
+                    value={budget}
+                    onChange={(e) => setBudget(e.target.value)}
+                  />
+                  <p className="muted">{t('costs.budgetHint')}</p>
+                </div>
+              )}
             </Fold>
 
             <Fold title={t('rounds.recipesPerBrief.label')} aside={t('pro.badge')}>

@@ -60,7 +60,7 @@ export function BoardPage() {
               <span className="threadbox__who">{assignment.cook_secret_name}</span>
               <span className="threadbox__what">{t('board.myRecipe')}</span>
             </header>
-            <ChatThread pairingId={assignment.pairing_id} />
+            <ChatThread pairingId={assignment.pairing_id} roundId={roundId} />
           </section>
         )}
 
@@ -74,7 +74,7 @@ export function BoardPage() {
               <span className="redact threadbox__who">{t('rounds.chefCovered')}</span>
               <span className="threadbox__what">{t('board.recipeReceived')}</span>
             </header>
-            <ChatThread pairingId={myBrief.pairing_id} />
+            <ChatThread pairingId={myBrief.pairing_id} roundId={roundId} />
           </section>
         )}
 

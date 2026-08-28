@@ -33,6 +33,18 @@ main {
   flex: 1;
   padding: 16px;
   padding-bottom: 32px;
+  /* Nothing laid on the cloth may widen the page. The app is a column of a
+     fixed width and everything decorative — props, stains, tilted envelopes —
+     is placed relative to it; one piece hanging over the right edge is enough
+     to turn every screen into something that pans. Down the page is the only
+     direction this app scrolls. */
+  overflow-x: clip;
+}
+
+@supports not (overflow: clip) {
+  main {
+    overflow-x: hidden;
+  }
 }
 
 h1 {
@@ -268,6 +280,29 @@ header.app-header {
   border-bottom: 1px solid var(--border);
 }
 
+/* The app is pointed at the wrong database. Not a page-level error box: the
+   condition is about the whole app rather than the screen it was noticed on, so
+   it sits above everything and stays there. Deliberately plain — this one is
+   read by whoever is building the thing, not by a diner. */
+.schema-warning {
+  padding: 12px 16px;
+  background: var(--danger-bg);
+  border-bottom: 2px solid var(--danger);
+  color: var(--text);
+  font-size: 14px;
+}
+
+.schema-warning p {
+  margin: 4px 0 6px;
+}
+
+.schema-warning code {
+  display: block;
+  font-size: 12px;
+  overflow-wrap: anywhere;
+  color: var(--text-muted);
+}
+
 /* The invitation follows you through sign-up. Sticks under the header so
    it stays true on every screen of the detour, not just the first. */
 .pending-join {
@@ -378,6 +413,16 @@ input.is-taken {
 .card--left {
   opacity: 0.65;
   cursor: default;
+}
+
+/* Not finished, and not wrong either. The green of .notice says "this went
+   right", which is exactly the wrong thing to say over a list of fields
+   somebody still has to fill in — and the red of .error says they have made a
+   mistake, which they have not. Ink on the ordinary border: a statement of
+   where the form has got to. */
+.notice--wanting {
+  color: var(--text);
+  border-color: var(--border);
 }
 
 /* Something that went right, said once. The error box's calm opposite. */
@@ -512,21 +557,286 @@ input.is-taken {
   color: var(--text);
 }
 
+/* ---------------------------------------------------------------------------
+ * Shared costs. Numbers in a column, right-aligned and tabular, because the
+ * only thing anybody does on this screen is compare one figure against another.
+ * ------------------------------------------------------------------------- */
+
+.costs__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 14px;
+}
+
+.costs__row strong {
+  font-variant-numeric: tabular-nums;
+}
+
+.costs__over {
+  color: var(--danger);
+}
+
+.costs__settlement {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.costs__settlement li {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 4px 10px;
+  align-items: baseline;
+  font-size: 14px;
+  padding-bottom: 6px;
+  border-bottom: 1px dashed var(--border);
+}
+
+.costs__settlement li:last-child {
+  border-bottom: none;
+}
+
+/* Your own line, marked the way the chain marks your own node. */
+.costs__settlement li.is-me .costs__who {
+  font-weight: 700;
+}
+
+.costs__settlement strong {
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+/* Owed and owing are the same fact from two sides, and they are the one place
+   in this app where green and red mean money rather than danger. */
+.costs__owed { color: var(--ok); }
+.costs__owes { color: var(--accent); }
+
+/* ---------------------------------------------------------------------------
+ * The album. One photograph per dinner (0068), so this stopped being a strip
+ * you push along and became what it always wanted to be: a print, laid on the
+ * page at the size somebody would actually look at it.
+ * ------------------------------------------------------------------------- */
+
+.album__tile {
+  margin: 0;
+  max-width: 340px;
+}
+
+.album__tile img {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 3px;
+  /* A print, not a thumbnail: a white edge and a shadow, the same light as
+     everything else on the cloth. */
+  border: 4px solid var(--paper-solid, #fff);
+  box-shadow: 0 1px 2px rgba(120, 60, 30, 0.16), 0 6px 14px rgba(120, 60, 30, 0.16);
+  background: var(--bg-elevated);
+}
+
+.album__pending {
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  background: var(--bg-elevated);
+  border: 1px dashed var(--border);
+}
+
+.album__tile figcaption {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.album__tile.is-hidden img {
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.album__actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/* The file input itself is never shown — its label is the button. Hidden by
+   clipping rather than by display:none, so it keeps its place in the tab order
+   and the label still operates it from the keyboard. */
+.album__input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+.album__input:focus-visible + .album__button {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.album__button {
+  cursor: pointer;
+}
+
+/* Whose job the photograph is, and who took the one on screen. A caption
+   rather than a control: it answers a question somebody is already asking of
+   an empty frame. */
+.album__holder {
+  margin: 0;
+  font-size: 13px;
+}
+
+/* Keeping it, and saving it. Two different acts on one picture — one makes a
+   copy in an album, the other a file on a phone — so they sit together under
+   the print rather than among the flag-and-remove marks in its caption. */
+.album__keep {
+  margin-top: 8px;
+}
+
+/* ---------------------------------------------------------------------------
+ * One evening in the profile album, opened from the list. Everything here is
+ * copied at the moment somebody presses add, so it survives the dinner being
+ * deleted (0068).
+ * ------------------------------------------------------------------------- */
+
+.album__photo {
+  display: block;
+  width: 100%;
+  max-width: 340px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 4px solid var(--paper-solid, #fff);
+  box-shadow: 0 1px 2px rgba(120, 60, 30, 0.16), 0 6px 14px rgba(120, 60, 30, 0.16);
+  background: var(--bg-elevated);
+}
+
+/* The courses under the picture, printed rather than listed: the course in
+   small capitals where a menu puts it, the dish on the line under it. No
+   scores and no leader dots — the results page is where the evening is a
+   competition, and this is where it is a memory. */
+.album__menu {
+  list-style: none;
+  margin: 10px 0 0;
+  padding: 0;
+  font-size: 14px;
+}
+
+.album__menu li {
+  margin-bottom: 6px;
+}
+
+.album__menu-course {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.65;
+}
+
+.album__menu-dish {
+  display: block;
+}
+
+/* ---------------------------------------------------------------------------
+ * The recipe book. A card per recipe, folded, because thirty recipes open at
+ * once is a wall and the thing somebody came for is one of them.
+ * ------------------------------------------------------------------------- */
+
+.recipe__origin {
+  margin: 0 0 4px;
+  font-size: 13px;
+}
+
+.recipe__ingredients {
+  margin: 0;
+  padding-left: 20px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+/* The method as it was typed. A recipe written in steps on separate lines is
+   a recipe in steps, and collapsing that whitespace would hand the cook one
+   paragraph to find their place in with wet hands. */
+.recipe__procedure {
+  margin: 0;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* A section of the recipe that has not been written yet.
+ *
+ * Ruled lines rather than a spinner or a grey box: the cook's page keeps its
+ * headings and its shape while it waits (0067), and what belongs under a
+ * heading nobody has filled in is an empty ruled page. It is decoration in the
+ * strict sense — aria-hidden at every use — because the sentence explaining
+ * the wait is already above it in words. */
+.recipe__blank {
+  height: 72px;
+  border-radius: 2px;
+  opacity: 0.55;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 23px,
+    var(--border) 23px 24px
+  );
+}
+
+.recipe__blank--tall {
+  height: 120px;
+}
+
 /* A declared set, read like a line on a menu. */
 .declared {
   margin-bottom: 14px;
+}
+
+/* The heading and the button that adds to it, on one line. The hairline
+   belongs to the row rather than to the words, so the button sits above it
+   with the heading instead of floating beside a rule that stops short. */
+.declared__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid var(--text);
 }
 
 .declared__title {
   /* A hairline under the heading, in ink. The coloured bar that was here read
      as a warning stripe across a settings page — too much weight for a label,
      and the wrong colour for half of what it labelled. */
-  margin: 0 0 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--text);
+  margin: 0;
   font-size: 15px;
   font-weight: 600;
   color: var(--text);
+}
+
+/* Small, and only as wide as the word. A full-width button under the list
+   read as the page's main action; this one is a label's companion. */
+button.declared__add {
+  flex: none;
+  width: auto;
+  margin: 0;
+  padding: 4px 14px;
+  font-size: 13px;
 }
 
 .declared__empty {
@@ -564,6 +874,44 @@ input.is-taken {
 .food-label--stacked img {
   width: 48px;
   height: 48px;
+}
+
+/* A list of yes-or-no answers about this device. Monospaced marks in their own
+   column so the eye runs down the ticks and stops at the cross — which is the
+   only line on the list anybody needs to read. */
+.checklist {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 14px;
+}
+
+.checklist li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.checklist li > span:first-child {
+  flex: none;
+  width: 1.1em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  color: var(--text-muted);
+}
+
+.checklist li.is-ok > span:first-child {
+  color: var(--ok);
+}
+
+.checklist li.is-bad > span:first-child {
+  color: var(--accent);
+}
+
+.checklist li.is-bad {
+  font-weight: 600;
 }
 
 /* A tint of green, with ink text: a diet is a rule to respect, not a danger

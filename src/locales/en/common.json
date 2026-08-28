@@ -19,7 +19,8 @@
     "add": "Add",
     "remove": "Remove",
     "ok": "OK",
-    "no": "No, leave it"
+    "no": "No, leave it",
+    "close": "Close"
   },
   "auth": {
     "signIn": "Sign in",
@@ -280,7 +281,8 @@
       "vote": "Vote the menu",
       "results": "Results",
       "allergies": "Allergies",
-      "info": "The dinner"
+      "info": "The dinner",
+      "costs": "The costs"
     },
     "waiting": {
       "assignment": "Opens once the Executive Chef spins the roulette",
@@ -311,7 +313,13 @@
       "AWAITING_APPROVAL": "You have already asked to join. The Executive Chef has not answered yet — you will see the dinner here as soon as they do.",
       "PREVIOUSLY_LEFT": "You left this dinner. Ask the Executive Chef to add you back.",
       "WAS_REMOVED": "The Executive Chef removed you from this dinner.",
-      "ROUND_FULL": "This dinner is full."
+      "ROUND_FULL": "This dinner is full.",
+      "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner.",
+      "TURNSTILE_SECRET_KEY is not configured": "The bot check is half configured on this deployment: the app is sending a real captcha token and the server has no key to check it against. Either set TURNSTILE_SECRET_KEY on the functions, or clear VITE_TURNSTILE_SITE_KEY so both sides use the development bypass.",
+      "turnstile verification failed": "The bot check refused this attempt. Reload the page and try the code again.",
+      "token and purpose are required": "The bot check never produced a token. Reload the page — and if it keeps happening, VITE_TURNSTILE_SITE_KEY is set to something Cloudflare does not recognise.",
+      "TURNSTILE_NO_TICKET": "The bot check answered without a ticket. Reload the page and try again.",
+      "CAPTCHA_REQUIRED": "This deployment asks for a bot check and the page did not provide one. Reload and try again."
     },
     "chainChoice": {
       "intro": "The chain is already built. Taking a link out leaves two loose ends — decide what happens to them.",
@@ -398,7 +406,11 @@
     },
     "chefCount_one": "{{count}} chef",
     "chefCount_other": "{{count}} chefs",
-    "frozen": "This dinner is over. It stays here to be read — the recipes, the menu and the results — and nothing about it can be changed any more, by anybody."
+    "frozen": "This dinner is over. It stays here to be read — the recipes, the menu and the results — and nothing about it can be changed any more, by anybody.",
+    "deletesOn": "This dinner deletes itself on {{date}}.",
+    "deletesWhatSurvives": "What you keep: every recipe you put in your book, and the photograph you added to the album. The rest — the chain, the messages, the ballots — goes with the dinner.",
+    "copyCode": "Copy the code",
+    "copyLink": "Copy the link"
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",
@@ -408,8 +420,13 @@
     "dishName": "Dish name",
     "course": "Course",
     "courseOption": {
+      "APERITIF": "Aperitif",
+      "SNACK": "Nibbles",
       "STARTER": "Starter",
+      "FIRST": "First course",
       "MAIN": "Main",
+      "SIDE": "Side",
+      "CHEESE": "Cheese",
       "DESSERT": "Dessert",
       "DRINK": "Drink",
       "OTHER": "Other"
@@ -431,6 +448,12 @@
     "addTag": "Add",
     "tagsConfirmed": "I've reviewed the dietary panel above and confirmed the tags I've checked are accurate.",
     "noBriefYet": "No recipe to show yet.",
+    "waiting": {
+      "title": "Waiting for your recipe",
+      "body": "The chef writing for you hasn't sent it yet. This page fills in the moment they do. If the dinner is getting close and you need time to shop and prepare, send them a reminder — the Executive Chef is told too.",
+      "remind": "Send a reminder",
+      "reminded": "Reminder sent. Anything else you need, ask below."
+    },
     "cannotCook": "I have a problem",
     "cannotCookSent": "The chef who wrote it has been told. Explain below — they can help, or send something else.",
     "acknowledge": "Yes, chef!",
@@ -450,11 +473,47 @@
     "freeChoice": "Free choice — any dish you like.",
     "labelDish": "Put a card next to this dish",
     "labelDishWhy": "It contains {{items}}, and somebody at this table has said that matters to them. A card by the dish is what lets them decide for themselves.",
-    "needsMore": "A name, and either a link or the recipe written out.",
     "errors": {
+      "DISH_NAME_MISSING": "The dish has no name yet. That is the one thing your cook sees first.",
       "DISH_NAME_LENGTH": "The dish needs a name of at least three characters.",
-      "RECIPE_TOO_EMPTY": "Add a link, or write out the recipe."
-    }
+      "PROCEDURE_MISSING": "The method is empty. Write how to make it, or paste a link to a recipe instead.",
+      "PROCEDURE_TOO_SHORT": "The method is too short to cook from. A line or two is plenty — or paste a link instead.",
+      "INGREDIENTS_MISSING": "No ingredients listed. Your cook has to shop for this — or paste a link that lists them.",
+      "RECIPE_TOO_EMPTY": "Add a link, or write out the recipe.",
+      "LINK_MALFORMED": "That link has to start with http:// or https://.",
+      "ALREADY_SUBMITTED": "This recipe has already been sent, and a sent recipe cannot be changed.",
+      "DEADLINE_PASSED": "The deadline for recipes has passed for this dinner.",
+      "ROUND_NOT_ACCEPTING": "This dinner is not taking recipes right now.",
+      "NOTHING_WRITTEN": "Nothing has been saved yet. Save a draft first.",
+      "DIETARY_CONFLICT": "This dish contains {{items}}, and somebody at this table cannot eat it. Change the recipe — the dinner is shared.",
+      "constraint": {
+        "briefs_check": "The dish needs a name of between three and eighty characters.",
+        "briefs_check1": "The method is too short for this dinner’s database, which has not been updated yet. Paste a link, or write a couple more lines.",
+        "briefs_check3": "The allergen check has not run on this recipe. Reopen it and save it again.",
+        "briefs_submitted_recipe_not_empty": "A recipe needs a link or a written method before it can be sent.",
+        "briefs_external_url_check": "That link has to start with http:// or https://.",
+        "brief_ingredients_name_check": "One of the ingredients is blank. Remove the empty line, or fill it in."
+      }
+    },
+    "theMenu": "Tonight’s menu",
+    "yours": "Yours",
+    "sendFinal": "Send — final",
+    "submitConfirmTitle": "Send this recipe? It cannot be changed afterwards.",
+    "submitConfirmWhy": "It reaches your cook the moment you send it, and the form locks. There is no editing, no unsending and no second version — so read it back once before you press.",
+    "summaryDish": "Dish: {{name}}",
+    "summaryLink": "A link to follow: {{url}}",
+    "summaryWritten": "Written out, with {{n}} ingredient(s) listed",
+    "summaryFor": "Cooked by: {{name}}",
+    "missingIntro": "Not ready to send yet — still missing: {{items}}.",
+    "missing": {
+      "dishName": "the dish name",
+      "dishNameShort": "a longer dish name (at least three letters)",
+      "ingredients": "the ingredients (or a link instead)",
+      "procedure": "the method (or a link instead)",
+      "procedureShort": "a fuller method — a line or two, not a word",
+      "linkMalformed": "a link that starts with http:// or https://"
+    },
+    "submitConfirmLabel": "Yes — send it"
   },
   "chat": {
     "title": "Messages",
@@ -556,6 +615,13 @@
       "BEST_DRINK": "Best drink",
       "MOST_ORIGINAL": "Most original",
       "BEST_BRIEF_RESPECT": "Best brief respect"
+    },
+    "nothingServed": "No dishes were recorded for this dinner.",
+    "notServed": "not served",
+    "winner": "Dish of the evening",
+    "gate": {
+      "RESULTS_NOT_READY": "The results are not in yet — the dinner has not reached that point.",
+      "RESULTS_NOT_PUBLISHED": "The Executive Chef has the results and has not announced them yet. Sit tight."
     }
   },
   "chain": {
@@ -587,11 +653,17 @@
       "DROPOUT": "A player dropped out",
       "REPORTED_MESSAGE": "A message was reported",
       "OTHER": "Other"
-    }
+    },
+    "waiting_one": "{{count}} thing is waiting for you",
+    "waiting_other": "{{count}} things are waiting for you"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
-    "notAuthenticated": "You must be signed in."
+    "notAuthenticated": "You must be signed in.",
+    "databaseBehind": {
+      "title": "This app is talking to a database that is behind it.",
+      "body": "A function it needs is not there. Locally that is almost always .env.local still pointing at the deployed project — VITE_SUPABASE_URL should read http://127.0.0.1:54321. Otherwise the migrations have not been pushed: run `npx supabase db reset` locally, or `npx supabase db push` against the project. Nothing you do in the app will fix it."
+    }
   },
   "profile": {
     "title": "Profile",
@@ -750,7 +822,56 @@
       ]
     },
     "draftNote": "A draft, written from what the app actually does. It has not been reviewed by a lawyer, and it must be before CovertCook charges anybody — the dietary panel holds health data, and selling anything brings EU VAT and a right of withdrawal with it.",
-    "by": "by"
+    "by": "by",
+    "moderation": "Moderation",
+    "moderationDoc": {
+      "title": "Moderation",
+      "updated": "2026-08-27",
+      "sections": [
+        {
+          "heading": "What this covers",
+          "body": [
+            "CovertCook lets people write to each other in three places: the private thread with the person you cook for, the private thread with the person who cooks for you, and the fridge board the whole table reads. Everything written in them today is chosen from a list of ready-made phrases; the day free text opens, this page applies to it unchanged.",
+            "It also covers the recipes themselves, which are written by one guest and read by another."
+          ]
+        },
+        {
+          "heading": "What is not allowed",
+          "body": [
+            "Insults, harassment, threats, and anything aimed at somebody because of who they are rather than what they cooked. Sexual content. Attempts to identify another guest who is playing anonymously, or to get somebody else to identify them. Using a recipe to make somebody eat something they have declared they cannot eat.",
+            "That last one is the only rule here specific to this app, and it is the most serious. The dietary panel exists because a shared table means one dish reaches everybody."
+          ]
+        },
+        {
+          "heading": "Reporting",
+          "body": [
+            "Every message carries a flag. Reporting one sends it to the Executive Chef of that dinner — the person running it — and to nobody else. The reporter is never named to anybody.",
+            "The Executive Chef sees the phrase before they see which seat it came from, and can act without ever learning who wrote it."
+          ]
+        },
+        {
+          "heading": "What the Executive Chef can do",
+          "body": [
+            "Send a warning to the seat, which the person reads on the dinner’s own page. Remove the seat from the dinner, which is the same control used when somebody drops out. Both are addressed to a seat rather than to a name.",
+            "They can also reveal who wrote a reported message. This requires a written reason and is recorded permanently in the dinner’s audit log, together with who asked for it. It exists so that somebody can be reached outside the game — it is not a step in deciding what to do inside it."
+          ]
+        },
+        {
+          "heading": "Blocking",
+          "body": [
+            "Anybody can block anybody, from the board, without learning who they are. A blocked person’s phrases disappear from your board immediately, and neither of you can take a seat at a dinner the other is already at.",
+            "Blocking does not end a dinner already under way: three other people’s evening is built on the chain of who cooks for whom, and one block cannot be allowed to collapse it. It takes full effect at the next dinner."
+          ]
+        },
+        {
+          "heading": "Appealing, and reaching us",
+          "body": [
+            "A warning or a removal is one host’s decision about one evening. If you think it was wrong, write to contact@opus35.fr and say which dinner it was; the audit log records every moderation act, including the ones we got wrong.",
+            "Anything urgent — a threat, a minor at risk, content that should be with the police rather than with us — goes to the same address, and is read by a person."
+          ]
+        }
+      ]
+    }
   },
   "push": {
     "title": "Notifications",
@@ -772,7 +893,8 @@
       "denied": "Blocked. Your browser is refusing on your behalf and the app cannot ask again — it has to be re-allowed in the site settings for CovertCook.",
       "needs-install": "Add CovertCook to your home screen and open it from there. On iPhone and iPad, notifications only exist in the installed app — this is Apple’s rule, not ours.",
       "unsupported": "This browser has no notification support. Nothing is broken; it simply cannot.",
-      "unconfigured": "Not available on this deployment yet."
+      "unconfigured": "Not available on this deployment yet.",
+      "no-worker": "The app’s background worker did not start on this device, so nothing can be delivered to it. Reload the app — and note that private windows block it outright, and Brave needs its push messaging setting switched on."
     },
     "aside": {
       "checking": "…",
@@ -781,7 +903,38 @@
       "denied": "Blocked",
       "needs-install": "Needs the installed app",
       "unsupported": "Unavailable",
-      "unconfigured": "Unavailable"
+      "unconfigured": "Unavailable",
+      "no-worker": "Not running"
+    },
+    "test": {
+      "open": "Notifications are not arriving?",
+      "title": "Test this device",
+      "why": "Push has seven links between a dinner and your lock screen, and when one is broken the phone just stays quiet. This asks each of them, then sends you one for real.",
+      "check": {
+        "installed": "Opened from the home screen, not in a browser tab",
+        "api": "This browser has the notification API",
+        "worker": "The app’s background worker is running",
+        "permission": "You have allowed notifications",
+        "key": "This deployment has a signing key",
+        "subscribed": "This browser holds a subscription",
+        "server": "CovertCook has that subscription on file"
+      },
+      "fix": {
+        "installed": "On iPhone and iPad this is the whole answer: Share → Add to Home Screen, then open CovertCook from that icon. Notifications do not exist in a Safari tab — Apple’s rule, not ours.",
+        "api": "This browser cannot receive web notifications at all. Nothing here is broken; try the installed app on another browser.",
+        "worker": "The background worker never started. Reload the app. It is blocked outright in private windows, and Brave needs Settings → Privacy → “Use Google services for push messaging” switched on before any web push can arrive.",
+        "permission": "Turn notifications on with the switch above. If your browser has already refused, it will not ask again — allow CovertCook in the site settings first.",
+        "key": "This deployment has no signing key set (VITE_VAPID_PUBLIC_KEY), so no notification can be sent from it. Nothing you can do from this phone.",
+        "subscribed": "Turn notifications off and back on with the switch above — that is what asks the browser for a fresh address.",
+        "server": "This browser has an address the server never received. Press “Send a test notification” — it hands it over again before it sends.",
+        "none": ""
+      },
+      "recheck": "Check again",
+      "send": "Send a test notification",
+      "sent": "Sent. It should appear within a few seconds — if nothing arrives now, the fault is between your phone and its push service (Apple’s or Google’s), not in this app.",
+      "noRow": "The server has no address for any of your devices. Turn notifications off and on again with the switch above.",
+      "refused": "The server tried {{audience}} device(s) and every one was refused. That usually means the signing key has changed since you subscribed: turn notifications off and on again to get a fresh address.",
+      "accountOff": "Your account also has notifications switched off, so nothing but this test would have been sent."
     }
   },
   "account": {
@@ -858,6 +1011,135 @@
       "NO_SMOKING": "No smoking",
       "OTHER": "Something else",
       "otherPlaceholder": "Name it"
+    }
+  },
+  "book": {
+    "title": "Your recipe book",
+    "empty": "Nothing kept yet. At the end of a dinner, the menu lets you keep the recipes worth cooking again.",
+    "keepRecipes": "Keep recipes from this dinner",
+    "stopChoosing": "Done choosing",
+    "armHelp": "Tap the dishes you want to keep. Nothing is saved until you confirm.",
+    "saveCount": "Keep {{n}} recipe(s)",
+    "inYourBook": "in your book",
+    "savedTo": "{{n}} recipe(s) went into your book.",
+    "savedNothingNew": "Those were already in your book.",
+    "openBook": "Open the book",
+    "search": "Search a dish, a dinner, an ingredient",
+    "anyCourse": "Any course",
+    "anyRole": "Any role",
+    "count": "Showing {{shown}} of {{total}}",
+    "relation": {
+      "COOKED": "You cooked it",
+      "WROTE": "You wrote it",
+      "TABLE": "From the table"
+    },
+    "writtenBy": "Written by {{name}} ({{pseudonym}})",
+    "formerGuest": "Former guest",
+    "forget": "Remove from my book",
+    "forgetTitle": "Remove “{{name}}” from your book?",
+    "forgetConfirm": "Remove it",
+    "forgetRecoverable": "That dinner still exists, so you can keep this recipe again from its menu.",
+    "forgetLastCopy": "The dinner this came from is gone. This is the only copy left, and removing it cannot be undone by anyone.",
+    "exportMarkdown": "Download as text",
+    "exportJson": "Download as JSON"
+  },
+  "moderation": {
+    "byPseudonym": "You are shown what was said before who said it, and every action here is about a seat rather than a person. That is deliberate: knowing the author first is how an opinion of somebody decides whether their message was out of line — and you do not need a name to warn a seat or to remove one.",
+    "namesAreKnown": "This dinner is not undercover, so you already know who sits where. The actions below still address the seat, and the reveal below is still recorded — that is what makes it reviewable afterwards.",
+    "fromSeat": "From {{name}}",
+    "alreadyWarned": "already warned about this",
+    "warn": "Send a warning",
+    "warnReason": "What they should know (optional — it is shown to them word for word)",
+    "sendWarning": "Send it",
+    "reveal": "Reveal who wrote it",
+    "revealTitle": "Reveal this author?",
+    "revealWhy": "Everything else on this page works without a name. This does not, and it is recorded: the reveal, who asked for it and the reason you give are written to the dinner’s audit log, permanently. Use it to reach somebody outside the game — not to decide what to do inside it.",
+    "revealReason": "Why you need the name",
+    "revealConfirm": "Reveal, and record it",
+    "revealed": "Written by {{name}}. This reveal has been recorded.",
+    "youWereWarned": "A word from the Executive Chef",
+    "warningNoReason": "They did not say more than that.",
+    "warningRead": "I have read this",
+    "blockedTitle": "People you have blocked",
+    "blockHelp": "Blocking happens at a dinner, on the seat, so you never have to learn who somebody is to decide you would rather not sit with them again. Their messages leave your board straight away, and neither of you can take a seat at a dinner the other is already at. It does not end a dinner already under way — three other people’s evening is built on the chain.",
+    "noBlocks": "Nobody. Long may it last.",
+    "unblock": "Unblock",
+    "block": "Block this person",
+    "errors": {
+      "REVEAL_NEEDS_A_REASON": "Write why you need the name. It is recorded with the reveal.",
+      "REVEAL_ONLY_FOR_REPORTED": "Only the author of a reported message can be revealed.",
+      "CANNOT_BLOCK_YOURSELF": "That seat is yours.",
+      "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner."
+    }
+  },
+  "album": {
+    "title": "The table, at the end",
+    "profileTitle": "Your album",
+    "empty": "No photograph of this table yet. One picture, at the end of the evening.",
+    "emptyForGuests": "No photograph of this table yet.",
+    "profileEmpty": "Nothing yet. At the end of a dinner you can add its photograph here, with the menu that was eaten printed under it — and it stays after the dinner itself is gone.",
+    "add": "Add the photograph",
+    "replace": "Replace the photograph",
+    "working": "Preparing…",
+    "remove": "Remove",
+    "removed": "removed",
+    "altFallback": "A photograph from {{name}}",
+    "takenBy": "Photograph by {{name}}",
+    "heldBy": "{{name}} adds the photograph of this table.",
+    "heldByYou": "The photograph of this table is yours to add.",
+    "keep": "Add to my album",
+    "inYourAlbum": "In your album",
+    "download": "Save to this device",
+    "forget": "Remove from my album",
+    "forgetConfirm": "Remove it",
+    "photographer": "Who takes the photograph",
+    "photographerMe": "Me, the Executive Chef",
+    "handOver": "Hand it over",
+    "handedOver": "Done — they can add it now, and you no longer can.",
+    "photographerHint": "Choose a chef and hand them the camera: they add the photograph from their own phone, and while they hold it you cannot.",
+    "photographerHintGiven": "They hold the camera. Choose yourself and hand it over again to take it back.",
+    "exifNote": "One photograph per dinner, and it reaches nobody's album until they add it. Location data is stripped in your browser before anything is uploaded — a photo from a phone carries the address it was taken at, and nobody at a dinner needs yours.",
+    "errors": {
+      "NOT_AN_IMAGE": "That is not an image.",
+      "TOO_LARGE": "That file is too big to open safely. Anything under 12 MB is fine.",
+      "UNREADABLE": "That image could not be read on this device.",
+      "ALBUM_NOT_OPEN_YET": "The album opens when the dinner does.",
+      "PHOTO_PATH_MISMATCH": "Something went wrong with the upload. Try again.",
+      "NOT_THE_PHOTOGRAPHER": "Somebody else is holding the camera for this dinner.",
+      "NOT_AT_THIS_TABLE": "That chef is no longer at this table.",
+      "PHOTO_REMOVED": "That photograph has been taken down.",
+      "PHOTO_NOT_IN_YOUR_ALBUM": "That is not in your album."
+    }
+  },
+  "costs": {
+    "label": "Shared costs",
+    "on": "On",
+    "share": "Split what the dinner costs",
+    "budgetPerHead": "Budget each (optional)",
+    "budgetHint": "Agreed now rather than at the end, so it shapes what people write. Leave it empty to split the costs with no ceiling.",
+    "perHead": "{{amount}} each",
+    "agreed": "Agreed for this dinner: {{amount}} each.",
+    "yourList": "What you were asked to buy",
+    "whatYouSpent": "What you spent, all in",
+    "notePlaceholder": "A note, if you want one",
+    "save": "Save what I spent",
+    "saved": "Saved.",
+    "you": "You",
+    "average": "Average at this table",
+    "total": "The whole dinner",
+    "reported": "{{reported}} of {{people}} have said.",
+    "overBudget": "You are over the agreed budget. Nothing stops you — it just means the others will be settling up towards you.",
+    "amountInvalid": "Write an amount like 12.50.",
+    "settlementTitle": "Settling up",
+    "square": "square",
+    "isOwed": "is owed {{amount}}",
+    "owes": "owes {{amount}}",
+    "settlementNote": "Everybody pays the same share of the whole dinner. The app does not move any money — it only says who should hand what to whom.",
+    "errors": {
+      "COSTS_NOT_SHARED": "This dinner does not split its costs.",
+      "SETTLEMENT_TOO_EARLY": "The bill comes after the food.",
+      "BUDGET_TOO_LATE": "The roulette has run and people are writing against this budget — it cannot move now.",
+      "AMOUNT_INVALID": "Write an amount like 12.50."
     }
   }
 }

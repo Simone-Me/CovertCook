@@ -7,8 +7,11 @@ import { supabase } from '../../lib/supabase'
 import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
+import { MyWarnings } from './MyWarnings'
+import { fromCents, roundDeletesAt } from '../../lib/rpc'
 import { Envelope } from './Envelope'
 import { CutleryLink } from '../../components/CutleryLink'
+import { CopyButton } from '../../components/CopyButton'
 import { Icon } from '../../components/Icon'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { RemoveChef } from './RemoveChef'
@@ -16,6 +19,7 @@ import { HostPass, PassNote } from './HostAction'
 import { MenuPanel } from './MenuPanel'
 import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
+import { CostsPanel } from './CostsPanel'
 import {
   advancePhase,
   cancelLeaveRequest,
@@ -52,7 +56,7 @@ import {
   type VotingMode,
 } from '../../lib/rpc'
 
-type OpenDrawer = 'chefs' | 'allergies' | 'info' | null
+type OpenDrawer = 'chefs' | 'allergies' | 'info' | 'costs' | null
 
 // The two marks the Messages envelope can carry, in rank order — see
 // messageMark below for which wins.
@@ -204,6 +208,8 @@ export function RoundHomePage() {
   // one line — the Executive Chef keeps the title and loses the powers, which
   // is what being over means.
   const frozen = round.status === 'ARCHIVED' || round.status === 'CANCELLED'
+  // Only a finished dinner has a date; a live one has nothing to count down.
+  const deletesAt = roundDeletesAt(round.finished_at)
   const isHost = round.host_id === profile?.id && !frozen
 
 
@@ -500,7 +506,7 @@ export function RoundHomePage() {
   }
 
   return (
-    <div className="cloth" style={{ position: 'relative', minHeight: '100%', margin: -16, padding: 16 }}>
+    <div className="cloth table-scene">
       <TableProps status={round.status} />
 
       <div className="stack" style={{ position: 'relative', zIndex: 2, gap: 11 }}>
@@ -523,6 +529,22 @@ export function RoundHomePage() {
         {/* Said once, so the missing controls read as a rule rather than as
             something broken. */}
         {frozen && <p className="notice">{t('rounds.frozen')}</p>}
+
+        {/* The countdown, on the dinner it is about. Two sentences: when it
+            goes, and what you keep — because "this will be deleted" on its own
+            reads as a loss rather than as a tidy-up. */}
+        {deletesAt && (
+          <div className="paper stack">
+            <strong>{t('rounds.deletesOn', { date: deletesAt.toLocaleDateString(profile?.locale ?? 'en') })}</strong>
+            <p className="muted" style={{ margin: 0 }}>{t('rounds.deletesWhatSurvives')}</p>
+          </div>
+        )}
+
+        {/* A warning from the Executive Chef, on the page it is about, where
+            the person it was sent to will actually be. It stays until they say
+            they have read it — a moderation notice that scrolls away unread is
+            a moderation notice that never happened. */}
+        <MyWarnings roundId={roundId as string} />
 
         {error && <div className="error">{error}</div>}
 
@@ -551,11 +573,17 @@ export function RoundHomePage() {
           <div className="stack">
             <span className="pass__section-title">{t('rounds.actions.fillTable')}</span>
             <label>{t('rounds.shareLink')}</label>
+            {/* Two buttons, because there are two things to hand somebody and
+                they are not interchangeable. A link opens the app on the right
+                screen with the code already in it — best by far, when you can
+                send one. The code alone is what you read out at a table, put in
+                a group chat that mangles links, or type into a phone that has
+                the app already open. One button beside a printed code, copying
+                the link, said neither. */}
             <div className="row">
               <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
-              <button type="button" className="secondary" onClick={() => navigator.clipboard.writeText(shareLink)}>
-                {t('actions.copy')}
-              </button>
+              <CopyButton value={round.join_code} label={t('rounds.copyCode')} />
+              <CopyButton value={shareLink} label={t('rounds.copyLink')} />
             </div>
 
             <label htmlFor="invite-email">{t('rounds.invitations.invite')}</label>
@@ -1055,6 +1083,33 @@ export function RoundHomePage() {
         >
           {open === 'allergies' && <DietaryPanelGrid entries={dietaryPanel} />}
         </Envelope>
+
+        {/* Only where the dinner actually splits its costs. An envelope that
+            says "nothing here" is an envelope people open once and resent. */}
+        {round.cost_mode === 'SHARED' && (
+          <Envelope
+            icon={<Icon name="costs" />}
+            name={t('rounds.drawers.costs')}
+            meta={
+              round.budget_per_head !== null
+                ? t('costs.perHead', {
+                    amount: fromCents(round.budget_per_head, profile?.locale ?? 'en', round.currency),
+                  })
+                : undefined
+            }
+            tilt={2}
+            onOpen={() => toggle('costs')}
+          >
+            {open === 'costs' && (
+              <CostsPanel
+                roundId={roundId as string}
+                status={round.status}
+                budgetPerHead={round.budget_per_head}
+                currency={round.currency}
+              />
+            )}
+          </Envelope>
+        )}
 
         <Envelope
           icon={<Icon name="where" />}

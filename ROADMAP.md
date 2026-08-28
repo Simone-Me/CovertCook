@@ -428,6 +428,13 @@ Written as steps rather than as a list of wants, because three of the things
 below depend on the one above them and doing them in the wrong order means
 building something twice.
 
+> **All four steps shipped on 2026-08-27** — `0057` and `0058` (steps 1 and 2),
+> `0059` (step 3) and `0060` (step 4), with `smoke_test9.sql` through
+> `smoke_test11.sql`. What follows is the design they were built from, kept as
+> written. The one thing deliberately NOT built is the last line of step 4:
+> deleting old dinners waits until the book and the album have been used, which
+> is the whole argument for it.
+
 ### Step 1 — the results screen becomes a menu
 
 No schema, no new data: the results already know the dish, the course and the

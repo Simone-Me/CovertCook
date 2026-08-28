@@ -1,12 +1,37 @@
 // Verifies a Cloudflare Turnstile token server-side and, on success, stamps
 // a one-time ticket in turnstile_tickets that a SECURITY DEFINER RPC
-// (join_round, ...) can consume atomically. This function is the only
-// place TURNSTILE_SECRET_KEY and SUPABASE_SERVICE_ROLE_KEY are read — both
-// stay out of the frontend bundle entirely (§2 architectural rule 3).
-import { createClient } from 'jsr:@supabase/supabase-js@2'
+// (join_round) can consume atomically. This function is the only place
+// TURNSTILE_SECRET_KEY and SUPABASE_SERVICE_ROLE_KEY are read — both stay out
+// of the frontend bundle entirely (§2 architectural rule 3).
+//
+// NO IMPORTS, AND THAT IS THE POINT.
+//
+// This function used to open with `import { createClient } from ...` — first
+// `jsr:`, then `esm.sh` — to do exactly one INSERT. An Edge Function fetches
+// its remote imports on every cold start, so that one line made the door to
+// every dinner depend on the runtime being able to reach a package registry.
+// On a machine where it cannot — Docker Desktop with restricted networking, a
+// corporate proxy, a firewall, a train — the isolate hangs on the import and
+// the runtime kills it:
+//
+//     serving the request with supabase/functions/verify-turnstile
+//     wall clock duration warning: isolate: …
+//     early termination has been triggered: isolate: …
+//
+// which reaches the browser as a non-2xx with no body worth reading. The
+// function was never broken and never failed to deploy; it just could not
+// finish starting.
+//
+// A single INSERT does not need a client library. PostgREST is one HTTP call
+// away and the service role key is right here, so this now boots instantly and
+// depends on nothing but the stack it is part of.
+//
+// The other two functions keep their imports on purpose: send-push genuinely
+// needs `web-push` to sign a VAPID payload, and send-email needs
+// `standardwebhooks` to verify a signature. Neither stands between somebody
+// and a seat at a table.
 
 const TURNSTILE_VERIFY_URL = 'https://challenges.cloudflare.com/turnstile/v0/siteverify'
-const DEV_PLACEHOLDER_TOKEN = 'dev-placeholder-token'
 
 interface VerifyRequest {
   token: string
@@ -25,72 +50,99 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 }
 
+const json = (body: unknown, status = 200) =>
+  new Response(JSON.stringify(body), {
+    status,
+    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  })
+
 Deno.serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
 
   if (req.method !== 'POST') {
-    return new Response('method not allowed', { status: 405, headers: corsHeaders })
+    return json({ error: 'method not allowed' }, 405)
   }
 
   let body: VerifyRequest
   try {
     body = await req.json()
   } catch {
-    return new Response(JSON.stringify({ error: 'invalid JSON body' }), { status: 400, headers: corsHeaders })
+    return json({ error: 'invalid JSON body' }, 400)
   }
 
   if (!body.token || !body.purpose) {
-    return new Response(JSON.stringify({ error: 'token and purpose are required' }), { status: 400, headers: corsHeaders })
+    return json({ error: 'token and purpose are required' }, 400)
   }
 
   const secret = Deno.env.get('TURNSTILE_SECRET_KEY')
 
-  // Local/dev fallback: no secret configured yet, and the frontend's
-  // Turnstile component (see src/components/Turnstile.tsx) only ever sends
-  // this exact placeholder when it has no real site key either — so this
-  // path can't be hit by a real deployment with real keys configured.
-  const devBypass = !secret && body.token === DEV_PLACEHOLDER_TOKEN
+  // No bypass, and this is the point of 0063.
+  //
+  // There used to be one: with no secret configured, a placeholder token the
+  // frontend invented was accepted without being checked. It was documented as
+  // a development convenience and it was not — it accepted that token from
+  // anybody, anywhere, including a real deployment that had simply never had
+  // its keys set. What made it seem necessary was that joining a dinner went
+  // through here even when there was no captcha to verify.
+  //
+  // That is fixed where it belonged: `app_settings.captcha_required` decides,
+  // in the database, and with it false the frontend never calls this function
+  // at all. So this function now has exactly one job and does it properly.
+  if (!secret) {
+    return json({ error: 'TURNSTILE_SECRET_KEY is not configured' }, 500)
+  }
 
-  if (!devBypass) {
-    if (!secret) {
-      return new Response(JSON.stringify({ error: 'TURNSTILE_SECRET_KEY is not configured' }), {
-        status: 500,
-        headers: corsHeaders,
-      })
-    }
-
+  // Given a timeout, because a captcha service that hangs must not become a
+  // door that hangs. Ten seconds is far longer than Cloudflare ever takes and
+  // short enough to answer before the runtime's own wall clock does — an
+  // explicit refusal the interface can read beats an isolate killed mid-flight.
+  let verifyJson: { success?: boolean; 'error-codes'?: unknown }
+  try {
     const verifyRes = await fetch(TURNSTILE_VERIFY_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ secret, response: body.token }),
+      signal: AbortSignal.timeout(10_000),
     })
-    const verifyJson = await verifyRes.json()
-    if (!verifyJson.success) {
-      return new Response(JSON.stringify({ error: 'turnstile verification failed', detail: verifyJson['error-codes'] }), {
-        status: 403,
-        headers: corsHeaders,
-      })
-    }
+    verifyJson = await verifyRes.json()
+  } catch (err) {
+    return json({ error: 'could not reach the captcha service', detail: String(err) }, 502)
   }
 
-  const supabase = createClient(
-    Deno.env.get('SUPABASE_URL')!,
-    Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!,
-  )
-
-  const { data, error } = await supabase
-    .from('turnstile_tickets')
-    .insert({ purpose: body.purpose, subject: body.subject ?? null })
-    .select('id')
-    .single()
-
-  if (error) {
-    return new Response(JSON.stringify({ error: error.message }), { status: 500, headers: corsHeaders })
+  if (!verifyJson.success) {
+    return json({ error: 'turnstile verification failed', detail: verifyJson['error-codes'] }, 403)
   }
 
-  return new Response(JSON.stringify({ ticket_id: data.id }), {
-    headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+  // One INSERT, over PostgREST, with the service role key. `Prefer: return=
+  // representation` is what makes it come back with the id rather than empty.
+  const url = Deno.env.get('SUPABASE_URL')
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')
+  if (!url || !serviceKey) {
+    return json({ error: 'SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not configured' }, 500)
+  }
+
+  const insert = await fetch(`${url}/rest/v1/turnstile_tickets`, {
+    method: 'POST',
+    headers: {
+      apikey: serviceKey,
+      Authorization: `Bearer ${serviceKey}`,
+      'Content-Type': 'application/json',
+      Prefer: 'return=representation',
+    },
+    body: JSON.stringify({ purpose: body.purpose, subject: body.subject ?? null }),
   })
+
+  if (!insert.ok) {
+    return json({ error: `could not mint a ticket: ${await insert.text()}` }, 500)
+  }
+
+  const rows = (await insert.json()) as { id?: string }[]
+  const id = rows?.[0]?.id
+  if (!id) {
+    return json({ error: 'the ticket came back without an id' }, 500)
+  }
+
+  return json({ ticket_id: id })
 })

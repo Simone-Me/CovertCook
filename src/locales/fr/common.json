@@ -19,7 +19,8 @@
     "add": "Ajouter",
     "remove": "Retirer",
     "ok": "OK",
-    "no": "Non, laisser"
+    "no": "Non, laisser",
+    "close": "Fermer"
   },
   "auth": {
     "signIn": "Se connecter",
@@ -280,7 +281,8 @@
       "vote": "Votez le menu",
       "results": "Résultats",
       "allergies": "Allergies",
-      "info": "Le dîner"
+      "info": "Le dîner",
+      "costs": "Les frais"
     },
     "waiting": {
       "assignment": "S'ouvre quand l'Executive Chef lance la roulette",
@@ -311,7 +313,13 @@
       "AWAITING_APPROVAL": "Vous avez déjà demandé à rejoindre. L'Executive Chef n'a pas encore répondu — le dîner apparaîtra ici dès qu'il l'aura fait.",
       "PREVIOUSLY_LEFT": "Vous avez quitté ce dîner. Demandez à l'Executive Chef de vous rajouter.",
       "WAS_REMOVED": "L'Executive Chef vous a retiré de ce dîner.",
-      "ROUND_FULL": "Ce dîner est complet."
+      "ROUND_FULL": "Ce dîner est complet.",
+      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner.",
+      "TURNSTILE_SECRET_KEY is not configured": "Le contrôle anti-robot est à moitié configuré sur ce déploiement : l’app envoie un vrai jeton et le serveur n’a aucune clé pour le vérifier. Définissez TURNSTILE_SECRET_KEY sur les fonctions, ou videz VITE_TURNSTILE_SITE_KEY pour que les deux côtés passent par le contournement de développement.",
+      "turnstile verification failed": "Le contrôle anti-robot a refusé cette tentative. Rechargez la page et réessayez le code.",
+      "token and purpose are required": "Le contrôle anti-robot n’a produit aucun jeton. Rechargez la page — et si cela persiste, VITE_TURNSTILE_SITE_KEY vaut quelque chose que Cloudflare ne reconnaît pas.",
+      "TURNSTILE_NO_TICKET": "Le contrôle anti-robot a répondu sans billet. Rechargez la page et réessayez.",
+      "CAPTCHA_REQUIRED": "Ce déploiement demande un contrôle anti-robot et la page n’en a pas fourni. Rechargez et réessayez."
     },
     "chainChoice": {
       "intro": "La chaîne est déjà faite. Retirer un maillon laisse deux extrémités libres — décidez ce qu'elles deviennent.",
@@ -398,7 +406,11 @@
     },
     "chefCount_one": "{{count}} chef",
     "chefCount_other": "{{count}} chefs",
-    "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne."
+    "frozen": "Ce dîner est terminé. Il reste consultable — les recettes, le menu et les résultats — et plus rien n’y est modifiable, par personne.",
+    "deletesOn": "Ce dîner s’effacera le {{date}}.",
+    "deletesWhatSurvives": "Ce que vous gardez : chaque recette mise dans votre carnet, et la photo que vous avez ajoutée à l’album. Le reste — la chaîne, les messages, les votes — part avec le dîner.",
+    "copyCode": "Copier le code",
+    "copyLink": "Copier le lien"
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
@@ -408,8 +420,13 @@
     "dishName": "Nom du plat",
     "course": "Type de plat",
     "courseOption": {
+      "APERITIF": "Apéritif",
+      "SNACK": "À grignoter",
       "STARTER": "Entrée",
+      "FIRST": "Premier plat",
       "MAIN": "Plat principal",
+      "SIDE": "Accompagnement",
+      "CHEESE": "Fromage",
       "DESSERT": "Dessert",
       "DRINK": "Boisson",
       "OTHER": "Autre"
@@ -431,6 +448,12 @@
     "addTag": "Ajouter",
     "tagsConfirmed": "J'ai vérifié le panneau diététique ci-dessus et confirme que les étiquettes cochées sont exactes.",
     "noBriefYet": "Aucune recette à afficher pour l'instant.",
+    "waiting": {
+      "title": "En attente de votre recette",
+      "body": "Le chef qui écrit pour vous ne l'a pas encore envoyée. Cette page se remplira dès qu'il le fera. Si le dîner approche et qu'il vous faut du temps pour les courses et la préparation, envoyez-lui un rappel — le Chef Exécutif est prévenu aussi.",
+      "remind": "Envoyer un rappel",
+      "reminded": "Rappel envoyé. Pour le reste, demandez ci-dessous."
+    },
     "cannotCook": "J'ai un problème",
     "cannotCookSent": "Le chef qui l'a écrite est prévenu. Expliquez ci-dessous — il peut vous aider, ou proposer autre chose.",
     "acknowledge": "Oui, chef !",
@@ -450,11 +473,47 @@
     "freeChoice": "Choix libre — le plat que vous voulez.",
     "labelDish": "Mettez un carton à côté de ce plat",
     "labelDishWhy": "Il contient {{items}}, et quelqu'un à cette table a dit que ça comptait pour lui. Un carton près du plat lui permet de décider lui-même.",
-    "needsMore": "Un nom, et soit un lien soit la recette écrite.",
     "errors": {
-      "DISH_NAME_LENGTH": "Le plat a besoin d'un nom d'au moins trois caractères.",
-      "RECIPE_TOO_EMPTY": "Ajoutez un lien, ou écrivez la recette."
-    }
+      "DISH_NAME_MISSING": "Le plat n’a pas encore de nom. C’est la première chose que votre cuisinier verra.",
+      "DISH_NAME_LENGTH": "Le plat a besoin d’un nom d’au moins trois caractères.",
+      "PROCEDURE_MISSING": "La préparation est vide. Écrivez comment faire, ou collez plutôt un lien vers une recette.",
+      "PROCEDURE_TOO_SHORT": "La préparation est trop courte pour être cuisinée. Une ligne ou deux suffisent — ou collez un lien.",
+      "INGREDIENTS_MISSING": "Aucun ingrédient listé. Votre cuisinier doit faire les courses — ou collez un lien qui les liste.",
+      "RECIPE_TOO_EMPTY": "Ajoutez un lien, ou écrivez la recette.",
+      "LINK_MALFORMED": "Ce lien doit commencer par http:// ou https://.",
+      "ALREADY_SUBMITTED": "Cette recette est déjà envoyée, et une recette envoyée ne se modifie plus.",
+      "DEADLINE_PASSED": "L’échéance des recettes est passée pour ce dîner.",
+      "ROUND_NOT_ACCEPTING": "Ce dîner n’accepte pas de recettes en ce moment.",
+      "NOTHING_WRITTEN": "Rien n’a encore été enregistré. Enregistrez d’abord un brouillon.",
+      "DIETARY_CONFLICT": "Ce plat contient {{items}}, et quelqu’un à cette table ne peut pas en manger. Changez la recette — le dîner est partagé.",
+      "constraint": {
+        "briefs_check": "Le plat a besoin d’un nom de trois à quatre-vingts caractères.",
+        "briefs_check1": "La préparation est trop courte pour la base de ce dîner, qui n’a pas encore été mise à jour. Collez un lien, ou écrivez deux lignes de plus.",
+        "briefs_check3": "Le contrôle des allergènes n’a pas tourné sur cette recette. Rouvrez-la et enregistrez-la à nouveau.",
+        "briefs_submitted_recipe_not_empty": "Une recette a besoin d’un lien ou d’une préparation écrite avant d’être envoyée.",
+        "briefs_external_url_check": "Ce lien doit commencer par http:// ou https://.",
+        "brief_ingredients_name_check": "Un des ingrédients est vide. Supprimez la ligne vide, ou remplissez-la."
+      }
+    },
+    "theMenu": "Le menu de ce soir",
+    "yours": "À vous",
+    "sendFinal": "Envoyer — définitif",
+    "submitConfirmTitle": "Envoyer cette recette ? Elle ne pourra plus être modifiée.",
+    "submitConfirmWhy": "Elle arrive chez votre cuisinier à l’instant où vous l’envoyez, et le formulaire se verrouille. Pas de correction, pas de retour en arrière, pas de deuxième version — relisez-la une fois avant d’appuyer.",
+    "summaryDish": "Plat : {{name}}",
+    "summaryLink": "Un lien à suivre : {{url}}",
+    "summaryWritten": "Écrite, avec {{n}} ingrédient(s) listé(s)",
+    "summaryFor": "Cuisinée par : {{name}}",
+    "missingIntro": "Pas encore prête à partir — il manque : {{items}}.",
+    "missing": {
+      "dishName": "le nom du plat",
+      "dishNameShort": "un nom de plat plus long (trois lettres au moins)",
+      "ingredients": "les ingrédients (ou un lien à la place)",
+      "procedure": "la préparation (ou un lien à la place)",
+      "procedureShort": "une préparation plus complète — une ligne ou deux, pas un mot",
+      "linkMalformed": "un lien commençant par http:// ou https://"
+    },
+    "submitConfirmLabel": "Oui — envoyer"
   },
   "chat": {
     "title": "Messages",
@@ -556,6 +615,13 @@
       "BEST_DRINK": "Meilleure boisson",
       "MOST_ORIGINAL": "Plus original",
       "BEST_BRIEF_RESPECT": "Meilleur respect de la recette"
+    },
+    "nothingServed": "Aucun plat n’a été enregistré pour ce dîner.",
+    "notServed": "non servi",
+    "winner": "Plat de la soirée",
+    "gate": {
+      "RESULTS_NOT_READY": "Les résultats n’existent pas encore — le dîner n’en est pas là.",
+      "RESULTS_NOT_PUBLISHED": "Le Chef exécutif a les résultats et ne les a pas encore annoncés. Patience."
     }
   },
   "chain": {
@@ -587,11 +653,17 @@
       "DROPOUT": "Un participant s'est désisté",
       "REPORTED_MESSAGE": "Un message a été signalé",
       "OTHER": "Autre"
-    }
+    },
+    "waiting_one": "{{count}} chose vous attend",
+    "waiting_other": "{{count}} choses vous attendent"
   },
   "errors": {
     "generic": "Une erreur est survenue. Réessayez.",
-    "notAuthenticated": "Vous devez être connecté."
+    "notAuthenticated": "Vous devez être connecté.",
+    "databaseBehind": {
+      "title": "Cette application parle à une base de données en retard sur elle.",
+      "body": "Une fonction dont elle a besoin n’est pas là. En local, c’est presque toujours .env.local qui pointe encore sur le projet déployé — VITE_SUPABASE_URL doit dire http://127.0.0.1:54321. Sinon les migrations n’ont pas été poussées : lancez `npx supabase db reset` en local, ou `npx supabase db push` sur le projet. Rien de ce que vous ferez dans l’app n’y changera quoi que ce soit."
+    }
   },
   "profile": {
     "title": "Profil",
@@ -750,7 +822,56 @@
       ]
     },
     "draftNote": "Un brouillon, écrit à partir de ce que fait réellement l'application. Il n'a pas été relu par un juriste, et il devra l'être avant que CovertCook facture quoi que ce soit — le panneau diététique contient des données de santé, et toute vente entraîne TVA européenne et droit de rétractation.",
-    "by": "par"
+    "by": "par",
+    "moderation": "Modération",
+    "moderationDoc": {
+      "title": "Modération",
+      "updated": "2026-08-27",
+      "sections": [
+        {
+          "heading": "Ce que ce texte couvre",
+          "body": [
+            "CovertCook permet d’écrire à trois endroits : le fil privé avec la personne pour qui vous cuisinez, le fil privé avec celle qui cuisine pour vous, et le frigo que toute la table lit. Tout ce qui s’y écrit aujourd’hui est choisi dans une liste de phrases toutes faites ; le jour où le texte libre s’ouvrira, cette page s’y appliquera telle quelle.",
+            "Elle couvre aussi les recettes elles-mêmes, écrites par un convive et lues par un autre."
+          ]
+        },
+        {
+          "heading": "Ce qui est interdit",
+          "body": [
+            "Les insultes, le harcèlement, les menaces, et tout ce qui vise quelqu’un pour ce qu’il est plutôt que pour ce qu’il a cuisiné. Les contenus sexuels. Les tentatives d’identifier un convive qui joue à couvert, ou de le faire identifier par un autre. Se servir d’une recette pour faire manger à quelqu’un ce qu’il a déclaré ne pas pouvoir manger.",
+            "Cette dernière règle est la seule propre à cette application, et c’est la plus grave. Le panneau alimentaire existe parce qu’une table partagée signifie qu’un plat atteint tout le monde."
+          ]
+        },
+        {
+          "heading": "Signaler",
+          "body": [
+            "Chaque message porte un drapeau. Le signaler l’envoie au Chef exécutif de ce dîner — la personne qui l’organise — et à personne d’autre. Celui qui signale n’est jamais nommé.",
+            "Le Chef exécutif voit la phrase avant de voir de quelle place elle vient, et peut agir sans jamais apprendre qui l’a écrite."
+          ]
+        },
+        {
+          "heading": "Ce que le Chef exécutif peut faire",
+          "body": [
+            "Envoyer un avertissement à la place, que la personne lit sur la page du dîner. Retirer la place du dîner — le même contrôle que lorsque quelqu’un se désiste. Les deux visent une place, pas un nom.",
+            "Il peut aussi dévoiler l’auteur d’un message signalé. Cela exige une raison écrite et reste inscrit définitivement dans le journal du dîner, avec le nom de qui l’a demandé. Cela existe pour joindre quelqu’un hors du jeu — pas pour décider quoi faire dedans."
+          ]
+        },
+        {
+          "heading": "Bloquer",
+          "body": [
+            "N’importe qui peut bloquer n’importe qui, depuis le frigo, sans apprendre de qui il s’agit. Les phrases d’une personne bloquée disparaissent aussitôt de votre frigo, et aucun de vous deux ne peut prendre place à un dîner où l’autre se trouve déjà.",
+            "Bloquer n’interrompt pas un dîner en cours : la soirée de trois autres personnes repose sur la chaîne, et un blocage ne peut pas la faire s’effondrer. L’effet est complet au dîner suivant."
+          ]
+        },
+        {
+          "heading": "Contester, et nous joindre",
+          "body": [
+            "Un avertissement ou un retrait est la décision d’un hôte sur une soirée. Si vous la jugez injuste, écrivez à contact@opus35.fr en précisant le dîner ; le journal enregistre chaque acte de modération, y compris ceux où nous nous sommes trompés.",
+            "Tout ce qui est urgent — une menace, un mineur en danger, un contenu qui relève de la police plutôt que de nous — va à la même adresse, et est lu par une personne."
+          ]
+        }
+      ]
+    }
   },
   "push": {
     "title": "Notifications",
@@ -772,7 +893,8 @@
       "denied": "Bloquées. Votre navigateur refuse à votre place et l’application ne peut plus le demander — il faut les réautoriser dans les réglages du site pour CovertCook.",
       "needs-install": "Ajoutez CovertCook à votre écran d’accueil et ouvrez-le depuis là. Sur iPhone et iPad, les notifications n’existent que dans l’application installée — c’est la règle d’Apple, pas la nôtre.",
       "unsupported": "Ce navigateur ne gère pas les notifications. Rien n’est cassé : il ne peut simplement pas.",
-      "unconfigured": "Pas encore disponible sur ce déploiement."
+      "unconfigured": "Pas encore disponible sur ce déploiement.",
+      "no-worker": "Le service en arrière-plan n’a pas démarré sur cet appareil : rien ne peut lui être remis. Rechargez l’app — la navigation privée le bloque net, et Brave demande d’activer son réglage de messagerie push."
     },
     "aside": {
       "checking": "…",
@@ -781,7 +903,38 @@
       "denied": "Bloquées",
       "needs-install": "Nécessite l’app installée",
       "unsupported": "Indisponible",
-      "unconfigured": "Indisponible"
+      "unconfigured": "Indisponible",
+      "no-worker": "À l’arrêt"
+    },
+    "test": {
+      "open": "Les notifications n’arrivent pas ?",
+      "title": "Tester cet appareil",
+      "why": "Sept maillons séparent un dîner de votre écran verrouillé, et quand l’un casse, le téléphone reste simplement silencieux. On les interroge un par un, puis on vous en envoie une pour de vrai.",
+      "check": {
+        "installed": "Ouverte depuis l’écran d’accueil, pas dans un onglet",
+        "api": "Ce navigateur a l’API de notifications",
+        "worker": "Le service en arrière-plan tourne",
+        "permission": "Vous avez autorisé les notifications",
+        "key": "Ce déploiement a une clé de signature",
+        "subscribed": "Ce navigateur détient un abonnement",
+        "server": "CovertCook a cet abonnement enregistré"
+      },
+      "fix": {
+        "installed": "Sur iPhone et iPad, c’est toute la réponse : Partager → Sur l’écran d’accueil, puis ouvrez CovertCook depuis cette icône. Les notifications n’existent pas dans un onglet Safari — règle d’Apple, pas la nôtre.",
+        "api": "Ce navigateur ne peut pas recevoir de notifications web. Rien n’est cassé ; essayez l’app installée sur un autre navigateur.",
+        "worker": "Le service en arrière-plan n’a jamais démarré. Rechargez l’app. Il est bloqué net en navigation privée, et Brave exige Paramètres → Confidentialité → « Utiliser les services Google pour la messagerie push » avant toute notification web.",
+        "permission": "Activez les notifications avec l’interrupteur ci-dessus. Si votre navigateur a déjà refusé, il ne redemandera pas — autorisez d’abord CovertCook dans les réglages du site.",
+        "key": "Ce déploiement n’a pas de clé de signature (VITE_VAPID_PUBLIC_KEY) : aucune notification ne peut en partir. Rien à faire depuis ce téléphone.",
+        "subscribed": "Coupez puis rallumez les notifications avec l’interrupteur ci-dessus — c’est ce qui demande une nouvelle adresse au navigateur.",
+        "server": "Ce navigateur a une adresse que le serveur n’a jamais reçue. Appuyez sur « Envoyer une notification de test » : elle est renvoyée juste avant l’envoi.",
+        "none": ""
+      },
+      "recheck": "Vérifier à nouveau",
+      "send": "Envoyer une notification de test",
+      "sent": "Envoyée. Elle devrait apparaître en quelques secondes — si rien n’arrive maintenant, le problème est entre votre téléphone et son service de push (Apple ou Google), pas dans cette app.",
+      "noRow": "Le serveur n’a d’adresse pour aucun de vos appareils. Coupez puis rallumez les notifications avec l’interrupteur ci-dessus.",
+      "refused": "Le serveur a essayé {{audience}} appareil(s) et tous ont été refusés. En général, la clé de signature a changé depuis votre abonnement : coupez puis rallumez les notifications pour obtenir une nouvelle adresse.",
+      "accountOff": "Votre compte a aussi les notifications coupées : rien d’autre que ce test ne serait parti."
     }
   },
   "account": {
@@ -858,6 +1011,135 @@
       "NO_SMOKING": "Sans tabac",
       "OTHER": "Autre chose",
       "otherPlaceholder": "Précisez"
+    }
+  },
+  "book": {
+    "title": "Votre carnet de recettes",
+    "empty": "Rien de gardé pour l’instant. À la fin d’un dîner, le menu vous laisse garder les recettes qui méritent d’être refaites.",
+    "keepRecipes": "Garder des recettes de ce dîner",
+    "stopChoosing": "Terminé",
+    "armHelp": "Touchez les plats que vous voulez garder. Rien n’est enregistré avant votre confirmation.",
+    "saveCount": "Garder {{n}} recette(s)",
+    "inYourBook": "dans votre carnet",
+    "savedTo": "{{n}} recette(s) sont entrées dans votre carnet.",
+    "savedNothingNew": "Elles étaient déjà dans votre carnet.",
+    "openBook": "Ouvrir le carnet",
+    "search": "Chercher un plat, un dîner, un ingrédient",
+    "anyCourse": "Toutes les catégories",
+    "anyRole": "Tous les rôles",
+    "count": "{{shown}} sur {{total}}",
+    "relation": {
+      "COOKED": "Vous l’avez cuisinée",
+      "WROTE": "Vous l’avez écrite",
+      "TABLE": "De la table"
+    },
+    "writtenBy": "Écrite par {{name}} ({{pseudonym}})",
+    "formerGuest": "Ancien invité",
+    "forget": "Retirer de mon carnet",
+    "forgetTitle": "Retirer « {{name}} » de votre carnet ?",
+    "forgetConfirm": "La retirer",
+    "forgetRecoverable": "Ce dîner existe encore : vous pourrez regarder son menu et la reprendre.",
+    "forgetLastCopy": "Le dîner d’où elle vient n’existe plus. C’est la seule copie qui reste, et la retirer est sans retour, pour personne.",
+    "exportMarkdown": "Télécharger en texte",
+    "exportJson": "Télécharger en JSON"
+  },
+  "moderation": {
+    "byPseudonym": "Vous voyez ce qui a été dit avant de savoir qui l’a dit, et chaque action ici vise une place à table plutôt qu’une personne. C’est voulu : connaître l’auteur d’abord, c’est laisser l’idée qu’on se fait de quelqu’un décider si son message était déplacé — et aucun nom n’est nécessaire pour avertir une place ou la retirer.",
+    "namesAreKnown": "Ce dîner n’est pas à couvert : vous savez déjà qui est où. Les actions ci-dessous visent quand même la place, et le dévoilement reste enregistré — c’est ce qui le rend vérifiable après coup.",
+    "fromSeat": "De {{name}}",
+    "alreadyWarned": "déjà averti à ce sujet",
+    "warn": "Envoyer un avertissement",
+    "warnReason": "Ce qu’il ou elle doit savoir (facultatif — transmis mot pour mot)",
+    "sendWarning": "Envoyer",
+    "reveal": "Dévoiler l’auteur",
+    "revealTitle": "Dévoiler cet auteur ?",
+    "revealWhy": "Tout le reste de cette page fonctionne sans nom. Pas ceci, et c’est enregistré : le dévoilement, qui l’a demandé et la raison que vous donnez sont inscrits dans le journal du dîner, définitivement. Servez-vous-en pour joindre quelqu’un hors du jeu — pas pour décider quoi faire dedans.",
+    "revealReason": "Pourquoi vous avez besoin du nom",
+    "revealConfirm": "Dévoiler, et l’inscrire",
+    "revealed": "Écrit par {{name}}. Ce dévoilement a été enregistré.",
+    "youWereWarned": "Un mot du Chef exécutif",
+    "warningNoReason": "Rien de plus n’a été précisé.",
+    "warningRead": "J’ai lu",
+    "blockedTitle": "Personnes que vous avez bloquées",
+    "blockHelp": "On bloque à un dîner, sur la place, sans jamais avoir à apprendre qui est la personne. Ses messages quittent votre frigo aussitôt, et aucun de vous deux ne peut prendre place à un dîner où l’autre est déjà. Cela n’interrompt pas un dîner en cours — la soirée de trois autres personnes repose sur la chaîne.",
+    "noBlocks": "Personne. Que ça dure.",
+    "unblock": "Débloquer",
+    "block": "Bloquer cette personne",
+    "errors": {
+      "REVEAL_NEEDS_A_REASON": "Écrivez pourquoi le nom vous est nécessaire. C’est enregistré avec le dévoilement.",
+      "REVEAL_ONLY_FOR_REPORTED": "Seul l’auteur d’un message signalé peut être dévoilé.",
+      "CANNOT_BLOCK_YOURSELF": "Cette place est la vôtre.",
+      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner."
+    }
+  },
+  "album": {
+    "title": "La table, à la fin",
+    "profileTitle": "Votre album",
+    "empty": "Aucune photo de cette table pour l’instant. Une seule image, à la fin de la soirée.",
+    "emptyForGuests": "Aucune photo de cette table pour l’instant.",
+    "profileEmpty": "Rien encore. À la fin d’un dîner vous pouvez ajouter sa photo ici, avec en dessous le menu qui a été servi — et elle reste une fois le dîner disparu.",
+    "add": "Ajouter la photo",
+    "replace": "Remplacer la photo",
+    "working": "Préparation…",
+    "remove": "Retirer",
+    "removed": "retirée",
+    "altFallback": "Une photo de {{name}}",
+    "takenBy": "Photo de {{name}}",
+    "heldBy": "C’est {{name}} qui ajoute la photo de cette table.",
+    "heldByYou": "La photo de cette table, c’est à vous de l’ajouter.",
+    "keep": "Ajouter à mon album",
+    "inYourAlbum": "Dans votre album",
+    "download": "Enregistrer sur cet appareil",
+    "forget": "Retirer de mon album",
+    "forgetConfirm": "La retirer",
+    "photographer": "Qui prend la photo",
+    "photographerMe": "Moi, le Chef Exécutif",
+    "handOver": "Confier l’appareil",
+    "handedOver": "C’est fait — il peut l’ajouter, vous ne pouvez plus.",
+    "photographerHint": "Choisissez un chef et confiez-lui l’appareil : il ajoutera la photo depuis son propre téléphone, et tant qu’il l’a, vous ne pouvez plus.",
+    "photographerHintGiven": "C’est lui qui a l’appareil. Choisissez-vous et confiez-le à nouveau pour le reprendre.",
+    "exifNote": "Une photo par dîner, et elle n’entre dans l’album de personne tant que personne ne l’ajoute. Les données de localisation sont retirées dans votre navigateur avant tout envoi — une photo de téléphone transporte l’adresse où elle a été prise, et personne à un dîner n’a besoin de la vôtre.",
+    "errors": {
+      "NOT_AN_IMAGE": "Ce n’est pas une image.",
+      "TOO_LARGE": "Ce fichier est trop lourd pour être ouvert sans risque. En dessous de 12 Mo, tout va bien.",
+      "UNREADABLE": "Cette image n’a pas pu être lue sur cet appareil.",
+      "ALBUM_NOT_OPEN_YET": "L’album s’ouvre en même temps que le dîner.",
+      "PHOTO_PATH_MISMATCH": "Quelque chose s’est mal passé pendant l’envoi. Réessayez.",
+      "NOT_THE_PHOTOGRAPHER": "Quelqu’un d’autre a l’appareil pour ce dîner.",
+      "NOT_AT_THIS_TABLE": "Ce chef n’est plus à cette table.",
+      "PHOTO_REMOVED": "Cette photo a été retirée.",
+      "PHOTO_NOT_IN_YOUR_ALBUM": "Elle n’est pas dans votre album."
+    }
+  },
+  "costs": {
+    "label": "Frais partagés",
+    "on": "Activé",
+    "share": "Partager ce que coûte le dîner",
+    "budgetPerHead": "Budget par personne (facultatif)",
+    "budgetHint": "Convenu maintenant plutôt qu’à la fin, pour qu’il oriente ce que chacun écrit. Laissez vide pour partager les frais sans plafond.",
+    "perHead": "{{amount}} chacun",
+    "agreed": "Convenu pour ce dîner : {{amount}} chacun.",
+    "yourList": "Ce qu’on vous a demandé d’acheter",
+    "whatYouSpent": "Ce que vous avez dépensé, tout compris",
+    "notePlaceholder": "Une note, si vous voulez",
+    "save": "Enregistrer ma dépense",
+    "saved": "Enregistré.",
+    "you": "Vous",
+    "average": "Moyenne à cette table",
+    "total": "Le dîner entier",
+    "reported": "{{reported}} sur {{people}} ont répondu.",
+    "overBudget": "Vous dépassez le budget convenu. Rien ne vous en empêche — cela veut simplement dire que les autres vous rembourseront.",
+    "amountInvalid": "Écrivez un montant comme 12,50.",
+    "settlementTitle": "Le partage",
+    "square": "à l’équilibre",
+    "isOwed": "doit recevoir {{amount}}",
+    "owes": "doit {{amount}}",
+    "settlementNote": "Chacun paie la même part du dîner entier. L’app ne déplace aucun argent — elle dit seulement qui doit donner quoi à qui.",
+    "errors": {
+      "COSTS_NOT_SHARED": "Ce dîner ne partage pas ses frais.",
+      "SETTLEMENT_TOO_EARLY": "L’addition vient après le repas.",
+      "BUDGET_TOO_LATE": "La roulette a tourné et les recettes s’écrivent sur ce budget — il ne bouge plus.",
+      "AMOUNT_INVALID": "Écrivez un montant comme 12,50."
     }
   }
 }

@@ -6,6 +6,8 @@ import { useRound } from '../rounds/hooks'
 import { DietaryPanelGrid } from '../rounds/DietaryPanelGrid'
 import { ChatThread } from '../chat/ChatThread'
 import { BackToTable } from '../../components/BackToTable'
+import { InlineConfirm } from '../../components/InlineConfirm'
+import { supabase } from '../../lib/supabase'
 import {
   getDietaryPanel,
   getMyAssignment,
@@ -14,6 +16,7 @@ import {
   submitBrief,
   notifyMyCook,
   type BriefIngredient,
+  type Course,
 } from '../../lib/rpc'
 
 // Two ways to write a recipe, because there are two kinds of person here and
@@ -41,6 +44,20 @@ function linesToIngredients(text: string): BriefIngredient[] {
     .map((name) => ({ name, quantity: null, unit: null }))
 }
 
+// The column refuses anything without a scheme, and somebody pasting a recipe
+// from their phone's address bar gets "cuisine-az.com/tarte" with no https://
+// in front of it. Refusing that is technically correct and completely useless:
+// there is exactly one thing they could have meant. So it is completed rather
+// than rejected — and completed in the field, where it can be seen and
+// corrected, never silently on the way to the database.
+function normaliseUrl(raw: string): string {
+  const url = raw.trim()
+  if (url === '' || /^https?:\/\//i.test(url)) return url
+  // Anything without a dot is not a domain someone forgot to prefix; it is
+  // something else entirely, and guessing at it would be inventing a link.
+  return /^[^\s/]+\.[^\s/]/.test(url) ? `https://${url}` : url
+}
+
 export function BriefEditorPage() {
   const { t } = useTranslation()
   const { roundId } = useParams()
@@ -61,6 +78,24 @@ export function BriefEditorPage() {
     enabled: !!roundId,
     queryFn: () => getDietaryPanel(roundId as string),
   })
+  // The whole menu, not just my line of it. One course named in a grey
+  // sentence is a fact with nothing to compare it against — the reader cannot
+  // tell whether "Dessert" is one of two courses or one of six, and half of
+  // them did not notice it was there at all. The menu shows the dinner and
+  // marks the reader's place in it.
+  const { data: slots } = useQuery({
+    queryKey: ['rounds', roundId, 'slots'],
+    enabled: !!roundId && round?.slot_mode === 'CATEGORIES',
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('slots')
+        .select('id,course')
+        .eq('round_id', roundId as string)
+        .order('course')
+      if (error) throw error
+      return data as { id: string; course: Course }[]
+    },
+  })
 
   const [mode, setMode] = useState<Mode>('quick')
   const [dishName, setDishName] = useState('')
@@ -73,6 +108,10 @@ export function BriefEditorPage() {
   const [submitted, setSubmitted] = useState(false)
   const [busy, setBusy] = useState(false)
   const [loadedFromDraft, setLoadedFromDraft] = useState(false)
+  // Sending is the one irreversible thing on this page, and the button that
+  // does it used to be the same size and weight as "Save". This is what stands
+  // between them.
+  const [confirmingSubmit, setConfirmingSubmit] = useState(false)
 
   useEffect(() => {
     if (draft && !loadedFromDraft) {
@@ -125,10 +164,37 @@ export function BriefEditorPage() {
   if (roundLoading || draftLoading || !round) return <p className="muted">…</p>
 
   const editingClosed = round.status !== 'ASSIGNED' || submitted
-  const hasLink = externalUrl.trim().length > 0
-  const hasBody =
-    procedure.trim().length >= 30 || quickIngredients.trim().length > 0 || ingredients.some((i) => i.name.trim())
-  const complete = dishName.trim().length >= 3 && (hasLink || hasBody)
+
+  // What the cook needs, checked here so it can be said in words before the
+  // send rather than bounced back as a constraint name afterwards.
+  //
+  //   a name, AND
+  //   either a link to follow
+  //   or the recipe written out — the method AND the list, both.
+  //
+  // The second half used to be an OR, which let a bare list of ingredients
+  // count as a complete recipe: the cook got seven things to buy and no idea
+  // what to do with them.
+  const rows = mode === 'careful' ? ingredients : linesToIngredients(quickIngredients)
+  const link = externalUrl.trim()
+  const linkOk = link !== '' && /^https?:\/\//i.test(link)
+  const hasIngredients = rows.some((i) => i.name.trim().length > 0)
+  const procedureWritten = procedure.trim().length
+  const writtenOut = procedureWritten >= 30 && hasIngredients
+
+  // In the order the form reads, so the list points down the page. Each entry
+  // is a key under briefs.missing — the sentence lives in the translations,
+  // and it names the field rather than describing the failure.
+  const missing: string[] = []
+  if (dishName.trim() === '') missing.push('dishName')
+  else if (dishName.trim().length < 3) missing.push('dishNameShort')
+  if (link !== '' && !linkOk) missing.push('linkMalformed')
+  if (!writtenOut && !linkOk) {
+    if (!hasIngredients) missing.push('ingredients')
+    if (procedureWritten === 0) missing.push('procedure')
+    else if (procedureWritten < 30) missing.push('procedureShort')
+  }
+  const complete = missing.length === 0
 
   // Switching modes must not throw away what's already typed — the two
   // shapes hold the same list, so translate rather than reset.
@@ -152,6 +218,33 @@ export function BriefEditorPage() {
     setIngredients((prev) => prev.map((ing, idx) => (idx === i ? { ...ing, ...patch } : ing)))
   }
 
+  // Every refusal this page can receive, turned into a sentence about a field.
+  //
+  // Three shapes arrive here and all three used to reach the screen raw:
+  //
+  //   * a code from submit_brief / save_brief_draft (0055) — translated;
+  //   * DIETARY_CONFLICT|label, which carries the allergen it hit, because
+  //     "conflicts with a restriction" without saying which one leaves the
+  //     sender to guess at somebody else's medical record;
+  //   * a Postgres constraint violation, which is what a database that has
+  //     not run 0055 yet still produces. `briefs_check1` is not a thing a
+  //     person can act on, so the ones that can actually fire are mapped to
+  //     the field they are about.
+  function explain(raw: string): string {
+    if (raw.startsWith('DIETARY_CONFLICT|')) {
+      return t('briefs.errors.DIETARY_CONFLICT', { items: raw.slice('DIETARY_CONFLICT|'.length) })
+    }
+    const known = t(`briefs.errors.${raw}`, { defaultValue: '' })
+    if (known) return known
+
+    const constraint = raw.match(/violates check constraint "([^"]+)"/)?.[1]
+    if (constraint) {
+      const byName = t(`briefs.errors.constraint.${constraint}`, { defaultValue: '' })
+      if (byName) return byName
+    }
+    return raw || t('errors.generic')
+  }
+
   async function save() {
     if (!roundId) return
     await saveBriefDraft({
@@ -166,7 +259,7 @@ export function BriefEditorPage() {
           ? ingredients.filter((i) => i.name.trim().length > 0)
           : linesToIngredients(quickIngredients),
       procedure,
-      externalUrl: externalUrl.trim() || null,
+      externalUrl: normaliseUrl(externalUrl) || null,
       difficulty: null,
       estCost: null,
       prepMinutes: null,
@@ -186,7 +279,7 @@ export function BriefEditorPage() {
       setSaved(true)
       await refetchDraft()
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      setError(explain(err instanceof Error ? err.message : ''))
     } finally {
       setBusy(false)
     }
@@ -195,6 +288,14 @@ export function BriefEditorPage() {
   async function onSubmit() {
     if (!roundId) return
     setError(null)
+    // The button is disabled while anything is missing, but a disabled button
+    // is not a rule — this is the same check on the way out, so a keyboard, a
+    // stale render or a hand-made call meets it too.
+    if (!complete) {
+      setConfirmingSubmit(false)
+      setError(t('briefs.missingIntro', { items: missing.map((k) => t(`briefs.missing.${k}`)).join(', ') }))
+      return
+    }
     setBusy(true)
     try {
       await save()
@@ -202,11 +303,10 @@ export function BriefEditorPage() {
       // The recipe reaches its cook the instant it is submitted (0035), so the
       // notification belongs here rather than at the next phase change.
       void notifyMyCook(roundId)
+      setConfirmingSubmit(false)
       setSubmitted(true)
     } catch (err) {
-      const raw = err instanceof Error ? err.message : ''
-      const known = t(`briefs.errors.${raw}`, { defaultValue: '' })
-      setError(known || raw || t('errors.generic'))
+      setError(explain(err instanceof Error ? err.message : ''))
     } finally {
       setBusy(false)
     }
@@ -223,12 +323,37 @@ export function BriefEditorPage() {
         </p>
       )}
 
-      {/* Informative, never a choice: this is what the roulette handed you. */}
-      <p className="muted">
-        {assignment && round.slot_mode === 'CATEGORIES'
-          ? t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })
-          : t('briefs.freeChoice')}
-      </p>
+      {/* Informative, never a choice: this is what the roulette handed you.
+          Printed as the menu it is, with your line marked, because a course
+          named in a grey sentence between two other grey sentences is a thing
+          people read past — and then write a starter for a dessert slot. */}
+      {assignment && round.slot_mode === 'CATEGORIES' && (slots?.length ?? 0) > 0 ? (
+        <div className="menucard">
+          <p className="menucard__head">{t('briefs.theMenu')}</p>
+          <ul className="menucard__list">
+            {(slots ?? []).map((slot) => {
+              const yours = slot.id === assignment.slot_id
+              return (
+                <li key={slot.id} className="menucard__row">
+                  <div className={`menucard__course${yours ? ' is-now is-yours' : ''}`}>
+                    <span className="menucard__name">{t(`briefs.courseOption.${slot.course}`)}</span>
+                    {yours && <span className="menucard__course-kind">{t('briefs.yours')}</span>}
+                  </div>
+                </li>
+              )
+            })}
+          </ul>
+          <p className="menucard__note">
+            {t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })}
+          </p>
+        </div>
+      ) : (
+        <p className="muted">
+          {assignment && round.slot_mode === 'CATEGORIES'
+            ? t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })
+            : t('briefs.freeChoice')}
+        </p>
+      )}
 
       {editingClosed && <p className="muted">{submitted ? t('briefs.alreadySubmitted') : t('briefs.editingClosed')}</p>}
       {error && <div className="error">{error}</div>}
@@ -353,8 +478,14 @@ export function BriefEditorPage() {
           <input
             id="external-url"
             disabled={editingClosed}
+            inputMode="url"
+            placeholder="https://…"
             value={externalUrl}
             onChange={(e) => setExternalUrl(e.target.value)}
+            // On the way out of the field, not on every keystroke: prefixing
+            // while somebody is still typing rewrites the text under their
+            // cursor.
+            onBlur={() => setExternalUrl((prev) => normaliseUrl(prev))}
           />
         </div>
       </div>
@@ -374,21 +505,65 @@ export function BriefEditorPage() {
       <DietaryPanelGrid entries={dietaryPanel} />
 
       {!editingClosed && (
-        <div className="row">
-          <button type="button" className="secondary" onClick={onSave} disabled={busy}>
-            {t('actions.save')}
-          </button>
-          <button type="button" onClick={onSubmit} disabled={busy || !complete}>
-            {t('actions.submit')}
-          </button>
-        </div>
+        <>
+          {/* What is still missing, named. "A name, and either a link or the
+              recipe written out" was a restatement of the rule, and a rule
+              read next to a disabled button does not say which half of it you
+              have failed — the reader has to hold the whole thing in their
+              head and audit their own form against it. This says the field. */}
+          {!complete && (
+            <div className="notice notice--wanting">
+              {t('briefs.missingIntro', { items: missing.map((k) => t(`briefs.missing.${k}`)).join(', ') })}
+            </div>
+          )}
+
+          <div className="row">
+            <button type="button" className="secondary" onClick={onSave} disabled={busy}>
+              {t('actions.save')}
+            </button>
+            {/* Saving is reversible and sending is not, so only one of these
+                two asks a second time. The consequence is on the button
+                itself as well as in the box it opens: "Submit" said nothing
+                about the door closing behind it. */}
+            <button
+              type="button"
+              onClick={() => setConfirmingSubmit(true)}
+              disabled={busy || !complete || confirmingSubmit}
+            >
+              {t('briefs.sendFinal')}
+            </button>
+          </div>
+
+          {confirmingSubmit && (
+            <InlineConfirm
+              title={t('briefs.submitConfirmTitle')}
+              confirmLabel={t('briefs.submitConfirmLabel')}
+              busy={busy}
+              onConfirm={onSubmit}
+              onCancel={() => setConfirmingSubmit(false)}
+            >
+              <p className="confirmbox__why">{t('briefs.submitConfirmWhy')}</p>
+              {/* Read it back before it goes. Not a preview of the page they
+                  are already looking at — the three things that are about to
+                  become somebody else's evening, in one line each. */}
+              <ul className="muted" style={{ margin: '6px 0 0', paddingLeft: 18 }}>
+                <li>{t('briefs.summaryDish', { name: dishName.trim() })}</li>
+                <li>
+                  {linkOk
+                    ? t('briefs.summaryLink', { url: link })
+                    : t('briefs.summaryWritten', { n: rows.filter((i) => i.name.trim()).length })}
+                </li>
+                <li>{t('briefs.summaryFor', { name: assignment?.cook_display_name ?? assignment?.cook_secret_name ?? '' })}</li>
+              </ul>
+            </InlineConfirm>
+          )}
+        </>
       )}
-      {!editingClosed && !complete && <p className="muted">{t('briefs.needsMore')}</p>}
 
       {assignment && (
         <>
           <h2>{t('chat.title')}</h2>
-          <ChatThread pairingId={assignment.pairing_id} />
+          <ChatThread pairingId={assignment.pairing_id} roundId={roundId} />
         </>
       )}
     </div>

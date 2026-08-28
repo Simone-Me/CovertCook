@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef } from 'react'
+import { captchaConfigured, captchaSiteKey } from '../lib/captcha'
 
 declare global {
   interface Window {
@@ -10,7 +11,6 @@ declare global {
 }
 
 const SCRIPT_SRC = 'https://challenges.cloudflare.com/turnstile/v0/api.js'
-const PLACEHOLDER_SITE_KEY = 'replace-with-turnstile-site-key'
 
 /**
  * Renders a Cloudflare Turnstile widget and calls onVerify with the token
@@ -22,19 +22,21 @@ const PLACEHOLDER_SITE_KEY = 'replace-with-turnstile-site-key'
 export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
   const containerId = useId()
   const widgetId = useRef<string | null>(null)
-  const siteKey = import.meta.env.VITE_TURNSTILE_SITE_KEY
+  const siteKey = captchaSiteKey()
 
   useEffect(() => {
-    if (!siteKey || siteKey === PLACEHOLDER_SITE_KEY) {
-      onVerify('dev-placeholder-token')
-      return
-    }
+    // Nothing to draw and nothing to send. It used to hand back a placeholder
+    // token that an Edge Function accepted without checking — which was not a
+    // bypass so much as an absence of protection with extra steps, and it is
+    // gone (0063).
+    if (!captchaConfigured()) return
 
     let cancelled = false
 
     function render() {
       const el = document.getElementById(containerId)
       if (!el || !window.turnstile || cancelled) return
+      if (!siteKey) return
       widgetId.current = window.turnstile.render(el, { sitekey: siteKey, callback: onVerify })
     }
 
@@ -55,6 +57,6 @@ export function Turnstile({ onVerify }: { onVerify: (token: string) => void }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [containerId, siteKey])
 
-  if (!siteKey || siteKey === PLACEHOLDER_SITE_KEY) return null
+  if (!captchaConfigured()) return null
   return <div id={containerId} />
 }

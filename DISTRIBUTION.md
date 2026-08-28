@@ -49,13 +49,15 @@ Nothing below can be skipped by choosing a different route.
 | **In-app account deletion** | Google Play requires an in-app path *and* a web URL to request deletion. Apple guideline 5.1.1(v) requires deletion from inside the app. Not "email us". | **Built (`0049`)** — anonymise in place, thirty days, cancellable. What is left is the public request URL for people who have not installed the app |
 | **Outbound email** | A password reset or an invite that silently fails is a review rejection and a support burden. | Blocked on a provider key |
 | **Real icons + store assets** | Icons at every size, a 512×512 store icon, a feature graphic, screenshots per device class. | Placeholders |
-| **UGC obligations** | The moment free-text chat opens, both stores require: a way to **report** content, a way to **block** a user, published moderation terms, and a contact. Canned templates today = safe. Free-text = this is required *before* it ships. | Chat is templates-only today |
+| **UGC obligations** | The moment free-text chat opens, both stores require: a way to **report** content, a way to **block** a user, published moderation terms, and a contact. Canned templates today = safe. Free-text = this is required *before* it ships. | **Done ahead of it (`0059`, `0060`)** — report on phrases and photographs, block by seat, moderation policy at `/legal/moderation`, contact in the footer. Free-text chat can now ship without owing anything |
 
-**Read that last row twice.** "Free-text chat" is high on the `README.md`
-build list, and it is the item that turns this from a small app into a
-platform with content-moderation duties. If a store listing is the goal,
-those two pieces of work are now coupled: ship chat and you owe report,
-block, and a moderation policy in the same release.
+**That last row used to be the warning of this document.** "Free-text chat" is
+high on the `README.md` build list, and it is the item that turns this from a
+small app into a platform with content-moderation duties — so the two pieces of
+work were coupled, and shipping chat meant owing report, block and a moderation
+policy in the same release. They were built first instead, on 2026-08-27,
+because the album (`0060`) is user-generated content too and needed exactly the
+same three things. The coupling is gone: chat can ship on its own schedule.
 
 Rough effort for the whole column, part-time: **2–4 weeks**, of which the
 migration deploy is an afternoon and the legal round-trip is calendar

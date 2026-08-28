@@ -32,6 +32,7 @@ export function AppFooter() {
         </span>
         <Link to="/legal/terms">{t('legal.terms')}</Link>
         <Link to="/legal/privacy">{t('legal.privacy')}</Link>
+        <Link to="/legal/moderation">{t('legal.moderation')}</Link>
         <a href="mailto:contact@opus35.fr">{t('legal.contact')}</a>
       </p>
 

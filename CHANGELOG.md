@@ -59,6 +59,666 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-28
+
+**One photograph of the table, taken by somebody** (`0068`), **a menu with more
+than three courses** (`0066`), **a cook's page that exists before the recipe
+does** (`0067`), and the coin jar the costs drawer should always have worn.
+
+*Start with the bug, because it has been quietly emptying every album since
+`0061`.* That migration rewrote the photo bucket's read policy from
+`is_round_member(folder, uid)` into a pair of `EXISTS` over `dinner_photos`, so
+that a photograph could still be looked at after its dinner was purged. The
+logic was right. The privilege was not: `dinner_photos` has RLS on and — by
+design, said out loud in `0060` — **no policies and no grants**, because every
+read of it goes through a `SECURITY DEFINER` function. A storage policy is not
+one of those. It is evaluated as the caller, so the subquery ran as
+`authenticated`, hit a table it has no `SELECT` on, and the whole expression
+failed with "permission denied".
+
+The failure is invisible in exactly the way that matters. Uploading works. The
+row is written. `list_round_photos` — a definer function — returns it, and the
+tile appears. Then `createSignedUrl` is refused, the client turns that into a
+null URL, and the dashed placeholder sits there forever. **A photograph that
+uploaded successfully and cannot be looked at, with no error anywhere.** The
+policy now asks a definer function a yes/no question, which is the posture the
+rest of the schema already had.
+
+*And then the decision `0060` avoided.* It said so plainly: one photo per
+dinner "immediately asks who gets to be the photographer, so one each says
+everybody may add theirs". What one-each actually produces is four near
+identical pictures of the same table taken minutes apart, none of them the one
+anybody would have chosen, and a profile album that is a scroll of them — which
+is a camera roll, not an album. The question was worth asking rather than
+avoiding, and the dinner already has an answer: the person whose dinner it is.
+
+So it is **one photograph, and the Executive Chef's to take** — one more
+decision on a list that already holds the menu, the roulette, the vote and the
+door. And because the person running a dinner is usually the person carrying
+plates at the end of it, they can **hand the camera to one named chef**, who
+adds it from their own phone.
+
+**Handing it over means giving it up.** Choose, then confirm — two gestures,
+because the second one is the moment the host stops being able to take the
+photograph, and that is not something to do by brushing a select. While the
+handover stands the Executive Chef cannot upload or replace anything; they take
+it back the same way, by handing it to themselves. A right two people hold at
+once is not a handover, it is a suggestion, and the table would have no way of
+knowing whose job it actually was — which is why **everybody is told, in words,
+under the frame**: "Lena adds the photograph of this table". Somebody looking
+at an empty frame is already asking who they are waiting for.
+
+That line is also why the credit on the picture changed from a pseudonym to a
+real name. It used to be the seat's — correct when everybody added their own,
+and wrong the moment the table is told in words who holds the camera, because
+the pseudonym would then sit one line from that person's real name and hand
+over the mapping the whole design exists to protect. One public fact, said once.
+
+**That picker is the only place in the app that shows real names during a
+dinner, and how it does it is the interesting part.** A host cannot choose
+"Saffron" — they are choosing a person in a room. But `list_round_members`
+hands out `member_id` beside `secret_name` and withholds `profile_id` until the
+reveal, precisely so no client can build the map from a pseudonym to a person;
+a photographer stored as a `member_id`, picked from a list of real names, would
+hand the host that map in one join. So `list_table_chefs` returns **profile ids
+and real names, no seats and no pseudonyms**, ordered by name so position
+cannot be read as a correlation either, and the delegation is stored on
+`rounds` as a profile. The host learns nothing they did not already know: they
+approved every one of these people.
+
+*Nothing lands in an album by itself, and that is the second decision.* The
+photograph was arriving in the album of everybody who had been at the dinner,
+automatically, which sounds generous and is the same mistake one-each was: a
+folder that fills itself is not a keepsake. `saved_photos` is `saved_recipes`
+(`0058`) with a picture in it — there is an **add button under the photograph on
+the results screen**, exactly where the button that keeps a recipe already is,
+and pressing it is the only way anything reaches an album. Beside it, a second
+button that is a different act and had to be offered separately: **save to this
+device**, a file that outlives the account rather than a copy inside it. (It
+fetches the picture into a blob first — the signed URL is on another origin and
+browsers ignore `download` across origins, so a plain link would have quietly
+meant "open in a tab".)
+
+Like a recipe, what is kept is a **copy**: the dinner can be purged three weeks
+later (`0062`) and the photographer can swap the picture out at any point before
+that, and neither rewrites what somebody chose to keep. The one exception is
+moderation, and it is deliberate: taking a photograph down reaches the copies,
+because a removal that leaves the picture in nine albums has removed nothing.
+
+*The album stops being a list of doors, and becomes a list.* Its headings were
+links back to the dinner — and once the dinner is purged a heading is a door
+onto nothing; an album whose value is a link is an index. But full-width
+pictures are no better, because by the fourth dinner you are scrolling past
+photographs to find an evening you can already name. So it is **one line per
+evening, its name and its date**, and the triangle opens the one you came for:
+the photograph, who took it, and **the menu that was eaten**, printed under it.
+The same disclosure the settings use, for the same reason — read them one at a
+time. In the profile it now sits directly under the recipe book, both of them
+above everything else, because those two are the only sections anybody opens
+because they want to rather than because something needs correcting.
+
+*And the photo drawer on the round page came back out.* It was added an hour
+earlier in this same entry's work, on the reasoning that the picture is taken at
+the table and the results screen does not open until the vote is counted. True,
+and not worth a tenth envelope: the photograph reaches the app from a camera
+roll, not from a live viewfinder, and `preparePhoto` has never cared when the
+shutter was pressed. The album lives in exactly two places — the results screen,
+where it is offered, and the profile, if you kept it.
+
+*A menu has more than three courses.* `course` had held five values since
+`0001` — starter, main, dessert, drink, other — which is a schema written for
+the shape of a game rather than of a dinner. The moment a table of six composes
+a menu it runs out: the olives handed round standing up, the cheese, and the
+salad that came with the main are all "Other", and **Other is not a course, it
+is a shrug** — the results menu can only print it last, whatever it was. Five
+more, positioned in the enum with `ADD VALUE ... BEFORE/AFTER` so the database
+returns a menu already in the order it is eaten: aperitif, nibbles, starter,
+first course, main, side, cheese, dessert. Nibbles is there deliberately: it is
+a real assignment and it is the friendliest one to hand somebody who cannot
+cook, which is worth having in a game about cooking.
+
+*The cook's page before the recipe arrives.* It used to render one grey line —
+"no recipe to show yet" — and nothing else, and everything a cook in that
+position could actually **do** was behind it. The conversation with the person
+writing for them lives on that page and that page is its only door, so for
+exactly as long as there was something to ask about there was nowhere to ask
+it; the page appeared at the moment it stopped being needed. And the sentence
+for it has been in the database since `0010`, with a host alert wired to the
+back of it, unreachable.
+
+`get_my_brief` now starts from the pairing and left-joins the recipe, so the
+page exists from the moment the roulette runs. The layout stays and the content
+goes: same heading, same course on the badge — it was dealt, and it is true
+before anything is written — and the two sections ruled and blank, the way a
+page in a recipe book waiting to be filled in looks. What the shape says is
+that nothing is broken and nothing is lost. Under it, one tap: a reminder, to
+the chef writing for you and to the Executive Chef at the same time, without
+either being accused of anything.
+
+*Also:* the shared-costs drawer wore the map pin, borrowed from the info drawer
+directly beneath it — two envelopes with the same mark, one of them about
+money. It has a coin jar now, and the 512 px master went to `assets-src/icons/`
+where the other nine live, because everything left in `public/` is precached by
+the service worker and ships to every phone that installs the app.
+
+*Tested:* `smoke_test11.sql` rewritten around who may add the photograph — the
+Executive Chef refused on their own dinner once they have handed the camera
+over is the assertion that matters — what the picker is careful not to say, and
+that pressing add is the only way into an album. `smoke_test12.sql` proves both
+halves of the promise across the purge: Olga and Piet kept the evening and still
+have it, with its menu in the order it was eaten, and Rosa sat at the same table,
+kept nothing, and has nothing.
+
+---
+
+## 2026-08-27 (7)
+
+**Everybody reads in their own language** (`0064`), **shared costs** (`0065`),
+and two copy buttons instead of one.
+
+*The language bug is the important one, and it was found by using the app.* The
+canned phrases exist for exactly one reason: so that two people who share no
+language can still say something to each other at a dinner. The writer picks
+from a list, the reader gets the same thought in their own words — that is the
+whole argument for a closed vocabulary over free text. And it did not work. A
+message stored the id of **one locale's row**, because the French sentence and
+the English sentence are two rows with two ids, so a French cook picked "Goûte
+avant de servir" and an English diner opened the fridge and read it in French.
+
+A phrase is a thought, not a string. `message_templates` now carries a
+`template_key` shared across locales, and every reader resolves it against
+their own — the fridge, the private threads, and the reported phrases the host
+is deciding what to do about, which matters most of the three. `template_id`
+stays exactly as it was: still a true record of what the writer chose, and now
+enough to find the thought behind it.
+
+The keys are derived by position rather than typed out fifty-six times, because
+every seed in this repo inserts the two locales in the same order — and because
+that is an assumption rather than a guarantee, the migration **refuses to run**
+if any group has a different number of phrases per locale, which is the one way
+position-pairing could silently key the wrong sentences together. Verified in
+`smoke_test13.sql` against the actual pairs, not just the counts.
+
+*Shared costs.* A budget each, agreed when the dinner is created — before the
+roulette, before the recipes. That timing is the feature: a recipe written for
+a €10 dinner is a different recipe, so the budget shapes what people write
+rather than passing judgement on their receipts afterwards. Everybody records
+what they spent beside the shopping list they were actually given, and at the
+end the app says who should hand what to whom.
+
+**The one real decision was what to show while the dinner is running, and it is
+not a per-person list.** The case for one is genuine: seeing that everyone else
+is at €12 would let somebody about to spend €40 reconsider. The case against is
+that it is a leaderboard about money between friends, it invites exactly the
+comparison the feature exists to remove, and the person who has overspent finds
+out in front of everybody who has not. So: your own number, the table's
+average, and the budget. "Everyone is around twelve and I am at thirty-five" is
+the half that steers; "Marta is at thirty-five" is the half that starts an
+argument at a table Marta is sitting at. The individual numbers appear at
+settlement, because nobody can be asked for eight euros without being told why,
+and by then the dinner is a memory rather than a competition.
+
+Money is integer cents everywhere, including in the input box. The remainder
+that does not divide — three people and €58.00 is 1933 each and one cent over —
+is handed to whoever spent most, because they are the ones owed money and being
+owed a cent less is the smallest unfairness available. The balances sum to
+**exactly** zero, and the test asserts it rather than assuming it: a settlement
+that invents or loses a cent is one nobody can be asked to act on.
+
+*One note on where this sits.* `ROADMAP.md` §2 says free stays a whole product
+and Pro sells flavour only — tables and themes — because a table should never
+be split into paying and non-paying players. Splitting the bill is neither
+flavour nor a game mechanic, so it does not sit cleanly on either side of that
+line; it is labelled Pro as asked and works today, and the switch is in one
+place for the day that decision is revisited.
+
+*Also:* the share row printed the code and had one "Copy" button that copied
+the **link**, which is two things and one control. Two buttons now, each saying
+what it takes — a link opens the app on the right screen with the code already
+in it, and the code alone is what you read out at a table or paste into a group
+chat that mangles links — and both say "Copied!" for two seconds, because the
+clipboard is the one operation in a browser with no visible result of its own.
+
+*Tested:* `smoke_test13.sql` — a French phrase read in English and proved to be
+the same thought, the budget refusing to move once the roulette has run, the
+running view showing no per-person figures, and the settlement summing to zero
+twice in a row with the same answer.
+
+---
+
+## 2026-08-27 (6)
+
+**`verify-turnstile` has no imports any more**, and that is the fix rather than
+a tidy-up.
+
+The runtime's own log said what was happening, once anybody read it:
+
+```
+serving the request with supabase/functions/verify-turnstile
+wall clock duration warning: isolate: …
+early termination has been triggered: isolate: …
+```
+
+Found, started, and **killed for taking too long**. Not missing, not
+undeployed, not a bad specifier — a boot that never finished. An Edge Function
+fetches its remote imports on every cold start, so a single
+`import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'` made the
+door to every dinner depend on the container being able to reach a package
+registry. On a machine where it cannot — Docker Desktop with restricted
+networking, a proxy, a firewall, an aeroplane — the isolate hangs on that line
+until the wall clock runs out, and the browser gets a non-2xx with nothing in
+it. Yesterday's swap of `jsr:` for `esm.sh` moved which registry it could not
+reach and fixed nothing; the honest note is that it was the wrong diagnosis.
+
+The function existed to do **one INSERT**. One INSERT does not need a client
+library: PostgREST is one HTTP call away and the service role key is already in
+the environment. So it now boots instantly and depends on nothing but the stack
+it belongs to. The Cloudflare call it does make is given a ten-second
+`AbortSignal.timeout` for the same reason — a captcha service that hangs must
+not become a door that hangs, and an explicit 502 the interface can read beats
+an isolate killed mid-flight.
+
+`send-push` and `send-email` keep their imports: one needs `web-push` to sign a
+VAPID payload and the other `standardwebhooks` to verify a signature, and
+neither stands between somebody and a seat at a table.
+
+Between this and `0063` — which stopped the frontend calling the function at all
+when no captcha is configured — joining a dinner on a stack with no internet and
+no Edge Functions running now works.
+
+---
+
+## 2026-08-27 (5)
+
+**Joining a dinner stops depending on an Edge Function that has nothing to do**
+(`0063`), and the Turnstile bypass is gone rather than documented.
+
+*The symptom* was `POST /functions/v1/verify-turnstile 503` on a local stack and
+nobody able to take a seat. *The problem underneath it* was worse: with no
+Turnstile keys configured, that function did nothing — it recognised a
+placeholder token the frontend had invented, skipped the verification entirely,
+and inserted a row. So a deployment with no captcha still could not seat anybody
+unless an Edge Function was up. The bypass had moved the dependency rather than
+removing it.
+
+And it was never protection. With no `TURNSTILE_SECRET_KEY` the old path
+accepted `dev-placeholder-token` from anybody, anywhere, production included —
+which is why `README.md` listed it as a simplification to remove before real
+use. It is removed now, and nothing is weaker for it, because there was nothing
+there.
+
+The question moved into the database, where it can be answered without a network
+call: `app_settings.captcha_required`, one row, readable by everyone and
+writable by no client role. False by default — `join_round` takes no ticket and
+the frontend never calls the function. True — a real token is verified against a
+real secret, a missing ticket is refused with `CAPTCHA_REQUIRED`, and the
+one-time ticket is burned exactly as before. **Turn it on in the same breath as
+setting the keys**: a site key with the flag off collects tokens nothing checks.
+
+*And "Edge Function returned a non-2xx status code" stops being a shrug.* That
+sentence is the SDK's; the function's own answer, which says what is actually
+wrong, arrives on the error object as `context` where nothing looked at it. So
+`{"error":"TURNSTILE_SECRET_KEY is not configured"}` — a perfectly clear 500 —
+reached the screen as a generic failure, and the search for the cause started in
+the client, which is the one place it was not. `src/lib/functions.ts` reads it,
+once, for every function call in the app; a function that fails to *boot*
+answers with something that is not JSON at all, and that comes back as its
+status and first line, which is still worth ten times the generic sentence. The
+self-test's private copy of that logic is gone with it.
+
+*Also:* `verify-turnstile` was the only function importing from `jsr:` while the
+other two use `esm.sh`. A specifier the runtime cannot fetch is a worker that
+never boots, and a worker that never boots is indistinguishable from a function
+that was never deployed — which is one plausible reading of that `503`. It now
+matches its neighbours.
+
+*Tested:* `smoke_test12.sql` §7 — the default accepting a null ticket, the flag
+turned on refusing it, a real ticket working, that same ticket refused the
+second time, and no client role able to write the setting. The other four suites
+re-run clean against the new `join_round`.
+
+---
+
+## 2026-08-27 (4)
+
+**Finished dinners delete themselves after twenty-one days** (`0062`) — and
+first, the migration that makes that honest (`0061`).
+
+*The order matters more than the feature.* The promise attached to deleting old
+dinners is "everything worth keeping is already in the recipe book and the
+album". The book kept it: `0058` copies the recipe and references only the
+author, exactly so a deleted dinner cannot empty it. **The album did not.**
+`dinner_photos` was written while rounds were permanent, and every road out of
+it led back through the round — cascading foreign keys on both sides,
+`my_album()` joining `rounds` for the name and `round_members` for "was I
+there", and a storage read policy asking `is_round_member`, which after the
+dinner is gone answers no for everybody. Shipping the deletion against that
+would have destroyed the thing the deletion was justified by, silently, three
+weeks after anybody could have noticed.
+
+So `0061` does to the album what `0058` did to the book: the dinner's name and
+date are copied onto the photograph, the owner is copied as a profile rather
+than a seat, both foreign keys become `on delete set null`, and the storage
+policy learns a second rule — you may read a photograph if you were at that
+table, **or if it is yours**. After a purge you keep your own photograph, with
+the evening's name printed on it. You do not keep everybody else's, and that
+asymmetry is the same one the book already had: a recipe is in your book
+because you chose to copy it; other people's photographs were shown to you
+because you were at the table, and the table is what is being deleted.
+
+*Twenty-one days from when it finished, not from the evening.* A `finished_at`
+stamp, set by a trigger rather than by a line in `advance_phase`, because there
+are several ways into ARCHIVED and a stamp only some of them set is worse than
+none. A host who takes a fortnight to publish the results does not find the
+dinner gone the day they do. Everything already archived gets today's date on
+migration, so the earliest any existing dinner can go is three weeks from the
+deploy rather than the same night.
+
+*The freeze had to be opened from the inside.* `0054` refuses INSERT, UPDATE
+**and DELETE** on every table belonging to a frozen round — which is what makes
+a finished dinner a record, and also means `delete from rounds` fails: the
+cascade is refused row by row. There is now one named door,
+`covertcook.purging`, set transaction-locally inside `purge_old_rounds` and
+nowhere else. A client cannot open it: PostgREST executes functions, never
+arbitrary SQL, and the one function that sets it is revoked from every client
+role. `smoke_test12.sql` §6 proves the door closes behind the purge.
+
+*And it is said before it happens*, on the dinner and on its card in the list:
+the date, and in the same breath what you keep. "This will be deleted" on its
+own reads as a loss rather than as a tidy-up.
+
+*Also: PGRST202 stops being a lost hour.* PostgREST answers "Could not find the
+function public.x in the schema cache" whenever the function is not visible to
+the calling role, and the first guess it invites is always a typo in the code.
+It almost never is — it means the app is talking to a database that has not run
+the migration that function arrives in. Locally that is `.env.local` still
+pointing at the deployed project. Every RPC in this app passes through one
+`unwrap`, so it is named there once, and raised as a banner above every screen
+with the two commands that fix it. The README now also says which migration the
+common casualties arrive in: an app pointed at a database that stopped at `0045`
+fails first on `display_name_available` (`0046`), at sign-up, and looks for all
+the world like the login is broken.
+
+*And the branch question, answered in the README.* No long-lived `test` branch:
+an integration branch has to be merged twice, every conflict is resolved twice,
+and the second resolution is the one nobody is paying attention to. That cost
+is real for a team and buys one person nothing, because there is nobody to be
+isolated from. What actually separates a test from production here is the
+database, not the branch — and that boundary already exists. `main` is what is
+deployed; branches are short and named for the thing they do; the four places to
+try something are listed in cost order. The one rule that is not optional: a
+migration reaches the deployed database before the frontend that needs it does.
+
+*Tested:* `smoke_test12.sql`, end to end against Postgres 16 — a whole dinner
+cooked, voted on, kept and photographed, then aged three weeks and purged, with
+the assertions on what is still there afterwards rather than on what is gone.
+
+---
+
+## 2026-08-27 (3)
+
+**Moderation by seat** (`0059`) **and the album** (`0060`). Steps 3 and 4 of
+`ROADMAP.md` §7, which completes the four.
+
+*Half of step 3 turned out to be built already, and not by accident.*
+"Moderate by pseudonym, not by name" was the design decision inside it —
+and `pairings` has no player SELECT policy at all, and `get_reported_messages`
+returned a pairing id and a direction. The host could not name an author if they
+wanted to. So the work was the opposite of hiding something: giving the host
+enough to **act**. The seat, and the pseudonym it wore that evening.
+
+On that seat: a warning, which is the action that was missing entirely — between
+reading a reported phrase and ending somebody's evening there was nothing at
+all. It is read on the dinner's own page and dismissed by a deliberate press,
+because a moderation notice that scrolls away unread is one that never happened.
+Removal stays where it already lives, on the roster, with the choice about the
+chain it forces.
+
+*The one act that hands over a name looks like one.* `reveal_message_author`
+refuses without a written reason, works only on a message somebody actually
+reported, and writes `AUTHOR_REVEALED` to `audit_log` with the reason and who
+asked. It is for reaching somebody outside the game — never a side effect of
+opening an alert.
+
+*And the promise has a limit, which the page says out loud.* By-seat only
+anonymises in `ANONYMOUS` rounds; in `SPY` the host sees every name by
+definition and in `OPEN` everybody does. The sentence above the reported
+messages is worded for whichever is true, rather than implying a protection the
+round never offered.
+
+*Blocking.* By seat as well, so nobody has to learn who somebody is to decide
+they would rather not sit with them again. Their phrases leave your board at
+once, their photographs leave your album, and neither of you can take a seat at
+a dinner the other is already at — checked in both directions, and the blocked
+person is never told, because telling them is how a block becomes an argument.
+It does not end a dinner under way: three other people's evening is built on the
+chain, and one block cannot be allowed to collapse it.
+
+*Telling the host.* A push kind that is the mirror image of the other four —
+those exclude whoever caused the moment, this one is the host and nobody else —
+and the in-app half, a count in the header for a host with something
+unresolved. Polled while the app is open, and absent entirely at zero, because a
+badge permanently showing nothing is how people learn to stop looking at a
+corner of the screen.
+
+*The album.* One photograph of the table per person per dinner. One **each**
+rather than one per dinner, which would have asked immediately who gets to be
+the photographer; adding again replaces, so nothing accumulates and the cost of
+an evening is bounded by a number known in advance.
+
+**EXIF is the whole of why this file is careful.** A phone photograph carries
+GPS coordinates, and uploading one untouched publishes the address of somebody's
+flat to everybody at the dinner. It is stripped in the browser, before a byte
+leaves it — the only place it *can* be done — and stripped by **re-drawing
+rather than by editing**: a library that removes the tags it knows about
+guarantees "the ones we thought of are gone", and what is wanted is "nothing but
+pixels left". Decoding and re-encoding the canvas builds a file from scratch, so
+there is no metadata to miss. Orientation is the one thing that must survive,
+and it does, baked into the pixels by `createImageBitmap(…, { imageOrientation:
+'from-image' })` — otherwise half the photographs arrive lying on their side.
+
+The bucket is private and reading goes through a signed URL that lasts an hour.
+A public bucket hands out a link that works forever for anybody who has ever
+seen it, long after the dinner and the app are done with it.
+
+*And the CSP, which is the half-day this would otherwise have cost somebody.*
+`public/_headers` declared `img-src 'self' data: blob:`, so a Supabase storage
+URL is blocked and the picture never appears — while `connect-src` already
+allowed the same host, so the **upload works perfectly** and only the display
+breaks, with nothing wrong in the network tab and one line in the console. The
+storage host is now in `img-src`, in the same commit as the bucket.
+
+*Two tables deliberately outside 0054's freeze,* for the same reason as
+`saved_recipes`: a photograph is taken at the end of a dinner and an album is
+looked at afterwards, so freezing them with the round would refuse the write at
+exactly the moment anybody makes it. `smoke_test11.sql` §7 proves it.
+
+*What is deliberately still not built* is the last line of step 4: deleting old
+dinners. The argument for it is that a recipe worth keeping is in a book and an
+evening worth remembering is in an album — both now exist, and neither has been
+used yet. Deleting first would prove the argument false.
+
+*Also:* the moderation policy the stores require the day free-text chat ships,
+published now rather than then. That row in `DISTRIBUTION.md` §1 was the warning
+of the whole document — ship chat and you owe report, block and a policy in the
+same release. The coupling is gone; chat can ship on its own schedule.
+
+*Tested:* `smoke_test10.sql` and `smoke_test11.sql`, both driven end to end
+against Postgres 16. The album's bucket policies are the one thing in the set
+that a bare Postgres cannot run, so `0060` skips them when the `storage` schema
+is absent rather than being untestable outside a full local stack.
+
+---
+
+## 2026-08-27 (2)
+
+**The evening ends on a menu** (`0057`), **and you can keep the recipes**
+(`0058`). Steps 1 and 2 of `ROADMAP.md` §7, in that order and for the reason
+given there: step 2 hangs its save control off step 1's layout.
+
+*The menu.* The results were a leaderboard — a stack of cards, `#1 Tarte
+tatin` in bold, the course in grey underneath, the points on the right. All
+true, and the same shape a sports app uses, on the one screen an evening ends
+on. They are now the carte: courses as sections, dishes as lines, the score
+printed where a price would be, which is the only place on a menu the eye
+already knows to look for a number. A round in FREE mode has no courses, so it
+is one carte générale rather than a heading invented over every dish.
+
+Two things a decorative shape must not lose. **Who won** — the dinner's first
+place carries a drop of wax, and the best of each course is already named in
+words by its award, so there is one mark and not two saying the same thing.
+And **what never arrived**: a dish whose cook left is excluded from the ballot
+(`0016`), so it has no `results` row and reached the old leaderboard not at
+all. On a list of five that is invisible. On a menu it is a hole, and the
+reader concludes the app lost something. `get_results` now returns those
+dishes too, carrying `served = false`, and the carte strikes them off the way a
+kitchen strikes a line off the service menu. It is dropped and recreated rather
+than replaced, because `create or replace` refuses to change the row type an
+OUT-parameter function returns.
+
+*The book.* `briefs` has no SELECT policy — not a narrow one, none — and the
+only reader has ever been `get_my_brief`. So keeping other people's recipes is
+not a feature that reads existing data: it is a **new, deliberate exposure**,
+and `list_round_recipes` is it, gated on membership and on the results being
+published, which is the same gate the scores use because the control lives on
+the same screen. It says who **wrote** each dish and never who **cooked** it:
+those two facts side by side are the chain, and the chain is the game.
+
+*Copy the recipe, reference the person.* The recipe is copied whole —
+title, ingredients, method, link, allergen tags — because the day old dinners
+can be deleted, a book of references empties itself, which is the one thing a
+recipe book must never do. The author is a reference, never a frozen name, so
+somebody who later asks to be forgotten becomes "Former guest" in ten other
+people's books rather than staying named in them. The pseudonym is copied as a
+label and is deliberately **not** a filter: "Chef Basilic" is a different
+person at every dinner, and filtering a book by it would collect strangers
+under one heading.
+
+*Its own table, and that is not a preference.* `0054` puts triggers on every
+table belonging to a round, refusing all writes once it is archived. A "saved"
+flag inside `briefs` would have been refused by the database at exactly the
+moment somebody saves a recipe from a finished dinner — which is the only
+moment anybody ever does it. `saved_recipes` is deliberately absent from that
+trigger list, and `smoke_test9.sql` §6 proves a save still works on an archived
+dinner.
+
+*The save flow.* A switch arms the menu, the dish names become the control —
+not a checkbox beside each one, which would be a form with a menu drawn behind
+it — a wine ring marks what you chose, one confirm writes the lot, and a line
+says where they went with a way to get there. Arming a second time comes back
+with what is already in the book **already ticked**: one save per person per
+recipe is enforced by a unique index, so a panel that came back empty would
+invite four taps and then report "0 saved", which reads as a failure. The
+invitation to tap is a fifth of a degree of lean, and it is off entirely under
+`prefers-reduced-motion`, where a dotted underline carries it instead — motion
+sickness is not a preference the app gets to weigh against a nice effect.
+
+*Also fixed on the way past.* `get_results` has always raised two named
+refusals — the results are not ready, or the Executive Chef has them and has
+not announced them — and nothing had ever handled either: the page rendered an
+empty list. With an empty state that says "no dishes were recorded" that would
+have become quiet, wrong and confident, so both are now sentences. And the
+"still missing" list on the brief editor stops borrowing `.notice`, whose green
+says "this went right" over a list of fields somebody has yet to fill in.
+
+*Tested:* `smoke_test9.sql`, driven end to end against Postgres 16 — four
+recipes, one dish struck off, ballots through `get_ballot_options` so the test
+agrees with the app rather than with itself, and the double save that must
+write nothing the second time.
+
+---
+
+## 2026-08-27 (1)
+
+**Fixed: the recipe that was refused by a constraint name** (`0055`), **the
+notification nobody could test** (`0056`), and three interface faults.
+
+*The recipe.* `0028` relaxed what a submittable recipe has to contain and
+relaxed it in `submit_brief`. It did not touch the table, which still carried
+the rule `0028` was replacing as an inline check — and an inline check is named
+by counting, so that one was `briefs_check1`. The function said yes, ran its
+`update … set status = 'SUBMITTED'`, and the row was refused on the way out.
+What the sender read was `new row for relation "briefs" violates check
+constraint "briefs_check1"`: a constraint they cannot see, in a table they do
+not know about, saying nothing about which of the four fields in front of them
+was wrong. Every recipe with a link and a short method hit it.
+
+The table now drops that rule — **by what it says, not by what it is called**,
+because `briefs_check1` is a name Postgres handed out by counting and a restore
+in another declaration order would have put the same rule under another number.
+What replaces it is deliberately weaker: a CHECK sees one row and cannot count
+that row's ingredients, so the ingredient half of the rule lives in
+`submit_brief`, which can.
+
+*And every refusal now names a field.* `DISH_NAME_MISSING`,
+`PROCEDURE_TOO_SHORT`, `INGREDIENTS_MISSING`, `LINK_MALFORMED`,
+`ALREADY_SUBMITTED`, `DIETARY_CONFLICT|<label>` — codes the interface
+translates and points at an input, checked in the same order the form reads in.
+The frontend checks all of them at once *before* the call and says what is
+missing in words; the database checks them one at a time on the way in, because
+the frontend is a convenience and this is the rule.
+
+*One tightening, on purpose.* "Written out" now means the method **and** the
+list, where it used to be either. A cook handed seven ingredients and no method
+has been given a shopping trip, not a recipe. A link still stands alone: it
+carries both, and asking somebody to retype them beside it is asking twice.
+
+*The notification nobody could test.* Push has seven links between a dinner and
+a lock screen and six of them failed the same way — the phone stayed quiet. The
+worst is not a bug at all: `push_audience_for_round` excludes whoever caused the
+notification, on purpose, so a host stepping their own dinner through every
+phase is correctly excluded from all four moments and will never receive a
+thing. There was no way to tell that apart from a broken install.
+
+`0056` adds one audience of one, addressed to the caller's own devices, and
+**Profile → Notifications → "Notifications are not arriving?"** asks each link
+separately before sending a real one: home screen or tab, API present,
+worker running, permission granted, deployment signed, browser subscribed,
+server informed. The first cross carries the fix rather than the diagnosis —
+including the two that are not ours (iOS has no Push API in a Safari tab, and
+Brave ships "Use Google services for push messaging" switched **off**, which
+makes a perfect subscription deliver nothing).
+
+It repairs as it goes: a subscription the browser holds and the server never
+stored is invisible from both ends, and re-sending it is a no-op in every other
+case, so it is not a second button.
+
+*And the settings screen can no longer hang.* `navigator.serviceWorker.ready`
+neither rejects nor times out, so where registration was refused — a private
+window, strict shields — the push panel sat on "Checking what this device can
+do…" for the rest of the session, with no button and no explanation. It is now
+raced against six seconds and reports `no-worker`.
+
+*Three interface faults.*
+
+The dinner **could be panned sideways**. The props are placed to run off the
+edges on purpose, but nothing cut them off, so on a phone they widened the
+document instead: a swipe meant to scroll slid the page right and left the
+paper off-centre. `.table-scene` clips them — `overflow-x: clip` rather than
+`hidden`, which would have made it a scroll container and moved the problem
+rather than removed it.
+
+The **assigned course was a grey sentence** between two other grey sentences,
+which is a thing people read past and then write a starter for a dessert slot.
+It is printed as the menu it is, with your line marked.
+
+The **buttons that add an allergy or a diet** sat below both lists, asking the
+reader to work out which button belonged to which heading, and then opened the
+grid in a third place further from the list the longer that list got. Each
+heading now carries its own, and the grid opens under the list it changes.
+
+*Also:* `lib/datetime.ts` writes down why the database says `+00` and why that
+is not two hours wrong — `timestamptz` stores an instant, not a wall clock, and
+the browser is the only participant that knows where the reader is standing.
+The README has the long version, including why pinning the server to Paris
+would move `current_date` and redraw which day a fridge note belongs to.
+
+*Tested:* `smoke_test8.sql`. Its first section is the exact recipe that used to
+come back as `briefs_check1`, and the reproduction was run against the pre-`0055`
+schema first to be sure the diagnosis was the fault and not a theory about it.
+
+---
+
 ## 2026-08-24 (16)
 
 **Added: the two moments at the door** (`0052`), and four interface fixes.

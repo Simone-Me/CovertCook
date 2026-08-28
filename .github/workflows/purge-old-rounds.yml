@@ -1,0 +1,56 @@
+name: Delete dinners that finished three weeks ago
+
+# The twenty-one days in 0062 need something to notice when they are up.
+# Here rather than pg_cron for the same reason the account purge and the
+# keep-alive ping are here: this project's scheduler already lives in GitHub
+# Actions, and one place to look beats two.
+#
+# It runs an hour after the account purge rather than alongside it. Both are
+# idempotent and neither depends on the other, but two deletions landing in the
+# same minute make a bad night's logs impossible to read.
+#
+# The job is boring by design: on almost every run it deletes nothing and says
+# so. It needs the SERVICE ROLE key, because purge_old_rounds is revoked from
+# every client role — it takes finished dinners apart through the freeze that
+# stops everybody else, which no signed-in person may ever do.
+on:
+  schedule:
+    - cron: '41 4 * * *' # daily, 04:41 UTC
+  workflow_dispatch:
+
+jobs:
+  purge:
+    runs-on: ubuntu-latest
+    steps:
+      # Without this the run fails as a 401 from PostgREST — "No API key found
+      # in request" — which reads like the endpoint is wrong when the actual
+      # cause is an empty secret interpolating to nothing. GitHub resolves a
+      # missing secret to the empty string and says nothing about it.
+      - name: Check the service role key is configured
+        env:
+          KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          URL: ${{ vars.VITE_SUPABASE_URL }}
+        run: |
+          missing=""
+          [ -z "$KEY" ] && missing="$missing SUPABASE_SERVICE_ROLE_KEY (Settings -> Secrets and variables -> Actions -> Secrets)"
+          [ -z "$URL" ] && missing="$missing VITE_SUPABASE_URL (same page, Variables tab)"
+          if [ -n "$missing" ]; then
+            echo "Not configured:$missing"
+            exit 1
+          fi
+
+      - name: Delete dinners whose three weeks are up
+        run: |
+          response=$(curl -s -w "\n%{http_code}" -X POST \
+            -H "apikey: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}" \
+            -H "Content-Type: application/json" \
+            -d '{"p_days": 21}' \
+            "${{ vars.VITE_SUPABASE_URL }}/rest/v1/rpc/purge_old_rounds")
+          status=$(echo "$response" | tail -n1)
+          body=$(echo "$response" | sed '$d')
+          echo "status=$status dinners_deleted=$body"
+          if [ "$status" != "200" ]; then
+            echo "purge_old_rounds did not run"
+            exit 1
+          fi

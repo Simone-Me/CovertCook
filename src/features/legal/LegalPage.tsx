@@ -18,7 +18,7 @@ interface Section {
  * statutory right of withdrawal with it. Both are flagged in the text rather
  * than quietly assumed away.
  */
-export function LegalPage({ page }: { page: 'terms' | 'privacy' }) {
+export function LegalPage({ page }: { page: 'terms' | 'privacy' | 'moderation' }) {
   const { t } = useTranslation()
   const sections = t(`legal.${page}Doc.sections`, { returnObjects: true }) as Section[]
 

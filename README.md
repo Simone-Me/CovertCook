@@ -27,7 +27,7 @@ cook, you don't know who chose yours, and you all find out at the end.
 | **Brief** | The recipe one Player writes *for another*. |
 | **Sender** | The Player who writes a Brief. |
 | **Cook** | The Player who receives it and must prepare it. |
-| **Slot** | A course to fill: starter / main / dessert / drink / other. |
+| **Slot** | A course to fill: aperitif / nibbles / starter / first course / main / side / cheese / dessert / drink / other (`0066`, in the order a meal is eaten). |
 | **Pairing** | The Sender → Cook link. |
 | **Chain** | The full cycle of pairings: A→B→C→…→A. |
 
@@ -324,6 +324,128 @@ public half in Netlify as `VITE_VAPID_PUBLIC_KEY`, then
 and `npx supabase functions deploy send-push`. Rotating that pair silently
 kills every existing subscription.
 
+### When nothing arrives
+
+There are seven links between a dinner and a lock screen and, until `0056`,
+six of them failed the same way: the phone stayed quiet. **Profile →
+Notifications → "Notifications are not arriving?"** asks each one separately
+and then sends a real notification to your own devices — the only push in the
+app that goes to the person who triggered it, and the only proof that the whole
+chain works.
+
+The three that are not bugs, and account for most reports:
+
+- **You are the only one testing.** `push_audience_for_round` excludes whoever
+  caused the notification, on purpose — being interrupted by your own button
+  press is noise. A host stepping their own dinner through every phase is
+  correctly excluded from all four of them and will never receive a thing. The
+  self-test exists because of this one.
+- **iOS in a Safari tab.** The Push API is simply absent until the app is added
+  to the home screen and opened from that icon. Apple's rule, not ours.
+- **Brave.** Web push there rides on Google's service, which Brave ships
+  switched **off**: Settings → Privacy and security → "Use Google services for
+  push messaging". Until that is on, registration succeeds, the subscription
+  looks perfect, and nothing is ever delivered. Chrome on the same phone works,
+  which is what makes it look like a site bug.
+
+The three that are: no `VITE_VAPID_PUBLIC_KEY` on the deployment (the switch
+reports itself unavailable); the Edge Function missing its secrets (`send-push
+is not configured` — invisible in normal use, because every real notify() call
+swallows its errors so a dinner never looks broken); and a subscription the
+browser holds but the server never stored, which the test repairs before it
+sends.
+
+`no-worker` is the seventh: the service worker never registered, which private
+windows enforce outright. It used to present as the settings screen saying
+"Checking what this device can do…" for ever, because `navigator.serviceWorker
+.ready` neither rejects nor times out — it is now raced against a six-second
+timeout so the screen can say what happened.
+
+---
+
+## Time, and why the database says `+00`
+
+Every `_at` column here is `timestamptz`, and the thing worth knowing is that
+**`timestamptz` does not store a time zone**. It stores an instant. The `+00`
+in the Supabase table editor is that session rendering the instant, and
+Postgres sessions there default to UTC.
+
+So a sign-up at 17:11 in Paris in summer, read back as `15:11+00`, is not two
+hours wrong — it is the same instant spelled in another zone, the way 5 km and
+3.1 miles are the same distance. Nothing was lost and nothing needs correcting.
+
+**Why the server is not set to Paris.** It could be — `alter database … set
+timezone = 'Europe/Paris'` changes what new sessions render, the dashboard
+included — and it would still not be a fix:
+
+- there is no "the" time zone for an app whose diners are not all in one place,
+  and picking one only moves the confusion to whoever is not in it;
+- it would move things that are not about display at all. `current_date` and
+  the `::date` casts in `0001`, `0015`, `0019` and `0030` decide which *day* a
+  fridge note or an invitation belongs to, and pinning the server to Paris
+  redraws that boundary at 22:00 or 23:00 UTC depending on the season.
+
+UTC on the server is not a default nobody got round to changing. It is the one
+choice with no opinion about where anybody is standing.
+
+**The conversion happens in the browser**, which is the only participant that
+knows the answer: the phone knows its own zone and knows about summer time.
+`new Date(iso).toLocaleString(locale)` renders the stored instant as 17:11 in
+Paris and 11:11 in New York from one row, with no zone stored anywhere and
+nothing to migrate when somebody travels. `src/lib/datetime.ts` holds the
+formatters and the reasoning; the locale is passed explicitly (the account's
+choice, not the phone's) and the zone deliberately is not.
+
+The one value that travels the other way is the dinner's date and time, typed
+into a `datetime-local` input: that one *is* in the typist's own zone, and
+`new Date(value).toISOString()` is what turns it back into an instant.
+
+---
+
+## Branches, and why there isn't a `test` one
+
+The obvious shape for this is a long-lived `test` branch: feature branches off
+it, merge them in, try everything there, promote to `main` when it works. It is
+what most people describe when asked, and for one person shipping this app it is
+the wrong answer.
+
+**A long-lived integration branch has to be merged twice.** Every change goes
+into `test` and then into `main`, which means every conflict is resolved twice,
+and the second resolution is the one nobody is paying attention to. The two
+branches drift — a hotfix on `main`, a half-finished experiment on `test` — and
+after a fortnight "promote to `main`" stops being a merge and becomes an audit.
+That cost is real for a team of six. For one person it buys nothing at all,
+because there is nobody to isolate from.
+
+**What actually separates a test from production here is the database, not the
+branch.** Nothing on `main` can break a dinner on its own; a migration can. So
+the boundary that matters runs between the local Supabase stack and the
+deployed project, and it is already there.
+
+So: `main` is what is deployed. Work on a short-lived branch named for the thing
+it does, keep it open for days rather than weeks, and delete it when it merges.
+That is what `claude/feature-recipe-book-y2tqc0` is, and it is the whole
+convention.
+
+**Where to try things, in the order they cost anything:**
+
+1. **The local stack.** `npx supabase start` + `npx supabase db reset` +
+   `npm run dev`, with `.env.local` pointing at `http://127.0.0.1:54321`. Free,
+   instant, and safe to destroy. Nearly every question is answered here.
+2. **The SQL smoke tests**, for anything that is really a database question.
+   Twelve files, no browser, and they run against a bare Postgres.
+3. **A Netlify deploy preview**, which you get per pull request for nothing and
+   which is the only way to test the things a local build cannot reach — the
+   real service worker, an installed PWA, push on an actual phone.
+4. **A second Supabase project as staging**, if and when a migration ever
+   frightens you enough to want one. Free tier, one extra set of env vars in
+   Netlify. Worth doing before the first migration that touches live dinners;
+   not worth doing before that.
+
+The one rule that is not optional: **a migration reaches the deployed database
+before the frontend that needs it does.** Everything in the "database is
+behind" banner above exists because that order got reversed once.
+
 ---
 
 ## CI/CD & required GitHub configuration
@@ -363,6 +485,54 @@ with `Could not find the function public.…` — which reads like a code
 bug and isn't. Look at `VITE_SUPABASE_URL` specifically; `VITE_APP_BASE_URL`
 says `localhost` in both setups and will happily fool a quick grep.
 
+The app now says this out loud rather than leaving it in the console: any
+`PGRST202` raises a banner above every screen naming the cause and the two
+commands that fix it (`src/components/SchemaMismatch.tsx`). **`PGRST202` never
+means the function name is wrong** — PostgREST only reports functions the
+calling role can see, so it means the database in front of you does not have
+the migration that function arrives in. `display_name_available` is `0046`,
+the recipe book is `0058`, the album is `0060`: an app pointed at a database
+that stopped at `0045` fails on the first of those, at sign-up, and looks
+like the login is broken.
+
+**"Edge Function returned a non-2xx status code" is the same kind of lie.** That
+sentence is the SDK's, and the function's own answer — which says what is
+actually wrong — was on the error object where nothing read it;
+`src/lib/functions.ts` now reads it, for every function call in the app.
+
+**And when a function is reached but still answers non-2xx, read the runtime's
+own log before anything else:**
+
+```bash
+docker logs supabase_edge_runtime_covertcook --tail 50
+```
+
+Three lines together mean one specific thing, and it is not what it looks like:
+
+```
+serving the request with supabase/functions/verify-turnstile
+wall clock duration warning: isolate: …
+early termination has been triggered: isolate: …
+```
+
+The function was found, started, and **killed for taking too long**. It is not
+missing and it did not fail to deploy. The usual cause is a remote import: an
+Edge Function fetches its imports on every cold start, so one
+`import … from 'https://esm.sh/…'` makes that function depend on the container
+being able to reach a package registry — and on a machine where it cannot
+(restricted Docker networking, a proxy, a firewall, no internet) the isolate
+hangs on the import until the runtime kills it. `verify-turnstile` therefore has
+**no imports at all**: it makes one INSERT, and one INSERT does not need a
+client library. `send-push` and `send-email` keep theirs, because they genuinely
+need them and neither stands between somebody and a seat at a table.
+
+To see what a database actually has, ask the CLI rather than guessing:
+
+```bash
+npx supabase migration list            # local stack
+npx supabase migration list --linked   # the deployed project, side by side
+```
+
 For local development it should read `http://127.0.0.1:54321`. Keep the
 production values in a second gitignored file (`.env.production-backup.local`)
 and swap when you actually mean to talk to the real project.
@@ -396,8 +566,23 @@ host-tools RPCs that only got a frontend later (`splice_member`,
 `set_pairing`, `remove_member` post-assignment, exclusion pairs, the menu
 RPCs, `host_alerts` resolve). `smoke_test4.sql` covers pending-member
 identity, `smoke_test5.sql` both removal modes, `smoke_test6.sql` round
-setup and invitations, and `smoke_test7.sql` the board plus allergens
-informing rather than blocking.
+setup and invitations, `smoke_test7.sql` the board plus allergens
+informing rather than blocking, and `smoke_test8.sql` what a recipe must
+contain (`0055`) plus the push self-test's audience (`0056`) — its first
+section is the exact recipe that used to come back as
+`violates check constraint "briefs_check1"` — `smoke_test9.sql` the
+results menu (`0057`) and the recipe book (`0058`), including the two cases
+that are invisible when they break — a dish nobody cooked still reaching the
+menu, and a second save writing nothing — `smoke_test10.sql` moderation by seat
+(`0059`), `smoke_test11.sql` the album (`0060`, `0068`) — who may add the one
+photograph, and what the delegation picker is careful not to say — whose bucket policies are
+the one thing in the set that needs a running local stack rather than a bare
+Postgres, `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —
+where the *survivors* are the point, not the deletion: it proves the book and
+the album still hold everything after the dinner they came from is gone — plus
+joining with and without a captcha (`0063`), and `smoke_test13.sql` the canned
+phrases arriving in the reader's language (`0064`) and the cost settlement
+summing to exactly zero (`0065`).
 
 **They cover less of the join path than they appear to.** Every one of
 them seeds its `turnstile_tickets` row by hand as the postgres superuser
@@ -422,7 +607,7 @@ docker exec -i "$CID" psql -U postgres -d postgres < supabase/smoke_test2.sql
 ```
 
 Then `db reset` again before each of `smoke_test3.sql` through
-`smoke_test7.sql`.
+`smoke_test13.sql`.
 
 **Prefer `npx supabase migration up --local` over `db reset` while anyone
 is using the app.** It applies pending migrations against the existing
@@ -472,6 +657,22 @@ names, migration numbers, bugs found and fixed) see
   carry what. A card is what a host would actually do, and an adult with an
   allergy is better served by knowing than by one dish silently never
   existing.
+- **Everybody reads in their own language** (`0064`). The canned phrases exist
+  so that two people who share no language can still talk at a dinner — and
+  until now a message stored the id of *one locale's* row, so a French cook's
+  "goûte avant de servir" reached an English diner in French, which defeated the
+  entire point. A message now references the thought and the reader's own locale
+  chooses the sentence. Applies to the fridge, to the private threads, and to
+  the reported phrases the host has to make a decision about.
+- **Shared costs** (`0065`, labelled Pro). A budget each, agreed when the
+  dinner is created — before the roulette, so it shapes the recipes people
+  write rather than judging their receipts afterwards. Everybody records what
+  they spent beside the shopping list they were given, and at the end the app
+  says who should hand what to whom, split evenly to the cent. **While the
+  dinner runs, nobody sees anybody else's number**: your own, the table's
+  average and the budget. The average is the steering signal; a per-person
+  leaderboard about money between friends is the argument the feature exists to
+  prevent.
 - **The board**: one channel the whole table reads and posts to, from a
   short list of ready-made cheerful phrases. Nothing is attributed —
   identical phrases collapse into one line with a count, so the board is
@@ -480,11 +681,72 @@ names, migration numbers, bugs found and fixed) see
   acted on.
 - **Cooking**: each player sees the recipe written for them, with a
   canned-message chat to their pairing partner and a "can't cook this"
-  quick action.
+  quick action. **The page exists before the recipe does** (`0067`): same
+  heading, same course, the two sections ruled and blank, and one tap that
+  sends a reminder to the chef writing for you and to the Executive Chef at
+  once. It used to be a single grey line, with the conversation — the only
+  thing a cook in that position can act through — behind it.
 - **Voting**: drag-and-drop dish ranking (Borda count) plus separate
   originality/brief-respect scores, with awards computed from the results.
-- **Results & reveal**: scores, awards, and — the actual twist — each
-  player's two chats unmask automatically, revealing who cooked for whom.
+- **Results & reveal**: the evening printed as the menu it was — courses as
+  sections, the score where a price would be, the dinner's first place sealed,
+  and a dish that never arrived struck off rather than missing (`0057`). Plus
+  the actual twist: each player's two chats unmask automatically, revealing who
+  cooked for whom.
+- **The recipe book** (`0058`): at the end of a dinner the menu arms, you tap
+  the dishes worth keeping, and one confirm copies them into a book in your
+  profile — searchable, filterable, exportable as text or JSON. The recipe is
+  **copied** so it outlives the dinner; the author is a **reference**, so
+  somebody who later erases their account becomes "Former guest" rather than
+  staying named in ten other people's books. This is also the app's one
+  deliberate exposure: `briefs` has no SELECT policy at all, and
+  `list_round_recipes` is the only thing that has ever opened somebody else's
+  recipe — gated on membership and on the results actually being published. It
+  says who *wrote* each dish and never who *cooked* it, because those two facts
+  side by side are the chain.
+- **Moderation, by seat** (`0059`): a reported phrase reaches the Executive
+  Chef with the seat it came from and the pseudonym that seat wore — never a
+  name, because knowing the author first is how an opinion of somebody decides
+  whether their message was out of line. They can warn the seat (read on the
+  dinner's own page, dismissed deliberately) or remove it from the roster. The
+  one act that hands over a name refuses without a written reason and writes
+  itself to `audit_log`. Anybody can block anybody from the board without
+  learning who they are: their phrases and photographs go, and neither of you
+  can take a seat where the other already is. The host is told there is
+  something waiting, by push and by a count in the header. Policy at
+  `/legal/moderation`.
+- **Finished dinners delete themselves** (`0062`): twenty-one days after a
+  dinner is archived or cancelled, the whole round goes — the chain, the
+  threads, the ballots, the roster. What survives is what somebody chose to
+  keep — and *chose* is literal in both cases, it is a button under each of
+  them: every recipe in their book and every evening in their album — the
+  photograph, the dinner's name and date, and the menu that was eaten — all of
+  which are **copies** precisely so this can be true (`0058`, `0061`, `0068`).
+  The date is printed on the dinner and on its card in the list while it still
+  exists, next to what you keep. Run by a scheduled workflow, like the account
+  purge.
+- **The album** (`0060`, `0068`): **one photograph per dinner**, and it is the
+  Executive Chef's to take — they can hand the camera to one named chef, who
+  adds it from their own phone. **Handing it over means giving it up**: choose,
+  then confirm, and while it stands the host cannot upload or replace anything.
+  Everybody at the table is told in words, under the frame, whose job it is,
+  because somebody looking at an empty frame is already asking who they are
+  waiting for. That picker shows real names and deliberately no seats and no
+  pseudonyms: a photographer stored as a seat, chosen from a list of names,
+  would hand the host the map from a pseudonym to a person. **Nothing reaches
+  an album by itself** — an add button under the picture on the results screen,
+  exactly where the one that keeps a recipe is, plus a separate one that saves
+  the file to the device. What is kept is a **copy**, so the dinner being purged
+  and the photographer swapping the picture out change nothing; moderation is
+  the one thing that reaches the copies, because a removal that leaves the
+  picture in nine albums has removed nothing. The profile album is a **list of
+  evenings** — name and date — and the triangle opens the picture, its credit,
+  and the menu that was eaten under it. Location data is stripped **in the
+  browser** before a byte is uploaded — a phone photograph carries the address
+  it was taken at — by decoding and re-encoding rather than by editing tags, so
+  what is left is pixels and nothing else. The bucket is private and reading
+  goes through short-lived signed URLs, so no photograph outlives the app in a
+  URL somebody pasted somewhere.
 - **Host tools**: round settings (venue/date/time), pause or cancel a
   round, a roster with approve/reject/remove, a spoiler-gated view of the
   whole assignment chain, and an inbox for player-reported issues.
@@ -587,8 +849,16 @@ themes are the paid side, because they are purely how the evening looks.
 - Allergy/diet matching is exact-string, not semantic: a diet like
   "vegan" needs every conflicting ingredient added by hand as its own tag,
   until a proper label→tags mapping exists.
-- Bot protection (Turnstile) has a dev-only bypass (both the frontend
-  widget and the `verify-turnstile` edge function recognise a placeholder
-  token) — inert the moment real site/secret keys are configured, but
-  must be removed entirely before this is used by anyone outside local
-  development.
+- ~~Bot protection (Turnstile) has a dev-only bypass~~ — **removed in `0063`.**
+  It was never really a dev-only bypass: with no `TURNSTILE_SECRET_KEY` set, the
+  edge function accepted a placeholder token the frontend had invented, from
+  anybody, in production as readily as on a laptop. What made it look necessary
+  was that joining a dinner went through that function *even with no captcha to
+  verify* — so a local stack whose edge runtime was not up answered `503` and
+  nobody could take a seat.
+  The question now lives in the database: `app_settings.captcha_required`,
+  false by default. With it false the frontend never calls the function and
+  `join_round` asks for no ticket; with it true a real token is verified
+  against a real secret and a missing ticket is refused. **Turn it on in the
+  same breath as setting the keys** — a site key with the flag off collects
+  tokens nothing checks.
