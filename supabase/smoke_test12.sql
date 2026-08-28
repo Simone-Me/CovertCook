@@ -199,14 +199,19 @@ select count(*) as photos from my_album();
 select _as('00000000-0000-0000-0000-000000001203');
 select count(*) as photos from my_album();
 
+-- Scoped by path rather than counted across the table: the round id is gone
+-- from the row after the purge, but it is still the first segment of the
+-- object's name — which is also the only reason the storage policies can
+-- answer anything about an orphan. Counting the whole table instead would make
+-- this pass or fail depending on which other smoke tests ran first.
 \echo '--- the photograph row outlives its dinner and the copies point at it ---'
 \echo '--- (expect 1 row, 1 still owned, 0 still attached, 2 kept) ---'
 reset role;
 select
-  (select count(*) from dinner_photos) as photo_rows,
-  (select count(taken_by_profile_id) from dinner_photos) as still_owned,
-  (select count(round_id) from dinner_photos) as still_attached,
-  (select count(*) from saved_photos) as kept_copies;
+  (select count(*) from dinner_photos where storage_path like :'round_id' || '/%') as photo_rows,
+  (select count(taken_by_profile_id) from dinner_photos where storage_path like :'round_id' || '/%') as still_owned,
+  (select count(round_id) from dinner_photos where storage_path like :'round_id' || '/%') as still_attached,
+  (select count(*) from saved_photos where storage_path like :'round_id' || '/%') as kept_copies;
 
 -- ---------------------------------------------------------------------------
 \echo ''

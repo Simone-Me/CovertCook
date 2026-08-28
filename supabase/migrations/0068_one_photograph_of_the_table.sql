@@ -502,7 +502,18 @@ grant execute on function forget_photo(uuid) to authenticated;
 -- camera (`get_photographer`, a real name), so a pseudonym on the picture that
 -- person took would sit one line away from their real name and hand over the
 -- mapping the whole design exists to protect. One public fact, said once.
-create or replace function list_round_photos(p_round_id uuid)
+--
+-- DROPPED RATHER THAN REPLACED, and it has to be: `already_saved` is a new OUT
+-- parameter, and `create or replace` refuses to change the row type an
+-- OUT-parameter function returns — "cannot change return type of existing
+-- function". That error aborts the whole migration, which is worse than it
+-- sounds: Supabase runs each file as one transaction, so *nothing* in this
+-- file lands, `rounds` never gets its photographer column, and the app talks
+-- to a database one version behind itself. 0057 hit this and wrote it down.
+-- This file did it anyway.
+drop function if exists list_round_photos(uuid);
+
+create function list_round_photos(p_round_id uuid)
 returns table (
   id uuid,
   storage_path text,
