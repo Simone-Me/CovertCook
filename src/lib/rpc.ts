@@ -62,6 +62,74 @@ export const THEME_LOCKED = 'THEME_LOCKED'
 export const PRO_REQUIRED = 'PRO_REQUIRED'
 
 /**
+ * Raised by the triggers in 0079 when a dinner built on something PRO has run
+ * past its cover and its three days of grace. The dinner is on hold, not gone:
+ * nothing is deleted, it simply stops moving until the host renews.
+ */
+export const PRO_LAPSED = 'PRO_LAPSED'
+
+/** The grace after a subscription ends, in hours. Mirrors pro_grace() in
+ *  0079 — the client only uses it to say the number out loud. */
+export const PRO_GRACE_HOURS = 72
+
+/**
+ * How a dinner stands against its PRO cover.
+ *
+ * Three states and they are genuinely different: nothing to lose (it was never
+ * PRO, or it uses nothing PRO), running out soon, and on hold. Only a dinner
+ * that actually uses a PRO feature can be held — see round_uses_pro in 0079
+ * for why, which is that on the day the free-for-all ends every dinner ever
+ * created during it would otherwise stop at once.
+ */
+export type ProCover = 'NONE' | 'OK' | 'ENDING' | 'HELD'
+
+export function roundProCover(round: {
+  is_pro: boolean
+  pro_until: string | null
+  recipes_per_brief: number
+  name_theme: NameTheme
+  table_theme: TableTheme
+  paidNameThemes?: string[]
+  paidTableThemes?: string[]
+}): ProCover {
+  if (!round.is_pro || round.pro_until === null) return 'NONE'
+  // Mirrors round_uses_pro(). The theme tiers come from the catalogue, so the
+  // caller passes them when it has them; without them the recipe count alone
+  // is the honest answer this side of the wire, and the server is the
+  // authority either way.
+  const usesPro =
+    round.recipes_per_brief > 1 ||
+    (round.paidNameThemes ?? []).includes(round.name_theme) ||
+    (round.paidTableThemes ?? []).includes(round.table_theme)
+  if (!usesPro) return 'NONE'
+
+  const until = new Date(round.pro_until).getTime()
+  const now = Date.now()
+  if (until <= now) return 'HELD'
+  // A fortnight is the window where saying something is useful rather than
+  // nagging: long enough to renew without hurrying, short enough that the
+  // dinner it is about is real.
+  return until - now < 14 * 24 * 3600 * 1000 ? 'ENDING' : 'OK'
+}
+
+/**
+ * How long until a subscription ends, in days, or null when it does not.
+ *
+ * The two moments worth interrupting somebody about are a month out and a week
+ * out — far enough to act, close enough to matter — and everything between is
+ * silence. A banner that appears the day after you subscribe is a banner
+ * people learn to look past.
+ */
+export function proWarningLevel(status: ProStatus | null | undefined): 'MONTH' | 'WEEK' | null {
+  if (!status || status.window_open || !status.expires_at) return null
+  const days = (new Date(status.expires_at).getTime() - Date.now()) / (24 * 3600 * 1000)
+  if (days < 0) return null
+  if (days <= 7) return 'WEEK'
+  if (days <= 30) return 'MONTH'
+  return null
+}
+
+/**
  * What PRO is, for this account, right now (0075).
  *
  * `window_open` is the thing to read first: while the free-for-all is on,
@@ -143,9 +211,13 @@ export function namesAreOpen(
   )
 }
 
-// Not whether voting happens, but how. LIVE = the host opens it during
-// dinner and publishes results when ready; TIMED = a deadline publishes
-// them itself; DISABLED = no voting, and that choice is final.
+// Not whether voting happens, but how. LIVE = the host opens it during dinner
+// and publishes results when ready; TIMED = a deadline publishes them itself;
+// MANUAL = hands up at the table; DISABLED = no voting.
+//
+// None of the four is final. DISABLED used to be — set_voting_mode refused to
+// leave it — and 0078 took that door out: what actually needs protecting is a
+// ballot somebody has already cast, and that is guarded separately.
 export type VotingMode = 'LIVE' | 'TIMED' | 'DISABLED' | 'MANUAL'
 export type SlotMode = 'FREE' | 'CATEGORIES'
 export type RoundStatus =

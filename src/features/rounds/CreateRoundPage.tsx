@@ -58,6 +58,13 @@ const ANONYMITY_ORDER: RoundAnonymity[] = ['ANONYMOUS', 'SPY', 'OPEN']
 // your cook — and they are what the PRO unlock actually buys.
 const RECIPE_COUNTS = [1, 2, 3]
 
+// Not the database's own `cost_mode`, which has two values: this is the
+// question as a host is actually asked it, and "shared" splits into "with a
+// number we agreed" and "without one". Both are cost_mode = SHARED; what
+// separates them is whether budget_per_head is null.
+type CostChoice = 'NONE' | 'BUDGET' | 'NO_BUDGET'
+const COST_MODES: CostChoice[] = ['NONE', 'BUDGET', 'NO_BUDGET']
+
 export function CreateRoundPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -78,7 +85,7 @@ export function CreateRoundPage() {
   // announced afterwards is a judgement passed on their receipts. Since 0074
   // this switch is also the *only* moment it can be thrown: turning sharing on
   // halfway through a dinner is a new deal, not a setting.
-  const [shareCosts, setShareCosts] = useState(false)
+  const [costMode, setCostMode] = useState<CostChoice>('NONE')
   const [budget, setBudget] = useState('')
   const [recipesPerBrief, setRecipesPerBrief] = useState(1)
   const [limitPlayers, setLimitPlayers] = useState(false)
@@ -130,11 +137,13 @@ export function CreateRoundPage() {
       // A second call rather than four more arguments on create_round, which
       // already takes thirteen. The dinner exists either way; a budget that
       // failed to save is a setting to fix, not a dinner to lose.
-      if (custom && shareCosts) {
+      if (custom && costMode !== 'NONE') {
         await setCostSettings({
           roundId,
           mode: 'SHARED',
-          budgetPerHead: toCents(budget),
+          // Null is a real answer here and not a missing one: it is what
+          // "split it, with no ceiling" means all the way down to the column.
+          budgetPerHead: costMode === 'BUDGET' ? toCents(budget) : null,
         })
       }
       navigate(`/rounds/${roundId}`, { replace: true })
@@ -269,19 +278,22 @@ export function CreateRoundPage() {
                   and not the other one — the *number* moves all evening, but
                   whether the table splits at all is agreed before anybody
                   shops (0074). */}
-              <Fold
-                title={t('costs.label')}
-                aside={shareCosts ? t('costs.on') : t('pro.badge')}
-              >
-                <label className="row">
-                  <input
-                    type="checkbox"
-                    style={{ width: 'auto' }}
-                    checked={shareCosts}
-                    onChange={(e) => setShareCosts(e.target.checked)}
-                  />
-                  <span>{t('costs.share')}</span>
-                </label>
+              {/* Three answers, not a tick and a hidden field. "Split it, no
+                  ceiling" was reachable before — tick the box, leave the
+                  budget empty — but only by discovering that an empty field
+                  meant something, which is a rule you can only learn by
+                  guessing right. Written out, it is a choice among three. */}
+              <Fold title={t('costs.label')} aside={t(`costs.mode.${costMode}`)}>
+                <ChoiceList
+                  name="cost-mode"
+                  value={costMode}
+                  onChange={(v) => setCostMode(v as CostChoice)}
+                  options={COST_MODES.map((code) => ({
+                    value: code,
+                    label: t(`costs.mode.${code}`),
+                    hint: t(`costs.mode.${code}Hint`),
+                  }))}
+                />
                 <p className="muted">{t('costs.shareFixed')}</p>
               </Fold>
 
@@ -386,7 +398,7 @@ export function CreateRoundPage() {
               {/* The number, in the box of things that move — beside the
                   courses and the voting, and deliberately not beside the
                   switch that turned sharing on. */}
-              {shareCosts && (
+              {costMode === 'BUDGET' && (
                 <Fold title={t('costs.budgetPerHead')} aside={budget || t('costs.noCeiling')}>
                   <label htmlFor="budget">{t('costs.budgetPerHead')}</label>
                   <input

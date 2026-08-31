@@ -59,6 +59,93 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-31 (3)
+
+**A refusal that was never protecting anything, and a PRO cover that ran
+forever** (`0078`, `0079`).
+
+### "No voting" was a one-way door for no reason
+
+Asked directly — *is it a database rule or is it impossible?* — and the honest
+answer is the first. The door was two lines in `set_voting_mode`:
+
+    if v_round.voting_mode = 'DISABLED' and p_mode <> 'DISABLED' then
+      raise exception 'voting was turned off ... cannot be turned back on';
+    end if;
+
+Nothing else in the schema depended on them. `voting_enabled` is a **generated
+column** derived from `voting_mode` (`0018`), so the phase machine's guard —
+`advance_phase` refusing `VOTING` when voting is off (`0013`) — opens by itself
+the instant the mode changes. There was never a technical reason. It was a
+judgement, and it was wrong: it treated "we are not going to rank our friends'
+cooking" as a destructive act needing protection, when it is one of the four
+ordinary ways a dinner ends. Every other voting choice can be revisited over
+dinner with the turning arrow; this one alone was final, so a host who chose it
+in June and found in October that the table wanted to vote had no way back.
+
+What still refuses is what was always doing the work: a vote cannot be reshaped
+once ballots exist, nor once results are in. Those protect ballots that exist.
+The old rule protected nothing.
+
+So the pass now offers the voteless dinner the same arrow as every other, with
+all four modes as rows, and the moment a method is chosen the open-the-vote
+button and the ballot envelope appear on their own — because `voting_enabled`
+recomputes itself. The red warning on the creation form is gone too.
+
+### PRO cover: 72 hours, and the dinner that must never be held
+
+`0075` stamped `is_pro` at creation and left it there forever. That solved the
+right problem — a subscription lapsing on the Tuesday must not strip a Friday
+dinner in front of eight people — and solved it too generously: a dinner
+created on the last day of a subscription kept its PRO features for as long as
+it existed, so every lapsed subscriber could keep one dinner alive.
+
+Cover now ends **72 hours** after the subscription does. Three days is chosen
+against a specific abuse (a dinner created at the last minute to outlive the
+payment) and is too short to be worth planning around, while being long enough
+that an evening already on the calendar is not lost to a card that failed.
+
+**Held is deliberately narrow.** Nothing is deleted and nothing disappears: the
+dinner stops moving. No phase advance, no recipes written or sent, everything
+still readable, and renewing releases it in the same breath — `redeem_code`
+calls `refresh_round_pro_cover`. Cancelling is always allowed, because a host
+who has decided not to renew must be able to call the evening off rather than
+be trapped inside it.
+
+**And the assertion that matters most is the one about dinners that must NOT
+stop.** During the free-for-all every account is PRO, so every dinner is
+stamped — and a rule keyed only on "the host's subscription ended" would put
+every dinner created since 2026 on hold at once on 3 January. So the hold asks
+a second question first: is this dinner *actually built on* something PRO — more
+than one recipe per cook, a paid word list, a paid cloth? A default dinner has
+nothing to lose and is never held, whatever happens to its host's subscription.
+
+The warnings are a month out and a week out, and nothing in between: the
+temptation with a lapsing subscription is to warn continuously, which produces
+a banner people stop seeing weeks before it starts mattering. The dinner
+carries its own version of the notice, with its own date — a host reading
+"your subscription ends on the 14th" in their profile has not necessarily
+worked out that the dinner they are planning for the 16th is what is at stake.
+
+### Shared costs, as three answers instead of a tick
+
+"Split it, with no ceiling" was reachable before — tick the box, leave the
+budget field empty — but only by discovering that an empty field meant
+something, which is a rule you can only learn by guessing right. It is now one
+of three rows: not shared, shared with a budget each, shared with no ceiling.
+
+*Tested:* `smoke_test17.sql` — a voteless dinner switched on mid-evening and
+`voting_enabled` following by itself, the phase machine then admitting it to
+`VOTING`, the switch back off, and the two real guards surviving
+(`VOTES_ALREADY_CAST`, `VOTE_ALREADY_CLOSED`); then an ordinary window-stamped
+dinner past its cover that is **not** held and still advances, a PRO-built one
+inside its grace that is not held and past it that is, the hold refusing an
+advance while still permitting a cancellation, a code lifting the hold, and the
+grace measured back out of the row at exactly 72 hours. Whole suite re-run on a
+fresh database: `smoke_test`, `2` and `4` fail exactly as they do on `main`.
+
+---
+
 ## 2026-08-31 (2)
 
 **PRO stops being a badge, and a sender may offer their cook a choice**

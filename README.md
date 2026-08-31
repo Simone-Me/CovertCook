@@ -893,6 +893,16 @@ strip a Friday dinner of the thing it was built around. That is the
 "never split a table into paying and non-paying players" rule made mechanical
 rather than promised.
 
+**Cover ends 72 hours after the subscription does** (`rounds.pro_until`,
+`0079`), so a dinner created on the last day of a subscription cannot outlive
+it indefinitely. Past the grace, a dinner *built on* a PRO feature goes on hold
+— it stops moving, nothing is deleted, everything stays readable, cancelling is
+still allowed, and renewing releases it. A dinner that uses nothing PRO is
+never held, whatever happens to its host's subscription: that is what stops the
+end of the free-for-all from stopping every dinner ever created during it.
+The warnings are a month out and a week out, on the profile and on the dinner
+itself.
+
 **Everybody is PRO until 31 December 2026** (`app_settings.pro_open_until`).
 Ending it is an `UPDATE`, not a deploy. While it is open there are no free
 accounts to look at, so the PRO page carries a switch that shows you the free

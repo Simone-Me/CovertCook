@@ -6,6 +6,7 @@ import { useAuth } from '../../lib/auth'
 import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
 import { themeMark } from '../../lib/themes'
+import { ProEndingNotice } from './ProNotices'
 import {
   fromCents,
   listNameThemes,
@@ -149,6 +150,8 @@ export function ProPage() {
           )}
         </div>
       )}
+
+      <ProEndingNotice />
 
       {note && <p className="notice">{note}</p>}
 

@@ -16,6 +16,8 @@ import { CopyButton } from '../../components/CopyButton'
 import { Icon } from '../../components/Icon'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { TurnBackRow } from '../../components/TurnBack'
+import { ChoiceList } from '../../components/ChoiceList'
+import { RoundProNotice } from '../pro/ProNotices'
 import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
 import { MenuPanel } from './MenuPanel'
@@ -62,6 +64,10 @@ import {
 } from '../../lib/rpc'
 
 type OpenDrawer = 'chefs' | 'allergies' | 'info' | 'costs' | null
+
+// The same order the creation form asks in, so a host meets the four choices
+// laid out the way they first met them.
+const PASS_VOTING_ORDER: VotingMode[] = ['MANUAL', 'LIVE', 'TIMED', 'DISABLED']
 
 // The two marks the Messages envelope can carry, in rank order — see
 // messageMark below for which wins.
@@ -585,6 +591,12 @@ export function RoundHomePage() {
             something broken. */}
         {frozen && <p className="notice">{t('rounds.frozen')}</p>}
 
+        {/* Above the pass, not inside it: everybody at this table needs to know
+            why the dinner has stopped, and the pass is the Executive Chef's
+            drawer. Only the host is offered the way out, because only the host
+            has one. */}
+        <RoundProNotice round={round} isHost={round.host_id === profile?.id} />
+
         {/* The countdown, on the dinner it is about. Two sentences: when it
             goes, and what you keep — because "this will be deleted" on its own
             reads as a loss rather than as a tidy-up. */}
@@ -792,18 +804,19 @@ export function RoundHomePage() {
                 onToggle={() => setReVoting((v) => !v)}
               >
                 <p className="muted" style={{ margin: 0 }}>{t('rounds.voting.chosenAtCreation')}</p>
-                <select
-                  aria-label={t('vote.style')}
+                <ChoiceList
+                  name="vote-style-manual"
                   value={round.voting_mode}
-                  onChange={(e) => {
-                    onVotingMode(e.target.value as VotingMode)
+                  onChange={(v) => {
+                    onVotingMode(v as VotingMode)
                     setReVoting(false)
                   }}
-                >
-                  <option value="MANUAL">{t('rounds.voting.MANUAL')}</option>
-                  <option value="LIVE">{t('rounds.voting.LIVE')}</option>
-                  <option value="TIMED">{t('rounds.voting.TIMED')}</option>
-                </select>
+                  options={PASS_VOTING_ORDER.map((mode) => ({
+                    value: mode,
+                    label: t(`rounds.voting.${mode}`),
+                    hint: t(`rounds.voting.${mode}Hint`),
+                  }))}
+                />
               </TurnBackRow>
             )}
 
@@ -819,8 +832,16 @@ export function RoundHomePage() {
           </div>
         )}
 
+        {/* A DINNER WITH NO VOTE STILL GETS THIS SECTION, because "no vote"
+            is now a choice like the other three rather than a door that shut
+            behind the host (0078). Without it the arrow had nowhere to live on
+            exactly the dinner that most needed it: the one where somebody said
+            in June that nobody would want to vote, and the table said in
+            October that they did.
+            The moment a method is chosen the round stops being voteless — 
+            `voting_enabled` is generated from `voting_mode` — so the button to
+            open the vote and the ballot envelope below appear on their own. */}
         {(round.status === 'DINNER' || round.status === 'VOTING') &&
-          round.voting_mode !== 'DISABLED' &&
           round.voting_mode !== 'MANUAL' && (
           <div className="stack">
             <span className="pass__section-title">{t('rounds.actions.voting')}</span>
@@ -844,29 +865,36 @@ export function RoundHomePage() {
               >
                 <p className="muted" style={{ margin: 0 }}>{t('rounds.voting.chosenAtCreation')}</p>
                 <label htmlFor="vote-style">{t('vote.style')}</label>
-                <select
-                  id="vote-style"
+                {/* All four, including "no voting" — which is why 0078
+                    exists. Rows rather than a dropdown, the same shape the
+                    creation form uses, so the four are compared rather than
+                    revealed one at a time. */}
+                <ChoiceList
+                  name="vote-style"
                   value={round.voting_mode}
-                  onChange={(e) => {
-                    onVotingMode(e.target.value as VotingMode)
+                  onChange={(v) => {
+                    onVotingMode(v as VotingMode)
                     setReVoting(false)
                   }}
-                >
-                  {/* DISABLED is absent on purpose and always has been: it can
-                      never be turned back on (0045), so offering it here would
-                      be a one-way door in the middle of an evening. */}
-                  <option value="MANUAL">{t('rounds.voting.MANUAL')}</option>
-                  <option value="LIVE">{t('rounds.voting.LIVE')}</option>
-                  <option value="TIMED">{t('rounds.voting.TIMED')}</option>
-                </select>
-                <p className="muted">{t(`rounds.voting.${round.voting_mode}Hint`)}</p>
+                  options={PASS_VOTING_ORDER.map((mode) => ({
+                    value: mode,
+                    label: t(`rounds.voting.${mode}`),
+                    hint: t(`rounds.voting.${mode}Hint`),
+                  }))}
+                />
               </TurnBackRow>
             )}
 
-            {round.status === 'DINNER' && (
+            {/* Only once there is a method to open. On a voteless dinner the
+                section is just the arrow and its explanation. */}
+            {round.status === 'DINNER' && round.voting_mode !== 'DISABLED' && (
               <button type="button" onClick={onOpenVoting}>
                 {t('vote.openNow')}
               </button>
+            )}
+
+            {round.voting_mode === 'DISABLED' && (
+              <p className="muted" style={{ margin: 0 }}>{t('rounds.voting.DISABLEDHint')}</p>
             )}
 
             {/* How many have finished, never who and never what. A share as
@@ -942,9 +970,11 @@ export function RoundHomePage() {
               )
             )}
 
-            <button type="button" className="secondary" onClick={onSkipVoting}>
-              {t('vote.skip')}
-            </button>
+            {round.voting_mode !== 'DISABLED' && (
+              <button type="button" className="secondary" onClick={onSkipVoting}>
+                {t('vote.skip')}
+              </button>
+            )}
           </div>
         )}
 

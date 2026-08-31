@@ -132,10 +132,10 @@
       "TIMED": "Secret, après le dîner",
       "TIMEDHint": "Chacun vote de chez soi après, jusqu'à 48 heures. Les résultats se publient tout seuls à l'échéance.",
       "DISABLED": "Pas de vote",
-      "DISABLEDHint": "Celui-ci est sans retour : le vote sera indisponible pour ce dîner et ne pourra pas être activé ensuite.",
+      "DISABLEDHint": "La soirée se termine avec le repas — pas de classement, pas de résultats. Vous pouvez encore changer d’avis à table, jusqu’au premier vote.",
       "MANUAL": "À main levée",
       "MANUALHint": "Pas de téléphones à table : les plats sont classés à main levée, et vous saisissez le décompte.",
-      "chosenWhenOpening": "Choisi à l’ouverture du vote, pas maintenant — et modifiable tant que personne n’a voté.",
+      "chosenWhenOpening": "Modifiable pendant le dîner avec la flèche ↺, dans les deux sens, jusqu’au premier vote.",
       "changeMethod": "Changer la façon de voter",
       "chosenAtCreation": "Choisi à la création du dîner. La flèche revient dessus, tant que personne n'a voté."
     },
@@ -255,7 +255,6 @@
       "fixedAtCreation": "choisi à la création, figé",
       "fixedNow": "non modifiable",
       "changeableNow": "modifiable maintenant",
-      "votingNeverOn": "ne peut plus être activé",
       "yes": "Oui",
       "no": "Non",
       "noLimit": "Sans limite",
@@ -808,6 +807,18 @@
         "NAME_THEME": "la liste de mots",
         "TABLE_THEME": "la nappe"
       }
+    },
+    "ending": {
+      "MONTH": "Votre PRO se termine le {{date}}.",
+      "WEEK": "Votre PRO se termine le {{date}} — dans moins d’une semaine.",
+      "whatHappens": "Les dîners déjà créés qui utilisent une fonction PRO continuent {{hours}} heures après cette date, puis se mettent en pause jusqu’au renouvellement. Rien n’est supprimé, et les dîners qui n’utilisent rien de PRO ne sont pas concernés.",
+      "renew": "Ce qu’est PRO, et comment le garder →"
+    },
+    "round": {
+      "ending": "La couverture PRO de ce dîner se termine le {{date}}.",
+      "endingWhat": "Il a été créé avec une fonction PRO. {{hours}} heures après cette date il se met en pause — toujours lisible, mais il n’avance plus et plus aucune recette ne peut être écrite.",
+      "held": "Ce dîner est en pause.",
+      "heldWhat": "Il a été créé avec une fonction PRO et sa couverture a expiré il y a plus de {{hours}} heures. Rien n’est perdu — tout ce qui a été écrit est toujours là — mais il ne peut plus avancer tant que le Executive Chef ne renouvelle pas."
     }
   },
   "legal": {
@@ -1259,7 +1270,15 @@
     "noCeiling": "Sans plafond",
     "setBudget": "Changer le budget",
     "budgetSaved": "Le nouveau budget est enregistré.",
-    "budgetHostOnly": "Seul le Executive Chef change le budget."
+    "budgetHostOnly": "Seul le Executive Chef change le budget.",
+    "mode": {
+      "NONE": "Non partagés",
+      "NONEHint": "Chacun paie ce qu’il apporte. Rien à compter, rien à régler.",
+      "BUDGET": "Partagés, avec un budget par personne",
+      "BUDGETHint": "Vous convenez d’un montant maintenant, avant que quiconque fasse les courses, pour qu’il oriente ce que chacun écrit plutôt que de juger les tickets après coup.",
+      "NO_BUDGET": "Partagés, sans plafond",
+      "NO_BUDGETHint": "La table partage ce que ça aura coûté. Chacun note sa dépense et l’application dit qui doit quoi à qui."
+    }
   },
   "themes": {
     "free": "Gratuit",

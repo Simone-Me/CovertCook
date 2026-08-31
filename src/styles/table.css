@@ -2403,3 +2403,18 @@
   margin: 8px 0 0;
   font-size: 13px;
 }
+
+/* The two PRO warnings, and the hold. A month out is a note; a week out is the
+   same note leaning on the accent; on hold uses the error card, because the
+   dinner has actually stopped. */
+.pro-notice {
+  border-left: 3px solid var(--border);
+}
+
+.pro-notice--month {
+  border-left-color: var(--text-muted);
+}
+
+.pro-notice--week {
+  border-left-color: var(--accent);
+}

@@ -132,10 +132,10 @@
       "TIMED": "Secret, after dinner",
       "TIMEDHint": "Everyone votes from home afterwards, up to 48 hours. The results publish themselves the moment the deadline runs out.",
       "DISABLED": "No voting",
-      "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later.",
+      "DISABLEDHint": "The evening ends with the meal — no ranking, no results. You can still change your mind at the table, right up until the first vote is cast.",
       "MANUAL": "By a show of hands",
       "MANUALHint": "No phones at the table: dishes are ranked by hands going up, and you type in the count.",
-      "chosenWhenOpening": "Chosen when you open the vote, not now — and changeable until the first vote is cast.",
+      "chosenWhenOpening": "Changeable during the dinner with the ↺ arrow, in any direction, until the first vote is cast.",
       "changeMethod": "Change how this dinner votes",
       "chosenAtCreation": "Chosen when the dinner was created. The arrow goes back on it, until the first vote is cast."
     },
@@ -255,7 +255,6 @@
       "fixedAtCreation": "chosen at creation, fixed",
       "fixedNow": "no longer changeable",
       "changeableNow": "changeable now",
-      "votingNeverOn": "cannot be turned on later",
       "yes": "Yes",
       "no": "No",
       "noLimit": "No limit",
@@ -808,6 +807,18 @@
         "NAME_THEME": "the word list",
         "TABLE_THEME": "the table cloth"
       }
+    },
+    "ending": {
+      "MONTH": "Your PRO ends on {{date}}.",
+      "WEEK": "Your PRO ends on {{date}} — that is under a week.",
+      "whatHappens": "Dinners you have already created that use a PRO feature keep working for {{hours}} hours after that, and then go on hold until you renew. Nothing is deleted, and dinners that use nothing PRO are not affected at all.",
+      "renew": "What PRO is, and how to keep it →"
+    },
+    "round": {
+      "ending": "This dinner’s PRO cover ends on {{date}}.",
+      "endingWhat": "It was built with a PRO feature. {{hours}} hours after that date it goes on hold — still readable, but it stops moving and no more recipes can be written.",
+      "held": "This dinner is on hold.",
+      "heldWhat": "It was built with a PRO feature and its cover ran out more than {{hours}} hours ago. Nothing has been lost — everything written is still here — but it cannot move on until the Executive Chef renews."
     }
   },
   "legal": {
@@ -1259,7 +1270,15 @@
     "noCeiling": "No ceiling",
     "setBudget": "Change the budget",
     "budgetSaved": "The new budget is in.",
-    "budgetHostOnly": "Only the Executive Chef changes the budget."
+    "budgetHostOnly": "Only the Executive Chef changes the budget.",
+    "mode": {
+      "NONE": "Not shared",
+      "NONEHint": "Everyone pays for what they bring. Nothing to tally, nothing to settle.",
+      "BUDGET": "Shared, with a budget each",
+      "BUDGETHint": "You agree a figure now, before anybody shops, so it shapes what people write rather than judging their receipts afterwards.",
+      "NO_BUDGET": "Shared, no ceiling",
+      "NO_BUDGETHint": "The table splits whatever it comes to. Everyone records what they spent and the app says who owes whom."
+    }
   },
   "themes": {
     "free": "Free",

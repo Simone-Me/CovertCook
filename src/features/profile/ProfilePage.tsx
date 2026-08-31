@@ -27,6 +27,7 @@ import {
 import { sendTestPush, type TestPushResult } from '../../lib/rpc'
 import { Link } from 'react-router-dom'
 import { myProStatus } from '../../lib/rpc'
+import { ProEndingNotice } from '../pro/ProNotices'
 
 interface DietaryRow {
   id: string
@@ -291,6 +292,9 @@ export function ProfilePage() {
             behind a click. */}
         <LanguageSwitch onChange={(code) => onLocale(code as SupportedLocale)} />
       </div>
+
+      {/* A month out and a week out, and never in between. */}
+      <ProEndingNotice />
 
       {/* The first of the two ways to PRO, and the one that is about the
           account rather than about a dinner being planned. It says where you

@@ -313,11 +313,10 @@ export function RoundSettingsPage() {
                   opens, and stays changeable until somebody has actually voted
                   (0043, 0045) — which is a thing worth knowing before the
                   evening, not a status to look up during it. */}
-              {round.voting_mode === 'DISABLED' ? (
-                <span className="fixed-note">{t('rounds.settings.votingNeverOn')}</span>
-              ) : (
-                <span className="fixed-note">{t('rounds.voting.chosenWhenOpening')}</span>
-              )}
+              {/* One note now, because there is one rule: the method moves in
+                  either direction until somebody has voted (0078). "No voting
+                  cannot be turned on later" was true and is not any more. */}
+              <span className="fixed-note">{t('rounds.voting.chosenWhenOpening')}</span>
             </dd>
 
             <dt>{t('rounds.slotMode.label')}</dt>
