@@ -35,6 +35,7 @@ export function ThemePicker({
   onChange,
   labelKey,
   locale,
+  freeUntil,
 }: {
   /** Radio group name — two pickers on one form must not share a group. */
   name: string
@@ -44,6 +45,9 @@ export function ThemePicker({
   /** i18n prefix; `${labelKey}.${code}` is the name, `…Hint` the sentence. */
   labelKey: string
   locale: string
+  /** When the free-for-all ends, if it is on. A PAID row is usable during it
+   *  and must still say so — see the note on the tag below. */
+  freeUntil?: string | null
 }) {
   const { t } = useTranslation()
 
@@ -68,6 +72,29 @@ export function ThemePicker({
                 second row is the fact that stops the whole shelf reading as a
                 paywall. */}
             {opt.tier === 'FREE' && <span className="shelf__tag">{t('themes.free')}</span>}
+
+            {/* A PAID row keeps saying PRO EVEN WHEN IT IS USABLE, and this is
+                the point of the whole prop. During the free-for-all every
+                paid theme is unlocked, so without this the shelf looks like
+                seven free cloths — and on 1 January five of them would appear
+                to have been taken away. Marked now, with the date it stops
+                being free, nothing is a surprise later. */}
+            {opt.tier === 'PAID' && (
+              <>
+                <span className="shelf__tag shelf__tag--pro">{t('pro.badge')}</span>
+                {opt.owned && freeUntil && (
+                  <em className="shelf__freenow">
+                    {t('pro.freeForNow', {
+                      date: new Date(freeUntil).toLocaleDateString(locale, {
+                        day: 'numeric',
+                        month: 'numeric',
+                      }),
+                    })}
+                  </em>
+                )}
+              </>
+            )}
+
             {!opt.owned && opt.price_cents !== null && (
               <span className="shelf__tag shelf__tag--price">
                 {fromCents(opt.price_cents, locale)}

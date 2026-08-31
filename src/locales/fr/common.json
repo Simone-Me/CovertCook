@@ -176,7 +176,6 @@
     "removeLeave": "Retirer sans rien changer",
     "removeCollapseConfirm": "Referme la chaîne autour de ce participant. Celui qui écrivait pour lui écrira pour le cuisinier suivant, donc chacun garde un plat à préparer — mais ce cuisinier reçoit une autre recette que celle qu'il avait déjà.",
     "removeLeaveConfirm": "Laisse la chaîne telle quelle. Personne d'autre n'est dérangé, et le plat écrit pour ce participant ne sera simplement pas cuisiné.",
-    "limitPlayers": "Limiter le nombre de participants",
     "maxPlayers": "Nombre maximum de participants",
     "joinCode": "Code du dîner",
     "joinCodePlaceholder": "ex. R63ZFCSZ",
@@ -281,8 +280,6 @@
       "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant."
     },
     "pastRounds": "Dîners passés ({{count}})",
-    "tooManyPlayers": "Trente, ça fait déjà beaucoup de cuisine. Où comptez-vous les asseoir — c'est un mariage ?",
-    "tooFewPlayers": "Il en faut au moins trois : à deux, vous sauriez chacun exactement qui a écrit votre recette.",
     "backToTable": "Retour à la table",
     "steps": {
       "signup": "Inscription",
@@ -456,6 +453,18 @@
       "XMASHint": "Vert sapin sur blanc papier.",
       "CARNIVAL": "Carnaval",
       "CARNIVALHint": "Des confettis, restés où ils sont tombés."
+    },
+    "door": {
+      "label": "Qui entre",
+      "seats_one": "{{count}} place",
+      "seats_other": "{{count}} places",
+      "noLimit": "Sans limite",
+      "seatsHint": "Le dîner cesse de prendre du monde à {{count}}. Qui arrive après s’entend dire que la table est pleine.",
+      "noLimitHint": "Autant que de gens qui se présentent. Au-delà d’environ {{max}} la liste de pseudonymes s’épuise et les gens finissent numérotés plutôt que nommés — gardez un œil dessus.",
+      "APPROVE": "Vous approuvez chaque arrivée",
+      "APPROVEHint": "Qui demande une place attend votre oui. Vous voyez son vrai nom avant de décider.",
+      "FREE": "Qui a de quoi entrer prend sa place",
+      "FREEHint": "Aucune attente et rien à faire pour vous. Qui détient le code, ou accepte une invitation, est à table."
     }
   },
   "briefs": {
@@ -819,7 +828,8 @@
       "endingWhat": "Il a été créé avec une fonction PRO. {{hours}} heures après cette date il se met en pause — toujours lisible, mais il n’avance plus et plus aucune recette ne peut être écrite.",
       "held": "Ce dîner est en pause.",
       "heldWhat": "Il a été créé avec une fonction PRO et sa couverture a expiré il y a plus de {{hours}} heures. Rien n’est perdu — tout ce qui a été écrit est toujours là — mais il ne peut plus avancer tant que le Executive Chef ne renouvelle pas."
-    }
+    },
+    "freeForNow": "gratuit jusqu’au {{date}}"
   },
   "legal": {
     "terms": "Conditions",

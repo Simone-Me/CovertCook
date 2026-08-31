@@ -176,7 +176,6 @@
     "removeLeave": "Remove and leave as is",
     "removeCollapseConfirm": "Reconnect the chain around this player. Whoever was writing for them will write for the next cook instead, so everyone still has a dish to make — but that cook gets a different recipe than the one they already have.",
     "removeLeaveConfirm": "Leave the chain exactly as it is. Nobody else is disturbed, and the dish written for this player simply won't be cooked.",
-    "limitPlayers": "Limit the number of players",
     "maxPlayers": "Maximum players",
     "joinCode": "Round code",
     "joinCodePlaceholder": "e.g. R63ZFCSZ",
@@ -281,8 +280,6 @@
       "inviteHelp": "Their username, not their email — the name they picked when they signed up."
     },
     "pastRounds": "Past dinners ({{count}})",
-    "tooManyPlayers": "Thirty is already a lot of cooking. Where were you planning to seat them all — is this a wedding?",
-    "tooFewPlayers": "It takes at least three: with two, you would both know exactly who wrote your recipe.",
     "backToTable": "Back to the table",
     "steps": {
       "signup": "Sign-up",
@@ -456,6 +453,18 @@
       "XMASHint": "Fir green on paper white.",
       "CARNIVAL": "Carnival",
       "CARNIVALHint": "Confetti, still where it fell."
+    },
+    "door": {
+      "label": "Who gets in",
+      "seats_one": "{{count}} seat",
+      "seats_other": "{{count}} seats",
+      "noLimit": "No limit",
+      "seatsHint": "The dinner stops taking people at {{count}}. Anyone arriving after that is told the table is full.",
+      "noLimitHint": "As many as turn up. Past about {{max}} the pseudonym list runs out and people start being numbered instead of named, so keep an eye on it.",
+      "APPROVE": "You approve each arrival",
+      "APPROVEHint": "Anyone who asks for a seat waits until you say yes. You see their real name before you decide.",
+      "FREE": "Anyone with the way in takes a seat",
+      "FREEHint": "No waiting and nothing for you to do. Whoever holds the code, or accepts an invitation, is at the table."
     }
   },
   "briefs": {
@@ -819,7 +828,8 @@
       "endingWhat": "It was built with a PRO feature. {{hours}} hours after that date it goes on hold — still readable, but it stops moving and no more recipes can be written.",
       "held": "This dinner is on hold.",
       "heldWhat": "It was built with a PRO feature and its cover ran out more than {{hours}} hours ago. Nothing has been lost — everything written is still here — but it cannot move on until the Executive Chef renews."
-    }
+    },
+    "freeForNow": "free until {{date}}"
   },
   "legal": {
     "terms": "Terms",

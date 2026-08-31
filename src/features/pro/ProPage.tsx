@@ -93,6 +93,34 @@ export function ProPage() {
   const paidNames = (nameThemes ?? []).filter((x) => x.tier === 'PAID')
   const paidTables = (tableThemes ?? []).filter((x) => x.tier === 'PAID')
 
+  /**
+   * What to print in the corner of a card on the shelf.
+   *
+   * "Yours" is the wrong word during the free-for-all and it is wrong in the
+   * way that costs trust later: everything is unlocked, so every card would
+   * claim to be owned, and in January five of them would appear to have been
+   * taken away from somebody who was told they had them. While the window is
+   * open the card shows what it will cost and how long it is free for.
+   */
+  function priceLabel(item: { owned: boolean; price_cents: number | null }) {
+    if (pro?.window_open && pro.window_until) {
+      return (
+        <>
+          {fromCents(item.price_cents ?? 0, locale)}
+          <em className="procard__freenow">
+            {t('pro.freeForNow', {
+              date: new Date(pro.window_until).toLocaleDateString(locale, {
+                day: 'numeric',
+                month: 'numeric',
+              }),
+            })}
+          </em>
+        </>
+      )
+    }
+    return item.owned ? t('pro.opens.yours') : fromCents(item.price_cents ?? 0, locale)
+  }
+
   return (
     <div className="stack sheet">
       <BackToTable />
@@ -158,7 +186,20 @@ export function ProPage() {
       {/* ---- 1. What it opens ---- */}
       <h2>{t('pro.opens.title')}</h2>
 
-      <Fold title={t('rounds.recipesPerBrief.label')} defaultOpen>
+      <Fold
+        title={t('rounds.recipesPerBrief.label')}
+        aside={
+          pro?.window_open && pro.window_until
+            ? t('pro.freeForNow', {
+                date: new Date(pro.window_until).toLocaleDateString(locale, {
+                  day: 'numeric',
+                  month: 'numeric',
+                }),
+              })
+            : undefined
+        }
+        defaultOpen
+      >
         <div className="card stack">
           <p style={{ margin: 0 }}>{t('pro.opens.recipes')}</p>
           {/* The example rather than a description of it: three tabs is exactly
@@ -185,9 +226,7 @@ export function ProPage() {
                 <span className="muted procard__eg">
                   {t(`rounds.nameTheme.${x.code}Hint`, { defaultValue: '' })}
                 </span>
-                <span className="procard__price">
-                  {x.owned ? t('pro.opens.yours') : fromCents(x.price_cents ?? 0, locale)}
-                </span>
+                <span className="procard__price">{priceLabel(x)}</span>
               </div>
             ))}
           </div>
@@ -211,9 +250,7 @@ export function ProPage() {
                 <span className="muted procard__eg">
                   {t(`rounds.tableTheme.${x.code}Hint`, { defaultValue: '' })}
                 </span>
-                <span className="procard__price">
-                  {x.owned ? t('pro.opens.yours') : fromCents(x.price_cents ?? 0, locale)}
-                </span>
+                <span className="procard__price">{priceLabel(x)}</span>
               </div>
             ))}
           </div>

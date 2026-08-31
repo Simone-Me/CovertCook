@@ -59,6 +59,54 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-31 (4)
+
+**The door becomes one question, and PRO keeps saying PRO while it is free.**
+
+### Two ticks at opposite ends of a form, about the same thing
+
+"The Executive Chef approves each player" was a checkbox in the fixed box.
+"Limit the number of players" was a checkbox plus a number field below every
+other control on the page. They are obviously one subject — a host thinking
+about the size of their table is thinking about the door — and they are now one
+fold, **Who gets in**, with the seat count on a slider and the approval as two
+rows like the rest of the form.
+
+**The slider replaced the tick, not just the number field.** Pushed all the way
+right, the dinner has no cap; the far end of the track is where "no limit"
+lives. A tick for *whether* to limit and a number for *how much* was one
+question asked twice, and the tick was the half nobody read. That only works
+because both ends of the track are labelled — a slider with unmarked extremes
+is a slider you have to drag to understand.
+
+The count reads above the track rather than beside it: on a phone your thumb
+covers the slider, and a value at the end of the row would be under your own
+hand while you are dragging it.
+
+**A bug this nearly introduced, caught before it shipped.** The door is asked
+of a classic host too — it is the one decision that is not about how the game
+is played, so taking it away from classic would have removed a capability
+nobody asked to lose. But the submit spreads a `CLASSIC` object over the form's
+values, and `requiresApproval` was in it: the new control would have rendered,
+responded to being pressed, and been thrown away on submit. `requiresApproval`
+has left `CLASSIC` and its default now lives on the `useState` with the others.
+
+### PRO stays legible while it is free
+
+During the free-for-all every paid theme is unlocked, so the shelf showed seven
+free-looking cloths and the PRO page called all five of them "Yours". Both are
+true today and both set up the same disappointment: on 1 January five cloths
+would appear to have been *taken away* from somebody who was told they had
+them.
+
+So a PAID row keeps its **PRO** pill whether or not it is currently locked, and
+carries a small italic beside it saying how long it stays free. On the PRO page
+the cards show what the thing will cost with the same note underneath, instead
+of claiming to be owned. Nothing is a surprise later, which is the only thing a
+free trial has to get right.
+
+---
+
 ## 2026-08-31 (3)
 
 **A refusal that was never protecting anything, and a PRO cover that ran

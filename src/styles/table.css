@@ -2418,3 +2418,69 @@
 .pro-notice--week {
   border-left-color: var(--accent);
 }
+
+/* ---------------------------------------------------------------------------
+ * The door: how many seats, on a slider.
+ *
+ * A tick and a number field were one question asked twice, and the far-right
+ * position of the track is what replaced the tick — pushed all the way over,
+ * the dinner has no cap. That only works if the end of the track is LABELLED,
+ * which is what .seatslider__ends is for: a slider whose extremes are unmarked
+ * is a slider you have to drag to understand.
+ * ------------------------------------------------------------------------- */
+
+.seatcount {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* "No limit" is words where the others are a numeral, so it is set smaller —
+   at 30px it would tower over every number it is meant to sit among. */
+.seatcount.is-open {
+  font-size: 19px;
+  letter-spacing: 0.01em;
+}
+
+.seatslider {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+  /* The ball needs somewhere to be grabbed on a phone. The track is thin; the
+     touch target is not. */
+  height: 28px;
+}
+
+.seatslider__ends {
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+/* PRO on a row that is currently usable. The pill says what the thing is; the
+   italic beside it says how long that stays true. Deliberately quiet — it is a
+   footnote on an option, not a second price tag. */
+.shelf__tag--pro {
+  border-color: var(--pass-edge);
+  background: var(--pass-env);
+  color: var(--pass-ink);
+}
+
+.shelf__freenow {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* On a shelf card the note goes under the price rather than beside it — the
+   cards are 148px wide and there is no room for a second thing on that line. */
+.procard__freenow {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-muted);
+}

@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { ThemePicker } from './ThemePicker'
 import { ChoiceList } from '../../components/ChoiceList'
+import { DoorRules } from './DoorRules'
 import { Link } from 'react-router-dom'
 import {
   createRound,
@@ -28,18 +29,16 @@ import {
 // one recipe each, voting on. Custom opens the rest. This is the "default
 // to simple" principle from README.md made literal — most hosts should
 // never see a radio button.
-// Kept in step with rounds_max_players_sane (0020). Three is where a chain
-// stops being a swap; thirty is where the secret-name list runs out and
-// people start being numbered instead of named.
-const MIN_PLAYERS = 3
-const MAX_PLAYERS = 30
-
+// What a classic dinner is. `requiresApproval` is NOT in here any more: the
+// door is asked of every host, classic or not, so its answer comes from the
+// form rather than from this object — which would otherwise silently overwrite
+// it. The default it used to carry lives on the useState below, where the
+// other defaults are.
 const CLASSIC = {
   access: 'CODE' as RoundAccess,
   anonymity: 'ANONYMOUS' as RoundAnonymity,
   slotMode: 'FREE' as SlotMode,
   votingMode: 'LIVE' as VotingMode,
-  requiresApproval: true,
 }
 
 // The order the questions are actually asked in, which is not the order the
@@ -77,7 +76,7 @@ export function CreateRoundPage() {
   const [tableTheme, setTableTheme] = useState<TableTheme>('CHECKS')
   const [access, setAccess] = useState<RoundAccess>(CLASSIC.access)
   const [anonymity, setAnonymity] = useState<RoundAnonymity>(CLASSIC.anonymity)
-  const [requiresApproval, setRequiresApproval] = useState(CLASSIC.requiresApproval)
+  const [requiresApproval, setRequiresApproval] = useState(true)
   const [votingMode, setVotingMode] = useState<VotingMode>(CLASSIC.votingMode)
   const [slotMode, setSlotMode] = useState<SlotMode>(CLASSIC.slotMode)
   // Shared costs (0065). Agreed here rather than at the end on purpose: a
@@ -88,8 +87,9 @@ export function CreateRoundPage() {
   const [costMode, setCostMode] = useState<CostChoice>('NONE')
   const [budget, setBudget] = useState('')
   const [recipesPerBrief, setRecipesPerBrief] = useState(1)
-  const [limitPlayers, setLimitPlayers] = useState(false)
-  const [maxPlayers, setMaxPlayers] = useState(8)
+  // Null is "no cap", which is what the slider's far-right position means. One
+  // value instead of a flag and a number, because they were one question.
+  const [seats, setSeats] = useState<number | null>(8)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -118,6 +118,10 @@ export function CreateRoundPage() {
     staleTime: 60 * 1000,
   })
   const isPro = pro?.pro ?? false
+  // Set only while the free-for-all is on. Everything PRO is usable right now
+  // and every PRO row still says so, with this date beside it — otherwise the
+  // shelf looks like seven free cloths today and a theft in January.
+  const freeUntil = pro?.window_open ? pro.window_until : null
 
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
@@ -132,7 +136,11 @@ export function CreateRoundPage() {
               nameTheme, tableTheme, recipesPerBrief,
             }
           : CLASSIC),
-        maxPlayers: limitPlayers ? maxPlayers : null,
+        // The door is asked of a classic host too, so its two answers have to
+        // survive the CLASSIC spread above — otherwise the control would be on
+        // the page, respond to being pressed, and be thrown away on submit.
+        requiresApproval,
+        maxPlayers: seats,
       })
       // A second call rather than four more arguments on create_round, which
       // already takes thirteen. The dinner exists either way; a budget that
@@ -255,6 +263,7 @@ export function CreateRoundPage() {
                   onChange={(code) => setNameTheme(code as NameTheme)}
                   labelKey="rounds.nameTheme"
                   locale={locale}
+                  freeUntil={freeUntil}
                 />
               </Fold>
 
@@ -269,6 +278,7 @@ export function CreateRoundPage() {
                   onChange={(code) => setTableTheme(code as TableTheme)}
                   labelKey="rounds.tableTheme"
                   locale={locale}
+                  freeUntil={freeUntil}
                 />
               </Fold>
 
@@ -321,7 +331,26 @@ export function CreateRoundPage() {
                     hint: t(`rounds.recipesPerBrief.hint${n}`),
                     locked: n > 1 && !isPro,
                     lockedReason: t('pro.lockedHere'),
-                    tag: n > 1 ? <span className="shelf__tag">{t('pro.badge')}</span> : undefined,
+                    // PRO, said whether or not it is currently locked. Same
+                    // reason as the theme shelves: during the free-for-all
+                    // these are usable, and a host who is never told they are
+                    // a paid feature finds out by losing them.
+                    tag:
+                      n > 1 ? (
+                        <>
+                          <span className="shelf__tag shelf__tag--pro">{t('pro.badge')}</span>
+                          {freeUntil && (
+                            <em className="shelf__freenow">
+                              {t('pro.freeForNow', {
+                                date: new Date(freeUntil).toLocaleDateString(locale, {
+                                  day: 'numeric',
+                                  month: 'numeric',
+                                }),
+                              })}
+                            </em>
+                          )}
+                        </>
+                      ) : undefined,
                   }))}
                 />
                 {!isPro && (
@@ -331,15 +360,15 @@ export function CreateRoundPage() {
                 )}
               </Fold>
 
-              <label className="row">
-                <input
-                  type="checkbox"
-                  style={{ width: 'auto' }}
-                  checked={requiresApproval}
-                  onChange={(e) => setRequiresApproval(e.target.checked)}
-                />
-                {t('rounds.requiresApproval')}
-              </label>
+              {/* How many, and whether you wave them in. Both settled here
+                  and nowhere else: there is no RPC that moves either on a live
+                  round, which is exactly why they belong in this box. */}
+              <DoorRules
+                seats={seats}
+                onSeats={setSeats}
+                requiresApproval={requiresApproval}
+                onRequiresApproval={setRequiresApproval}
+              />
             </section>
 
             <section className="rules rules--live">
@@ -428,40 +457,21 @@ export function CreateRoundPage() {
           </>
         )}
 
-        <label className="row">
-          <input
-            type="checkbox"
-            style={{ width: 'auto' }}
-            checked={limitPlayers}
-            onChange={(e) => setLimitPlayers(e.target.checked)}
+        {/* A classic dinner still gets a door — it is the one decision that
+            is not about how the game is played, so keeping it here costs the
+            "nothing to decide" promise nothing and losing it would take a
+            capability away. Under `custom` it lives inside the fixed box
+            instead, with the other things that cannot be changed. */}
+        {!custom && (
+          <DoorRules
+            seats={seats}
+            onSeats={setSeats}
+            requiresApproval={requiresApproval}
+            onRequiresApproval={setRequiresApproval}
           />
-          {t('rounds.limitPlayers')}
-        </label>
-
-        {limitPlayers && (
-          <div>
-            <label htmlFor="maxPlayers">{t('rounds.maxPlayers')}</label>
-            <input
-              id="maxPlayers"
-              type="number"
-              min={MIN_PLAYERS}
-              max={MAX_PLAYERS}
-              required
-              value={maxPlayers}
-              onChange={(e) => setMaxPlayers(Number(e.target.value))}
-            />
-            {/* Mirrors the rounds_max_players_sane constraint (0020) so the
-                limit is explained here rather than discovered as a raw
-                Postgres error after the click. */}
-            {maxPlayers > MAX_PLAYERS && <p className="error">{t('rounds.tooManyPlayers')}</p>}
-            {maxPlayers < MIN_PLAYERS && <p className="error">{t('rounds.tooFewPlayers')}</p>}
-          </div>
         )}
 
-        <button
-          type="submit"
-          disabled={submitting || (limitPlayers && (maxPlayers > MAX_PLAYERS || maxPlayers < MIN_PLAYERS))}
-        >
+        <button type="submit" disabled={submitting}>
           {t('actions.submit')}
         </button>
       </form>
