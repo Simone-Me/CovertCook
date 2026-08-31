@@ -44,6 +44,13 @@ export interface RoundRow {
   // one thing everybody is looking at, and re-dressing it mid-evening changes
   // the room under people who are mid-sentence.
   table_theme: TableTheme
+  // Whether the Executive Chef was PRO when this dinner was created (0075).
+  // Stamped rather than read live, and it covers everybody at the table: a
+  // guest at a PRO host's dinner gets what it opens without owning anything.
+  is_pro: boolean
+  // How many recipes each sender may offer their cook (0077). 1 everywhere but
+  // a PRO dinner; fixed once the dinner exists.
+  recipes_per_brief: number
   // How many hands are in the room for a MANUAL vote (0045).
   manual_voters: number | null
   requires_approval: boolean
@@ -64,7 +71,7 @@ export interface RoundRow {
 }
 
 const ROUND_COLUMNS =
-  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,table_theme,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency,photographer_profile_id'
+  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,table_theme,is_pro,recipes_per_brief,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency,photographer_profile_id'
 
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing

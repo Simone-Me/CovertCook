@@ -58,6 +58,53 @@ export interface TableThemeOption {
 /** Raised by create_round when a theme is named that this account cannot use. */
 export const THEME_LOCKED = 'THEME_LOCKED'
 
+/** Raised by create_round when a free dinner asks for a PRO-only setting. */
+export const PRO_REQUIRED = 'PRO_REQUIRED'
+
+/**
+ * What PRO is, for this account, right now (0075).
+ *
+ * `window_open` is the thing to read first: while the free-for-all is on,
+ * `pro` is true for everybody and means nothing about whether they have paid.
+ * Every screen that says "you have PRO" has to say which of the two it is, or
+ * it is setting up a disappointment for the day the window shuts.
+ */
+export interface ProStatus {
+  pro: boolean
+  window_open: boolean
+  window_until: string | null
+  source: 'PURCHASE' | 'CODE' | 'GRANT' | null
+  expires_at: string | null
+  test_override: 'FORCE_ON' | 'FORCE_OFF' | null
+}
+
+export async function myProStatus() {
+  const res = await supabase.rpc('my_pro_status', {})
+  const rows = unwrap<ProStatus[]>(res)
+  return rows[0] ?? null
+}
+
+/** Test-period only, and the server refuses it once the window shuts — see
+ *  0075 for why a switch that outlives its window is a hole. */
+export const TEST_WINDOW_CLOSED = 'TEST_WINDOW_CLOSED'
+
+export async function setProTestOverride(mode: 'FORCE_ON' | 'FORCE_OFF' | null) {
+  const res = await supabase.rpc('set_pro_test_override', { p_mode: mode })
+  return unwrap(res)
+}
+
+/** Both refusals a code can give. Everything else — no such code, expired,
+ *  used up — comes back as INVALID_CODE on purpose: distinguishing them would
+ *  turn the field into an oracle for guessing the format of real ones. */
+export const INVALID_CODE = 'INVALID_CODE'
+export const ALREADY_REDEEMED = 'ALREADY_REDEEMED'
+
+/** Returns what was handed over: 'PRO', 'NAME_THEME' or 'TABLE_THEME'. */
+export async function redeemCode(code: string) {
+  const res = await supabase.rpc('redeem_code', { p_code: code })
+  return unwrap<string>(res)
+}
+
 export async function listNameThemes() {
   const res = await supabase.rpc('list_name_themes', {})
   return unwrap<NameThemeOption[]>(res)
@@ -357,6 +404,7 @@ export async function createRound(input: {
   votingMode?: VotingMode
   nameTheme?: NameTheme
   tableTheme?: TableTheme
+  recipesPerBrief?: number
 }) {
   const res = await supabase.rpc('create_round', {
     p_name: input.name,
@@ -372,6 +420,7 @@ export async function createRound(input: {
     p_voting_mode: input.votingMode ?? 'LIVE',
     p_name_theme: input.nameTheme ?? 'FOOD',
     p_table_theme: input.tableTheme ?? 'CHECKS',
+    p_recipes_per_brief: input.recipesPerBrief ?? 1,
   })
   return unwrap<string>(res) // round id
 }
@@ -687,6 +736,11 @@ export interface BriefIngredient {
 export interface MyBrief {
   pairing_id: string
   brief_id: string | null
+  /** 1, 2 or 3 — which of the sender's ideas this is (0077). */
+  recipe_no: number
+  /** The one being cooked. Exactly one offer per pairing carries it, and the
+   *  database enforces that with a partial unique index, not a convention. */
+  chosen: boolean
   dish_name: string | null
   course: Course
   procedure: string | null
@@ -700,11 +754,41 @@ export interface MyBrief {
   acknowledged: boolean
 }
 
-export async function getMyBrief(roundId: string) {
+/**
+ * Every recipe your sender offered you, and which of them is the dish.
+ *
+ * One row on a free dinner, up to three where the Executive Chef was PRO
+ * (0077). The array shape is the honest one even at one — the caller that
+ * wants "the dish" asks for it, and a caller that forgets gets a list rather
+ * than silently the wrong recipe.
+ */
+export async function getMyBriefOffers(roundId: string) {
   const res = await supabase.rpc('get_my_brief', { p_round_id: roundId })
-  const rows = unwrap<MyBrief[]>(res)
-  return rows[0] ?? null
+  return unwrap<MyBrief[]>(res)
 }
+
+/**
+ * The dish, for every caller that only ever wanted the one.
+ *
+ * Falls back to the first row rather than to null when nothing is chosen,
+ * because a pairing with nothing written still comes back as one row — the
+ * LEFT join, all nulls but `pairing_id` — and several callers need exactly
+ * that: the thread with the chef writing for you hangs off the pairing, and it
+ * has to exist before the recipe does.
+ */
+export async function getMyBrief(roundId: string) {
+  const rows = await getMyBriefOffers(roundId)
+  return rows.find((r) => r.chosen) ?? rows[0] ?? null
+}
+
+/** The cook picks the one that suits them. Nobody else may. */
+export async function chooseBrief(briefId: string) {
+  const res = await supabase.rpc('choose_brief', { p_brief_id: briefId })
+  return unwrap(res)
+}
+
+/** Raised by choose_brief once the dinner is voting or over. */
+export const CHOICE_CLOSED = 'CHOICE_CLOSED'
 
 export async function saveBriefDraft(input: {
   roundId: string
@@ -719,6 +803,9 @@ export async function saveBriefDraft(input: {
   noteToCook: string | null
   containsTags: string[]
   containsTagsConfirmed: boolean
+  /** Which of the sender's ideas this is, 1-based. Refused past the dinner's
+   *  own `recipes_per_brief`, so a hand-made call cannot buy a second recipe. */
+  position?: number
 }) {
   const res = await supabase.rpc('save_brief_draft', {
     p_round_id: input.roundId,
@@ -731,6 +818,7 @@ export async function saveBriefDraft(input: {
     p_est_cost: input.estCost,
     p_prep_minutes: input.prepMinutes,
     p_note_to_cook: input.noteToCook,
+    p_position: input.position ?? 1,
     p_contains_tags: input.containsTags,
     p_contains_tags_confirmed: input.containsTagsConfirmed,
   })
@@ -744,7 +832,10 @@ export async function submitBrief(roundId: string) {
 
 export interface MyBriefDraft {
   brief_id: string
-  status: 'DRAFT' | 'SUBMITTED'
+  recipe_no: number
+  // OFFERED is a recipe that was sent, is complete, and is not the one the
+  // cook is making (0076). From the sender's side it is as final as SUBMITTED.
+  status: 'DRAFT' | 'OFFERED' | 'SUBMITTED'
   dish_name: string
   course: Course
   procedure: string
@@ -758,10 +849,26 @@ export interface MyBriefDraft {
   ingredients: BriefIngredient[]
 }
 
-export async function getMyBriefDraft(roundId: string) {
+/** All of them, lowest first. */
+export async function getMyBriefDrafts(roundId: string) {
   const res = await supabase.rpc('get_my_brief_draft', { p_round_id: roundId })
-  const rows = unwrap<MyBriefDraft[]>(res)
+  return unwrap<MyBriefDraft[]>(res)
+}
+
+/** The first, for the callers that only need "has this person written?". */
+export async function getMyBriefDraft(roundId: string) {
+  const rows = await getMyBriefDrafts(roundId)
   return rows[0] ?? null
+}
+
+/** A second idea thought better of. Drafts only — an offer already in front of
+ *  the cook is not the sender's to withdraw. */
+export async function discardBriefDraft(roundId: string, position: number) {
+  const res = await supabase.rpc('discard_brief_draft', {
+    p_round_id: roundId,
+    p_position: position,
+  })
+  return unwrap(res)
 }
 
 // ---------------------------------------------------------------------------

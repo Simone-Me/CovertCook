@@ -2073,6 +2073,21 @@
  * with the lights off.
  * ------------------------------------------------------------------------- */
 
+/* Capped and scrolling, so a shelf of seven does not push the dinner off the
+   screen. The row height is an estimate rather than a measurement — the rows
+   are two lines of text and a mark — and it only has to be close: the point is
+   that the box ends mid-row, which is what says "there is more under this"
+   far better than a scrollbar does. */
+.shelf--scroll {
+  max-height: calc(var(--shelf-rows, 3.5) * 62px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+}
+
 .shelf__row {
   display: flex;
   align-items: flex-start;
@@ -2269,4 +2284,122 @@
    meant to wait on. */
 .pass__advance {
   margin-top: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+ * The sender's ideas, and the cook's choice between them (0077).
+ *
+ * One strip of tabs, used from both sides — writing three and reading three
+ * are the same shape of decision — so a reader who has learned it as a sender
+ * already knows it as a cook. They wrap rather than scroll: there are at most
+ * three, and a dish name is as long as somebody felt like making it.
+ * ------------------------------------------------------------------------- */
+
+.ideatabs {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ideatab {
+  flex: 0 1 auto;
+  max-width: 100%;
+  padding: 6px 12px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.ideatab.is-now {
+  font-weight: 700;
+}
+
+/* The tick on the one being cooked. It is not the same fact as "the tab you
+   are reading", and the two have to be legible at once. */
+.ideatab__mark {
+  opacity: 0.75;
+}
+
+/* ---------------------------------------------------------------------------
+ * PRO: the shopfront, and the honest label on it (0075).
+ * ------------------------------------------------------------------------- */
+
+.pro-chip {
+  flex: none;
+  padding: 3px 9px;
+  border: 1px solid var(--paper-edge);
+  border-radius: 999px;
+  background: var(--pass-env);
+  color: var(--pass-ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pro-status {
+  border-left: 3px solid var(--accent);
+}
+
+/* One card per thing PRO opens, laid out as a shelf that scrolls sideways on a
+   phone. Sideways rather than a grid: these are objects on a shelf and there
+   are five of them, and a two-column grid of five leaves a hole. */
+.prorow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+
+.procard {
+  flex: 0 0 148px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  font-size: 13px;
+}
+
+.procard.is-owned {
+  border-color: var(--ok);
+}
+
+.procard__mark {
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+/* The cloth, actually drawn. Everything being sold here is what it looks like,
+   so a swatch is the description — the .cloth and .theme-* classes are the same
+   ones the real table wears, which is what makes this a preview rather than an
+   approximation of one. */
+.procard__swatch {
+  display: block;
+  height: 46px;
+  border: 1px solid var(--env-edge);
+  border-radius: 3px;
+}
+
+.procard__eg {
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.procard__price {
+  margin-top: auto;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.procard.is-owned .procard__price {
+  color: var(--ok);
+}
+
+.profree__link {
+  margin: 8px 0 0;
+  font-size: 13px;
 }

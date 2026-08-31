@@ -24,6 +24,7 @@ import { BoardPage } from './features/chat/BoardPage'
 import { BallotPage } from './features/vote/BallotPage'
 import { ManualTallyPage } from './features/vote/ManualTallyPage'
 import { ResultsPage } from './features/vote/ResultsPage'
+import { ProPage } from './features/pro/ProPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, profile, loading, needsSignupCompletion } = useAuth()
@@ -101,6 +102,16 @@ function AppRoutes() {
         element={
           <RequireAuth>
             <RoundHomePage />
+          </RequireAuth>
+        }
+      />
+      {/* Not under /rounds: PRO is about an account, and it is reached both
+          from the profile and from a locked row on the creation form. */}
+      <Route
+        path="/pro"
+        element={
+          <RequireAuth>
+            <ProPage />
           </RequireAuth>
         }
       />

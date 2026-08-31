@@ -154,13 +154,20 @@
     },
     "recipesPerBrief": {
       "label": "Recettes par chef",
-      "one": "Une recette"
+      "count_one": "Une recette",
+      "count_other": "{{count}} recettes",
+      "hint1": "Vous écrivez un plat pour votre cuisinier. Le jeu tel quel.",
+      "hint2": "Vous proposez deux idées et votre cuisinier fait celle qui va à sa cuisine, à sa semaine et à son budget.",
+      "hint3": "Trois idées, même principe. Plus d’écriture pour vous, plus de marge pour lui."
     },
     "slotMode": {
       "label": "Plats",
       "FREE": "Libre (chacun apporte ce qu'il veut)",
       "CATEGORIES": "Plats spécifiques (vous choisissez entrées/plats/etc.)",
-      "changeable": "Modifiable pendant le dîner, jusqu'à ce que la roulette soit lancée."
+      "changeable": "Modifiable pendant le dîner, jusqu'à ce que la roulette soit lancée.",
+      "FREEHint": "Chacun apporte ce qu’il veut. Rien à composer, rien à équilibrer.",
+      "CATEGORIESHint": "Vous décidez la forme du repas — deux entrées, trois plats, un dessert — et la roulette distribue un plat à chaque chef.",
+      "composedLater": "Vous choisirez quels plats depuis la passe, une fois les inscriptions fermées : il en faut un par chef, et ce nombre bouge tant que la porte est ouverte."
     },
     "remove": "Retirer",
     "removeConfirm": "Retirer ce participant du dîner ?",
@@ -286,16 +293,17 @@
     },
     "drawers": {
       "chefs": "Chefs",
-      "myRecipe": "Ma recette",
-      "received": "Recette reçue",
-      "receivedMeta": "Ce que vous cuisinez",
+      "myRecipe": "Ma commande",
+      "received": "Mon plat",
+      "receivedMeta": "Celui que je cuisine",
       "messages": "Messages",
       "messagesMeta": "Tableau et conversations",
       "vote": "Votez le menu",
       "results": "Résultats",
       "allergies": "Allergies",
       "info": "Le dîner",
-      "costs": "Les frais"
+      "costs": "Les frais",
+      "myRecipeMeta": "Le plat que je demande"
     },
     "waiting": {
       "assignment": "S'ouvre quand l'Executive Chef lance la roulette",
@@ -363,7 +371,8 @@
       "clearToChange": "Pour le changer, il faut effacer la roulette et la relancer. Personne n'a encore écrit, donc rien n'est perdu.",
       "discardWarning": "Changer le menu maintenant impose de relancer la roulette, et cela ne peut pas se faire sans supprimer toutes les recettes déjà écrites et tous les messages privés les concernant. C'est irréversible.",
       "discardConfirm": "Supprimer les recettes et changer le menu",
-      "stillFilling": "Plats pour l’instant : {{courses}}. Ils ne doivent égaler le nombre de chefs qu’une fois les inscriptions fermées."
+      "stillFilling": "Plats pour l’instant : {{courses}}. Ils ne doivent égaler le nombre de chefs qu’une fois les inscriptions fermées.",
+      "composedAtLock": "Quels plats se décide une fois les inscriptions fermées — il en faut exactement un par chef, et jusque-là ce nombre bouge encore."
     },
     "pass": {
       "title": "Le pass",
@@ -451,7 +460,7 @@
     }
   },
   "briefs": {
-    "editorTitle": "Écrivez votre recette secrète",
+    "editorTitle": "Le plat que vous demandez",
     "writingFor": "Vous écrivez pour : {{name}}",
     "alreadySubmitted": "Votre recette est soumise et verrouillée.",
     "editingClosed": "La fenêtre de soumission de ce dîner est fermée.",
@@ -487,7 +496,7 @@
     "tagsConfirmed": "J'ai vérifié le panneau diététique ci-dessus et confirme que les étiquettes cochées sont exactes.",
     "noBriefYet": "Aucune recette à afficher pour l'instant.",
     "waiting": {
-      "title": "En attente de votre recette",
+      "title": "En attente de votre commande",
       "body": "Le chef qui écrit pour vous ne l'a pas encore envoyée. Cette page se remplira dès qu'il le fera. Si le dîner approche et qu'il vous faut du temps pour les courses et la préparation, envoyez-lui un rappel — le Chef Exécutif est prévenu aussi.",
       "remind": "Envoyer un rappel",
       "reminded": "Rappel envoyé. Pour le reste, demandez ci-dessous."
@@ -531,7 +540,8 @@
         "briefs_submitted_recipe_not_empty": "Une recette a besoin d’un lien ou d’une préparation écrite avant d’être envoyée.",
         "briefs_external_url_check": "Ce lien doit commencer par http:// ou https://.",
         "brief_ingredients_name_check": "Un des ingrédients est vide. Supprimez la ligne vide, ou remplissez-la."
-      }
+      },
+      "inRecipe": "Idée {{recipe}} : {{what}}"
     },
     "theMenu": "Le menu de ce soir",
     "yours": "À vous",
@@ -552,7 +562,20 @@
       "procedureShort": "une préparation plus complète — une ligne ou deux, pas un mot",
       "linkMalformed": "un lien commençant par http:// ou https://"
     },
-    "submitConfirmLabel": "Oui — envoyer"
+    "submitConfirmLabel": "Oui — envoyer",
+    "ideas": {
+      "label": "Vos idées pour ce cuisinier",
+      "tab": "Idée {{n}}",
+      "hint": "Proposez-en plusieurs et votre cuisinier fera celle qui lui va. Seule la première est obligatoire.",
+      "sentHint": "Elles sont parties. Votre cuisinier choisit celle qui lui convient.",
+      "discard": "Abandonner cette idée"
+    },
+    "offers": {
+      "label": "Les recettes qu’on vous propose",
+      "thisIsIt": "C’est celle que vous cuisinez.",
+      "cookThisOne": "Cuisiner celle-ci à la place",
+      "closed": "Le dîner a avancé — le plat est fixé."
+    }
   },
   "chat": {
     "title": "Messages",
@@ -734,7 +757,58 @@
     "badge": "Pro",
     "title": "À propos de Pro",
     "freeForever": "L'application reste entièrement gratuite. Tous les dîners, quel que soit le nombre d'invités, et toutes les fonctions qui changent la façon de jouer — le but est que tout le monde puisse tout faire.",
-    "what": "Pro ne vend que le décor : de plus belles tables, des soirées à thème (Noël, un solstice d'été), et — une idée encore à préciser — la possibilité pour un hôte de partager ce qu'il a acheté avec les invités de sa table."
+    "what": "Pro ne vend que le décor : de plus belles tables, des soirées à thème (Noël, un solstice d'été), et — une idée encore à préciser — la possibilité pour un hôte de partager ce qu'il a acheté avec les invités de sa table.",
+    "needed": "Ce réglage fait partie de PRO.",
+    "lockedHere": "Fait partie de PRO.",
+    "whatIsIt": "C’est quoi, PRO ?",
+    "seeWhatItOpens": "Voir ce que PRO ouvre →",
+    "status": {
+      "on": "Vous avez PRO.",
+      "off": "Vous êtes sur l’application gratuite — c’est-à-dire l’application entière.",
+      "window": "Tout le monde a PRO pendant la phase de test de CovertCook, jusqu’au {{date}}.",
+      "until": "À vous jusqu’au {{date}}."
+    },
+    "test": {
+      "why": "Tant que tout le monde a PRO, impossible de voir ce que voit un compte gratuit. Cet interrupteur est cette vue, et il cesse de fonctionner à la fin de la période de test.",
+      "seeFree": "Me montrer la version gratuite",
+      "backOn": "Me rendre PRO",
+      "closed": "La période de test est terminée — cet interrupteur ne fait plus rien."
+    },
+    "opens": {
+      "title": "Ce que PRO ouvre",
+      "count": "{{count}} à débloquer",
+      "yours": "À vous",
+      "recipes": "Proposez deux ou trois idées à votre cuisinier au lieu d’une, et laissez-le faire celle qui va à sa cuisine, à sa semaine et à son budget.",
+      "recipesEg1": "Pasta alla Norma",
+      "recipesEg2": "Ribollita",
+      "recipesEg3": "Idée 3",
+      "recipesWhy": "Plus d’écriture pour vous, plus de marge pour lui. Personne à table n’est désavantagé — et comme un dîner porte le PRO de son organisateur, chaque invité en écrit trois quand le Executive Chef l’a.",
+      "names": "La liste de mots dont sortent les pseudonymes de votre table. Elle donne aussi sa marque au dîner et son visage à chaque chef dans le frigo.",
+      "tables": "La nappe sur laquelle la soirée est mise. Uniquement l’apparence — rien ici ne change une règle du jeu."
+    },
+    "ways": {
+      "title": "Comment l’obtenir",
+      "oneByOne": "Acheter une chose, la garder pour toujours",
+      "oneByOneWhat": "Une liste de mots ou une nappe, achetée une fois et à vous sur tous les dîners que vous organiserez.",
+      "yearly": "Tout, pour un an — {{price}}",
+      "yearlyWhat": "Toutes les listes, toutes les nappes, et trois recettes par cuisinier, sur tous les dîners que vous organisez pendant un an.",
+      "yearlyRefund": "Acheté via le store, donc c’est le store qui gère les remboursements selon ses propres règles.",
+      "notYet": "Pas encore : il n’y a aucun moyen de payer dans l’application pour l’instant. Rien ici ne s’achète, et rien ne vous est retiré tant que la phase de test dure."
+    },
+    "redeem": {
+      "title": "Utiliser un code",
+      "what": "Le seul chemin qui fonctionne aujourd’hui. Les codes sont à usage unique et de courte durée.",
+      "label": "Votre code",
+      "go": "Valider",
+      "done": "C’est fait — {{what}} est sur votre compte.",
+      "invalid": "Ce code ne fonctionne pas. Vérifiez l’orthographe — ils expirent vite, et chacun ne sert qu’une fois.",
+      "already": "Vous avez déjà utilisé ce code.",
+      "kind": {
+        "PRO": "PRO",
+        "NAME_THEME": "la liste de mots",
+        "TABLE_THEME": "la nappe"
+      }
+    }
   },
   "legal": {
     "terms": "Conditions",

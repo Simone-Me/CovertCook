@@ -154,13 +154,20 @@
     },
     "recipesPerBrief": {
       "label": "Recipes per chef",
-      "one": "One recipe"
+      "count_one": "One recipe",
+      "count_other": "{{count}} recipes",
+      "hint1": "You write one dish for your cook. The game as it is.",
+      "hint2": "You offer two ideas and your cook makes whichever suits their kitchen, their week and their budget.",
+      "hint3": "Three ideas, same thing. More writing for you, more room for them."
     },
     "slotMode": {
       "label": "Courses",
       "FREE": "Free-for-all (everyone brings any dish)",
       "CATEGORIES": "Specific courses (you choose starters/mains/etc.)",
-      "changeable": "Changeable during the dinner, up until the roulette has been run."
+      "changeable": "Changeable during the dinner, up until the roulette has been run.",
+      "FREEHint": "Everyone brings whatever they like. Nothing to compose, nothing to balance.",
+      "CATEGORIESHint": "You decide the shape of the meal — two starters, three mains, a dessert — and the roulette deals one course to each chef.",
+      "composedLater": "You pick which courses on the pass, once sign-ups close: there has to be one per chef, and that number is still moving until the door shuts."
     },
     "remove": "Remove",
     "removeConfirm": "Remove this player from the round?",
@@ -286,16 +293,17 @@
     },
     "drawers": {
       "chefs": "Chefs",
-      "myRecipe": "My recipe",
-      "received": "Recipe received",
-      "receivedMeta": "What you are cooking",
+      "myRecipe": "My order",
+      "received": "My dish",
+      "receivedMeta": "The one I am cooking",
       "messages": "Messages",
       "messagesMeta": "Board and conversations",
       "vote": "Vote the menu",
       "results": "Results",
       "allergies": "Allergies",
       "info": "The dinner",
-      "costs": "The costs"
+      "costs": "The costs",
+      "myRecipeMeta": "The dish I am asking for"
     },
     "waiting": {
       "assignment": "Opens once the Executive Chef spins the roulette",
@@ -363,7 +371,8 @@
       "clearToChange": "To change it, the roulette has to be cleared and spun again. Nobody has written yet, so nothing is lost.",
       "discardWarning": "Changing the menu now means dealing the roulette again, and there is no way to do that without throwing away every recipe already written and every private message sent about them. This cannot be undone.",
       "discardConfirm": "Delete the recipes and change the menu",
-      "stillFilling": "Courses so far: {{courses}}. They only have to match the number of chefs once sign-ups close."
+      "stillFilling": "Courses so far: {{courses}}. They only have to match the number of chefs once sign-ups close.",
+      "composedAtLock": "Which courses gets decided once sign-ups close — there has to be exactly one per chef, and until then that number is still moving."
     },
     "pass": {
       "title": "The pass",
@@ -451,7 +460,7 @@
     }
   },
   "briefs": {
-    "editorTitle": "Write your recipe brief",
+    "editorTitle": "The dish you are asking for",
     "writingFor": "You're writing for: {{name}}",
     "alreadySubmitted": "Your brief is submitted and locked.",
     "editingClosed": "The submission window for this round has closed.",
@@ -487,7 +496,7 @@
     "tagsConfirmed": "I've reviewed the dietary panel above and confirmed the tags I've checked are accurate.",
     "noBriefYet": "No recipe to show yet.",
     "waiting": {
-      "title": "Waiting for your recipe",
+      "title": "Waiting for your order",
       "body": "The chef writing for you hasn't sent it yet. This page fills in the moment they do. If the dinner is getting close and you need time to shop and prepare, send them a reminder — the Executive Chef is told too.",
       "remind": "Send a reminder",
       "reminded": "Reminder sent. Anything else you need, ask below."
@@ -531,7 +540,8 @@
         "briefs_submitted_recipe_not_empty": "A recipe needs a link or a written method before it can be sent.",
         "briefs_external_url_check": "That link has to start with http:// or https://.",
         "brief_ingredients_name_check": "One of the ingredients is blank. Remove the empty line, or fill it in."
-      }
+      },
+      "inRecipe": "Idea {{recipe}}: {{what}}"
     },
     "theMenu": "Tonight’s menu",
     "yours": "Yours",
@@ -552,7 +562,20 @@
       "procedureShort": "a fuller method — a line or two, not a word",
       "linkMalformed": "a link that starts with http:// or https://"
     },
-    "submitConfirmLabel": "Yes — send it"
+    "submitConfirmLabel": "Yes — send it",
+    "ideas": {
+      "label": "Your ideas for this cook",
+      "tab": "Idea {{n}}",
+      "hint": "Offer more than one and your cook makes whichever suits them. Only the first is required.",
+      "sentHint": "These have gone. Your cook picks the one that suits them.",
+      "discard": "Drop this idea"
+    },
+    "offers": {
+      "label": "The recipes you were offered",
+      "thisIsIt": "This is the one you are cooking.",
+      "cookThisOne": "Cook this one instead",
+      "closed": "The dinner has moved on — the dish is settled now."
+    }
   },
   "chat": {
     "title": "Messages",
@@ -734,7 +757,58 @@
     "badge": "Pro",
     "title": "About Pro",
     "freeForever": "The whole app stays free. Every dinner, every number of guests, every feature that changes how the game is played — the point is that everyone can do everything.",
-    "what": "Pro only sells flavour: better-looking tables, themed evenings (a Christmas one, a midsummer one), and — an idea still being worked out — letting a host share what they have bought with the guests at their table."
+    "what": "Pro only sells flavour: better-looking tables, themed evenings (a Christmas one, a midsummer one), and — an idea still being worked out — letting a host share what they have bought with the guests at their table.",
+    "needed": "That setting is part of PRO.",
+    "lockedHere": "Part of PRO.",
+    "whatIsIt": "What is PRO?",
+    "seeWhatItOpens": "See what PRO opens →",
+    "status": {
+      "on": "You have PRO.",
+      "off": "You are on the free app — which is the whole app.",
+      "window": "Everybody has PRO while CovertCook is being tested, until {{date}}.",
+      "until": "Yours until {{date}}."
+    },
+    "test": {
+      "why": "While everybody has PRO there is no way to see what a free account sees. This switch is that view, and it stops working when the test period ends.",
+      "seeFree": "Show me the free version",
+      "backOn": "Give me PRO back",
+      "closed": "The test period is over — this switch does nothing now."
+    },
+    "opens": {
+      "title": "What PRO opens",
+      "count": "{{count}} to unlock",
+      "yours": "Yours",
+      "recipes": "Offer your cook two or three ideas instead of one, and let them make whichever suits their kitchen, their week and their budget.",
+      "recipesEg1": "Pasta alla Norma",
+      "recipesEg2": "Ribollita",
+      "recipesEg3": "Idea 3",
+      "recipesWhy": "It is more writing for you and more room for them. Nobody at the table is at a disadvantage — and because a dinner carries its host’s PRO, every guest writes three when the Executive Chef has it.",
+      "names": "The word list your table’s pseudonyms are drawn from. It also gives the dinner its mark and every chef their face in the fridge.",
+      "tables": "The cloth the evening is laid on. Look only — nothing here changes a rule of the game."
+    },
+    "ways": {
+      "title": "How you would get it",
+      "oneByOne": "Buy one thing, keep it forever",
+      "oneByOneWhat": "A word list or a cloth, bought once and yours on every dinner you ever organise.",
+      "yearly": "Everything, for a year — {{price}}",
+      "yearlyWhat": "Every list, every cloth, and three recipes per cook, on every dinner you organise for a year.",
+      "yearlyRefund": "Bought through the store, so the store handles refunds under its own rules.",
+      "notYet": "Not yet: there is no way to pay inside the app at the moment. Nothing here can be bought, and nothing is being held back from you while the test period is on."
+    },
+    "redeem": {
+      "title": "Redeem a code",
+      "what": "The only route that works today. Codes are single-use and short-lived.",
+      "label": "Your code",
+      "go": "Redeem",
+      "done": "Done — {{what}} is on your account.",
+      "invalid": "That code does not work. Check the spelling — they expire quickly, and each one can only be used once.",
+      "already": "You have already used that code.",
+      "kind": {
+        "PRO": "PRO",
+        "NAME_THEME": "the word list",
+        "TABLE_THEME": "the table cloth"
+      }
+    }
   },
   "legal": {
     "terms": "Terms",

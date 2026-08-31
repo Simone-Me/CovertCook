@@ -59,6 +59,119 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-31 (2)
+
+**PRO stops being a badge, and a sender may offer their cook a choice**
+(`0075`–`0077`).
+
+### What PRO actually is
+
+Until now it was a word printed beside switched-off controls. It is now four
+things wearing one name, and deliberately not four mechanisms: a per-item
+unlock (`0072`), a subscription, a redeemed code, and an open window during
+which everybody has everything. `is_pro()` is the one question, and every gate
+asks it instead of deciding for itself.
+
+**Nothing takes money.** There is no payment provider wired to this app, so
+`pro_subscriptions` has no insert path for `authenticated` at all: a row gets
+there by redeeming a code or by whatever server-side thing eventually handles a
+purchase. The PRO page says so in the middle of both offers rather than
+carrying two buy buttons with no till behind them.
+
+**A dinner carries its host's PRO, and carries it for everybody at it.**
+Stamped at creation rather than read live, which matters: a subscription that
+lapses on the Tuesday must not strip a Friday dinner of the thing it was built
+around, mid-evening, in front of eight people. This is the README rule about
+never splitting a table into paying and non-paying players, made mechanical.
+
+**Codes are credentials, so they behave like credentials.** Single use, an
+expiry that is required rather than optional, and every wrong code failing the
+same way — no such code, expired and used up are all `INVALID_CODE`, because
+distinguishing them turns the field into an oracle for guessing the format of
+the real ones. The one exception is `ALREADY_REDEEMED`: telling somebody about
+their own past leaks nothing, and without it they retype a code that already
+worked and conclude the feature is broken. Minting is granted to nobody and
+happens from the SQL editor — an in-app admin panel would add a third privilege
+level to an app that has two, and that decision deserves its own audit rather
+than a grant added quietly to a line.
+
+**The test switch, and why it dies with the window.** While the free-for-all is
+on there are no free accounts, so there is no way to see what one sees — which
+is the single most useful thing to be able to check during a test period. So
+there is a switch, and it is powerless in both directions once the window
+shuts: `FORCE_ON` cannot grant PRO to a free account afterwards, because that
+is a bypass with a friendly name. A test affordance that outlives the test is a
+hole.
+
+### A second idea, and the cook picks
+
+The chain has never had any give in it: your cook opens the recipe to find
+something they cannot make on a Tuesday, cannot afford this week, or have no
+oven for. The private thread was always the way out, and it works when the
+problem is one ingredient — not when it is the whole dish.
+
+So a sender may offer up to three, and the cook chooses. What is PRO about it
+is the number, never an advantage: writing more is more work for the sender and
+more room for the cook.
+
+**The whole design is one status value.** Eight functions across six migrations
+enumerate a round's dishes with `b.status = 'SUBMITTED'` — the ballot, the
+tally, the results, the menu, the carte, the recipe book, the album, the
+delivery marks. A "chosen" boolean beside them would need a second predicate
+added by hand to every one, and the first one anybody forgot would put three
+dishes on the menu for one seat. Making SUBMITTED mean *the dish* — with
+`OFFERED` for the ones that were sent and are not it — keeps all eight correct
+without being touched, and a partial unique index makes "exactly one per
+pairing" a fact about the database rather than a promise made by two functions.
+
+The lowest-numbered idea is the dish until the cook says otherwise, so a cook
+who does not care is never made to choose and nothing downstream ever meets a
+pairing with no dish on it. Allergens are gathered over every recipe offered
+rather than only the chosen one — the cook may swap late, and a note that
+covered only the default would be silent about exactly that case.
+
+### The form stops using dropdowns
+
+Every select on the creation form is now a list of rows you press. A select
+shows one line — the name of the option currently chosen — and every one of
+these choices is a *sentence*, which was living in a paragraph underneath
+describing whichever option happened to be selected. Reading the four ways a
+dinner can vote meant opening the menu, picking one, closing it, reading the
+paragraph, and doing it three more times. The comparison the host is actually
+making was the one thing the control could not show.
+
+Also: the theme shelves are height-capped and scroll at about three and a half
+rows, so seven cloths no longer turn the form into a page of options.
+"No voting" has lost its red warning — it was true and it was the only option
+on the form that shouted, which made choosing a perfectly ordinary kind of
+dinner feel like disarming something. And *which* courses has gone back to
+waiting for sign-ups to close, where it belongs: there has to be exactly one
+course per chef, and until the door shuts that number keeps moving. The mode is
+chosen at creation; the menu is composed on the pass.
+
+### Two drawers that were one word apart
+
+"My recipe" and "Recipe received" were both recipes, and the word doing all the
+work was the one people skimmed. What tells them apart is direction — one is
+what you ask somebody else to cook, the other is what you cook — so the nouns
+now differ and neither says "recipe": **My order** and **My dish**. It is the
+kitchen's own pair, in an app already set in a kitchen: an order comes in from
+outside, a dish leaves.
+
+*Tested:* `smoke_test16.sql` — PRO from all four directions including the one
+that must fail (a `FORCE_ON` flag left over from the test period granting
+nothing once the window shuts), a code redeemed in the wrong case with stray
+spaces, the same code refused to its own redeemer and then to everybody else,
+a dinner stamped PRO with three recipes asked for, a fourth slot refused, two
+ideas sent by one press with exactly one of them the dish, the cook swapping
+and the menu still showing one dish for that seat, the sender refused the
+choice, and the choice shutting once the vote opens. Whole suite re-run on a
+fresh database: `smoke_test`, `2` and `4` still fail exactly as they do on
+`main` (they read `round_members` directly, which `0032` revoked, and they
+predate it).
+
+---
+
 ## 2026-08-31
 
 **Four rules that were written down and never enforced, and the creation form

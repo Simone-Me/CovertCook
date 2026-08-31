@@ -1170,7 +1170,11 @@ export function RoundHomePage() {
         <Envelope
           icon={<Icon name="myRecipe" />}
           name={t('rounds.drawers.myRecipe')}
-          meta={assigned ? t(`briefs.state.${briefState}`) : undefined}
+          // Before the roulette, what this drawer IS; after it, how far you
+          // have got. The name alone was carrying both jobs and doing the
+          // first one badly — "My order" says the direction but not that the
+          // order is yours to write.
+          meta={assigned ? t(`briefs.state.${briefState}`) : t('rounds.drawers.myRecipeMeta')}
           waitingFor={waitBrief}
           to={`/rounds/${roundId}/brief`}
           tilt={2}

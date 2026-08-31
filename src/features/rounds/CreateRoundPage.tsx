@@ -5,12 +5,16 @@ import { Fold } from '../../components/Fold'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { ThemePicker } from './ThemePicker'
+import { ChoiceList } from '../../components/ChoiceList'
+import { Link } from 'react-router-dom'
 import {
   createRound,
   listNameThemes,
   listTableThemes,
+  myProStatus,
   setCostSettings,
   toCents,
+  PRO_REQUIRED,
   THEME_LOCKED,
   type RoundAccess,
   type RoundAnonymity,
@@ -44,6 +48,16 @@ const CLASSIC = {
 // DISABLED is last because it is the answer that ends the conversation.
 const VOTING_ORDER: VotingMode[] = ['MANUAL', 'LIVE', 'TIMED', 'DISABLED']
 
+// Cheapest commitment first in both: a code you can hand to anyone, then a
+// guest list, then both. Undercover is the game as designed, and the two that
+// give identity away follow it.
+const ACCESS_ORDER: RoundAccess[] = ['CODE', 'INVITE', 'CODE_AND_INVITE']
+const ANONYMITY_ORDER: RoundAnonymity[] = ['ANONYMOUS', 'SPY', 'OPEN']
+
+// One is the game. Two and three are the same game with room to be kind to
+// your cook — and they are what the PRO unlock actually buys.
+const RECIPE_COUNTS = [1, 2, 3]
+
 export function CreateRoundPage() {
   const { t, i18n } = useTranslation()
   const navigate = useNavigate()
@@ -66,6 +80,7 @@ export function CreateRoundPage() {
   // halfway through a dinner is a new deal, not a setting.
   const [shareCosts, setShareCosts] = useState(false)
   const [budget, setBudget] = useState('')
+  const [recipesPerBrief, setRecipesPerBrief] = useState(1)
   const [limitPlayers, setLimitPlayers] = useState(false)
   const [maxPlayers, setMaxPlayers] = useState(8)
   const [error, setError] = useState<string | null>(null)
@@ -86,6 +101,17 @@ export function CreateRoundPage() {
     staleTime: 5 * 60 * 1000,
   })
 
+  // Read once here rather than inferred from the theme shelf: a host can own a
+  // single theme without being PRO, and the recipe count is the other thing
+  // PRO opens. The dinner is stamped with the answer at creation (0075), so
+  // this is also the last moment it matters.
+  const { data: pro } = useQuery({
+    queryKey: ['pro', 'status'],
+    queryFn: myProStatus,
+    staleTime: 60 * 1000,
+  })
+  const isPro = pro?.pro ?? false
+
   async function onSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError(null)
@@ -94,7 +120,10 @@ export function CreateRoundPage() {
       const roundId = await createRound({
         name,
         ...(custom
-          ? { access, anonymity, slotMode, votingMode, requiresApproval, nameTheme, tableTheme }
+          ? {
+              access, anonymity, slotMode, votingMode, requiresApproval,
+              nameTheme, tableTheme, recipesPerBrief,
+            }
           : CLASSIC),
         maxPlayers: limitPlayers ? maxPlayers : null,
       })
@@ -111,7 +140,9 @@ export function CreateRoundPage() {
       navigate(`/rounds/${roundId}`, { replace: true })
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''
-      setError(raw === THEME_LOCKED ? t('themes.locked') : raw || t('errors.generic'))
+      const known =
+        raw === THEME_LOCKED ? t('themes.locked') : raw === PRO_REQUIRED ? t('pro.needed') : null
+      setError(known ?? raw ?? t('errors.generic'))
     } finally {
       setSubmitting(false)
     }
@@ -175,29 +206,29 @@ export function CreateRoundPage() {
               </header>
 
               <Fold title={t('rounds.access.label')} aside={t(`rounds.access.${access}`)}>
-                <select
-                  aria-label={t('rounds.access.label')}
+                <ChoiceList
+                  name="access"
                   value={access}
-                  onChange={(e) => setAccess(e.target.value as RoundAccess)}
-                >
-                  <option value="CODE">{t('rounds.access.CODE')}</option>
-                  <option value="INVITE">{t('rounds.access.INVITE')}</option>
-                  <option value="CODE_AND_INVITE">{t('rounds.access.CODE_AND_INVITE')}</option>
-                </select>
-                <p className="muted">{t(`rounds.access.${access}Hint`)}</p>
+                  onChange={(v) => setAccess(v as RoundAccess)}
+                  options={ACCESS_ORDER.map((code) => ({
+                    value: code,
+                    label: t(`rounds.access.${code}`),
+                    hint: t(`rounds.access.${code}Hint`),
+                  }))}
+                />
               </Fold>
 
               <Fold title={t('rounds.anonymity.label')} aside={t(`rounds.anonymity.${anonymity}`)}>
-                <select
-                  aria-label={t('rounds.anonymity.label')}
+                <ChoiceList
+                  name="anonymity"
                   value={anonymity}
-                  onChange={(e) => setAnonymity(e.target.value as RoundAnonymity)}
-                >
-                  <option value="ANONYMOUS">{t('rounds.anonymity.ANONYMOUS')}</option>
-                  <option value="SPY">{t('rounds.anonymity.SPY')}</option>
-                  <option value="OPEN">{t('rounds.anonymity.OPEN')}</option>
-                </select>
-                <p className="muted">{t(`rounds.anonymity.${anonymity}Hint`)}</p>
+                  onChange={(v) => setAnonymity(v as RoundAnonymity)}
+                  options={ANONYMITY_ORDER.map((code) => ({
+                    value: code,
+                    label: t(`rounds.anonymity.${code}`),
+                    hint: t(`rounds.anonymity.${code}Hint`),
+                  }))}
+                />
               </Fold>
 
               {/* The word list, and the mark that comes with it: the same glyph
@@ -254,6 +285,40 @@ export function CreateRoundPage() {
                 <p className="muted">{t('costs.shareFixed')}</p>
               </Fold>
 
+              {/* HOW MANY IDEAS EACH SENDER MAY OFFER, and it belongs in this
+                  box rather than the other one: raising it later would ask
+                  people who have already finished writing to go back and write
+                  again, and lowering it would throw away a recipe somebody
+                  wrote for somebody.
+                  What PRO buys here is more work for the sender and more room
+                  for the cook — never an advantage over anybody at the table,
+                  which is the line README draws around anything sellable. And
+                  because the dinner carries its host's PRO (0075), every guest
+                  writes three whether or not they have paid for anything. */}
+              <Fold
+                title={t('rounds.recipesPerBrief.label')}
+                aside={t('rounds.recipesPerBrief.count', { count: recipesPerBrief })}
+              >
+                <ChoiceList
+                  name="recipes-per-brief"
+                  value={String(recipesPerBrief)}
+                  onChange={(v) => setRecipesPerBrief(Number(v))}
+                  options={RECIPE_COUNTS.map((n) => ({
+                    value: String(n),
+                    label: t('rounds.recipesPerBrief.count', { count: n }),
+                    hint: t(`rounds.recipesPerBrief.hint${n}`),
+                    locked: n > 1 && !isPro,
+                    lockedReason: t('pro.lockedHere'),
+                    tag: n > 1 ? <span className="shelf__tag">{t('pro.badge')}</span> : undefined,
+                  }))}
+                />
+                {!isPro && (
+                  <p className="muted">
+                    <Link to="/pro">{t('pro.whatIsIt')}</Link>
+                  </p>
+                )}
+              </Fold>
+
               <label className="row">
                 <input
                   type="checkbox"
@@ -275,37 +340,47 @@ export function CreateRoundPage() {
                 title={t('rounds.voting.label')}
                 aside={t(`rounds.voting.${votingMode}`)}
               >
-                <select
-                  aria-label={t('rounds.voting.label')}
+                {/* "No voting" no longer carries a red warning about being
+                    irreversible. It was true — set_voting_mode refuses to turn
+                    voting back on (0045) — and it was the only option on the
+                    form that shouted, which made choosing a perfectly ordinary
+                    kind of dinner feel like disarming something. A table that
+                    does not want to rank its friends' cooking is not making a
+                    mistake. The sentence under the option still says voting
+                    stays off; it no longer says it in red. */}
+                <ChoiceList
+                  name="voting"
                   value={votingMode}
-                  onChange={(e) => setVotingMode(e.target.value as VotingMode)}
-                >
-                  {VOTING_ORDER.map((mode) => (
-                    <option key={mode} value={mode}>
-                      {t(`rounds.voting.${mode}`)}
-                    </option>
-                  ))}
-                </select>
-                {/* The one setting in this box with no way back: advance_phase
-                    refuses to enter VOTING at all on a DISABLED round, on
-                    purpose, and set_voting_mode refuses to turn it back on
-                    (0045). Saying so here is cheaper than a support question
-                    later. */}
-                <p className={votingMode === 'DISABLED' ? 'error' : 'muted'}>
-                  {t(`rounds.voting.${votingMode}Hint`)}
-                </p>
+                  onChange={(v) => setVotingMode(v as VotingMode)}
+                  options={VOTING_ORDER.map((mode) => ({
+                    value: mode,
+                    label: t(`rounds.voting.${mode}`),
+                    hint: t(`rounds.voting.${mode}Hint`),
+                  }))}
+                />
               </Fold>
 
               <Fold title={t('rounds.slotMode.label')} aside={t(`rounds.slotMode.${slotMode}`)}>
-                <select
-                  aria-label={t('rounds.slotMode.label')}
+                <ChoiceList
+                  name="slot-mode"
                   value={slotMode}
-                  onChange={(e) => setSlotMode(e.target.value as SlotMode)}
-                >
-                  <option value="FREE">{t('rounds.slotMode.FREE')}</option>
-                  <option value="CATEGORIES">{t('rounds.slotMode.CATEGORIES')}</option>
-                </select>
-                <p className="muted">{t('rounds.slotMode.changeable')}</p>
+                  onChange={(v) => setSlotMode(v as SlotMode)}
+                  options={(['FREE', 'CATEGORIES'] as SlotMode[]).map((code) => ({
+                    value: code,
+                    label: t(`rounds.slotMode.${code}`),
+                    hint: t(`rounds.slotMode.${code}Hint`),
+                  }))}
+                />
+                {/* WHICH courses is not a question that can be answered here,
+                    and saying so is the point. There has to be exactly one
+                    course per chef, and the number of chefs is still moving —
+                    every person who joins breaks the sum. So the mode is chosen
+                    now and the menu is composed on the pass once sign-ups
+                    close, which is the first moment the arithmetic holds
+                    still. */}
+                {slotMode === 'CATEGORIES' && (
+                  <p className="muted">{t('rounds.slotMode.composedLater')}</p>
+                )}
               </Fold>
 
               {/* The number, in the box of things that move — beside the
@@ -325,18 +400,18 @@ export function CreateRoundPage() {
                 </Fold>
               )}
 
-              <Fold title={t('rounds.recipesPerBrief.label')} aside={t('pro.badge')}>
-                <select aria-label={t('rounds.recipesPerBrief.label')} disabled value="1" onChange={() => {}}>
-                  <option value="1">{t('rounds.recipesPerBrief.one')}</option>
-                </select>
-                <p className="muted">{t('rounds.comingSoon')}</p>
-              </Fold>
             </section>
 
             <div className="profree">
               <p className="profree__head">{t('pro.title')}</p>
               <p className="profree__free">{t('pro.freeForever')}</p>
               <p className="profree__what">{t('pro.what')}</p>
+              {/* The second of the two ways in, and the one that matters: this
+                  is where somebody is looking at a locked row and wondering
+                  what it would take. */}
+              <p className="profree__link">
+                <Link to="/pro">{t('pro.seeWhatItOpens')}</Link>
+              </p>
             </div>
           </>
         )}

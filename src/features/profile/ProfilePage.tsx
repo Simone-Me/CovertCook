@@ -25,6 +25,8 @@ import {
   type PushState,
 } from '../../lib/push'
 import { sendTestPush, type TestPushResult } from '../../lib/rpc'
+import { Link } from 'react-router-dom'
+import { myProStatus } from '../../lib/rpc'
 
 interface DietaryRow {
   id: string
@@ -118,6 +120,14 @@ export function ProfilePage() {
       setPushBusy(false)
     }
   }
+
+  // Where this account stands on PRO, for the row above. Cheap and cached —
+  // the PRO page reads the same key.
+  const { data: proStatus } = useQuery({
+    queryKey: ['pro', 'status'],
+    queryFn: myProStatus,
+    staleTime: 60 * 1000,
+  })
 
   const { data: entries } = useQuery({
     queryKey: ['dietary', profile?.id],
@@ -281,6 +291,19 @@ export function ProfilePage() {
             behind a click. */}
         <LanguageSwitch onChange={(code) => onLocale(code as SupportedLocale)} />
       </div>
+
+      {/* The first of the two ways to PRO, and the one that is about the
+          account rather than about a dinner being planned. It says where you
+          stand before it says there is more — somebody who already has it does
+          not need to be sold to. */}
+      <Link to="/pro" className="pass__link">
+        <span className="pro-chip" aria-hidden="true">{t('pro.badge')}</span>
+        <span>
+          <strong>{t(proStatus?.pro ? 'pro.status.on' : 'pro.status.off')}</strong>
+          {' — '}
+          {t('pro.seeWhatItOpens')}
+        </span>
+      </Link>
 
       {/* Folded, all three of them. The page had become one long scroll where
           every setting shouted at once; they arrive closed and you open the

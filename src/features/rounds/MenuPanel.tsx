@@ -228,19 +228,23 @@ export function MenuPanel({
         </span>
       </label>
 
-      {slotMode === 'CATEGORIES' && (
+      {/* WHICH COURSES WAITS FOR THE DOOR TO SHUT, and the mode does not.
+          There has to be exactly one course per chef, and until sign-ups close
+          the number of chefs keeps moving: every arrival broke the sum the
+          host had just finished making, and the panel answered with a red line
+          about a menu that was not wrong yet. So before LOCKED this offers the
+          choice between a free-for-all and a composed menu, says when the menu
+          gets composed, and stops there. */}
+      {slotMode === 'CATEGORIES' && !counting && (
+        <p className="muted">{t('rounds.menu.composedAtLock')}</p>
+      )}
+
+      {slotMode === 'CATEGORIES' && counting && (
         <>
           {/* One course per chef, because every chef cooks exactly one
               dish. Shown as it happens instead of as a refusal later. */}
-          <p className={balanced || !counting ? 'muted' : 'error'}>
-            {t(
-              balanced
-                ? 'rounds.menu.balanced'
-                : counting
-                  ? 'rounds.menu.unbalanced'
-                  : 'rounds.menu.stillFilling',
-              { courses, seats },
-            )}
+          <p className={balanced ? 'muted' : 'error'}>
+            {t(balanced ? 'rounds.menu.balanced' : 'rounds.menu.unbalanced', { courses, seats })}
           </p>
 
           <div className="stack">
