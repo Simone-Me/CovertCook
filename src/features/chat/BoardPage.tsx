@@ -57,7 +57,13 @@ export function BoardPage() {
         {assignment && (
           <section className="threadbox">
             <header className="threadbox__lid">
-              <span className="threadbox__who">{assignment.cook_secret_name}</span>
+              {/* The real name where the round hands one over — an OPEN
+                  dinner, or a SPY host reading their own thread (0073).
+                  get_my_assignment decides that; here it is simply printed
+                  when it arrives. */}
+              <span className="threadbox__who">
+                {assignment.cook_display_name ?? assignment.cook_secret_name}
+              </span>
               <span className="threadbox__what">{t('board.myRecipe')}</span>
             </header>
             <ChatThread pairingId={assignment.pairing_id} roundId={roundId} />

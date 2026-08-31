@@ -94,6 +94,10 @@ end $$;
 -- ---------------------------------------------------------------------------
 \echo ''
 \echo '=== invitations: no code, no email, just a row the invitee sees ==='
+-- Addressed by username since 0071, not by the address the account signed up
+-- with. The address was the one thing about an account its owner never chose
+-- to show anybody; display_name has been a unique identity since 0046 and is
+-- the name they picked themselves.
 select _as('00000000-0000-0000-0000-000000000401');
 select create_round('Invite Dinner', 'INVITE', 'ANONYMOUS', 'FREE', null, null, 'Europe/Paris', null, false, false, 'LIVE') as inv_id \gset
 select advance_phase(:'inv_id'::uuid, 'OPEN');
@@ -102,17 +106,17 @@ select advance_phase(:'inv_id'::uuid, 'OPEN');
 do $$
 declare v_id uuid := (select id from rounds where name = 'Invite Dinner');
 begin
-  perform invite_member(v_id, 'rosaa@test.local');
-  raise exception 'SMOKE FAIL: an unknown address was accepted';
+  perform invite_member(v_id, 'Rosa Guestt');
+  raise exception 'SMOKE FAIL: an unknown username was accepted';
 exception
   when others then
     if sqlerrm like 'SMOKE FAIL%' then raise; end if;
     raise notice 'correctly rejected: %', sqlerrm;
 end $$;
 
-\echo '--- address matching ignores case and stray spaces ---'
-select invite_member(:'inv_id'::uuid, '  ROSA@Test.Local  ') as rosa_inv \gset
-select invite_member(:'inv_id'::uuid, 'sami@test.local') as sami_inv \gset
+\echo '--- username matching ignores case and stray spaces ---'
+select invite_member(:'inv_id'::uuid, '  rOSA gUEST  ') as rosa_inv \gset
+select invite_member(:'inv_id'::uuid, 'Sami Guest') as sami_inv \gset
 
 \echo '--- Rosa sees it, with the round name she could not otherwise read ---'
 select _as('00000000-0000-0000-0000-000000000402');

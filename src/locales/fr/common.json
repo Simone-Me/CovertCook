@@ -109,38 +109,48 @@
     "access": {
       "label": "Comment on entre",
       "CODE": "Avec un code",
-      "CODEHint": "Vous recevez un code à partager comme vous voulez. Qui l'a peut demander une place.",
-      "INVITE": "Sur invitation",
-      "INVITEHint": "Vous ajoutez des chefs par l'adresse de leur compte. Ils acceptent ou refusent dans l'application — aucun code à mal taper ou à faire suivre."
+      "CODEHint": "Vous recevez un code à partager comme vous voulez. Qui l'a peut demander une place, et il n'y a pas de liste d'invités.",
+      "INVITE": "Sur invitation seulement",
+      "INVITEHint": "Vous ajoutez des chefs par leur nom d'utilisateur. Ils acceptent ou refusent dans l'application, et le code n'ouvre rien — personne n'entre sans que vous l'ayez nommé.",
+      "CODE_AND_INVITE": "Code et invitations",
+      "CODE_AND_INVITEHint": "Les deux portes ouvertes : vous invitez les chefs que vous connaissez déjà par leur nom, et qui a le code peut toujours demander une place."
     },
     "anonymity": {
       "label": "Qui connaît qui",
       "ANONYMOUS": "Couverture — personne ne connaît personne",
       "ANONYMOUSHint": "Chacun est un pseudonyme jusqu'à la révélation finale, vous compris.",
       "SPY": "Espion — vous voyez tout le monde, eux personne",
-      "SPYHint": "Vous gardez le vrai nom de chaque chef à côté de son pseudonyme. Les autres ne voient que des pseudonymes. Il faudra toujours le demander pour voir qui cuisine pour qui.",
+      "SPYHint": "Vous voyez le vrai nom de chaque chef partout où son pseudonyme apparaîtrait — la liste, le frigo, les phrases signalées. Tous les autres ne voient que des pseudonymes. Il faudra toujours demander pour voir qui cuisine pour qui.",
       "OPEN": "Ouvert — tout le monde se connaît",
-      "OPENHint": "Les vrais noms restent visibles toute la soirée. Seul qui cuisine pour qui reste secret."
+      "OPENHint": "Aucun pseudonyme : chacun porte son vrai nom, partout, toute la soirée. Seul qui cuisine pour qui reste secret."
     },
     "requiresApproval": "L'Executive Chef doit approuver chaque participant",
     "voting": {
       "label": "Vote",
-      "LIVE": "Pendant le dîner",
-      "LIVEHint": "Vous ouvrez le vote à table et voyez les résultats en premier, puis décidez comment les annoncer.",
-      "TIMED": "Après le dîner",
-      "TIMEDHint": "Vous fixez un délai et les résultats se publient tout seuls à son échéance.",
+      "LIVE": "Secret, pendant le dîner",
+      "LIVEHint": "Chacun vote sur son téléphone à table. Vous voyez combien ont fini — jamais ce qu'ils ont choisi — et le vote se ferme dès que le dernier a voté.",
+      "TIMED": "Secret, après le dîner",
+      "TIMEDHint": "Chacun vote de chez soi après, jusqu'à 48 heures. Les résultats se publient tout seuls à l'échéance.",
       "DISABLED": "Pas de vote",
       "DISABLEDHint": "Celui-ci est sans retour : le vote sera indisponible pour ce dîner et ne pourra pas être activé ensuite.",
       "MANUAL": "À main levée",
       "MANUALHint": "Pas de téléphones à table : les plats sont classés à main levée, et vous saisissez le décompte.",
-      "chosenWhenOpening": "Choisi à l’ouverture du vote, pas maintenant — et modifiable tant que personne n’a voté."
+      "chosenWhenOpening": "Choisi à l’ouverture du vote, pas maintenant — et modifiable tant que personne n’a voté.",
+      "changeMethod": "Changer la façon de voter",
+      "chosenAtCreation": "Choisi à la création du dîner. La flèche revient dessus, tant que personne n'a voté."
     },
     "nameTheme": {
       "label": "Thème des pseudonymes",
       "FOOD": "Herbes & épices",
       "FOODHint": "Chef Basilic, Chef Safran, Chef Clou de Girofle.",
       "BRIGADE": "Brigade de cuisine",
-      "BRIGADEHint": "Chef Saucier, Chef Pâtissier, Chef Aboyeur — les 24 vrais postes d'une cuisine."
+      "BRIGADEHint": "Chef Saucier, Chef Pâtissier, Chef Aboyeur — les 24 vrais postes d'une cuisine.",
+      "PASTA": "Formes de pâtes",
+      "PASTAHint": "Chef Rigatoni, Chef Farfalle, Chef Strozzapreti — 24 formes, écrites pareil dans toutes les cuisines.",
+      "PATISSERIE": "Pâtisserie",
+      "PATISSERIEHint": "Chef Éclair, Chef Canelé, Chef Paris-Brest — 24 choses du comptoir à gâteaux.",
+      "BATTERIE": "La batterie",
+      "BATTERIEHint": "Chef Mandoline, Chef Fouet, Chef Chalumeau — 24 outils décrochés du mur."
     },
     "recipesPerBrief": {
       "label": "Recettes par chef",
@@ -149,7 +159,8 @@
     "slotMode": {
       "label": "Plats",
       "FREE": "Libre (chacun apporte ce qu'il veut)",
-      "CATEGORIES": "Plats spécifiques (vous choisissez entrées/plats/etc.)"
+      "CATEGORIES": "Plats spécifiques (vous choisissez entrées/plats/etc.)",
+      "changeable": "Modifiable pendant le dîner, jusqu'à ce que la roulette soit lancée."
     },
     "remove": "Retirer",
     "removeConfirm": "Retirer ce participant du dîner ?",
@@ -241,10 +252,10 @@
       "yes": "Oui",
       "no": "Non",
       "noLimit": "Sans limite",
-      "themes": "Thème de la table",
-      "themesSoon": "Noël, solstice d'été, et d'autres à venir. Pro — le décor de la soirée uniquement ; rien sur la façon de jouer.",
       "venueEditable": "Modifiable dans les paramètres du dîner",
-      "venueHere": "les modifier"
+      "venueHere": "les modifier",
+      "tableTheme": "Thème de la table",
+      "changeableInGame": "modifiable pendant le dîner"
     },
     "entryPoints": {
       "writeRecipe": "Écrire votre recette",
@@ -257,9 +268,11 @@
       "accept": "Accepter",
       "decline": "Refuser",
       "invite": "Inviter un chef",
-      "inviteEmail": "L'adresse de son compte",
       "inviteSent": "Invitation envoyée",
-      "noSuchChef": "Aucun chef inscrit avec cette adresse. Vérifiez l'orthographe, ou partagez plutôt le code."
+      "noSuchChef": "Aucun chef ne porte ce nom. Vérifiez l'orthographe — les noms d'utilisateur sont exactement comme leur propriétaire les a tapés.",
+      "inviteUsername": "Son nom d'utilisateur",
+      "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
+      "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant."
     },
     "pastRounds": "Dîners passés ({{count}})",
     "tooManyPlayers": "Trente, ça fait déjà beaucoup de cuisine. Où comptez-vous les asseoir — c'est un mariage ?",
@@ -349,7 +362,8 @@
       "change": "Changer",
       "clearToChange": "Pour le changer, il faut effacer la roulette et la relancer. Personne n'a encore écrit, donc rien n'est perdu.",
       "discardWarning": "Changer le menu maintenant impose de relancer la roulette, et cela ne peut pas se faire sans supprimer toutes les recettes déjà écrites et tous les messages privés les concernant. C'est irréversible.",
-      "discardConfirm": "Supprimer les recettes et changer le menu"
+      "discardConfirm": "Supprimer les recettes et changer le menu",
+      "stillFilling": "Plats pour l’instant : {{courses}}. Ils ne doivent égaler le nombre de chefs qu’une fois les inscriptions fermées."
     },
     "pass": {
       "title": "Le pass",
@@ -370,7 +384,8 @@
         "CANCELLED": "Ce dîner a été annulé"
       },
       "empty": "vide",
-      "whatIsItToggle": "Qu’est-ce que le passe ?"
+      "whatIsItToggle": "Qu’est-ce que le passe ?",
+      "advance": "Faire avancer le dîner"
     },
     "lateJoinerShort": "Ajouter quelqu'un maintenant change les partenaires de deux chefs.",
     "briefProgress": "{{done}} recettes écrites sur {{total}}",
@@ -410,7 +425,30 @@
     "deletesOn": "Ce dîner s’effacera le {{date}}.",
     "deletesWhatSurvives": "Ce que vous gardez : chaque recette mise dans votre carnet, et la photo que vous avez ajoutée à l’album. Le reste — la chaîne, les messages, les votes — part avec le dîner.",
     "copyCode": "Copier le code",
-    "copyLink": "Copier le lien"
+    "copyLink": "Copier le lien",
+    "rules": {
+      "fixedTitle": "Fixé pour tout le dîner",
+      "fixedWarn": "Non modifiables ensuite — ni par vous, ni par personne.",
+      "liveTitle": "Modifiable pendant le dîner",
+      "liveNote": "Choisissez maintenant, changez d'avis plus tard : la flèche tournante ↺ de la passe revient sur chacun de ces réglages."
+    },
+    "tableTheme": {
+      "label": "Thème de la table",
+      "CHECKS": "Carreaux rouges",
+      "CHECKSHint": "La table de la maison : carreaux rouges sur crème. À quoi ressemble CovertCook.",
+      "ELEGANT": "Élégant",
+      "ELEGANTHint": "Lin repassé, rien d’imprimé dessus. Pour la soirée sur son trente-et-un.",
+      "SCIFI": "Science-fiction",
+      "SCIFIHint": "Un pont sombre sous une grille cyan.",
+      "BAROQUE": "Baroque",
+      "BAROQUEHint": "Or sur lie-de-vin, mis lourdement.",
+      "HALLOWEEN": "Halloween",
+      "HALLOWEENHint": "Suie et citrouille.",
+      "XMAS": "Noël",
+      "XMASHint": "Vert sapin sur blanc papier.",
+      "CARNIVAL": "Carnaval",
+      "CARNIVALHint": "Des confettis, restés où ils sont tombés."
+    }
   },
   "briefs": {
     "editorTitle": "Écrivez votre recette secrète",
@@ -560,8 +598,6 @@
     "timeLeft": "Le vote ferme dans",
     "closing": "Le vote se ferme…",
     "points": "pts",
-    "MANUAL": "À main levée",
-    "MANUALHint": "Sans téléphone. Vous annoncez les plats à table, comptez les mains et saisissez les totaux. L'application fait le calcul et affiche le gagnant.",
     "manual": {
       "title": "Compter les mains",
       "chosen": "Ce dîner vote à main levée.",
@@ -1071,7 +1107,8 @@
       "REVEAL_ONLY_FOR_REPORTED": "Seul l’auteur d’un message signalé peut être dévoilé.",
       "CANNOT_BLOCK_YOURSELF": "Cette place est la vôtre.",
       "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner."
-    }
+    },
+    "fromChef": "Écrit par {{name}}."
   },
   "album": {
     "title": "La table, à la fin",
@@ -1140,7 +1177,19 @@
       "COSTS_NOT_SHARED": "Ce dîner ne partage pas ses frais.",
       "SETTLEMENT_TOO_EARLY": "L’addition vient après le repas.",
       "BUDGET_TOO_LATE": "La roulette a tourné et les recettes s’écrivent sur ce budget — il ne bouge plus.",
-      "AMOUNT_INVALID": "Écrivez un montant comme 12,50."
-    }
+      "AMOUNT_INVALID": "Écrivez un montant comme 12,50.",
+      "MODE_SETTLED": "Le partage des frais a été décidé à la création de ce dîner.",
+      "ROUND_IS_OVER": "Ce dîner est terminé. Ses chiffres sont une archive désormais."
+    },
+    "shareFixed": "Décidé maintenant et seulement maintenant : activer le partage en cours de dîner changerait le marché pour ceux qui ont déjà fait les courses. Le budget, lui, bouge toute la soirée.",
+    "noCeiling": "Sans plafond",
+    "setBudget": "Changer le budget",
+    "budgetSaved": "Le nouveau budget est enregistré.",
+    "budgetHostOnly": "Seul le Executive Chef change le budget."
+  },
+  "themes": {
+    "free": "Gratuit",
+    "notYet": "Pas encore à vous — rien ne s'achète dans l'application pour l'instant, alors celui-ci attend.",
+    "locked": "Ce thème n'est pas débloqué sur ce compte."
   }
 }

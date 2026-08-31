@@ -15,7 +15,26 @@ import type { ChainLink } from '../../lib/rpc'
  * two-column grid would be approximating; going straight to the circle
  * removes the approximation.
  */
-export function ChainCircle({ cycle, youId }: { cycle: ChainLink[]; youId?: string }) {
+export function ChainCircle({
+  cycle,
+  youId,
+  realNames = false,
+}: {
+  cycle: ChainLink[]
+  youId?: string
+  /** Print the real names instead of the pseudonyms. True on a dinner where
+   *  this reader is entitled to them — OPEN for everybody, SPY for the host
+   *  (0073) — where a ring of code names would be a puzzle the reader has
+   *  already been given the answer to. */
+  realNames?: boolean
+}) {
+  const nameOf = (link: ChainLink, end: 'sender' | 'cook') =>
+    (realNames
+      ? end === 'sender'
+        ? link.sender_display_name
+        : link.cook_display_name
+      : null) ?? (end === 'sender' ? link.sender_secret_name : link.cook_secret_name)
+
   const n = cycle.length
   if (n === 0) return null
 
@@ -41,7 +60,7 @@ export function ChainCircle({ cycle, youId }: { cycle: ChainLink[]; youId?: stri
       className="chainring"
       viewBox={`0 0 ${size} ${size}`}
       role="img"
-      aria-label={cycle.map((l) => `${l.sender_secret_name} → ${l.cook_secret_name}`).join('; ')}
+      aria-label={cycle.map((l) => `${nameOf(l, 'sender')} → ${nameOf(l, 'cook')}`).join('; ')}
     >
       <circle cx={c} cy={c} r={r} fill="none" stroke="var(--border)" strokeWidth="1" strokeDasharray="3 5" />
 
@@ -103,7 +122,7 @@ export function ChainCircle({ cycle, youId }: { cycle: ChainLink[]; youId?: stri
               dominantBaseline="middle"
               className={isYou ? 'chainring__name is-you' : 'chainring__name'}
             >
-              {link.sender_secret_name}
+              {nameOf(link, 'sender')}
             </text>
           </g>
         )

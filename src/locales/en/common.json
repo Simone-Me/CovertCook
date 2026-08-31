@@ -109,38 +109,48 @@
     "access": {
       "label": "How people get in",
       "CODE": "With a code",
-      "CODEHint": "You get a code to share however you like. Anyone holding it can ask for a seat.",
-      "INVITE": "By invitation",
-      "INVITEHint": "You add chefs by the address they signed up with. They accept or decline in the app — no code to mistype or forward."
+      "CODEHint": "You get a code to share however you like. Anyone holding it can ask for a seat, and there is no guest list to add to.",
+      "INVITE": "By invitation only",
+      "INVITEHint": "You add chefs by their username. They accept or decline in the app, and the code opens nothing — nobody gets in unless you named them.",
+      "CODE_AND_INVITE": "Code and invitations",
+      "CODE_AND_INVITEHint": "Both doors open: you invite the chefs you already know by name, and anyone holding the code can still ask for a seat."
     },
     "anonymity": {
       "label": "Who knows whom",
       "ANONYMOUS": "Undercover — nobody knows anybody",
       "ANONYMOUSHint": "Everyone is a pseudonym until the final reveal, you included.",
       "SPY": "Spy — you see everyone, they see nobody",
-      "SPYHint": "You keep each chef's real name beside their pseudonym. Everyone else sees pseudonyms only. You'll still have to ask before you can see who cooks for whom.",
+      "SPYHint": "You see every chef's real name wherever their pseudonym would be — the roster, the fridge, the reported phrases. Everyone else sees pseudonyms only. You'll still have to ask before you can see who cooks for whom.",
       "OPEN": "Open — everyone knows everyone",
-      "OPENHint": "Real names stay visible all evening. Only who cooks for whom stays secret."
+      "OPENHint": "No pseudonyms at all: everyone is their own name, everywhere, all evening. Only who cooks for whom stays secret."
     },
     "requiresApproval": "The Executive Chef must approve each player",
     "voting": {
       "label": "Voting",
-      "LIVE": "During dinner",
-      "LIVEHint": "You open the vote at the table and see the results first, then decide how to announce them.",
-      "TIMED": "After dinner",
-      "TIMEDHint": "You set a deadline and the results publish themselves when it runs out.",
+      "LIVE": "Secret, during dinner",
+      "LIVEHint": "Everyone votes on their own phone at the table. You watch how many have finished — never what they chose — and it closes itself the moment the last person votes.",
+      "TIMED": "Secret, after dinner",
+      "TIMEDHint": "Everyone votes from home afterwards, up to 48 hours. The results publish themselves the moment the deadline runs out.",
       "DISABLED": "No voting",
       "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later.",
       "MANUAL": "By a show of hands",
       "MANUALHint": "No phones at the table: dishes are ranked by hands going up, and you type in the count.",
-      "chosenWhenOpening": "Chosen when you open the vote, not now — and changeable until the first vote is cast."
+      "chosenWhenOpening": "Chosen when you open the vote, not now — and changeable until the first vote is cast.",
+      "changeMethod": "Change how this dinner votes",
+      "chosenAtCreation": "Chosen when the dinner was created. The arrow goes back on it, until the first vote is cast."
     },
     "nameTheme": {
       "label": "Pseudonym theme",
       "FOOD": "Herbs & spices",
       "FOODHint": "Chef Basil, Chef Saffron, Chef Clove.",
       "BRIGADE": "Kitchen brigade",
-      "BRIGADEHint": "Chef Saucier, Chef Pâtissier, Chef Aboyeur — the 24 real stations of a kitchen."
+      "BRIGADEHint": "Chef Saucier, Chef Pâtissier, Chef Aboyeur — the 24 real stations of a kitchen.",
+      "PASTA": "Pasta shapes",
+      "PASTAHint": "Chef Rigatoni, Chef Farfalle, Chef Strozzapreti — 24 shapes, spelled the same in every kitchen.",
+      "PATISSERIE": "Pâtisserie",
+      "PATISSERIEHint": "Chef Éclair, Chef Canelé, Chef Paris-Brest — 24 things from the pastry counter.",
+      "BATTERIE": "The batterie",
+      "BATTERIEHint": "Chef Mandoline, Chef Whisk, Chef Blowtorch — 24 tools off the hook."
     },
     "recipesPerBrief": {
       "label": "Recipes per chef",
@@ -149,7 +159,8 @@
     "slotMode": {
       "label": "Courses",
       "FREE": "Free-for-all (everyone brings any dish)",
-      "CATEGORIES": "Specific courses (you choose starters/mains/etc.)"
+      "CATEGORIES": "Specific courses (you choose starters/mains/etc.)",
+      "changeable": "Changeable during the dinner, up until the roulette has been run."
     },
     "remove": "Remove",
     "removeConfirm": "Remove this player from the round?",
@@ -241,10 +252,10 @@
       "yes": "Yes",
       "no": "No",
       "noLimit": "No limit",
-      "themes": "Table theme",
-      "themesSoon": "Christmas, midsummer, and others to come. Pro — the look of the evening only; nothing about how the game is played.",
       "venueEditable": "Editable in the dinner settings",
-      "venueHere": "change them"
+      "venueHere": "change them",
+      "tableTheme": "Table theme",
+      "changeableInGame": "changeable during the dinner"
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
@@ -257,9 +268,11 @@
       "accept": "Accept",
       "decline": "Decline",
       "invite": "Invite a chef",
-      "inviteEmail": "Their account address",
       "inviteSent": "Invitation sent",
-      "noSuchChef": "No chef signed up with that address. Check the spelling, or share the code instead."
+      "noSuchChef": "No chef goes by that name. Check the spelling — usernames are exactly as their owner typed them.",
+      "inviteUsername": "Their username",
+      "notByInvitation": "This dinner is entered with the code. There is no guest list to add to.",
+      "inviteHelp": "Their username, not their email — the name they picked when they signed up."
     },
     "pastRounds": "Past dinners ({{count}})",
     "tooManyPlayers": "Thirty is already a lot of cooking. Where were you planning to seat them all — is this a wedding?",
@@ -349,7 +362,8 @@
       "change": "Change",
       "clearToChange": "To change it, the roulette has to be cleared and spun again. Nobody has written yet, so nothing is lost.",
       "discardWarning": "Changing the menu now means dealing the roulette again, and there is no way to do that without throwing away every recipe already written and every private message sent about them. This cannot be undone.",
-      "discardConfirm": "Delete the recipes and change the menu"
+      "discardConfirm": "Delete the recipes and change the menu",
+      "stillFilling": "Courses so far: {{courses}}. They only have to match the number of chefs once sign-ups close."
     },
     "pass": {
       "title": "The pass",
@@ -370,7 +384,8 @@
         "CANCELLED": "This dinner was called off"
       },
       "empty": "empty",
-      "whatIsItToggle": "What is the pass?"
+      "whatIsItToggle": "What is the pass?",
+      "advance": "Move the dinner on"
     },
     "lateJoinerShort": "Adding someone now changes two chefs' partners.",
     "briefProgress": "{{done}} of {{total}} recipes written",
@@ -410,7 +425,30 @@
     "deletesOn": "This dinner deletes itself on {{date}}.",
     "deletesWhatSurvives": "What you keep: every recipe you put in your book, and the photograph you added to the album. The rest — the chain, the messages, the ballots — goes with the dinner.",
     "copyCode": "Copy the code",
-    "copyLink": "Copy the link"
+    "copyLink": "Copy the link",
+    "rules": {
+      "fixedTitle": "Settled for the whole dinner",
+      "fixedWarn": "These cannot be changed afterwards — not by you, not by anyone.",
+      "liveTitle": "Changeable during the dinner",
+      "liveNote": "Pick something now and think again later: the turning arrow ↺ on the pass comes back to any of these."
+    },
+    "tableTheme": {
+      "label": "Table theme",
+      "CHECKS": "Red checks",
+      "CHECKSHint": "The house table: red squares on cream. What CovertCook looks like.",
+      "ELEGANT": "Elegant",
+      "ELEGANTHint": "Pressed linen, nothing printed on it. For the evening that is dressed up.",
+      "SCIFI": "Sci-fi",
+      "SCIFIHint": "A dark deck under a cyan grid.",
+      "BAROQUE": "Baroque",
+      "BAROQUEHint": "Gold on wine, laid heavy.",
+      "HALLOWEEN": "Halloween",
+      "HALLOWEENHint": "Soot and pumpkin.",
+      "XMAS": "Christmas",
+      "XMASHint": "Fir green on paper white.",
+      "CARNIVAL": "Carnival",
+      "CARNIVALHint": "Confetti, still where it fell."
+    }
   },
   "briefs": {
     "editorTitle": "Write your recipe brief",
@@ -560,8 +598,6 @@
     "timeLeft": "Voting closes in",
     "closing": "Voting is closing…",
     "points": "pts",
-    "MANUAL": "By show of hands",
-    "MANUALHint": "No phones. You read the dishes out at the table, count the hands, and enter the totals. The app does the arithmetic and shows the winner.",
     "manual": {
       "title": "Counting the hands",
       "chosen": "This dinner votes by show of hands.",
@@ -1071,7 +1107,8 @@
       "REVEAL_ONLY_FOR_REPORTED": "Only the author of a reported message can be revealed.",
       "CANNOT_BLOCK_YOURSELF": "That seat is yours.",
       "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner."
-    }
+    },
+    "fromChef": "Written by {{name}}."
   },
   "album": {
     "title": "The table, at the end",
@@ -1140,7 +1177,19 @@
       "COSTS_NOT_SHARED": "This dinner does not split its costs.",
       "SETTLEMENT_TOO_EARLY": "The bill comes after the food.",
       "BUDGET_TOO_LATE": "The roulette has run and people are writing against this budget — it cannot move now.",
-      "AMOUNT_INVALID": "Write an amount like 12.50."
-    }
+      "AMOUNT_INVALID": "Write an amount like 12.50.",
+      "MODE_SETTLED": "Whether this dinner splits its costs was settled when it was created.",
+      "ROUND_IS_OVER": "This dinner is over. Its numbers are a record now."
+    },
+    "shareFixed": "Decided now and only now: turning this on halfway through a dinner would change the deal for people who have already shopped. The budget itself can move all evening.",
+    "noCeiling": "No ceiling",
+    "setBudget": "Change the budget",
+    "budgetSaved": "The new budget is in.",
+    "budgetHostOnly": "Only the Executive Chef changes the budget."
+  },
+  "themes": {
+    "free": "Free",
+    "notYet": "Not yours yet — nothing can be bought in the app at the moment, so this one is waiting.",
+    "locked": "That theme is not unlocked on this account."
   }
 }

@@ -59,6 +59,131 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-31
+
+**Four rules that were written down and never enforced, and the creation form
+that could not tell you which of its questions were final** (`0070`–`0074`).
+
+### The door was a label, not a rule
+
+`rounds.access` has existed since `0018` and **nothing read it**. `join_round`
+accepted any code for any `OPEN` round; `invite_member` invited into any round
+at all. So "By invitation" was a word on a form: a host who chose it, and whose
+code then got forwarded once, got exactly the dinner they had said they did not
+want — and was never told, because from their screen it looked as though a
+friend had simply joined.
+
+`0071` makes both halves real. A code is refused on an `INVITE` round (as
+`INVALID_CODE`, deliberately: confirming the code is real would tell a stranger
+the dinner exists), and a guest list is refused on a `CODE` one. `0070` adds
+the third value the enum could not express, `CODE_AND_INVITE`, which is the
+ordinary case — you invite the four people you already know and hand the code
+to whoever else turns up. The pass now offers each door only where the host
+actually left one open.
+
+**And an invitation names a username, not an email address.** The address is
+the one thing about an account its owner has never chosen to show anybody: to
+invite a friend you had to know, or ask for, the mailbox they registered with.
+`display_name` has been a unique identity since `0046`, it is the name printed
+at the reveal, and it is the name the person picked themselves. The email
+lookup is dropped rather than kept alongside — two ways to name one person is
+two error messages and an enumeration surface kept alive for nobody's benefit.
+
+### SPY and OPEN were both half-built, from opposite ends
+
+SPY was supposed to mean "the Executive Chef sees everyone, the table sees
+nobody". `0053` does hand the host the profile ids on a SPY round — and then
+nothing reads them. Every screen printed `secret_name`, so **a SPY host got the
+undercover game with a different label on it.**
+
+OPEN was supposed to mean "everyone knows everyone", and it half-worked: the
+brief editor and the finished thread ask for real names by hand, so those two
+screens were right and the roster, the fridge, the chain and the moderation
+queue were not. An OPEN dinner therefore ran with two names per person and the
+reader holding the mapping themselves — which is the opposite of the point.
+
+The thing that kept going wrong is that "may this reader see real names" was
+being decided separately in every function that returns a name, and most of
+them never asked. `0073` writes it once, as `names_are_open()`, and five
+readers now ask it: the roster, the fridge, the private thread, the assignment
+and the reported-message queue. On OPEN there are no code names at all —
+`secret_name` is still minted, because the chain, the ballot and every message
+row are keyed to a seat, and it is simply never shown.
+
+### The shelf of looks, priced and honest
+
+`0072` turns the pseudonym theme and the table theme into two catalogues with a
+tier on each row, three new word lists (pasta shapes, pâtisserie, the batterie
+— 24 names each, in both locales) and seven cloths. Two of each are free; the
+rest are locked with a price on them.
+
+**Nothing sells anything.** There is no payment provider wired to this app, so
+a paid row is visible, priced and refused — and there is deliberately no "buy"
+button leading into a checkout that does not exist. The entitlement check is
+server-side (`theme_available`, called by `create_round`, which also closes a
+hole nobody had opened yet: a paid theme named in a raw RPC call used to be
+granted), and it already reads the table a purchase will write to. The day
+there is one, the shelf unlocks itself.
+
+A pseudonym list now also carries its own mark, and the mark does three jobs:
+it stands for the dinner in the rounds list and at the head of its own table,
+and it seeds the faces the fridge gives each chef. A brigade of stations
+wearing vegetables was the host's choice of theme being thrown away at the one
+screen where the whole table is looking at each other.
+
+### The budget moves; whether you split does not
+
+`set_cost_settings` (`0065`) treated those as one setting and let both move
+until `LOCKED`. Both halves were wrong in different directions. **Turning
+sharing on late is not a setting, it is a new deal** — several people have
+already shopped, and a receipt that was a gift on Tuesday is a debt on Friday
+— so `0074` settles the mode at creation. **The budget, meanwhile, was frozen
+before anybody had been to a shop**: "let's say twenty each" becoming "make it
+thirty, the fish was mad" is the most ordinary thing at a dinner and it was the
+one thing the app refused. It moves now, all evening, and only the Executive
+Chef moves it.
+
+### Two boxes, and the arrow
+
+The creation form was seven folded rows in one card, and nothing on it said
+which of them a host was committing to. Some can be revisited over dinner;
+the rest can never be touched again, because changing them would rewrite an
+evening under the people living it. The only reliable way to tell them apart
+was to try.
+
+They are now two containers in two colours, each with the fact in its own
+heading rather than in a footnote under every control — red for what is
+settled, green for what still moves. Colour does the work, and never alone: a
+host who cannot tell red from green reads the same two headings.
+
+What moves, moves through **the turning arrow** — the same `↺` the phase menu
+uses to un-serve a course, now a shared component (`components/TurnBack.tsx`).
+It arms; a second, deliberate act answers. It reaches the voting method during
+dinner (including on a hand-counted round, which was the one voting choice that
+could not be revisited, with nothing in the database saying so) and the
+budget. Courses move too — `set_slot_mode` has allowed `DRAFT`→`LOCKED` since
+`0036` and the pass was only offering it at `LOCKED`.
+
+**And the button that moves the dinner on is now inside the pass**, where it
+belongs: it used to sit at the foot of the page, past the roster, the recipes,
+the messages, the vote, the allergies and the address — the most consequential
+control the Executive Chef has, at the end of a scroll, and outside the one
+place this app says every host action lives.
+
+*Tested:* `smoke_test15.sql` — both doors refused where they should be and open
+where they should be, an invitation found by a username in the wrong case, a
+SPY host reading three real names while a player at the same table reads three
+pseudonyms, an OPEN table named to everybody with the door still open, an
+undercover round that stays covered *even for its host*, two paid themes
+refused by name in a raw RPC call and then granted by a row in
+`profile_theme_unlocks`, and the cost mode refusing to move while the budget
+does. `smoke_test6` updated for username invitations. The whole suite was run
+against a fresh database, migration by migration: `smoke_test`, `2` and `4`
+still fail exactly as they do on `main` — they read `round_members` directly,
+which `0032` revoked, and they predate it.
+
+---
+
 ## 2026-08-28 (4)
 
 **The results reach the table, and not only the Executive Chef.**

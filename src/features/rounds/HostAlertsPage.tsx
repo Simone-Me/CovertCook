@@ -136,7 +136,14 @@ function ReportedCard({ roundId, message }: { roundId: string; message: Reported
       <blockquote className="reported__body">{text}</blockquote>
 
       <p className="muted" style={{ margin: 0 }}>
-        {t('moderation.fromSeat', { name: message.author_secret_name ?? '—' })}
+        {/* The real name where this host is entitled to it — a SPY or OPEN
+            round, or one that is over (0073). Everywhere else it stays the
+            seat, because every action on this card is about a seat rather than
+            about a person, and the reveal below is the one deliberate
+            exception. */}
+        {t(message.author_display_name ? 'moderation.fromChef' : 'moderation.fromSeat', {
+          name: message.author_display_name ?? message.author_secret_name ?? '—',
+        })}
         {message.already_warned && ` · ${t('moderation.alreadyWarned')}`}
       </p>
 

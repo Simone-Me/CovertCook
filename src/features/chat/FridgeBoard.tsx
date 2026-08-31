@@ -2,6 +2,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { faceFor } from '../../lib/themes'
+import { useRound } from '../rounds/hooks'
 import {
   getBoard,
   getMessageTemplates,
@@ -21,19 +23,17 @@ import {
 // The phrases are still canned (README §"Anonymity is layered"): no free
 // text, so writing style can't out anyone before the reveal.
 
-// The icon is drawn from the author's secret name, so it stays with them for
-// the whole evening: Chef Persil is always the carrot. That is the point now —
+// The icon is drawn from the author's name, so it stays with them for the
+// whole evening: Chef Persil is always the carrot. That is the point now —
 // you can see who said what and answer them (0037). It was deliberately the
 // opposite before, keyed to the message id so nobody could be followed; that
 // anonymity was given up knowingly, and real identities are still the game's
 // secret.
-const FOODS = ['🥕', '🍅', '🧄', '🧅', '🥦', '🍆', '🌽', '🥑', '🍋', '🍇', '🍒', '🧀', '🥐', '🍄', '🌶️', '🥬', '🍐', '🥝']
-
-function foodFor(name: string) {
-  let h = 0
-  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) >>> 0
-  return FOODS[h % FOODS.length]
-}
+//
+// The palette it draws from is the dinner's own pseudonym list (0072): a
+// brigade of stations wearing vegetables was the host's choice of theme being
+// thrown away at the one screen where the whole table is looking at each
+// other. See lib/themes.ts — faceFor() is the same hash, over a different set.
 
 // The rolling pin. Horizontal, and mostly handles — that is what makes a
 // rolling pin recognisable, and leaving them off is why the first attempt
@@ -130,6 +130,9 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
   const { profile } = useAuth()
   const queryClient = useQueryClient()
   const locale = profile?.locale ?? 'en'
+  // Only for the faces. The round row is already in the cache — the page above
+  // this one reads it — so this is a cache hit, not a second request.
+  const { data: round } = useRound(roundId)
 
   const [posting, setPosting] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -205,7 +208,7 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
           {board?.map((m) => (
             <div key={m.message_id} className={`chat-bubble chat-bubble--food${m.is_mine ? ' mine' : ''}`}>
               <span className="chat-bubble__food" aria-hidden="true">
-                {foodFor(m.author_name)}
+                {faceFor(m.author_name, round?.name_theme)}
               </span>
               <span className="chat-bubble__body">
                 {/* Your own name would be telling you something you know. */}

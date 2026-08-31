@@ -7,10 +7,12 @@ import {
   fromCents,
   getMyBrief,
   recordExpense,
+  setBudgetPerHead,
   settleCosts,
   toCents,
   type RoundStatus,
 } from '../../lib/rpc'
+import { TurnBackRow } from '../../components/TurnBack'
 
 /**
  * What the evening is costing, and who owes whom at the end.
@@ -37,11 +39,14 @@ export function CostsPanel({
   status,
   budgetPerHead,
   currency,
+  isHost,
 }: {
   roundId: string
   status: RoundStatus
   budgetPerHead: number | null
   currency: string
+  /** Only the Executive Chef moves the budget (0074). Everybody else reads it. */
+  isHost: boolean
 }) {
   const { t, i18n } = useTranslation()
   const { profile } = useAuth()
@@ -53,6 +58,12 @@ export function CostsPanel({
   const [busy, setBusy] = useState(false)
   const [error, setError] = useState<string | null>(null)
   const [saved, setSaved] = useState(false)
+  // The budget, and the arrow that goes back on it. Held separately from the
+  // expense field above: they are numbers about different things, and typing
+  // in the wrong one is how a host announces they spent forty euros.
+  const [editingBudget, setEditingBudget] = useState(false)
+  const [budgetDraft, setBudgetDraft] = useState('')
+  const [budgetSaved, setBudgetSaved] = useState(false)
 
   const { data: costs } = useQuery({
     queryKey: ['rounds', roundId, 'costs'],
@@ -110,6 +121,38 @@ export function CostsPanel({
     }
   }
 
+  /**
+   * The agreed ceiling, moved.
+   *
+   * "Let's say twenty each" turning into "make it thirty, the fish was mad" is
+   * the most ordinary thing that happens at a dinner, and until 0074 it was the
+   * one thing the app refused: the number froze at LOCKED, before anybody had
+   * been to a shop. An empty box is a real answer and not a missing one — it
+   * means splitting with no ceiling.
+   */
+  async function saveBudget() {
+    const trimmed = budgetDraft.trim()
+    const cents = trimmed === '' ? null : toCents(trimmed)
+    if (trimmed !== '' && cents === null) {
+      setError(t('costs.amountInvalid'))
+      return
+    }
+    setError(null)
+    setBudgetSaved(false)
+    setBusy(true)
+    try {
+      await setBudgetPerHead(roundId, cents)
+      setBudgetSaved(true)
+      setEditingBudget(false)
+      await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : ''
+      setError(t(`costs.errors.${raw}`, { defaultValue: raw || t('errors.generic') }))
+    } finally {
+      setBusy(false)
+    }
+  }
+
   const money = (cents: number) => fromCents(cents, locale, costs?.currency ?? currency)
   const over = budgetPerHead !== null && (costs?.my_spend_cents ?? 0) > budgetPerHead
 
@@ -117,9 +160,40 @@ export function CostsPanel({
     <div className="stack">
       {error && <div className="error">{error}</div>}
 
-      {budgetPerHead !== null && (
-        <p className="muted">{t('costs.agreed', { amount: money(budgetPerHead) })}</p>
+      {/* The number, and — for the Executive Chef only — the way to move it.
+          Everyone else reads the same line without an arrow on it, which is
+          exactly what the rule says: the budget is the table's, and one person
+          holds the pen. */}
+      {isHost ? (
+        <TurnBackRow
+          title={t('costs.budgetPerHead')}
+          answer={budgetPerHead !== null ? money(budgetPerHead) : t('costs.noCeiling')}
+          open={editingBudget}
+          label={t('costs.setBudget')}
+          onToggle={() => {
+            setBudgetDraft(budgetPerHead !== null ? (budgetPerHead / 100).toFixed(2) : '')
+            setEditingBudget((v) => !v)
+          }}
+        >
+          <label htmlFor={`budget-${roundId}`}>{t('costs.budgetPerHead')}</label>
+          <input
+            id={`budget-${roundId}`}
+            inputMode="decimal"
+            placeholder="0.00"
+            value={budgetDraft}
+            onChange={(e) => setBudgetDraft(e.target.value)}
+          />
+          <p className="muted" style={{ margin: 0 }}>{t('costs.budgetHint')}</p>
+          <button type="button" disabled={busy} onClick={saveBudget}>
+            {t('actions.save')}
+          </button>
+        </TurnBackRow>
+      ) : (
+        budgetPerHead !== null && (
+          <p className="muted">{t('costs.agreed', { amount: money(budgetPerHead) })}</p>
+        )
       )}
+      {budgetSaved && <p className="muted">{t('costs.budgetSaved')}</p>}
 
       {/* What you were asked to buy. Read-only, and only yours. */}
       {myBrief && myBrief.ingredients.length > 0 && (

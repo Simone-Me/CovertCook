@@ -1978,3 +1978,295 @@
 .editable-note {
   margin: 8px 0 0;
 }
+
+/* ---------------------------------------------------------------------------
+ * How the cloth is dressed (0072).
+ *
+ * The default table — red checks on cream — is still the app's own face and
+ * nothing here changes it: `.theme-checks` is written out for completeness and
+ * sets exactly what :root already says. The rest are a *dinner's* choice, not
+ * the reader's, which is why this is not the dark-mode block tokens.css says
+ * there will never be: it is one host dressing one evening, and every guest at
+ * that evening sees the same cloth.
+ *
+ * Each theme is a token swap and nothing else. The papers, envelopes and
+ * documents laid on the table keep their own light ground on purpose — paper
+ * on a dark table is still paper, and re-inventing the readable surfaces per
+ * theme is how a look becomes seven codebases.
+ * ------------------------------------------------------------------------- */
+
+.theme-checks {
+  --cloth-ground: #fffcf6;
+  --cloth-check: rgba(198, 32, 44, 0.5);
+  --cloth-square: 13px;
+}
+
+/* Linen, pressed. No checks at all — the whole point of the elegant table is
+   that there is nothing printed on it — so the two gradients are turned into a
+   whisper of weave rather than a grid. */
+.theme-elegant {
+  --cloth-ground: #f4f1e8;
+  --cloth-check: rgba(120, 110, 92, 0.07);
+  --cloth-square: 4px;
+}
+
+.theme-scifi {
+  --cloth-ground: #101820;
+  --cloth-check: rgba(94, 234, 212, 0.22);
+  --cloth-square: 22px;
+}
+
+/* Damask: gold on wine, and the grid pulled wide enough to read as a repeat
+   rather than as graph paper. */
+.theme-baroque {
+  --cloth-ground: #3c1220;
+  --cloth-check: rgba(198, 162, 74, 0.28);
+  --cloth-square: 18px;
+}
+
+.theme-halloween {
+  --cloth-ground: #1c1614;
+  --cloth-check: rgba(232, 121, 27, 0.32);
+  --cloth-square: 15px;
+}
+
+.theme-xmas {
+  --cloth-ground: #f6f3e9;
+  --cloth-check: rgba(23, 96, 58, 0.42);
+  --cloth-square: 13px;
+}
+
+/* Confetti rather than a grid: the one theme where the repeat is dots, because
+   a carnival table is covered in things that fell on it. */
+.theme-carnival {
+  --cloth-ground: #fffdf5;
+  --cloth-check: transparent;
+}
+
+.theme-carnival.cloth {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(198, 32, 44, 0.5) 0 3px, transparent 3px),
+    radial-gradient(circle at 70% 15%, rgba(240, 170, 30, 0.55) 0 3px, transparent 3px),
+    radial-gradient(circle at 45% 75%, rgba(40, 120, 190, 0.45) 0 3px, transparent 3px),
+    radial-gradient(circle at 88% 62%, rgba(90, 160, 80, 0.45) 0 3px, transparent 3px);
+  background-size: 76px 76px;
+}
+
+/* The dark cloths need their own muted ink for the few lines that sit directly
+   on the table rather than on paper — a page-level "…" or an error above the
+   first envelope. Everything inside .paper keeps the app's own colours. */
+.theme-scifi,
+.theme-baroque,
+.theme-halloween {
+  --text-muted: #cdbfae;
+}
+
+/* Nothing animates per theme, and that is a decision rather than an omission:
+   the cloth is a background, and a background that moves is a background you
+   end up reading instead of the dinner. */
+
+/* ---------------------------------------------------------------------------
+ * The shelf: a list of looks, some of them locked (0072).
+ *
+ * A locked row is dimmed and still fully readable — the name, what it is, and
+ * what it costs. Dimming it to the point of illegibility would be a shopfront
+ * with the lights off.
+ * ------------------------------------------------------------------------- */
+
+.shelf__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-paper);
+}
+
+.shelf__row.is-chosen {
+  border-color: var(--paper-edge);
+  background: var(--bg-elevated);
+}
+
+.shelf__row.is-locked {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.shelf__mark {
+  flex: none;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.shelf__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shelf__name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.shelf__hint {
+  font-size: 12.5px;
+}
+
+/* Free, or a price. Both are the same shape so the eye can compare down the
+   column instead of hunting for which rows have one. */
+.shelf__tag {
+  margin-left: 7px;
+  padding: 1px 6px;
+  border: 1px solid var(--env-edge);
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  vertical-align: 1px;
+}
+
+.shelf__tag--price {
+  border-color: var(--paper-edge);
+  color: var(--accent);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.shelf__locked {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+ * The two boxes of rules on the creation form.
+ *
+ * A HOST IS MAKING TWO DIFFERENT KINDS OF DECISION and the form used to make
+ * them look identical: seven folded rows in one card, some of which could be
+ * revisited over dinner and some of which could never be touched again. The
+ * only reliable way to tell them apart was to try.
+ *
+ * So they are two objects. The fixed box is bound in the app's own red — the
+ * colour it already uses for wax seals and for the pass, which is to say for
+ * the things that are settled — and it carries the warning in its heading. The
+ * changeable box is bound in green and says, once, that the turning arrow can
+ * come back to any of it. Colour is doing the work here rather than repeating
+ * "fixed" under every control, but colour is never doing it *alone*: each
+ * heading also says which kind of box it is, because a host who cannot
+ * distinguish red from green is still making the same commitment.
+ * ------------------------------------------------------------------------- */
+
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 15px 16px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+  box-shadow: var(--paper-shadow);
+}
+
+.rules__head {
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--env-edge);
+}
+
+.rules__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.rules__warn,
+.rules__note {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+}
+
+.rules--fixed {
+  border-color: var(--paper-edge);
+  border-left-color: var(--accent);
+}
+
+.rules--fixed .rules__title {
+  color: var(--accent);
+}
+
+.rules--fixed .rules__warn {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rules--live {
+  border-color: var(--diet-bg);
+  border-left-color: var(--ok);
+}
+
+.rules--live .rules__title {
+  color: var(--ok);
+}
+
+.rules--live .rules__note {
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+ * A setting with the turning arrow beside it (components/TurnBack.tsx).
+ *
+ * Closed, it is a line of fact: what this dinner is doing right now. Open, the
+ * way to change it drops out underneath. The arrow is the same one the phase
+ * menu uses to un-serve a course, because it is the same gesture.
+ * ------------------------------------------------------------------------- */
+
+.turnrow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.turnrow__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.turnrow__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.turnrow__title {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.turnrow__answer {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.turnrow__body {
+  padding-left: 2px;
+  border-left: 2px solid var(--paper-edge);
+  padding-inline-start: 10px;
+}
+
+/* The last thing in the pass: the button that ends the phase. Ruled off from
+   whatever the phase was asking for, because reading "you have five recipes in"
+   and "move the dinner on" as one paragraph is how a host advances a phase they
+   meant to wait on. */
+.pass__advance {
+  margin-top: 4px;
+}

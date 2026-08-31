@@ -9,6 +9,7 @@ import { Fold } from '../../components/Fold'
 import { PhaseMenu } from './PhaseMenu'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
+  accessAdmitsCode,
   advancePhase,
   previousPhaseFor,
   updateRoundDetails,
@@ -240,7 +241,13 @@ export function RoundSettingsPage() {
             only in OPEN. Showing it at every other phase invited the host to
             hand out something that would be refused, and then to wonder why.
             What replaces it is the actual route: reopen sign-ups first. */}
-        {round.status !== 'OPEN' ? (
+        {/* An invitation-only dinner has no code to hand out — join_round
+            refuses it outright since 0071 — so printing one here would be
+            offering the host something the server will reject, and then
+            leaving them to wonder why their friend could not get in. */}
+        {!accessAdmitsCode(round.access) ? (
+          <p className="muted">{t('rounds.access.INVITEHint')}</p>
+        ) : round.status !== 'OPEN' ? (
           <div className="howto">
             <p className="howto__lead">{t('rounds.lateJoin.short')}</p>
             <ol className="howto__steps">
@@ -317,7 +324,7 @@ export function RoundSettingsPage() {
             <dd>
               {t(`rounds.slotMode.${round.slot_mode}`)}
               <span className="fixed-note">
-                {preAssignment ? t('rounds.settings.changeableNow') : t('rounds.settings.fixedNow')}
+                {preAssignment ? t('rounds.settings.changeableInGame') : t('rounds.settings.fixedNow')}
               </span>
             </dd>
 
@@ -334,12 +341,14 @@ export function RoundSettingsPage() {
             </dd>
 
             {/* The one thing here that is genuinely for sale, and it is a
-                look — said next to everything that isn't, so the difference
-                is visible rather than asserted. */}
-            <dt>{t('rounds.settings.themes')}</dt>
+                look — said next to everything that isn't, so the difference is
+                visible rather than asserted. It stopped being a promise in
+                0072: the cloth this dinner is laid on is a choice that was
+                made, so the row prints the choice. */}
+            <dt>{t('rounds.settings.tableTheme')}</dt>
             <dd>
-              {t('rounds.comingSoon')} · {t('pro.badge')}
-              <span className="fixed-note">{t('rounds.settings.themesSoon')}</span>
+              {t(`rounds.tableTheme.${round.table_theme}`, { defaultValue: round.table_theme })}
+              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
             </dd>
 
             <dt>{t('rounds.settings.dinerInfo')}</dt>

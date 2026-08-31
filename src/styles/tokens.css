@@ -12,6 +12,12 @@
  * inherits a ground it doesn't control. If dark mode is ever wanted back,
  * it is a design exercise (what does this table look like at night?), not
  * a token-inversion exercise.
+ *
+ * A DINNER'S OWN THEME IS NOT THAT (0072). The .theme-* classes at the foot
+ * of table.css dress one evening's cloth, chosen by its host and seen the same
+ * way by everybody at it. They swap the three --cloth-* tokens and nothing
+ * else: the papers, envelopes and documents keep the colours defined here,
+ * because paper on a dark table is still paper.
  */
 
 :root {

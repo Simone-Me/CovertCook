@@ -824,8 +824,11 @@ Ordered roughly by how much the product misses them.
   the three states; what's missing is the artwork. The three rules the real
   ones must follow (one camera angle, one light source, shadow baked in) are
   in `DESIGN.md` §4 and `TableProps.tsx`.
-- **Two recipes per brief** and **themed pseudonyms** — both shown in the
-  creation form, both disabled, both v2.
+- **Two recipes per brief** — shown in the creation form, disabled, v2. (Themed
+  pseudonyms are no longer on this list: five word lists and seven table cloths
+  ship in `0072`, two of each free and the rest priced and locked. What is still
+  not built is the *buying* — there is no payment provider, so a paid theme is
+  visible, priced and refused. See "The paid tier" below.)
 - **Dinner-day tools**: shopping list, printable buffet labels,
   offline-cache verification.
 - **An in-app help layer** and a first-run tour. (Terms and Privacy now exist
@@ -851,6 +854,23 @@ non-paying players. Reasoning in [`ROADMAP.md`](./ROADMAP.md) §2.
 The line in practice: the kitchen-brigade pseudonym set shipped **free**,
 because a second word list changes nothing about how the game is played. Table
 themes are the paid side, because they are purely how the evening looks.
+
+`0072` turns that line into data rather than a policy written in prose. Two
+catalogues — `name_theme_catalogue` and `table_theme_catalogue` — each carry a
+tier per row: `DEFAULT` (what a dinner gets when nobody chooses, always
+available), `FREE` (a second one, open to everybody, nothing to claim) and
+`PAID` (locked, with a price in cents on the row). `theme_available()` is the
+one place the rule is written, `create_round` asks it, and the pickers render
+what it answers.
+
+**Nothing sells anything yet, and the shelf says so.** There is no payment
+provider wired to this app, so a `PAID` row is shown, priced, and refused —
+with no "buy" button leading to a checkout that does not exist. The entitlement
+table (`profile_theme_unlocks`) is already the thing the check reads, so the day
+a purchase lands it is a row insert and the shelf unlocks itself.
+
+Prices today: 50 cents a pseudonym list, €1 a table cloth. Both are data — one
+`UPDATE`, not a deploy.
 
 ### Known simplifications (deliberate, not oversights)
 - Allergy/diet matching is exact-string, not semantic: a diet like

@@ -7,17 +7,94 @@ import { supabase } from './supabase'
 import { invokeFunction } from './functions'
 
 // How someone gets a seat. CODE = share a code, anyone holding it can ask;
-// INVITE = the host names existing accounts, who accept or decline in-app.
-// Replaces PUBLIC_LINK/PRIVATE_CODE, which were two names for one act.
-export type RoundAccess = 'CODE' | 'INVITE'
+// INVITE = the host names existing accounts by username, who accept or
+// decline in-app; CODE_AND_INVITE = both doors open, which is the ordinary
+// case of a host who invites the four people they know and hands the code to
+// whoever else turns up (0071). All three are enforced server-side now: the
+// code is refused on an INVITE round and the guest list on a CODE one.
+export type RoundAccess = 'CODE' | 'INVITE' | 'CODE_AND_INVITE'
+
+export function accessAdmitsCode(access: RoundAccess) {
+  return access === 'CODE' || access === 'CODE_AND_INVITE'
+}
+
+export function accessAdmitsInvites(access: RoundAccess) {
+  return access === 'INVITE' || access === 'CODE_AND_INVITE'
+}
 
 // What members know about each other once seated. SPY sits between the
 // other two: the host sees real names, nobody else does.
-// The two pseudonym sets a dinner can draw from (0038). FOOD is herbs and
-// spices; BRIGADE is the kitchen's own stations — saucier, pâtissier, aboyeur.
-export type NameTheme = 'FOOD' | 'BRIGADE'
+// The pseudonym sets a dinner can draw from (0038, 0072). The codes are rows
+// in name_theme_catalogue — this union is the set the client knows how to
+// describe, and listNameThemes() is what says which of them this account may
+// actually use.
+export type NameTheme = 'FOOD' | 'BRIGADE' | 'PASTA' | 'PATISSERIE' | 'BATTERIE'
+
+// How the cloth is dressed (0072). Look only: nothing here touches a rule.
+export type TableTheme =
+  | 'CHECKS' | 'ELEGANT' | 'SCIFI' | 'BAROQUE' | 'HALLOWEEN' | 'XMAS' | 'CARNIVAL'
+
+/** DEFAULT is what a dinner gets for free by default, FREE is the second one
+ *  everybody also gets, PAID carries a price and is refused until it is
+ *  owned — and nothing can be bought yet, so PAID means locked. */
+export type ThemeTier = 'DEFAULT' | 'FREE' | 'PAID'
+
+export interface NameThemeOption {
+  code: NameTheme
+  tier: ThemeTier
+  price_cents: number | null
+  /** The list's own mark, used wherever the dinner is one character wide. */
+  mark: string
+  owned: boolean
+}
+
+export interface TableThemeOption {
+  code: TableTheme
+  tier: ThemeTier
+  price_cents: number | null
+  owned: boolean
+}
+
+/** Raised by create_round when a theme is named that this account cannot use. */
+export const THEME_LOCKED = 'THEME_LOCKED'
+
+export async function listNameThemes() {
+  const res = await supabase.rpc('list_name_themes', {})
+  return unwrap<NameThemeOption[]>(res)
+}
+
+export async function listTableThemes() {
+  const res = await supabase.rpc('list_table_themes', {})
+  return unwrap<TableThemeOption[]>(res)
+}
 
 export type RoundAnonymity = 'ANONYMOUS' | 'SPY' | 'OPEN'
+
+/**
+ * Whether this reader is entitled to real names on this round.
+ *
+ * The mirror of `names_are_open` in 0073, and kept in step with it by hand —
+ * the cost of not asking the database, worth paying because the answer is two
+ * columns the round row already carries and the alternative is a round-trip on
+ * every screen that prints a name.
+ *
+ * The server is still the authority: every function that returns a name asks
+ * the SQL version before it sends one, so the worst this can do when it drifts
+ * is print a pseudonym where a real name was available. It can never invent a
+ * name that was not sent.
+ */
+export function namesAreOpen(
+  round: { anonymity: RoundAnonymity; status: RoundStatus },
+  isHost: boolean,
+) {
+  return (
+    round.anonymity === 'OPEN' ||
+    (round.anonymity === 'SPY' && isHost) ||
+    round.status === 'RESULTS' ||
+    round.status === 'ARCHIVED' ||
+    round.status === 'CANCELLED'
+  )
+}
 
 // Not whether voting happens, but how. LIVE = the host opens it during
 // dinner and publishes results when ready; TIMED = a deadline publishes
@@ -279,6 +356,7 @@ export async function createRound(input: {
   requiresApproval?: boolean
   votingMode?: VotingMode
   nameTheme?: NameTheme
+  tableTheme?: TableTheme
 }) {
   const res = await supabase.rpc('create_round', {
     p_name: input.name,
@@ -293,6 +371,7 @@ export async function createRound(input: {
     p_requires_approval: input.requiresApproval ?? true,
     p_voting_mode: input.votingMode ?? 'LIVE',
     p_name_theme: input.nameTheme ?? 'FOOD',
+    p_table_theme: input.tableTheme ?? 'CHECKS',
   })
   return unwrap<string>(res) // round id
 }
@@ -309,13 +388,19 @@ export async function getMemberIdentities(roundId: string) {
   return unwrap<MemberIdentity[]>(res)
 }
 
-// Raised by invite_member when no account uses that address. Surfaced as a
-// named constant rather than prose so the UI can say "no chef with this
-// address" in the user's own language.
+// Raised by invite_member when nobody goes by that username. Surfaced as a
+// named constant rather than prose so the UI can say "no chef by that name"
+// in the user's own language.
 export const NO_SUCH_CHEF = 'NO_SUCH_CHEF'
 
-export async function inviteMember(roundId: string, email: string) {
-  const res = await supabase.rpc('invite_member', { p_round_id: roundId, p_email: email })
+/** Raised when the round's access is CODE: there is no guest list to add to. */
+export const NOT_BY_INVITATION = 'NOT_BY_INVITATION'
+
+// By username, not by email (0071). The address was the one thing about an
+// account its owner never chose to show anyone; `display_name` has been a
+// unique identity since 0046 and is the name they picked themselves.
+export async function inviteMember(roundId: string, username: string) {
+  const res = await supabase.rpc('invite_member', { p_round_id: roundId, p_username: username })
   return unwrap<string>(res) // invitation id
 }
 
@@ -762,6 +847,10 @@ export interface ReportedMessage {
   // enough to remove; deliberately not enough to know who it was.
   author_member_id: string
   author_secret_name: string | null
+  // Present only where this host is entitled to it: a SPY or OPEN round, or
+  // one that has finished (0073). Warning somebody is the start of talking to
+  // a person, and on those rounds the host may know which one.
+  author_display_name: string | null
   already_warned: boolean
 }
 
@@ -1039,6 +1128,10 @@ export function fromCents(cents: number, locale = 'en', currency = 'EUR'): strin
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100)
 }
 
+/** Raised when a live round is asked to start or stop splitting costs. The
+ *  rule is settled at creation (0074) — only the number moves after that. */
+export const MODE_SETTLED = 'MODE_SETTLED'
+
 export async function setCostSettings(input: {
   roundId: string
   mode: CostMode
@@ -1050,6 +1143,22 @@ export async function setCostSettings(input: {
     p_mode: input.mode,
     p_budget_per_head: input.budgetPerHead,
     p_currency: input.currency ?? 'EUR',
+  })
+  return unwrap(res)
+}
+
+/**
+ * The number, on its own, for the whole life of the dinner (0074).
+ *
+ * Separate from setCostSettings because they are separate decisions: whether
+ * the table splits at all is a deal struck before anybody shops, and the
+ * ceiling is a thing that moves when the fish turns out to be expensive. Null
+ * is a real answer — "we're splitting, with no ceiling".
+ */
+export async function setBudgetPerHead(roundId: string, budgetPerHead: number | null) {
+  const res = await supabase.rpc('set_budget_per_head', {
+    p_round_id: roundId,
+    p_budget_per_head: budgetPerHead,
   })
   return unwrap(res)
 }

@@ -4,7 +4,14 @@ import { Navigate, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
-import { getChain, setPairing, spliceMember, SPLICE_REQUIRES_CONFIRMATION, type ChainLink } from '../../lib/rpc'
+import {
+  getChain,
+  namesAreOpen,
+  setPairing,
+  spliceMember,
+  SPLICE_REQUIRES_CONFIRMATION,
+  type ChainLink,
+} from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
 import { ChainCircle } from './ChainCircle'
 import { InlineConfirm } from '../../components/InlineConfirm'
@@ -70,6 +77,15 @@ export function ChainPage() {
   const isHost = round.host_id === profile?.id
   if (!isHost) return <Navigate to={`/rounds/${roundId}`} replace />
 
+  // This page is host-only and get_chain returns real names to the host
+  // unconditionally — the reveal button above is the gate. What decides
+  // whether they are *printed* is the dinner's own rule (0073): on a SPY or
+  // OPEN round the host is entitled to them, so a ring of pseudonyms would be
+  // a puzzle whose answer they already hold.
+  const realNames = namesAreOpen(round, isHost)
+  const nameOf = (m: { display_name: string | null; secret_name: string | null }) =>
+    (realNames ? m.display_name : null) ?? m.secret_name
+
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved) ?? []
   const inChain = new Set(chain?.flatMap((l) => [l.sender_member_id, l.cook_member_id]) ?? [])
   const notInChain = activeMembers.filter((m) => !inChain.has(m.id))
@@ -132,7 +148,7 @@ export function ChainPage() {
                   arrow points at the person that chef cooks for, and the fact
                   that it closes is visible rather than asserted at the bottom
                   of a list. */}
-              <ChainCircle cycle={cycle} />
+              <ChainCircle cycle={cycle} realNames={realNames} />
 
               {/* The same edges written out, kept because a name is easier to
                   copy from a line than from a diagram, and because a screen
@@ -140,9 +156,13 @@ export function ChainPage() {
               <ol className="chainring__pairs">
                 {cycle.map((link) => (
                   <li key={link.sender_member_id}>
-                    <span className="badge">{link.sender_secret_name}</span>
+                    <span className="badge">
+                      {(realNames ? link.sender_display_name : null) ?? link.sender_secret_name}
+                    </span>
                     <span aria-hidden="true"> → </span>
-                    <span className="badge">{link.cook_secret_name}</span>
+                    <span className="badge">
+                      {(realNames ? link.cook_display_name : null) ?? link.cook_secret_name}
+                    </span>
                   </li>
                 ))}
               </ol>
@@ -161,7 +181,7 @@ export function ChainPage() {
                 <option value="">—</option>
                 {activeMembers.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.secret_name}
+                    {nameOf(m)}
                   </option>
                 ))}
               </select>
@@ -172,7 +192,7 @@ export function ChainPage() {
                 <option value="">—</option>
                 {activeMembers.map((m) => (
                   <option key={m.id} value={m.id}>
-                    {m.secret_name}
+                    {nameOf(m)}
                   </option>
                 ))}
               </select>
@@ -190,7 +210,7 @@ export function ChainPage() {
                   <option value="">—</option>
                   {notInChain.map((m) => (
                     <option key={m.id} value={m.id}>
-                      {m.secret_name}
+                      {nameOf(m)}
                     </option>
                   ))}
                 </select>
