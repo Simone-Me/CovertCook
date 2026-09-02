@@ -68,7 +68,7 @@
       "checking": "Checking…",
       "free": "Free — it is yours.",
       "taken": "Already taken. Try another one.",
-      "changeLater": "Changing it later is planned as part of Pro.",
+      "changeLater": "Changing it later is planned as part of Crème.",
       "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
     },
     "passwordLabel": "Password",
@@ -710,20 +710,77 @@
   },
   "alerts": {
     "title": "Executive Chef alerts",
-    "openAlerts": "Open alerts",
-    "none": "No open alerts.",
-    "resolve": "Resolve",
-    "reportedMessages": "Reported messages",
-    "noReports": "No reported messages.",
-    "kind": {
-      "CANNOT_COOK": "A player can't cook their dish",
-      "NO_BRIEF": "A player hasn't received a brief",
-      "DROPOUT": "A player dropped out",
-      "REPORTED_MESSAGE": "A message was reported",
-      "OTHER": "Other"
-    },
+    "none": "Nothing is waiting. The table is running itself.",
+    "resolve": "Resolved",
+    "someone": "someone",
+    "aDish": "a dish",
+    "answered": "This looks as though it has already been dealt with.",
+    "declared": "Declared on the dish: {{labels}}",
+    "theRecipe": "The recipe they were given — {{dish}}",
+    "reportedPhoto": "The photograph that was reported",
     "waiting_one": "{{count}} thing is waiting for you",
-    "waiting_other": "{{count}} things are waiting for you"
+    "waiting_other": "{{count}} things are waiting for you",
+    "nothingWaiting": "Nothing is waiting for you",
+    "kind": {
+      "CANNOT_COOK": "A chef cannot cook what they were sent",
+      "NO_BRIEF": "A chef has no recipe",
+      "DROPOUT": "Someone left the dinner",
+      "ACCOUNT_CLOSED": "Someone closed their account",
+      "REPORTED_PRIVATE": "Report — a phrase in a private thread",
+      "REPORTED_FRIDGE": "Report — a phrase in the fridge",
+      "REPORTED_PHOTO": "Report — a photograph",
+      "ENTER_REQUEST": "Someone is at the door",
+      "LATE_ENTRY_CHAIN": "A late arrival went into the chain",
+      "CLOSED_CHAIN": "The chain was closed again",
+      "ORFAN_MEAL": "A dish has no cook",
+      "ALLERGY_ALERT": "An allergen is on the table",
+      "UNKNOWN": "Something happened"
+    },
+    "what": {
+      "CANNOT_COOK": "{{who}} has told {{counterpart}}, in their own thread, that they cannot cook the recipe they were sent.",
+      "NO_BRIEF": "{{who}} says nothing has arrived from {{counterpart}} — there is no recipe to cook.",
+      "DROPOUT": "{{who}} has left this dinner. Their seat is empty and the chain is a link short.",
+      "ACCOUNT_CLOSED": "{{who}} closed their CovertCook account, which takes their seat at this dinner with it.",
+      "REPORTED_PRIVATE": "Somebody reported this phrase, sent by {{who}} in a private thread.",
+      "REPORTED_FRIDGE": "Somebody reported this phrase, posted by {{who}} where the whole table could read it.",
+      "REPORTED_PHOTO": "Somebody reported the photograph {{who}} put in the album.",
+      "ENTER_REQUEST": "{{who}} is asking for a seat at this dinner, and is waiting on your answer.",
+      "LATE_ENTRY_CHAIN": "{{who}} arrived after the chain was dealt and has been spliced into it, beside {{counterpart}}.",
+      "CLOSED_CHAIN": "A removal broke the chain and it has been closed again: {{who}} now writes for {{counterpart}}.",
+      "ORFAN_MEAL": "{{who}} was removed and the chain kept its shape, so {{dish}} — written by {{counterpart}} — has nobody to cook it.",
+      "ALLERGY_ALERT": "{{dish}}, written for {{who}}, carries something they have declared.",
+      "UNKNOWN": "Something happened that this version of the app has no name for."
+    },
+    "how": {
+      "CANNOT_COOK": "Read the recipe first. Most dishes bend — an ingredient swapped, a step left out, a version found online. Saying so to the table, below, is usually the whole of the fix: a recipe here is not rewritten because somebody would rather cook something else.",
+      "NO_BRIEF": "Look at the chain: a seat with nobody writing for it is the usual cause. Saying so to the table, below, reaches both of them at once.",
+      "DROPOUT": "Nothing has to happen. If the hole in the chain matters more than the empty seat, it can be dealt again from the chain page — your call, and it changes everybody's cook.",
+      "ACCOUNT_CLOSED": "Same as any other departure: the chain can be dealt again from the chain page if the hole matters.",
+      "REPORTED_PRIVATE": "Read the phrase, not the seat. Flagging it warns that chef about the app's guidelines and tells them that a second time at this dinner can end with you removing them.",
+      "REPORTED_FRIDGE": "Read the phrase, not the seat. Flagging it warns that chef about the app's guidelines and tells them that a second time at this dinner can end with you removing them.",
+      "REPORTED_PHOTO": "Flagging takes the photograph down and warns the chef who put it there. Not everything that gets reported is worth taking down.",
+      "ENTER_REQUEST": "You are shown their real name because nobody has taken a seat yet. The moment they are in, they are a pseudonym to you like everybody else.",
+      "LATE_ENTRY_CHAIN": "Nothing to do. You are being told because the chain changed shape after it was dealt.",
+      "CLOSED_CHAIN": "Nothing to do. You are being told because the chain changed shape after it was dealt.",
+      "ORFAN_MEAL": "Nothing to do, unless you would rather deal the chain again from the chain page.",
+      "ALLERGY_ALERT": "An allergen informs, it never refuses: nobody has to change their dish. Asking the table to say plainly what is in what they cook is the useful thing.",
+      "UNKNOWN": "Nothing can be done about it from here. Resolving it clears it from the bell."
+    },
+    "actions": {
+      "postRecipeReview": "Tell the table a recipe is meant to be possible",
+      "postAllergenCare": "Tell the table to say what is in their dish",
+      "flag": "Flag it",
+      "dontFlag": "Leave it",
+      "accept": "Let them in",
+      "refuse": "Turn them away"
+    },
+    "confirm": {
+      "flagTitle": "Flag this?",
+      "flagWhy": "That chef is told, in their own language, that this did not follow the app's guidelines — and that if it happens again at this dinner you can remove them from it. It appears on the dinner's page and they have to say they have read it. Nothing names whoever reported it."
+    },
+    "errors": {
+      "NOTICE_ALREADY_POSTED": "You said that in the fridge less than an hour ago. Give it time to be read."
+    }
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -731,6 +788,11 @@
     "databaseBehind": {
       "title": "This app is talking to a database that is behind it.",
       "body": "A function it needs is not there. Locally that is almost always .env.local still pointing at the deployed project — VITE_SUPABASE_URL should read http://127.0.0.1:54321. Otherwise the migrations have not been pushed: run `npx supabase db reset` locally, or `npx supabase db push` against the project. Nothing you do in the app will fix it."
+    },
+    "crashed": {
+      "title": "This screen broke.",
+      "body": "Only this one — the rest of the app is still standing, and the way back is at the top of the page. If you can, tell us what you were doing: the line below names what went wrong.",
+      "reload": "Reload the page"
     }
   },
   "profile": {
@@ -758,39 +820,40 @@
     "yourChefHelp": "Your two private conversations: the chef you write for, and the chef who writes for you.",
     "toYourCook": "With the chef you write for",
     "toYourSender": "With the chef who writes for you",
-    "myRecipe": "My recipe",
-    "recipeReceived": "Recipe received"
+    "myOrder": "My order",
+    "myDish": "My dish",
+    "fromExecutiveChef": "The Executive Chef"
   },
   "pro": {
-    "badge": "Pro",
-    "title": "About Pro",
-    "freeForever": "The whole app stays free. Every dinner, every number of guests, every feature that changes how the game is played — the point is that everyone can do everything.",
-    "what": "Pro only sells flavour: better-looking tables, themed evenings (a Christmas one, a midsummer one), and — an idea still being worked out — letting a host share what they have bought with the guests at their table.",
-    "needed": "That setting is part of PRO.",
-    "lockedHere": "Part of PRO.",
-    "whatIsIt": "What is PRO?",
-    "seeWhatItOpens": "See what PRO opens →",
+    "badge": "Crème",
+    "title": "About Crème",
+    "freeForever": "Everything a dinner needs is free, and stays free: any dinner, any number of guests, every rule of the game. Nobody at a table is ever playing a smaller version of it.",
+    "what": "Crème adds no powers. It makes the evening run smoother and look better: tables laid with more care, themed nights (a Christmas one, a midsummer one), more room to be kind to your cook, and — an idea still being worked out — letting a host share what they have bought with the guests at their table.",
+    "needed": "That setting is part of Crème.",
+    "lockedHere": "Part of Crème.",
+    "whatIsIt": "What is Crème?",
+    "seeWhatItOpens": "See what Crème opens →",
     "status": {
-      "on": "You have PRO.",
-      "off": "You are on the free app — which is the whole app.",
-      "window": "Everybody has PRO while CovertCook is being tested, until {{date}}.",
+      "on": "You have Crème.",
+      "off": "You are on the free app — which has everything a dinner needs.",
+      "window": "Crème is free to try while CovertCook is being tested, until {{date}}.",
       "until": "Yours until {{date}}."
     },
-    "test": {
-      "why": "While everybody has PRO there is no way to see what a free account sees. This switch is that view, and it stops working when the test period ends.",
-      "seeFree": "Show me the free version",
-      "backOn": "Give me PRO back",
+    "trial": {
+      "why": "Switch it on and everything below is yours until {{date}}, for nothing. Switch it off whenever you like — the free app is a whole app and it is waiting exactly where you left it.",
+      "on": "Try Crème — free until {{date}}",
+      "off": "Turn Crème off",
       "closed": "The test period is over — this switch does nothing now."
     },
     "opens": {
-      "title": "What PRO opens",
+      "title": "What Crème opens",
       "count": "{{count}} to unlock",
       "yours": "Yours",
       "recipes": "Offer your cook two or three ideas instead of one, and let them make whichever suits their kitchen, their week and their budget.",
       "recipesEg1": "Pasta alla Norma",
       "recipesEg2": "Ribollita",
       "recipesEg3": "Idea 3",
-      "recipesWhy": "It is more writing for you and more room for them. Nobody at the table is at a disadvantage — and because a dinner carries its host’s PRO, every guest writes three when the Executive Chef has it.",
+      "recipesWhy": "It is more writing for you and more room for them. Nobody at the table is at a disadvantage — and because a dinner carries its host’s Crème, every guest writes three when the Executive Chef has it.",
       "names": "The word list your table’s pseudonyms are drawn from. It also gives the dinner its mark and every chef their face in the fridge.",
       "tables": "The cloth the evening is laid on. Look only — nothing here changes a rule of the game."
     },
@@ -801,7 +864,8 @@
       "yearly": "Everything, for a year — {{price}}",
       "yearlyWhat": "Every list, every cloth, and three recipes per cook, on every dinner you organise for a year.",
       "yearlyRefund": "Bought through the store, so the store handles refunds under its own rules.",
-      "notYet": "Not yet: there is no way to pay inside the app at the moment. Nothing here can be bought, and nothing is being held back from you while the test period is on."
+      "freeWhileTesting": "Free while CovertCook is being tested: switch Crème on above and all of this is yours until {{date}}, without paying for anything. After that date this is where it is bought — here, in the app.",
+      "notYet": "Not yet: there is no way to pay inside the app at the moment. Nothing here can be bought, and nothing is being held back from you."
     },
     "redeem": {
       "title": "Redeem a code",
@@ -812,22 +876,22 @@
       "invalid": "That code does not work. Check the spelling — they expire quickly, and each one can only be used once.",
       "already": "You have already used that code.",
       "kind": {
-        "PRO": "PRO",
+        "PRO": "Crème",
         "NAME_THEME": "the word list",
         "TABLE_THEME": "the table cloth"
       }
     },
     "ending": {
-      "MONTH": "Your PRO ends on {{date}}.",
-      "WEEK": "Your PRO ends on {{date}} — that is under a week.",
-      "whatHappens": "Dinners you have already created that use a PRO feature keep working for {{hours}} hours after that, and then go on hold until you renew. Nothing is deleted, and dinners that use nothing PRO are not affected at all.",
-      "renew": "What PRO is, and how to keep it →"
+      "MONTH": "Your Crème ends on {{date}}.",
+      "WEEK": "Your Crème ends on {{date}} — that is under a week.",
+      "whatHappens": "Dinners you have already created that use a Crème feature keep working for {{hours}} hours after that, and then go on hold until you renew. Nothing is deleted, and dinners that use nothing Crème are not affected at all.",
+      "renew": "What Crème is, and how to keep it →"
     },
     "round": {
-      "ending": "This dinner’s PRO cover ends on {{date}}.",
-      "endingWhat": "It was built with a PRO feature. {{hours}} hours after that date it goes on hold — still readable, but it stops moving and no more recipes can be written.",
+      "ending": "This dinner’s Crème cover ends on {{date}}.",
+      "endingWhat": "It was built with a Crème feature. {{hours}} hours after that date it goes on hold — still readable, but it stops moving and no more recipes can be written.",
       "held": "This dinner is on hold.",
-      "heldWhat": "It was built with a PRO feature and its cover ran out more than {{hours}} hours ago. Nothing has been lost — everything written is still here — but it cannot move on until the Executive Chef renews."
+      "heldWhat": "It was built with a Crème feature and its cover ran out more than {{hours}} hours ago. Nothing has been lost — everything written is still here — but it cannot move on until the Executive Chef renews."
     },
     "freeForNow": "free until {{date}}"
   },
@@ -1190,7 +1254,7 @@
     "revealConfirm": "Reveal, and record it",
     "revealed": "Written by {{name}}. This reveal has been recorded.",
     "youWereWarned": "A word from the Executive Chef",
-    "warningNoReason": "They did not say more than that.",
+    "warningGuidelines": "Something you sent did not follow the app’s guidelines. Nothing has happened to your seat. If it happens again at this dinner, the Executive Chef can remove you from it.",
     "warningRead": "I have read this",
     "blockedTitle": "People you have blocked",
     "blockHelp": "Blocking happens at a dinner, on the seat, so you never have to learn who somebody is to decide you would rather not sit with them again. Their messages leave your board straight away, and neither of you can take a seat at a dinner the other is already at. It does not end a dinner already under way — three other people’s evening is built on the chain.",
@@ -1293,6 +1357,8 @@
   "themes": {
     "free": "Free",
     "notYet": "Not yours yet — nothing can be bought in the app at the moment, so this one is waiting.",
-    "locked": "That theme is not unlocked on this account."
+    "locked": "That theme is not unlocked on this account.",
+    "paused": "Back in the workshop. It is being redrawn, so nobody can lay a table with it yet — not even with Crème. It will come back on this shelf when it is finished.",
+    "pausedTag": "In the workshop"
   }
 }

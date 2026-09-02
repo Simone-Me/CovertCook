@@ -5,7 +5,7 @@ import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
 import { ChatThread } from './ChatThread'
 import { FridgeBoard } from './FridgeBoard'
-import { getMyAssignment, getMyBrief } from '../../lib/rpc'
+import { getMyAssignment, getMyBriefOffers, pickChosenBrief } from '../../lib/rpc'
 import { useRound } from '../rounds/hooks'
 
 // Two different things, and now two folds rather than one long scroll.
@@ -33,9 +33,15 @@ export function BoardPage() {
   })
 
   const { data: myBrief } = useQuery({
+    // One key, one shape (see the note above the same query in
+    // RoundHomePage). CookViewPage holds this exact key with the array, and a
+    // fetcher here that returned a single row put an object in the cache for
+    // it to call .filter() on — a throw during render, which is a blank page.
+    // The row this screen wants is picked from the array instead.
     queryKey: ['rounds', roundId, 'my-brief'],
     enabled: !!roundId,
-    queryFn: () => getMyBrief(roundId as string).catch(() => null),
+    queryFn: () => getMyBriefOffers(roundId as string).catch(() => []),
+    select: pickChosenBrief,
   })
 
   if (!roundId) return null
@@ -64,7 +70,7 @@ export function BoardPage() {
               <span className="threadbox__who">
                 {assignment.cook_display_name ?? assignment.cook_secret_name}
               </span>
-              <span className="threadbox__what">{t('board.myRecipe')}</span>
+              <span className="threadbox__what">{t('board.myOrder')}</span>
             </header>
             <ChatThread pairingId={assignment.pairing_id} roundId={roundId} />
           </section>
@@ -73,12 +79,20 @@ export function BoardPage() {
         {myBrief && (
           <section className="threadbox">
             <header className="threadbox__lid">
-              {/* The one name that is genuinely unknown: get_my_brief never
-                  sends who wrote for you, so this bar covers a placeholder
-                  rather than a name held back in the browser — which is the
-                  only way .redact is allowed to be used (see table.css). */}
-              <span className="redact threadbox__who">{t('rounds.chefCovered')}</span>
-              <span className="threadbox__what">{t('board.recipeReceived')}</span>
+              {/* Covered on an ANONYMOUS dinner that is still running, and
+                  named where the round hands the name over — an OPEN table, a
+                  SPY Executive Chef, or an evening already over. 0081 wired
+                  get_my_brief to the same rule the other five readers use; it
+                  was the one screen still covering the author for the one
+                  person entitled to read it. The bar is still covering a
+                  placeholder rather than a name held back in the browser,
+                  which is the only way .redact is allowed to be used. */}
+              {myBrief.sender_display_name ? (
+                <span className="threadbox__who">{myBrief.sender_display_name}</span>
+              ) : (
+                <span className="redact threadbox__who">{t('rounds.chefCovered')}</span>
+              )}
+              <span className="threadbox__what">{t('board.myDish')}</span>
             </header>
             <ChatThread pairingId={myBrief.pairing_id} roundId={roundId} />
           </section>

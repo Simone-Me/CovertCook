@@ -8,6 +8,8 @@ export interface ThemeChoice {
   price_cents: number | null
   mark?: string
   owned: boolean
+  /** Being worked on, and out of reach of everybody until it is finished. */
+  paused?: boolean
 }
 
 /**
@@ -65,7 +67,10 @@ export function ThemePicker({
         hint: t(`${labelKey}.${opt.code}Hint`, { defaultValue: '' }) || undefined,
         mark: opt.mark,
         locked: !opt.owned,
-        lockedReason: t('themes.notYet'),
+        // Two different sentences, and printing the wrong one is a support
+        // question: "not yours yet" invites somebody to go and buy it, which
+        // is not what is happening to a cloth that is back in the workshop.
+        lockedReason: opt.paused ? t('themes.paused') : t('themes.notYet'),
         tag: (
           <>
             {/* The tier, in words rather than by a padlock alone: "free" on the
@@ -79,7 +84,7 @@ export function ThemePicker({
                 seven free cloths — and on 1 January five of them would appear
                 to have been taken away. Marked now, with the date it stops
                 being free, nothing is a surprise later. */}
-            {opt.tier === 'PAID' && (
+            {opt.tier === 'PAID' && !opt.paused && (
               <>
                 <span className="shelf__tag shelf__tag--pro">{t('pro.badge')}</span>
                 {opt.owned && freeUntil && (
@@ -95,10 +100,18 @@ export function ThemePicker({
               </>
             )}
 
-            {!opt.owned && opt.price_cents !== null && (
-              <span className="shelf__tag shelf__tag--price">
-                {fromCents(opt.price_cents, locale)}
-              </span>
+            {/* A price on something nobody can have is noise, and a price on
+                something that is being redrawn is a promise about a thing that
+                does not exist yet. The paused row carries one word instead. */}
+            {opt.paused ? (
+              <span className="shelf__tag">{t('themes.pausedTag')}</span>
+            ) : (
+              !opt.owned &&
+              opt.price_cents !== null && (
+                <span className="shelf__tag shelf__tag--price">
+                  {fromCents(opt.price_cents, locale)}
+                </span>
+              )
             )}
           </>
         ),

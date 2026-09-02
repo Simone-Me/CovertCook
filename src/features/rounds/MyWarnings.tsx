@@ -41,13 +41,13 @@ export function MyWarnings({ roundId }: { roundId: string }) {
       {warnings.map((warning) => (
         <div key={warning.id} className="paper stack card--danger">
           <strong>{t('moderation.youWereWarned')}</strong>
-          {warning.reason ? (
-            <p style={{ margin: 0 }}>{warning.reason}</p>
-          ) : (
-            <p className="muted" style={{ margin: 0 }}>
-              {t('moderation.warningNoReason')}
-            </p>
-          )}
+          {/* A warning raised from the bell carries no words of the host's own:
+              it is one press on a reported phrase, and what it means is the
+              same every time. Saying "they did not say more than that" of it
+              was true and useless — the person needs to know what the rule is
+              and what happens if it goes again, which is exactly what the host
+              pressed the button to tell them. */}
+          <p style={{ margin: 0 }}>{warning.reason ?? t('moderation.warningGuidelines')}</p>
           <button type="button" className="secondary" onClick={() => dismiss(warning.id)}>
             {t('moderation.warningRead')}
           </button>

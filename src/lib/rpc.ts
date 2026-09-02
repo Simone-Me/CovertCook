@@ -46,6 +46,9 @@ export interface NameThemeOption {
   /** The list's own mark, used wherever the dinner is one character wide. */
   mark: string
   owned: boolean
+  /** Withdrawn while it is being worked on (0082): listed, never selectable,
+   *  by anybody — Crème and ownership do not open a paused one. */
+  paused: boolean
 }
 
 export interface TableThemeOption {
@@ -53,6 +56,9 @@ export interface TableThemeOption {
   tier: ThemeTier
   price_cents: number | null
   owned: boolean
+  /** Withdrawn while it is being worked on (0082): listed, never selectable,
+   *  by anybody — Crème and ownership do not open a paused one. */
+  paused: boolean
 }
 
 /** Raised by create_round when a theme is named that this account cannot use. */
@@ -824,6 +830,11 @@ export interface MyBrief {
   contains_tags: string[]
   ingredients: BriefIngredient[]
   acknowledged: boolean
+  /** Who wrote it, where this reader is entitled to know: an OPEN dinner, a
+   *  SPY host, or any dinner that has finished (0073, wired here in 0081).
+   *  Null everywhere else — and null is what the black bar in the thread is
+   *  covering, which is the only honest way to redact in a browser. */
+  sender_display_name: string | null
 }
 
 /**
@@ -848,8 +859,7 @@ export async function getMyBriefOffers(roundId: string) {
  * that: the thread with the chef writing for you hangs off the pairing, and it
  * has to exist before the recipe does.
  */
-export async function getMyBrief(roundId: string) {
-  const rows = await getMyBriefOffers(roundId)
+export function pickChosenBrief(rows: MyBrief[]) {
   return rows.find((r) => r.chosen) ?? rows[0] ?? null
 }
 
@@ -927,11 +937,12 @@ export async function getMyBriefDrafts(roundId: string) {
   return unwrap<MyBriefDraft[]>(res)
 }
 
-/** The first, for the callers that only need "has this person written?". */
-export async function getMyBriefDraft(roundId: string) {
-  const rows = await getMyBriefDrafts(roundId)
-  return rows[0] ?? null
-}
+// There was a `getMyBriefDraft` here — the same call, returning only the first
+// row, for the callers that just want "has this person written anything?". It
+// is gone on purpose. Two fetchers for one RPC meant two shapes could land
+// under one React Query key, and that is precisely what emptied the screen:
+// see the note above the query in RoundHomePage. A caller that wants the first
+// one takes the first one, at the call site, where it is visible.
 
 /** A second idea thought better of. Drafts only — an offer already in front of
  *  the cook is not the sender's to withdraw. */
@@ -973,6 +984,11 @@ export async function getMessageTemplates(locale: string) {
     .select('id,category,locale,body,slot_type,day_of')
     .eq('locale', locale)
     .eq('active', true)
+    // The Executive Chef's notices are BOARD phrases like any other and must
+    // never be in a list somebody can pick from (0080). Filtered here as well
+    // as refused in post_host_notice: this is the half that keeps them out of
+    // sight, the server is the half that keeps them out of the table.
+    .eq('host_only', false)
   if (error) throw new Error(error.message)
   return (data ?? []) as MessageTemplate[]
 }
@@ -1241,27 +1257,83 @@ export async function removeMember(
 // supabase/migrations/0014_brief_pairing_and_alerts.sql).
 // ---------------------------------------------------------------------------
 
-export type HostAlertKind = 'CANNOT_COOK' | 'NO_BRIEF' | 'DROPOUT' | 'REPORTED_MESSAGE' | 'OTHER'
+/**
+ * WHAT HAPPENED, NOT WHICH ENUM VALUE IT WAS FILED UNDER.
+ *
+ * `host_alerts.kind` has five values and the app raises twelve different
+ * events, because adding to a Postgres enum is a one-way door and the writing
+ * side was right to avoid it: seven of them are stored as OTHER with the real
+ * type in the payload. This union is the reading side of that — one name per
+ * thing that can actually happen, resolved in SQL by
+ * get_host_alerts_detailed (0080).
+ *
+ * UNKNOWN is not paranoia. A payload written by a migration this client has
+ * never heard of has to land somewhere that can still be read and resolved.
+ */
+export type HostAlertType =
+  | 'CANNOT_COOK'
+  | 'NO_BRIEF'
+  | 'DROPOUT'
+  | 'ACCOUNT_CLOSED'
+  | 'REPORTED_PRIVATE'
+  | 'REPORTED_FRIDGE'
+  | 'REPORTED_PHOTO'
+  | 'ENTER_REQUEST'
+  | 'LATE_ENTRY_CHAIN'
+  | 'CLOSED_CHAIN'
+  | 'ORFAN_MEAL'
+  | 'ALLERGY_ALERT'
+  | 'UNKNOWN'
 
-export interface HostAlert {
-  id: string
-  round_id: string
-  kind: HostAlertKind
-  pairing_id: string | null
-  payload: Record<string, unknown>
-  created_at: string
-  resolved_at: string | null
+export interface HostAlertDetail {
+  alert_id: string
+  alert_type: HostAlertType
+  happened_at: string
+  /** The seat the alert is about, as a pseudonym — or a real name at the door,
+   *  where nobody has taken a seat yet and the host is entitled to know who is
+   *  asking. */
+  who: string | null
+  /** The other half of a pair, when the event has two sides. */
+  counterpart: string | null
+  /** The seat to act on: approve it, warn it. Null when there is nothing to do
+   *  to anybody. */
+  seat_id: string | null
+  /** The phrase a warning or a reveal is about. Only ever set for a message in
+   *  a private thread: a fridge phrase lives in another table, and a warning
+   *  records a `messages` id or nothing. */
+  seat_message_id: string | null
+  seat_pairing_id: string | null
+  seat_photo_id: string | null
+  photo_path: string | null
+  /** What was said, in the reader's language, slot already filled in. */
+  phrase: string | null
+  dish: string | null
+  /** The method, on CANNOT_COOK only: whether a refusal is fair is not a
+   *  question anybody can answer without reading the recipe. */
+  recipe: string | null
+  labels: string[] | null
+  already_warned: boolean
+  /** Has it sorted itself out? The pair have spoken since, the person at the
+   *  door is already in, the photograph is already down. */
+  answered: boolean
 }
 
-export async function getHostAlerts(roundId: string) {
-  const { data, error } = await supabase
-    .from('host_alerts')
-    .select('id,round_id,kind,pairing_id,payload,created_at,resolved_at')
-    .eq('round_id', roundId)
-    .is('resolved_at', null)
-    .order('created_at', { ascending: false })
-  if (error) throw new Error(error.message)
-  return (data ?? []) as HostAlert[]
+export async function getHostAlertsDetailed(roundId: string) {
+  const res = await supabase.rpc('get_host_alerts_detailed', { p_round_id: roundId })
+  return unwrap<HostAlertDetail[]>(res)
+}
+
+/** The two things the Executive Chef can say to the whole table (0080). Fixed
+ *  keys rather than a phrase id: a button means one thing. */
+export type HostNotice = 'HOST_RECIPE_REVIEW' | 'HOST_ALLERGEN_CARE'
+
+/** Raised when the same notice is already an hour old or less. A double press
+ *  should not read as the host shouting. */
+export const NOTICE_ALREADY_POSTED = 'NOTICE_ALREADY_POSTED'
+
+export async function postHostNotice(roundId: string, key: HostNotice) {
+  const res = await supabase.rpc('post_host_notice', { p_round_id: roundId, p_key: key })
+  return unwrap(res)
 }
 
 /**
@@ -1696,8 +1768,20 @@ export interface SlotRow {
   course: Course
 }
 
+/**
+ * The courses this dinner is laid for.
+ *
+ * Ordered here rather than at two of the three call sites: the three of them
+ * share one React Query key, so whichever ran last decided whether the menu
+ * came back in course order or in whatever order Postgres felt like. One key,
+ * one fetcher, one shape — the rule the blank screen taught us.
+ */
 export async function getSlots(roundId: string) {
-  const { data, error } = await supabase.from('slots').select('id,round_id,course').eq('round_id', roundId)
+  const { data, error } = await supabase
+    .from('slots')
+    .select('id,round_id,course')
+    .eq('round_id', roundId)
+    .order('course')
   if (error) throw new Error(error.message)
   return (data ?? []) as SlotRow[]
 }
@@ -1932,13 +2016,17 @@ export interface BoardMessage {
   // original unattributability: you can see who said what and pick the
   // conversation up later, at the cost of a pseudonym being followable
   // across an evening. Real identities are still the game's secret.
-  author_name: string
+  // Null on a notice from the Executive Chef (0080), which is the one thing in
+  // the fridge that comes from outside the table rather than from a seat at it.
+  author_name: string | null
   is_mine: boolean
   reported: boolean
   // The seat behind the pseudonym (0059), so a phrase can be blocked without
   // anybody being named. Opaque: it adds nothing a reader did not already have
-  // from `author_name`.
-  author_member_id: string
+  // from `author_name`. Null for the same reason as above — and there is
+  // nothing to block, because the host is not a seat.
+  author_member_id: string | null
+  from_host: boolean
 }
 
 export async function getBoard(roundId: string) {

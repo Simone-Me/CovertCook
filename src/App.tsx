@@ -5,6 +5,7 @@ import { rememberJoinCode } from './lib/pendingJoin'
 import { AppHeader } from './components/AppHeader'
 import { PendingJoinBanner } from './components/PendingJoinBanner'
 import { SchemaMismatch } from './components/SchemaMismatch'
+import { ErrorBoundary } from './components/ErrorBoundary'
 import { AppFooter } from './components/AppFooter'
 import { LegalPage } from './features/legal/LegalPage'
 import { SignInPage } from './features/auth/SignInPage'
@@ -51,144 +52,151 @@ function RequireAuth({ children }: { children: ReactNode }) {
 
 function AppRoutes() {
   const { session, needsSignupCompletion } = useAuth()
+  const location = useLocation()
 
   return (
-    <Routes>
-      <Route path="/legal/terms" element={<LegalPage page="terms" />} />
-      <Route path="/legal/privacy" element={<LegalPage page="privacy" />} />
-      {/* Required by both stores the day free-text chat ships, and published
-          before it rather than after (DISTRIBUTION §1). */}
-      <Route path="/legal/moderation" element={<LegalPage page="moderation" />} />
-      <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
-      <Route
-        path="/signup"
-        element={session && !needsSignupCompletion ? <Navigate to="/" replace /> : <SignUpPage />}
-      />
-      <Route path="/reset" element={<ResetPasswordPage />} />
-      <Route
-        path="/"
-        element={
-          <RequireAuth>
-            <MyRoundsPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/profile"
-        element={
-          <RequireAuth>
-            <ProfilePage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/new"
-        element={
-          <RequireAuth>
-            <CreateRoundPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/join"
-        element={
-          <RequireAuth>
-            <JoinRoundPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId"
-        element={
-          <RequireAuth>
-            <RoundHomePage />
-          </RequireAuth>
-        }
-      />
-      {/* Not under /rounds: PRO is about an account, and it is reached both
-          from the profile and from a locked row on the creation form. */}
-      <Route
-        path="/pro"
-        element={
-          <RequireAuth>
-            <ProPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/settings"
-        element={
-          <RequireAuth>
-            <RoundSettingsPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/chain"
-        element={
-          <RequireAuth>
-            <ChainPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/alerts"
-        element={
-          <RequireAuth>
-            <HostAlertsPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/brief"
-        element={
-          <RequireAuth>
-            <BriefEditorPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/recipe"
-        element={
-          <RequireAuth>
-            <CookViewPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/messages"
-        element={
-          <RequireAuth>
-            <BoardPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/ballot"
-        element={
-          <RequireAuth>
-            <BallotPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/tally"
-        element={
-          <RequireAuth>
-            <ManualTallyPage />
-          </RequireAuth>
-        }
-      />
-      <Route
-        path="/rounds/:roundId/results"
-        element={
-          <RequireAuth>
-            <ResultsPage />
-          </RequireAuth>
-        }
-      />
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+    // Around the routes rather than around the whole app: the header, the
+    // banners and the footer are the way out of a broken screen, and a
+    // boundary above them would take them down with it. Keyed on the path so
+    // walking away from a crashed page actually leaves it behind.
+    <ErrorBoundary resetKey={location.pathname}>
+      <Routes>
+        <Route path="/legal/terms" element={<LegalPage page="terms" />} />
+        <Route path="/legal/privacy" element={<LegalPage page="privacy" />} />
+        {/* Required by both stores the day free-text chat ships, and published
+            before it rather than after (DISTRIBUTION §1). */}
+        <Route path="/legal/moderation" element={<LegalPage page="moderation" />} />
+        <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
+        <Route
+          path="/signup"
+          element={session && !needsSignupCompletion ? <Navigate to="/" replace /> : <SignUpPage />}
+        />
+        <Route path="/reset" element={<ResetPasswordPage />} />
+        <Route
+          path="/"
+          element={
+            <RequireAuth>
+              <MyRoundsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <RequireAuth>
+              <ProfilePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/new"
+          element={
+            <RequireAuth>
+              <CreateRoundPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/join"
+          element={
+            <RequireAuth>
+              <JoinRoundPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId"
+          element={
+            <RequireAuth>
+              <RoundHomePage />
+            </RequireAuth>
+          }
+        />
+        {/* Not under /rounds: PRO is about an account, and it is reached both
+            from the profile and from a locked row on the creation form. */}
+        <Route
+          path="/pro"
+          element={
+            <RequireAuth>
+              <ProPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/settings"
+          element={
+            <RequireAuth>
+              <RoundSettingsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/chain"
+          element={
+            <RequireAuth>
+              <ChainPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/alerts"
+          element={
+            <RequireAuth>
+              <HostAlertsPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/brief"
+          element={
+            <RequireAuth>
+              <BriefEditorPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/recipe"
+          element={
+            <RequireAuth>
+              <CookViewPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/messages"
+          element={
+            <RequireAuth>
+              <BoardPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/ballot"
+          element={
+            <RequireAuth>
+              <BallotPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/tally"
+          element={
+            <RequireAuth>
+              <ManualTallyPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/rounds/:roundId/results"
+          element={
+            <RequireAuth>
+              <ResultsPage />
+            </RequireAuth>
+          }
+        />
+          <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </ErrorBoundary>
   )
 }
 

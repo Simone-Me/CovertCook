@@ -78,7 +78,7 @@ export function ProPage() {
     }
   }
 
-  async function onToggleTest(mode: 'FORCE_OFF' | null) {
+  async function onToggleTrial(mode: 'FORCE_ON' | null) {
     setNote(null)
     try {
       await setProTestOverride(mode)
@@ -86,9 +86,33 @@ export function ProPage() {
       await queryClient.invalidateQueries({ queryKey: ['themes'] })
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''
-      setNote(raw === TEST_WINDOW_CLOSED ? t('pro.test.closed') : raw || t('errors.generic'))
+      setNote(raw === TEST_WINDOW_CLOSED ? t('pro.trial.closed') : raw || t('errors.generic'))
     }
   }
+
+  // The end of the free-for-all, in words, in one place: the status line, the
+  // switch and both of the offers all name it now.
+  const windowUntil =
+    pro?.window_open && pro.window_until
+      ? new Date(pro.window_until).toLocaleDateString(locale, {
+          day: 'numeric',
+          month: 'long',
+          year: 'numeric',
+        })
+      : null
+
+  /**
+   * What to say under an offer that cannot be taken yet.
+   *
+   * While the window is open the true sentence is not "you cannot buy this" —
+   * it is "you do not have to". Switching Crème on above costs nothing until
+   * the date, and this is where it will be bought afterwards. Saying "not yet,
+   * wait" instead reads as a feature being withheld, which is the opposite of
+   * what is happening.
+   */
+  const buyingNote = windowUntil
+    ? t('pro.ways.freeWhileTesting', { date: windowUntil })
+    : t('pro.ways.notYet')
 
   const paidNames = (nameThemes ?? []).filter((x) => x.tier === 'PAID')
   const paidTables = (tableThemes ?? []).filter((x) => x.tier === 'PAID')
@@ -102,7 +126,11 @@ export function ProPage() {
    * taken away from somebody who was told they had them. While the window is
    * open the card shows what it will cost and how long it is free for.
    */
-  function priceLabel(item: { owned: boolean; price_cents: number | null }) {
+  function priceLabel(item: { owned: boolean; price_cents: number | null; paused?: boolean }) {
+    // Nothing about money on a card for something that is back in the
+    // workshop: it is not for sale and it is not free either, it is simply not
+    // finished, and that is the only fact worth the corner.
+    if (item.paused) return <em className="procard__freenow">{t('themes.pausedTag')}</em>
     if (pro?.window_open && pro.window_until) {
       return (
         <>
@@ -142,13 +170,9 @@ export function ProPage() {
       {pro && (
         <div className="card stack pro-status">
           <strong>{t(pro.pro ? 'pro.status.on' : 'pro.status.off')}</strong>
-          {pro.window_open && pro.window_until && (
+          {windowUntil && (
             <p className="muted" style={{ margin: 0 }}>
-              {t('pro.status.window', {
-                date: new Date(pro.window_until).toLocaleDateString(locale, {
-                  day: 'numeric', month: 'long', year: 'numeric',
-                }),
-              })}
+              {t('pro.status.window', { date: windowUntil })}
             </p>
           )}
           {!pro.window_open && pro.expires_at && (
@@ -157,22 +181,30 @@ export function ProPage() {
             </p>
           )}
 
-          {/* THE TEST SWITCH, and it exists only while the window that
-              justifies it is open. Without it there is no way to see what a
-              free account sees, because during the test period there are no
-              free accounts. The server refuses it the moment the window shuts
-              (0075): it is not a way to have PRO for nothing, and not a way to
-              keep it. */}
+          {/* THE TRIAL, and it is a door rather than a gift (0081). It used
+              to be the other way round — everybody had Crème and this switch
+              took it away so you could see the free version — which meant
+              nobody chose it, nobody noticed what it gave them, and in January
+              a great many accounts would lose features they never knew they
+              had. Asked for, it means something: the day the window shuts, the
+              people who lose Crème are the people who once pressed this.
+
+              The server refuses it the moment the window closes (0075): it is
+              not a way to have Crème for nothing afterwards. */}
           {pro.window_open && (
             <div className="stack">
               <hr className="pass__rule" />
-              <p className="muted" style={{ margin: 0 }}>{t('pro.test.why')}</p>
+              <p className="muted" style={{ margin: 0 }}>
+                {t('pro.trial.why', { date: windowUntil ?? '' })}
+              </p>
               <button
                 type="button"
-                className="secondary"
-                onClick={() => onToggleTest(pro.test_override === 'FORCE_OFF' ? null : 'FORCE_OFF')}
+                className={pro.test_override === 'FORCE_ON' ? 'secondary' : undefined}
+                onClick={() => onToggleTrial(pro.test_override === 'FORCE_ON' ? null : 'FORCE_ON')}
               >
-                {t(pro.test_override === 'FORCE_OFF' ? 'pro.test.backOn' : 'pro.test.seeFree')}
+                {t(pro.test_override === 'FORCE_ON' ? 'pro.trial.off' : 'pro.trial.on', {
+                  date: windowUntil ?? '',
+                })}
               </button>
             </div>
           )}
@@ -263,14 +295,14 @@ export function ProPage() {
       <div className="card stack">
         <strong>{t('pro.ways.oneByOne')}</strong>
         <p className="muted" style={{ margin: 0 }}>{t('pro.ways.oneByOneWhat')}</p>
-        <p className="notice">{t('pro.ways.notYet')}</p>
+        <p className="notice">{buyingNote}</p>
       </div>
 
       <div className="card stack">
         <strong>{t('pro.ways.yearly', { price: fromCents(YEARLY_CENTS, locale) })}</strong>
         <p className="muted" style={{ margin: 0 }}>{t('pro.ways.yearlyWhat')}</p>
         <p className="muted" style={{ margin: 0 }}>{t('pro.ways.yearlyRefund')}</p>
-        <p className="notice">{t('pro.ways.notYet')}</p>
+        <p className="notice">{buyingNote}</p>
       </div>
 
       {/* The one that works today. Last, because it is not how most people will

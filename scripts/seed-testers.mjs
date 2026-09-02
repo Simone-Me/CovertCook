@@ -28,20 +28,97 @@
 // the switch is in front of you while you are looking at the thing you want to
 // check. Once the window shuts, `redeem_code` is how a tester gets PRO.
 
+import { readFileSync } from 'node:fs'
 import { createClient } from '@supabase/supabase-js'
 
-const url = process.env.SUPABASE_URL
-const key = process.env.SUPABASE_SERVICE_ROLE_KEY
+// .env.local, read here because nothing else will.
+//
+// Vite loads that file; Node does not, and this script is Node. So the two
+// values sat in the file the whole time and `npm run seed:testers` said "set
+// SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY" at somebody who just had.
+//
+// The environment still wins, because a value passed on the command line is
+// somebody being deliberate about which project they are about to write eight
+// accounts into — and that should never be quietly overruled by a file.
+//
+// Deliberately not `--env-file`: that flag would need every reader of this
+// script to remember it, and forgetting it reproduces the exact confusion this
+// is here to end.
+function fromEnvFile(name) {
+  for (const file of ['.env.local', '.env']) {
+    let text
+    try {
+      text = readFileSync(new URL(`../${file}`, import.meta.url), 'utf8')
+    } catch {
+      continue
+    }
+    for (const line of text.split('\n')) {
+      const at = line.indexOf('=')
+      if (at === -1 || line.trimStart().startsWith('#')) continue
+      if (line.slice(0, at).trim() !== name) continue
+      // Quotes are the shell's, not the value's.
+      return line.slice(at + 1).trim().replace(/^["']|["']$/g, '')
+    }
+  }
+  return undefined
+}
+
+const url = process.env.SUPABASE_URL || fromEnvFile('SUPABASE_URL')
+const key = process.env.SUPABASE_SERVICE_ROLE_KEY || fromEnvFile('SUPABASE_SERVICE_ROLE_KEY')
 
 if (!url || !key) {
-  console.error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY.')
+  console.error('Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY — in the environment, or in .env.local.')
   console.error('Both are in the Supabase dashboard under Project Settings → API.')
+  console.error('For the local stack, `npx supabase status` prints them (API URL and service_role key).')
   process.exit(1)
 }
 
 function arg(name, fallback) {
   const i = process.argv.indexOf(`--${name}`)
   return i === -1 ? fallback : process.argv[i + 1]
+}
+
+// WHICH DATABASE, SAID OUT LOUD, AND A DOOR IN FRONT OF THE WRONG ONE.
+//
+// .env.local holds two URLs on purpose: VITE_SUPABASE_URL is where the app
+// points, SUPABASE_URL is where the admin scripts point, and there is no rule
+// saying they agree. They very easily do not — the app on the local stack, the
+// service-role key from the dashboard beside it — and this script would then
+// have put eight accounts with a published password into the real project
+// without ever saying which one it was writing to.
+//
+// That is the exact thing the header of this file refuses to do in a
+// migration. It should not happen by accident either. So: the target is
+// printed before anything is created, and anything that is not localhost has
+// to be asked for by name.
+// The other half of the same confusion. `npx supabase status` prints both a
+// DB_URL and an API_URL, and the one that looks like a database is the one a
+// person reaches for when a variable is called SUPABASE_URL. supabase-js
+// speaks HTTP, so pasting it produces a failure several layers down that names
+// neither the variable nor the mistake.
+if (/^postgres(ql)?:\/\//.test(url)) {
+  console.error('SUPABASE_URL is a database connection string. This script speaks HTTP.')
+  console.error('It wants the API URL — http://127.0.0.1:54321 for the local stack.')
+  console.error('`npx supabase status` prints both: API_URL is the one, DB_URL is not.')
+  process.exit(1)
+}
+
+const isLocal = /^https?:\/\/(127\.0\.0\.1|localhost|\[::1\])(:|\/|$)/.test(url)
+
+console.log(`Seeding into ${url}${isLocal ? ' (local stack)' : ''}`)
+
+if (!isLocal && process.argv.indexOf('--production') === -1) {
+  console.error('')
+  console.error('That is not the local stack. Eight accounts with a known password would be')
+  console.error('created there, and a way in that arrives automatically is a way in nobody')
+  console.error('remembers to shut.')
+  console.error('')
+  console.error('If the local stack is what you meant, SUPABASE_URL in .env.local is pointing')
+  console.error('somewhere else — `npx supabase status` prints the right API URL and')
+  console.error('service_role key.')
+  console.error('')
+  console.error('If you really do mean that project, say so: --production')
+  process.exit(1)
 }
 
 const count = Number(arg('count', 8))
@@ -103,7 +180,11 @@ for (let i = 1; i <= count; i++) {
     continue
   }
 
-  console.log(`✓ ${email}  ${password}  “${displayName}”`)
+  console.log(`✓ ${email.padEnd(32)}“${displayName}”`)
 }
 
-console.log(`\n${count} testers ready. They sign in with the address and password above.`)
+// The password once, on a line of its own, because it is the same for all of
+// them. In a column beside eight addresses it read as a third name, and the
+// first person handed this list had to ask which field was which.
+console.log(`\n${count} testers ready. Sign in with any address above.`)
+console.log(`Password, the same for every one of them: ${password}`)

@@ -7,17 +7,16 @@ import { DietaryPanelGrid } from '../rounds/DietaryPanelGrid'
 import { ChatThread } from '../chat/ChatThread'
 import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
-import { supabase } from '../../lib/supabase'
 import {
   discardBriefDraft,
   getDietaryPanel,
+  getSlots,
   getMyAssignment,
   getMyBriefDrafts,
   saveBriefDraft,
   submitBrief,
   notifyMyCook,
   type BriefIngredient,
-  type Course,
 } from '../../lib/rpc'
 
 // Two ways to write a recipe, because there are two kinds of person here and
@@ -87,15 +86,7 @@ export function BriefEditorPage() {
   const { data: slots } = useQuery({
     queryKey: ['rounds', roundId, 'slots'],
     enabled: !!roundId && round?.slot_mode === 'CATEGORIES',
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('slots')
-        .select('id,course')
-        .eq('round_id', roundId as string)
-        .order('course')
-      if (error) throw error
-      return data as { id: string; course: Course }[]
-    },
+    queryFn: () => getSlots(roundId as string),
   })
 
   // WHICH OF THE SENDER'S IDEAS IS ON THE PAGE (0077).

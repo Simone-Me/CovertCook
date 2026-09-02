@@ -5,7 +5,8 @@ import { useAuth } from '../../lib/auth'
 import {
   costsSoFar,
   fromCents,
-  getMyBrief,
+  getMyBriefOffers,
+  pickChosenBrief,
   recordExpense,
   setBudgetPerHead,
   settleCosts,
@@ -75,9 +76,15 @@ export function CostsPanel({
   // the ingredients belong on one screen: you tally what you spent against what
   // you were asked to buy, not against a memory of a receipt.
   const { data: myBrief } = useQuery({
+    // One key, one shape (see the note above the same query in
+    // RoundHomePage). CookViewPage holds this exact key with the array, and a
+    // fetcher here that returned a single row put an object in the cache for
+    // it to call .filter() on — a throw during render, which is a blank page.
+    // The row this screen wants is picked from the array instead.
     queryKey: ['rounds', roundId, 'my-brief'],
     enabled: !!roundId,
-    queryFn: () => getMyBrief(roundId),
+    queryFn: () => getMyBriefOffers(roundId),
+    select: pickChosenBrief,
     retry: false,
   })
 

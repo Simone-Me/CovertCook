@@ -45,7 +45,7 @@ import {
   getPendingMembers,
   getBoardUnread,
   getRoundProgress,
-  getMyBriefDraft,
+  getMyBriefDrafts,
   getUnreadCount,
   getVoteProgress,
   inviteMember,
@@ -108,10 +108,20 @@ export function RoundHomePage() {
   // Your own recipe, not the table's tally. The envelope used to read
   // "1 / 3" — a number about everyone else, on the one drawer that is
   // entirely about you, so it looked like a score you were losing.
+  //
+  // THE FETCHER HERE HAS TO BE THE ONE THE EDITOR USES, not the convenience
+  // wrapper that returns the first row. React Query caches by key, not by
+  // function: this key held a single object while BriefEditorPage's copy of it
+  // expected the array, so opening this page and then the editor handed the
+  // editor an object to call .find() on — a throw during render, and with no
+  // error boundary above it React unmounted the whole application. A white
+  // page, nothing in it, F5 the only way out. One key, one shape; the first
+  // row is picked here, where only this page wants it.
   const { data: myBrief } = useQuery({
     queryKey: ['rounds', roundId, 'my-brief-draft'],
     enabled: !!roundId && ROUND_PHASE_ORDER.indexOf(round?.status ?? 'DRAFT') >= ROUND_PHASE_ORDER.indexOf('ASSIGNED'),
-    queryFn: () => getMyBriefDraft(roundId as string),
+    queryFn: () => getMyBriefDrafts(roundId as string),
+    select: (rows) => rows[0] ?? null,
   })
 
   const { data: hasAssignment } = useQuery({

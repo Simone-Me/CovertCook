@@ -509,8 +509,52 @@
   filter: brightness(1.08);
 }
 
+/* Nothing waiting. Present, so it can be looked at and believed, and quiet
+   enough that it never competes with the one that is asking for something. */
+.alert-pip.is-quiet {
+  border-color: var(--border);
+  background: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  opacity: 0.65;
+  cursor: default;
+}
+
+.alert-pip.is-quiet:hover,
+.alert-pip.is-quiet:focus-visible {
+  filter: none;
+}
+
 .alert-pip__count {
   font-variant-numeric: tabular-nums;
+}
+
+/* The small, last button on a card: the one that says "I have read this and
+   it is over". Shaped like the language pills in the profile on purpose —
+   same weight of decision, same size of target. */
+.pillbtn {
+  width: auto;
+  padding: 3px 12px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.pillbtn:hover:not(:disabled),
+.pillbtn:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* A reported photograph on the alert that reported it: big enough to judge,
+   small enough that a moderation screen is not a gallery. */
+.alert-photo {
+  max-width: min(100%, 320px);
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 /* A reported phrase, quoted rather than restated. It is somebody's words on a
@@ -727,6 +771,23 @@
   flex-direction: row-reverse;
   background: var(--accent);
   color: var(--accent-contrast);
+}
+
+/* A notice from the Executive Chef. Wider than a phrase, because it is one,
+ * and pinned in the fridge's own paper rather than in a bubble — it should
+ * read as something stuck to the door, not as somebody talking. */
+.chat-bubble--notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 96%;
+  padding: 6px 9px;
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  background: rgba(255, 250, 235, 0.98);
+  box-shadow: 0 1px 1px rgba(60, 90, 105, 0.16), 0 3px 8px rgba(60, 90, 105, 0.14);
 }
 
 .chat-bubble__food {

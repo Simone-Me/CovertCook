@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
 import {
   addCourse,
   changeCourse,
@@ -9,6 +8,7 @@ import {
   BRIEFS_EXIST,
   COURSE_IN_USE,
   getMenuStatus,
+  getSlots,
   removeCourse,
   setSlotMode,
   COURSES,
@@ -59,15 +59,7 @@ export function MenuPanel({
   const { data: slots } = useQuery({
     queryKey: ['rounds', roundId, 'slots'],
     enabled: slotMode === 'CATEGORIES',
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('slots')
-        .select('id,course')
-        .eq('round_id', roundId)
-        .order('course')
-      if (error) throw error
-      return data as { id: string; course: Course }[]
-    },
+    queryFn: () => getSlots(roundId),
   })
 
   const { data: menu } = useQuery({
