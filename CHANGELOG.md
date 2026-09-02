@@ -59,6 +59,379 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-08-31 (4)
+
+**The door becomes one question, and PRO keeps saying PRO while it is free.**
+
+### Two ticks at opposite ends of a form, about the same thing
+
+"The Executive Chef approves each player" was a checkbox in the fixed box.
+"Limit the number of players" was a checkbox plus a number field below every
+other control on the page. They are obviously one subject — a host thinking
+about the size of their table is thinking about the door — and they are now one
+fold, **Who gets in**, with the seat count on a slider and the approval as two
+rows like the rest of the form.
+
+**The slider replaced the tick, not just the number field.** Pushed all the way
+right, the dinner has no cap; the far end of the track is where "no limit"
+lives. A tick for *whether* to limit and a number for *how much* was one
+question asked twice, and the tick was the half nobody read. That only works
+because both ends of the track are labelled — a slider with unmarked extremes
+is a slider you have to drag to understand.
+
+The count reads above the track rather than beside it: on a phone your thumb
+covers the slider, and a value at the end of the row would be under your own
+hand while you are dragging it.
+
+**A bug this nearly introduced, caught before it shipped.** The door is asked
+of a classic host too — it is the one decision that is not about how the game
+is played, so taking it away from classic would have removed a capability
+nobody asked to lose. But the submit spreads a `CLASSIC` object over the form's
+values, and `requiresApproval` was in it: the new control would have rendered,
+responded to being pressed, and been thrown away on submit. `requiresApproval`
+has left `CLASSIC` and its default now lives on the `useState` with the others.
+
+### PRO stays legible while it is free
+
+During the free-for-all every paid theme is unlocked, so the shelf showed seven
+free-looking cloths and the PRO page called all five of them "Yours". Both are
+true today and both set up the same disappointment: on 1 January five cloths
+would appear to have been *taken away* from somebody who was told they had
+them.
+
+So a PAID row keeps its **PRO** pill whether or not it is currently locked, and
+carries a small italic beside it saying how long it stays free. On the PRO page
+the cards show what the thing will cost with the same note underneath, instead
+of claiming to be owned. Nothing is a surprise later, which is the only thing a
+free trial has to get right.
+
+---
+
+## 2026-08-31 (3)
+
+**A refusal that was never protecting anything, and a PRO cover that ran
+forever** (`0078`, `0079`).
+
+### "No voting" was a one-way door for no reason
+
+Asked directly — *is it a database rule or is it impossible?* — and the honest
+answer is the first. The door was two lines in `set_voting_mode`:
+
+    if v_round.voting_mode = 'DISABLED' and p_mode <> 'DISABLED' then
+      raise exception 'voting was turned off ... cannot be turned back on';
+    end if;
+
+Nothing else in the schema depended on them. `voting_enabled` is a **generated
+column** derived from `voting_mode` (`0018`), so the phase machine's guard —
+`advance_phase` refusing `VOTING` when voting is off (`0013`) — opens by itself
+the instant the mode changes. There was never a technical reason. It was a
+judgement, and it was wrong: it treated "we are not going to rank our friends'
+cooking" as a destructive act needing protection, when it is one of the four
+ordinary ways a dinner ends. Every other voting choice can be revisited over
+dinner with the turning arrow; this one alone was final, so a host who chose it
+in June and found in October that the table wanted to vote had no way back.
+
+What still refuses is what was always doing the work: a vote cannot be reshaped
+once ballots exist, nor once results are in. Those protect ballots that exist.
+The old rule protected nothing.
+
+So the pass now offers the voteless dinner the same arrow as every other, with
+all four modes as rows, and the moment a method is chosen the open-the-vote
+button and the ballot envelope appear on their own — because `voting_enabled`
+recomputes itself. The red warning on the creation form is gone too.
+
+### PRO cover: 72 hours, and the dinner that must never be held
+
+`0075` stamped `is_pro` at creation and left it there forever. That solved the
+right problem — a subscription lapsing on the Tuesday must not strip a Friday
+dinner in front of eight people — and solved it too generously: a dinner
+created on the last day of a subscription kept its PRO features for as long as
+it existed, so every lapsed subscriber could keep one dinner alive.
+
+Cover now ends **72 hours** after the subscription does. Three days is chosen
+against a specific abuse (a dinner created at the last minute to outlive the
+payment) and is too short to be worth planning around, while being long enough
+that an evening already on the calendar is not lost to a card that failed.
+
+**Held is deliberately narrow.** Nothing is deleted and nothing disappears: the
+dinner stops moving. No phase advance, no recipes written or sent, everything
+still readable, and renewing releases it in the same breath — `redeem_code`
+calls `refresh_round_pro_cover`. Cancelling is always allowed, because a host
+who has decided not to renew must be able to call the evening off rather than
+be trapped inside it.
+
+**And the assertion that matters most is the one about dinners that must NOT
+stop.** During the free-for-all every account is PRO, so every dinner is
+stamped — and a rule keyed only on "the host's subscription ended" would put
+every dinner created since 2026 on hold at once on 3 January. So the hold asks
+a second question first: is this dinner *actually built on* something PRO — more
+than one recipe per cook, a paid word list, a paid cloth? A default dinner has
+nothing to lose and is never held, whatever happens to its host's subscription.
+
+The warnings are a month out and a week out, and nothing in between: the
+temptation with a lapsing subscription is to warn continuously, which produces
+a banner people stop seeing weeks before it starts mattering. The dinner
+carries its own version of the notice, with its own date — a host reading
+"your subscription ends on the 14th" in their profile has not necessarily
+worked out that the dinner they are planning for the 16th is what is at stake.
+
+### Shared costs, as three answers instead of a tick
+
+"Split it, with no ceiling" was reachable before — tick the box, leave the
+budget field empty — but only by discovering that an empty field meant
+something, which is a rule you can only learn by guessing right. It is now one
+of three rows: not shared, shared with a budget each, shared with no ceiling.
+
+*Tested:* `smoke_test17.sql` — a voteless dinner switched on mid-evening and
+`voting_enabled` following by itself, the phase machine then admitting it to
+`VOTING`, the switch back off, and the two real guards surviving
+(`VOTES_ALREADY_CAST`, `VOTE_ALREADY_CLOSED`); then an ordinary window-stamped
+dinner past its cover that is **not** held and still advances, a PRO-built one
+inside its grace that is not held and past it that is, the hold refusing an
+advance while still permitting a cancellation, a code lifting the hold, and the
+grace measured back out of the row at exactly 72 hours. Whole suite re-run on a
+fresh database: `smoke_test`, `2` and `4` fail exactly as they do on `main`.
+
+---
+
+## 2026-08-31 (2)
+
+**PRO stops being a badge, and a sender may offer their cook a choice**
+(`0075`–`0077`).
+
+### What PRO actually is
+
+Until now it was a word printed beside switched-off controls. It is now four
+things wearing one name, and deliberately not four mechanisms: a per-item
+unlock (`0072`), a subscription, a redeemed code, and an open window during
+which everybody has everything. `is_pro()` is the one question, and every gate
+asks it instead of deciding for itself.
+
+**Nothing takes money.** There is no payment provider wired to this app, so
+`pro_subscriptions` has no insert path for `authenticated` at all: a row gets
+there by redeeming a code or by whatever server-side thing eventually handles a
+purchase. The PRO page says so in the middle of both offers rather than
+carrying two buy buttons with no till behind them.
+
+**A dinner carries its host's PRO, and carries it for everybody at it.**
+Stamped at creation rather than read live, which matters: a subscription that
+lapses on the Tuesday must not strip a Friday dinner of the thing it was built
+around, mid-evening, in front of eight people. This is the README rule about
+never splitting a table into paying and non-paying players, made mechanical.
+
+**Codes are credentials, so they behave like credentials.** Single use, an
+expiry that is required rather than optional, and every wrong code failing the
+same way — no such code, expired and used up are all `INVALID_CODE`, because
+distinguishing them turns the field into an oracle for guessing the format of
+the real ones. The one exception is `ALREADY_REDEEMED`: telling somebody about
+their own past leaks nothing, and without it they retype a code that already
+worked and conclude the feature is broken. Minting is granted to nobody and
+happens from the SQL editor — an in-app admin panel would add a third privilege
+level to an app that has two, and that decision deserves its own audit rather
+than a grant added quietly to a line.
+
+**The test switch, and why it dies with the window.** While the free-for-all is
+on there are no free accounts, so there is no way to see what one sees — which
+is the single most useful thing to be able to check during a test period. So
+there is a switch, and it is powerless in both directions once the window
+shuts: `FORCE_ON` cannot grant PRO to a free account afterwards, because that
+is a bypass with a friendly name. A test affordance that outlives the test is a
+hole.
+
+### A second idea, and the cook picks
+
+The chain has never had any give in it: your cook opens the recipe to find
+something they cannot make on a Tuesday, cannot afford this week, or have no
+oven for. The private thread was always the way out, and it works when the
+problem is one ingredient — not when it is the whole dish.
+
+So a sender may offer up to three, and the cook chooses. What is PRO about it
+is the number, never an advantage: writing more is more work for the sender and
+more room for the cook.
+
+**The whole design is one status value.** Eight functions across six migrations
+enumerate a round's dishes with `b.status = 'SUBMITTED'` — the ballot, the
+tally, the results, the menu, the carte, the recipe book, the album, the
+delivery marks. A "chosen" boolean beside them would need a second predicate
+added by hand to every one, and the first one anybody forgot would put three
+dishes on the menu for one seat. Making SUBMITTED mean *the dish* — with
+`OFFERED` for the ones that were sent and are not it — keeps all eight correct
+without being touched, and a partial unique index makes "exactly one per
+pairing" a fact about the database rather than a promise made by two functions.
+
+The lowest-numbered idea is the dish until the cook says otherwise, so a cook
+who does not care is never made to choose and nothing downstream ever meets a
+pairing with no dish on it. Allergens are gathered over every recipe offered
+rather than only the chosen one — the cook may swap late, and a note that
+covered only the default would be silent about exactly that case.
+
+### The form stops using dropdowns
+
+Every select on the creation form is now a list of rows you press. A select
+shows one line — the name of the option currently chosen — and every one of
+these choices is a *sentence*, which was living in a paragraph underneath
+describing whichever option happened to be selected. Reading the four ways a
+dinner can vote meant opening the menu, picking one, closing it, reading the
+paragraph, and doing it three more times. The comparison the host is actually
+making was the one thing the control could not show.
+
+Also: the theme shelves are height-capped and scroll at about three and a half
+rows, so seven cloths no longer turn the form into a page of options.
+"No voting" has lost its red warning — it was true and it was the only option
+on the form that shouted, which made choosing a perfectly ordinary kind of
+dinner feel like disarming something. And *which* courses has gone back to
+waiting for sign-ups to close, where it belongs: there has to be exactly one
+course per chef, and until the door shuts that number keeps moving. The mode is
+chosen at creation; the menu is composed on the pass.
+
+### Two drawers that were one word apart
+
+"My recipe" and "Recipe received" were both recipes, and the word doing all the
+work was the one people skimmed. What tells them apart is direction — one is
+what you ask somebody else to cook, the other is what you cook — so the nouns
+now differ and neither says "recipe": **My order** and **My dish**. It is the
+kitchen's own pair, in an app already set in a kitchen: an order comes in from
+outside, a dish leaves.
+
+*Tested:* `smoke_test16.sql` — PRO from all four directions including the one
+that must fail (a `FORCE_ON` flag left over from the test period granting
+nothing once the window shuts), a code redeemed in the wrong case with stray
+spaces, the same code refused to its own redeemer and then to everybody else,
+a dinner stamped PRO with three recipes asked for, a fourth slot refused, two
+ideas sent by one press with exactly one of them the dish, the cook swapping
+and the menu still showing one dish for that seat, the sender refused the
+choice, and the choice shutting once the vote opens. Whole suite re-run on a
+fresh database: `smoke_test`, `2` and `4` still fail exactly as they do on
+`main` (they read `round_members` directly, which `0032` revoked, and they
+predate it).
+
+---
+
+## 2026-08-31
+
+**Four rules that were written down and never enforced, and the creation form
+that could not tell you which of its questions were final** (`0070`–`0074`).
+
+### The door was a label, not a rule
+
+`rounds.access` has existed since `0018` and **nothing read it**. `join_round`
+accepted any code for any `OPEN` round; `invite_member` invited into any round
+at all. So "By invitation" was a word on a form: a host who chose it, and whose
+code then got forwarded once, got exactly the dinner they had said they did not
+want — and was never told, because from their screen it looked as though a
+friend had simply joined.
+
+`0071` makes both halves real. A code is refused on an `INVITE` round (as
+`INVALID_CODE`, deliberately: confirming the code is real would tell a stranger
+the dinner exists), and a guest list is refused on a `CODE` one. `0070` adds
+the third value the enum could not express, `CODE_AND_INVITE`, which is the
+ordinary case — you invite the four people you already know and hand the code
+to whoever else turns up. The pass now offers each door only where the host
+actually left one open.
+
+**And an invitation names a username, not an email address.** The address is
+the one thing about an account its owner has never chosen to show anybody: to
+invite a friend you had to know, or ask for, the mailbox they registered with.
+`display_name` has been a unique identity since `0046`, it is the name printed
+at the reveal, and it is the name the person picked themselves. The email
+lookup is dropped rather than kept alongside — two ways to name one person is
+two error messages and an enumeration surface kept alive for nobody's benefit.
+
+### SPY and OPEN were both half-built, from opposite ends
+
+SPY was supposed to mean "the Executive Chef sees everyone, the table sees
+nobody". `0053` does hand the host the profile ids on a SPY round — and then
+nothing reads them. Every screen printed `secret_name`, so **a SPY host got the
+undercover game with a different label on it.**
+
+OPEN was supposed to mean "everyone knows everyone", and it half-worked: the
+brief editor and the finished thread ask for real names by hand, so those two
+screens were right and the roster, the fridge, the chain and the moderation
+queue were not. An OPEN dinner therefore ran with two names per person and the
+reader holding the mapping themselves — which is the opposite of the point.
+
+The thing that kept going wrong is that "may this reader see real names" was
+being decided separately in every function that returns a name, and most of
+them never asked. `0073` writes it once, as `names_are_open()`, and five
+readers now ask it: the roster, the fridge, the private thread, the assignment
+and the reported-message queue. On OPEN there are no code names at all —
+`secret_name` is still minted, because the chain, the ballot and every message
+row are keyed to a seat, and it is simply never shown.
+
+### The shelf of looks, priced and honest
+
+`0072` turns the pseudonym theme and the table theme into two catalogues with a
+tier on each row, three new word lists (pasta shapes, pâtisserie, the batterie
+— 24 names each, in both locales) and seven cloths. Two of each are free; the
+rest are locked with a price on them.
+
+**Nothing sells anything.** There is no payment provider wired to this app, so
+a paid row is visible, priced and refused — and there is deliberately no "buy"
+button leading into a checkout that does not exist. The entitlement check is
+server-side (`theme_available`, called by `create_round`, which also closes a
+hole nobody had opened yet: a paid theme named in a raw RPC call used to be
+granted), and it already reads the table a purchase will write to. The day
+there is one, the shelf unlocks itself.
+
+A pseudonym list now also carries its own mark, and the mark does three jobs:
+it stands for the dinner in the rounds list and at the head of its own table,
+and it seeds the faces the fridge gives each chef. A brigade of stations
+wearing vegetables was the host's choice of theme being thrown away at the one
+screen where the whole table is looking at each other.
+
+### The budget moves; whether you split does not
+
+`set_cost_settings` (`0065`) treated those as one setting and let both move
+until `LOCKED`. Both halves were wrong in different directions. **Turning
+sharing on late is not a setting, it is a new deal** — several people have
+already shopped, and a receipt that was a gift on Tuesday is a debt on Friday
+— so `0074` settles the mode at creation. **The budget, meanwhile, was frozen
+before anybody had been to a shop**: "let's say twenty each" becoming "make it
+thirty, the fish was mad" is the most ordinary thing at a dinner and it was the
+one thing the app refused. It moves now, all evening, and only the Executive
+Chef moves it.
+
+### Two boxes, and the arrow
+
+The creation form was seven folded rows in one card, and nothing on it said
+which of them a host was committing to. Some can be revisited over dinner;
+the rest can never be touched again, because changing them would rewrite an
+evening under the people living it. The only reliable way to tell them apart
+was to try.
+
+They are now two containers in two colours, each with the fact in its own
+heading rather than in a footnote under every control — red for what is
+settled, green for what still moves. Colour does the work, and never alone: a
+host who cannot tell red from green reads the same two headings.
+
+What moves, moves through **the turning arrow** — the same `↺` the phase menu
+uses to un-serve a course, now a shared component (`components/TurnBack.tsx`).
+It arms; a second, deliberate act answers. It reaches the voting method during
+dinner (including on a hand-counted round, which was the one voting choice that
+could not be revisited, with nothing in the database saying so) and the
+budget. Courses move too — `set_slot_mode` has allowed `DRAFT`→`LOCKED` since
+`0036` and the pass was only offering it at `LOCKED`.
+
+**And the button that moves the dinner on is now inside the pass**, where it
+belongs: it used to sit at the foot of the page, past the roster, the recipes,
+the messages, the vote, the allergies and the address — the most consequential
+control the Executive Chef has, at the end of a scroll, and outside the one
+place this app says every host action lives.
+
+*Tested:* `smoke_test15.sql` — both doors refused where they should be and open
+where they should be, an invitation found by a username in the wrong case, a
+SPY host reading three real names while a player at the same table reads three
+pseudonyms, an OPEN table named to everybody with the door still open, an
+undercover round that stays covered *even for its host*, two paid themes
+refused by name in a raw RPC call and then granted by a row in
+`profile_theme_unlocks`, and the cost mode refusing to move while the budget
+does. `smoke_test6` updated for username invitations. The whole suite was run
+against a fresh database, migration by migration: `smoke_test`, `2` and `4`
+still fail exactly as they do on `main` — they read `round_members` directly,
+which `0032` revoked, and they predate it.
+
+---
+
 ## 2026-08-28 (4)
 
 **The results reach the table, and not only the Executive Chef.**

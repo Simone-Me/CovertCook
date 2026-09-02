@@ -49,20 +49,32 @@ export function AppHeader() {
         <span className="app-logo__name">{t('app.name')}</span>
       </Link>
       {/* Between the way home and the way to yourself, because it is neither:
-          it is the one thing in this row that is asking for something. Absent
-          entirely when there is nothing waiting — a badge that is always there
-          showing zero teaches people to stop reading it. */}
-      {session && waiting > 0 && first && (
-        <Link
-          to={`/rounds/${first.round_id}/alerts`}
-          className="alert-pip"
-          aria-label={t('alerts.waiting', { count: waiting })}
-          title={t('alerts.waiting', { count: waiting })}
-        >
-          <span aria-hidden="true">🔔</span>
-          <span className="alert-pip__count">{waiting}</span>
-        </Link>
-      )}
+          it is the one thing in this row that is asking for something.
+          
+          IT DOES NOT LEAVE. It used to be absent whenever the count was zero,
+          on the reasoning that a badge permanently showing nothing teaches
+          people to stop reading it. What that actually taught was worse: a
+          host who resolved the last alert watched the bell disappear and had
+          no way of telling that from the app losing it. A thing that vanishes
+          cannot be checked. So it stays, and says zero, and goes quiet —
+          unlit, unclickable, no colour — until there is something in it. */}
+      {session &&
+        (waiting > 0 && first ? (
+          <Link
+            to={`/rounds/${first.round_id}/alerts`}
+            className="alert-pip"
+            aria-label={t('alerts.waiting', { count: waiting })}
+            title={t('alerts.waiting', { count: waiting })}
+          >
+            <span aria-hidden="true">🔔</span>
+            <span className="alert-pip__count">{waiting}</span>
+          </Link>
+        ) : (
+          <span className="alert-pip is-quiet" aria-label={t('alerts.nothingWaiting')} title={t('alerts.nothingWaiting')}>
+            <span aria-hidden="true">🔔</span>
+            <span className="alert-pip__count">0</span>
+          </span>
+        ))}
       {session && (
         <Link to="/profile" className="badge" style={{ textDecoration: 'none' }}>
           {profile?.display_name ?? t('profile.title')}

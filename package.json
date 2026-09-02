@@ -1,14 +1,15 @@
 {
   "name": "covertcook",
   "private": true,
-  "version": "1.63.0",
+  "version": "1.67.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "mail:templates": "node --experimental-strip-types scripts/render-email-templates.mjs"
+    "mail:templates": "node --experimental-strip-types scripts/render-email-templates.mjs",
+    "seed:testers": "node scripts/seed-testers.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",

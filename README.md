@@ -824,8 +824,18 @@ Ordered roughly by how much the product misses them.
   the three states; what's missing is the artwork. The three rules the real
   ones must follow (one camera angle, one light source, shadow baked in) are
   in `DESIGN.md` §4 and `TableProps.tsx`.
-- **Two recipes per brief** and **themed pseudonyms** — both shown in the
-  creation form, both disabled, both v2.
+- **Taking money** — this is the one thing PRO is missing. `0075` builds the
+  entitlements (a subscription, a redeemed code, an open test window, and the
+  per-item unlocks from `0072`), `is_pro()` is the single question every gate
+  asks, and `pro_subscriptions` has no insert path for a signed-in client at
+  all: a row gets there by redeeming a code, or by whatever server-side thing
+  eventually handles a purchase. The PRO page describes both offers and says
+  plainly that neither can be bought yet. See "The paid tier" below.
+- **An admin surface** — deliberately absent. `create_redeem_code` is granted
+  to nobody and is run from the Supabase SQL editor; adding an in-app panel
+  would add a third privilege level to an app that has two (a member, and the
+  Executive Chef of one dinner), and that deserves its own decision with its
+  own audit rather than a grant added quietly to a line.
 - **Dinner-day tools**: shopping list, printable buffet labels,
   offline-cache verification.
 - **An in-app help layer** and a first-run tour. (Terms and Privacy now exist
@@ -851,6 +861,53 @@ non-paying players. Reasoning in [`ROADMAP.md`](./ROADMAP.md) §2.
 The line in practice: the kitchen-brigade pseudonym set shipped **free**,
 because a second word list changes nothing about how the game is played. Table
 themes are the paid side, because they are purely how the evening looks.
+
+`0072` turns that line into data rather than a policy written in prose. Two
+catalogues — `name_theme_catalogue` and `table_theme_catalogue` — each carry a
+tier per row: `DEFAULT` (what a dinner gets when nobody chooses, always
+available), `FREE` (a second one, open to everybody, nothing to claim) and
+`PAID` (locked, with a price in cents on the row). `theme_available()` is the
+one place the rule is written, `create_round` asks it, and the pickers render
+what it answers.
+
+**Nothing sells anything yet, and the shelf says so.** There is no payment
+provider wired to this app, so a `PAID` row is shown, priced, and refused —
+with no "buy" button leading to a checkout that does not exist. The entitlement
+table (`profile_theme_unlocks`) is already the thing the check reads, so the day
+a purchase lands it is a row insert and the shelf unlocks itself.
+
+Prices today: 50 cents a pseudonym list, €1 a table cloth, €5 a year for
+everything. The first two are rows in the catalogue — one `UPDATE`, not a
+deploy. The yearly one is a constant in `ProPage.tsx` and stays there until
+there is a store to be the authority on it.
+
+**What PRO opens, in full:** the three paid pseudonym lists, the five paid
+table cloths, and two or three recipes per cook instead of one (`0077`). That
+last one is the test of the rule: writing more is more work for the sender and
+more room for the cook, and it is never an advantage over anybody at the table.
+
+**A dinner carries its host's PRO to everybody at it** (`rounds.is_pro`,
+stamped at creation). A guest at a PRO host's table writes three recipes
+without owning anything, and a subscription lapsing on the Tuesday cannot
+strip a Friday dinner of the thing it was built around. That is the
+"never split a table into paying and non-paying players" rule made mechanical
+rather than promised.
+
+**Cover ends 72 hours after the subscription does** (`rounds.pro_until`,
+`0079`), so a dinner created on the last day of a subscription cannot outlive
+it indefinitely. Past the grace, a dinner *built on* a PRO feature goes on hold
+— it stops moving, nothing is deleted, everything stays readable, cancelling is
+still allowed, and renewing releases it. A dinner that uses nothing PRO is
+never held, whatever happens to its host's subscription: that is what stops the
+end of the free-for-all from stopping every dinner ever created during it.
+The warnings are a month out and a week out, on the profile and on the dinner
+itself.
+
+**Everybody is PRO until 31 December 2026** (`app_settings.pro_open_until`).
+Ending it is an `UPDATE`, not a deploy. While it is open there are no free
+accounts to look at, so the PRO page carries a switch that shows you the free
+version — and the server refuses that switch the moment the window shuts, in
+both directions, because a test affordance that outlives the test is a hole.
 
 ### Known simplifications (deliberate, not oversights)
 - Allergy/diet matching is exact-string, not semantic: a diet like

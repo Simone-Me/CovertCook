@@ -68,7 +68,7 @@
       "checking": "Checking…",
       "free": "Free — it is yours.",
       "taken": "Already taken. Try another one.",
-      "changeLater": "Changing it later is planned as part of Pro.",
+      "changeLater": "Changing it later is planned as part of Crème.",
       "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
     },
     "passwordLabel": "Password",
@@ -109,47 +109,65 @@
     "access": {
       "label": "How people get in",
       "CODE": "With a code",
-      "CODEHint": "You get a code to share however you like. Anyone holding it can ask for a seat.",
-      "INVITE": "By invitation",
-      "INVITEHint": "You add chefs by the address they signed up with. They accept or decline in the app — no code to mistype or forward."
+      "CODEHint": "You get a code to share however you like. Anyone holding it can ask for a seat, and there is no guest list to add to.",
+      "INVITE": "By invitation only",
+      "INVITEHint": "You add chefs by their username. They accept or decline in the app, and the code opens nothing — nobody gets in unless you named them.",
+      "CODE_AND_INVITE": "Code and invitations",
+      "CODE_AND_INVITEHint": "Both doors open: you invite the chefs you already know by name, and anyone holding the code can still ask for a seat."
     },
     "anonymity": {
       "label": "Who knows whom",
       "ANONYMOUS": "Undercover — nobody knows anybody",
       "ANONYMOUSHint": "Everyone is a pseudonym until the final reveal, you included.",
       "SPY": "Spy — you see everyone, they see nobody",
-      "SPYHint": "You keep each chef's real name beside their pseudonym. Everyone else sees pseudonyms only. You'll still have to ask before you can see who cooks for whom.",
+      "SPYHint": "You see every chef's real name wherever their pseudonym would be — the roster, the fridge, the reported phrases. Everyone else sees pseudonyms only. You'll still have to ask before you can see who cooks for whom.",
       "OPEN": "Open — everyone knows everyone",
-      "OPENHint": "Real names stay visible all evening. Only who cooks for whom stays secret."
+      "OPENHint": "No pseudonyms at all: everyone is their own name, everywhere, all evening. Only who cooks for whom stays secret."
     },
     "requiresApproval": "The Executive Chef must approve each player",
     "voting": {
       "label": "Voting",
-      "LIVE": "During dinner",
-      "LIVEHint": "You open the vote at the table and see the results first, then decide how to announce them.",
-      "TIMED": "After dinner",
-      "TIMEDHint": "You set a deadline and the results publish themselves when it runs out.",
+      "LIVE": "Secret, during dinner",
+      "LIVEHint": "Everyone votes on their own phone at the table. You watch how many have finished — never what they chose — and it closes itself the moment the last person votes.",
+      "TIMED": "Secret, after dinner",
+      "TIMEDHint": "Everyone votes from home afterwards, up to 48 hours. The results publish themselves the moment the deadline runs out.",
       "DISABLED": "No voting",
-      "DISABLEDHint": "This one can't be undone: voting will be unavailable for this dinner, and can't be turned on later.",
+      "DISABLEDHint": "The evening ends with the meal — no ranking, no results. You can still change your mind at the table, right up until the first vote is cast.",
       "MANUAL": "By a show of hands",
       "MANUALHint": "No phones at the table: dishes are ranked by hands going up, and you type in the count.",
-      "chosenWhenOpening": "Chosen when you open the vote, not now — and changeable until the first vote is cast."
+      "chosenWhenOpening": "Changeable during the dinner with the ↺ arrow, in any direction, until the first vote is cast.",
+      "changeMethod": "Change how this dinner votes",
+      "chosenAtCreation": "Chosen when the dinner was created. The arrow goes back on it, until the first vote is cast."
     },
     "nameTheme": {
       "label": "Pseudonym theme",
       "FOOD": "Herbs & spices",
       "FOODHint": "Chef Basil, Chef Saffron, Chef Clove.",
       "BRIGADE": "Kitchen brigade",
-      "BRIGADEHint": "Chef Saucier, Chef Pâtissier, Chef Aboyeur — the 24 real stations of a kitchen."
+      "BRIGADEHint": "Chef Saucier, Chef Pâtissier, Chef Aboyeur — the 24 real stations of a kitchen.",
+      "PASTA": "Pasta shapes",
+      "PASTAHint": "Chef Rigatoni, Chef Farfalle, Chef Strozzapreti — 24 shapes, spelled the same in every kitchen.",
+      "PATISSERIE": "Pâtisserie",
+      "PATISSERIEHint": "Chef Éclair, Chef Canelé, Chef Paris-Brest — 24 things from the pastry counter.",
+      "BATTERIE": "The batterie",
+      "BATTERIEHint": "Chef Mandoline, Chef Whisk, Chef Blowtorch — 24 tools off the hook."
     },
     "recipesPerBrief": {
       "label": "Recipes per chef",
-      "one": "One recipe"
+      "count_one": "One recipe",
+      "count_other": "{{count}} recipes",
+      "hint1": "You write one dish for your cook. The game as it is.",
+      "hint2": "You offer two ideas and your cook makes whichever suits their kitchen, their week and their budget.",
+      "hint3": "Three ideas, same thing. More writing for you, more room for them."
     },
     "slotMode": {
       "label": "Courses",
       "FREE": "Free-for-all (everyone brings any dish)",
-      "CATEGORIES": "Specific courses (you choose starters/mains/etc.)"
+      "CATEGORIES": "Specific courses (you choose starters/mains/etc.)",
+      "changeable": "Changeable during the dinner, up until the roulette has been run.",
+      "FREEHint": "Everyone brings whatever they like. Nothing to compose, nothing to balance.",
+      "CATEGORIESHint": "You decide the shape of the meal — two starters, three mains, a dessert — and the roulette deals one course to each chef.",
+      "composedLater": "You pick which courses on the pass, once sign-ups close: there has to be one per chef, and that number is still moving until the door shuts."
     },
     "remove": "Remove",
     "removeConfirm": "Remove this player from the round?",
@@ -158,7 +176,6 @@
     "removeLeave": "Remove and leave as is",
     "removeCollapseConfirm": "Reconnect the chain around this player. Whoever was writing for them will write for the next cook instead, so everyone still has a dish to make — but that cook gets a different recipe than the one they already have.",
     "removeLeaveConfirm": "Leave the chain exactly as it is. Nobody else is disturbed, and the dish written for this player simply won't be cooked.",
-    "limitPlayers": "Limit the number of players",
     "maxPlayers": "Maximum players",
     "joinCode": "Round code",
     "joinCodePlaceholder": "e.g. R63ZFCSZ",
@@ -237,14 +254,13 @@
       "fixedAtCreation": "chosen at creation, fixed",
       "fixedNow": "no longer changeable",
       "changeableNow": "changeable now",
-      "votingNeverOn": "cannot be turned on later",
       "yes": "Yes",
       "no": "No",
       "noLimit": "No limit",
-      "themes": "Table theme",
-      "themesSoon": "Christmas, midsummer, and others to come. Pro — the look of the evening only; nothing about how the game is played.",
       "venueEditable": "Editable in the dinner settings",
-      "venueHere": "change them"
+      "venueHere": "change them",
+      "tableTheme": "Table theme",
+      "changeableInGame": "changeable during the dinner"
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
@@ -257,13 +273,13 @@
       "accept": "Accept",
       "decline": "Decline",
       "invite": "Invite a chef",
-      "inviteEmail": "Their account address",
       "inviteSent": "Invitation sent",
-      "noSuchChef": "No chef signed up with that address. Check the spelling, or share the code instead."
+      "noSuchChef": "No chef goes by that name. Check the spelling — usernames are exactly as their owner typed them.",
+      "inviteUsername": "Their username",
+      "notByInvitation": "This dinner is entered with the code. There is no guest list to add to.",
+      "inviteHelp": "Their username, not their email — the name they picked when they signed up."
     },
     "pastRounds": "Past dinners ({{count}})",
-    "tooManyPlayers": "Thirty is already a lot of cooking. Where were you planning to seat them all — is this a wedding?",
-    "tooFewPlayers": "It takes at least three: with two, you would both know exactly who wrote your recipe.",
     "backToTable": "Back to the table",
     "steps": {
       "signup": "Sign-up",
@@ -273,16 +289,17 @@
     },
     "drawers": {
       "chefs": "Chefs",
-      "myRecipe": "My recipe",
-      "received": "Recipe received",
-      "receivedMeta": "What you are cooking",
+      "myRecipe": "My order",
+      "received": "My dish",
+      "receivedMeta": "The one I am cooking",
       "messages": "Messages",
       "messagesMeta": "Board and conversations",
       "vote": "Vote the menu",
       "results": "Results",
       "allergies": "Allergies",
       "info": "The dinner",
-      "costs": "The costs"
+      "costs": "The costs",
+      "myRecipeMeta": "The dish I am asking for"
     },
     "waiting": {
       "assignment": "Opens once the Executive Chef spins the roulette",
@@ -349,7 +366,9 @@
       "change": "Change",
       "clearToChange": "To change it, the roulette has to be cleared and spun again. Nobody has written yet, so nothing is lost.",
       "discardWarning": "Changing the menu now means dealing the roulette again, and there is no way to do that without throwing away every recipe already written and every private message sent about them. This cannot be undone.",
-      "discardConfirm": "Delete the recipes and change the menu"
+      "discardConfirm": "Delete the recipes and change the menu",
+      "stillFilling": "Courses so far: {{courses}}. They only have to match the number of chefs once sign-ups close.",
+      "composedAtLock": "Which courses gets decided once sign-ups close — there has to be exactly one per chef, and until then that number is still moving."
     },
     "pass": {
       "title": "The pass",
@@ -370,7 +389,8 @@
         "CANCELLED": "This dinner was called off"
       },
       "empty": "empty",
-      "whatIsItToggle": "What is the pass?"
+      "whatIsItToggle": "What is the pass?",
+      "advance": "Move the dinner on"
     },
     "lateJoinerShort": "Adding someone now changes two chefs' partners.",
     "briefProgress": "{{done}} of {{total}} recipes written",
@@ -410,10 +430,45 @@
     "deletesOn": "This dinner deletes itself on {{date}}.",
     "deletesWhatSurvives": "What you keep: every recipe you put in your book, and the photograph you added to the album. The rest — the chain, the messages, the ballots — goes with the dinner.",
     "copyCode": "Copy the code",
-    "copyLink": "Copy the link"
+    "copyLink": "Copy the link",
+    "rules": {
+      "fixedTitle": "Settled for the whole dinner",
+      "fixedWarn": "These cannot be changed afterwards — not by you, not by anyone.",
+      "liveTitle": "Changeable during the dinner",
+      "liveNote": "Pick something now and think again later: the turning arrow ↺ on the pass comes back to any of these."
+    },
+    "tableTheme": {
+      "label": "Table theme",
+      "CHECKS": "Red checks",
+      "CHECKSHint": "The house table: red squares on cream. What CovertCook looks like.",
+      "ELEGANT": "Elegant",
+      "ELEGANTHint": "Pressed linen, nothing printed on it. For the evening that is dressed up.",
+      "SCIFI": "Sci-fi",
+      "SCIFIHint": "A dark deck under a cyan grid.",
+      "BAROQUE": "Baroque",
+      "BAROQUEHint": "Gold on wine, laid heavy.",
+      "HALLOWEEN": "Halloween",
+      "HALLOWEENHint": "Soot and pumpkin.",
+      "XMAS": "Christmas",
+      "XMASHint": "Fir green on paper white.",
+      "CARNIVAL": "Carnival",
+      "CARNIVALHint": "Confetti, still where it fell."
+    },
+    "door": {
+      "label": "Who gets in",
+      "seats_one": "{{count}} seat",
+      "seats_other": "{{count}} seats",
+      "noLimit": "No limit",
+      "seatsHint": "The dinner stops taking people at {{count}}. Anyone arriving after that is told the table is full.",
+      "noLimitHint": "As many as turn up. Past about {{max}} the pseudonym list runs out and people start being numbered instead of named, so keep an eye on it.",
+      "APPROVE": "You approve each arrival",
+      "APPROVEHint": "Anyone who asks for a seat waits until you say yes. You see their real name before you decide.",
+      "FREE": "Anyone with the way in takes a seat",
+      "FREEHint": "No waiting and nothing for you to do. Whoever holds the code, or accepts an invitation, is at the table."
+    }
   },
   "briefs": {
-    "editorTitle": "Write your recipe brief",
+    "editorTitle": "The dish you are asking for",
     "writingFor": "You're writing for: {{name}}",
     "alreadySubmitted": "Your brief is submitted and locked.",
     "editingClosed": "The submission window for this round has closed.",
@@ -449,7 +504,7 @@
     "tagsConfirmed": "I've reviewed the dietary panel above and confirmed the tags I've checked are accurate.",
     "noBriefYet": "No recipe to show yet.",
     "waiting": {
-      "title": "Waiting for your recipe",
+      "title": "Waiting for your order",
       "body": "The chef writing for you hasn't sent it yet. This page fills in the moment they do. If the dinner is getting close and you need time to shop and prepare, send them a reminder — the Executive Chef is told too.",
       "remind": "Send a reminder",
       "reminded": "Reminder sent. Anything else you need, ask below."
@@ -493,7 +548,8 @@
         "briefs_submitted_recipe_not_empty": "A recipe needs a link or a written method before it can be sent.",
         "briefs_external_url_check": "That link has to start with http:// or https://.",
         "brief_ingredients_name_check": "One of the ingredients is blank. Remove the empty line, or fill it in."
-      }
+      },
+      "inRecipe": "Idea {{recipe}}: {{what}}"
     },
     "theMenu": "Tonight’s menu",
     "yours": "Yours",
@@ -514,7 +570,20 @@
       "procedureShort": "a fuller method — a line or two, not a word",
       "linkMalformed": "a link that starts with http:// or https://"
     },
-    "submitConfirmLabel": "Yes — send it"
+    "submitConfirmLabel": "Yes — send it",
+    "ideas": {
+      "label": "Your ideas for this cook",
+      "tab": "Idea {{n}}",
+      "hint": "Offer more than one and your cook makes whichever suits them. Only the first is required.",
+      "sentHint": "These have gone. Your cook picks the one that suits them.",
+      "discard": "Drop this idea"
+    },
+    "offers": {
+      "label": "The recipes you were offered",
+      "thisIsIt": "This is the one you are cooking.",
+      "cookThisOne": "Cook this one instead",
+      "closed": "The dinner has moved on — the dish is settled now."
+    }
   },
   "chat": {
     "title": "Messages",
@@ -560,8 +629,6 @@
     "timeLeft": "Voting closes in",
     "closing": "Voting is closing…",
     "points": "pts",
-    "MANUAL": "By show of hands",
-    "MANUALHint": "No phones. You read the dishes out at the table, count the hands, and enter the totals. The app does the arithmetic and shows the winner.",
     "manual": {
       "title": "Counting the hands",
       "chosen": "This dinner votes by show of hands.",
@@ -643,20 +710,77 @@
   },
   "alerts": {
     "title": "Executive Chef alerts",
-    "openAlerts": "Open alerts",
-    "none": "No open alerts.",
-    "resolve": "Resolve",
-    "reportedMessages": "Reported messages",
-    "noReports": "No reported messages.",
-    "kind": {
-      "CANNOT_COOK": "A player can't cook their dish",
-      "NO_BRIEF": "A player hasn't received a brief",
-      "DROPOUT": "A player dropped out",
-      "REPORTED_MESSAGE": "A message was reported",
-      "OTHER": "Other"
-    },
+    "none": "Nothing is waiting. The table is running itself.",
+    "resolve": "Resolved",
+    "someone": "someone",
+    "aDish": "a dish",
+    "answered": "This looks as though it has already been dealt with.",
+    "declared": "Declared on the dish: {{labels}}",
+    "theRecipe": "The recipe they were given — {{dish}}",
+    "reportedPhoto": "The photograph that was reported",
     "waiting_one": "{{count}} thing is waiting for you",
-    "waiting_other": "{{count}} things are waiting for you"
+    "waiting_other": "{{count}} things are waiting for you",
+    "nothingWaiting": "Nothing is waiting for you",
+    "kind": {
+      "CANNOT_COOK": "A chef cannot cook what they were sent",
+      "NO_BRIEF": "A chef has no recipe",
+      "DROPOUT": "Someone left the dinner",
+      "ACCOUNT_CLOSED": "Someone closed their account",
+      "REPORTED_PRIVATE": "Report — a phrase in a private thread",
+      "REPORTED_FRIDGE": "Report — a phrase in the fridge",
+      "REPORTED_PHOTO": "Report — a photograph",
+      "ENTER_REQUEST": "Someone is at the door",
+      "LATE_ENTRY_CHAIN": "A late arrival went into the chain",
+      "CLOSED_CHAIN": "The chain was closed again",
+      "ORFAN_MEAL": "A dish has no cook",
+      "ALLERGY_ALERT": "An allergen is on the table",
+      "UNKNOWN": "Something happened"
+    },
+    "what": {
+      "CANNOT_COOK": "{{who}} has told {{counterpart}}, in their own thread, that they cannot cook the recipe they were sent.",
+      "NO_BRIEF": "{{who}} says nothing has arrived from {{counterpart}} — there is no recipe to cook.",
+      "DROPOUT": "{{who}} has left this dinner. Their seat is empty and the chain is a link short.",
+      "ACCOUNT_CLOSED": "{{who}} closed their CovertCook account, which takes their seat at this dinner with it.",
+      "REPORTED_PRIVATE": "Somebody reported this phrase, sent by {{who}} in a private thread.",
+      "REPORTED_FRIDGE": "Somebody reported this phrase, posted by {{who}} where the whole table could read it.",
+      "REPORTED_PHOTO": "Somebody reported the photograph {{who}} put in the album.",
+      "ENTER_REQUEST": "{{who}} is asking for a seat at this dinner, and is waiting on your answer.",
+      "LATE_ENTRY_CHAIN": "{{who}} arrived after the chain was dealt and has been spliced into it, beside {{counterpart}}.",
+      "CLOSED_CHAIN": "A removal broke the chain and it has been closed again: {{who}} now writes for {{counterpart}}.",
+      "ORFAN_MEAL": "{{who}} was removed and the chain kept its shape, so {{dish}} — written by {{counterpart}} — has nobody to cook it.",
+      "ALLERGY_ALERT": "{{dish}}, written for {{who}}, carries something they have declared.",
+      "UNKNOWN": "Something happened that this version of the app has no name for."
+    },
+    "how": {
+      "CANNOT_COOK": "Read the recipe first. Most dishes bend — an ingredient swapped, a step left out, a version found online. Saying so to the table, below, is usually the whole of the fix: a recipe here is not rewritten because somebody would rather cook something else.",
+      "NO_BRIEF": "Look at the chain: a seat with nobody writing for it is the usual cause. Saying so to the table, below, reaches both of them at once.",
+      "DROPOUT": "Nothing has to happen. If the hole in the chain matters more than the empty seat, it can be dealt again from the chain page — your call, and it changes everybody's cook.",
+      "ACCOUNT_CLOSED": "Same as any other departure: the chain can be dealt again from the chain page if the hole matters.",
+      "REPORTED_PRIVATE": "Read the phrase, not the seat. Flagging it warns that chef about the app's guidelines and tells them that a second time at this dinner can end with you removing them.",
+      "REPORTED_FRIDGE": "Read the phrase, not the seat. Flagging it warns that chef about the app's guidelines and tells them that a second time at this dinner can end with you removing them.",
+      "REPORTED_PHOTO": "Flagging takes the photograph down and warns the chef who put it there. Not everything that gets reported is worth taking down.",
+      "ENTER_REQUEST": "You are shown their real name because nobody has taken a seat yet. The moment they are in, they are a pseudonym to you like everybody else.",
+      "LATE_ENTRY_CHAIN": "Nothing to do. You are being told because the chain changed shape after it was dealt.",
+      "CLOSED_CHAIN": "Nothing to do. You are being told because the chain changed shape after it was dealt.",
+      "ORFAN_MEAL": "Nothing to do, unless you would rather deal the chain again from the chain page.",
+      "ALLERGY_ALERT": "An allergen informs, it never refuses: nobody has to change their dish. Asking the table to say plainly what is in what they cook is the useful thing.",
+      "UNKNOWN": "Nothing can be done about it from here. Resolving it clears it from the bell."
+    },
+    "actions": {
+      "postRecipeReview": "Tell the table a recipe is meant to be possible",
+      "postAllergenCare": "Tell the table to say what is in their dish",
+      "flag": "Flag it",
+      "dontFlag": "Leave it",
+      "accept": "Let them in",
+      "refuse": "Turn them away"
+    },
+    "confirm": {
+      "flagTitle": "Flag this?",
+      "flagWhy": "That chef is told, in their own language, that this did not follow the app's guidelines — and that if it happens again at this dinner you can remove them from it. It appears on the dinner's page and they have to say they have read it. Nothing names whoever reported it."
+    },
+    "errors": {
+      "NOTICE_ALREADY_POSTED": "You said that in the fridge less than an hour ago. Give it time to be read."
+    }
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
@@ -664,6 +788,11 @@
     "databaseBehind": {
       "title": "This app is talking to a database that is behind it.",
       "body": "A function it needs is not there. Locally that is almost always .env.local still pointing at the deployed project — VITE_SUPABASE_URL should read http://127.0.0.1:54321. Otherwise the migrations have not been pushed: run `npx supabase db reset` locally, or `npx supabase db push` against the project. Nothing you do in the app will fix it."
+    },
+    "crashed": {
+      "title": "This screen broke.",
+      "body": "Only this one — the rest of the app is still standing, and the way back is at the top of the page. If you can, tell us what you were doing: the line below names what went wrong.",
+      "reload": "Reload the page"
     }
   },
   "profile": {
@@ -691,14 +820,80 @@
     "yourChefHelp": "Your two private conversations: the chef you write for, and the chef who writes for you.",
     "toYourCook": "With the chef you write for",
     "toYourSender": "With the chef who writes for you",
-    "myRecipe": "My recipe",
-    "recipeReceived": "Recipe received"
+    "myOrder": "My order",
+    "myDish": "My dish",
+    "fromExecutiveChef": "The Executive Chef"
   },
   "pro": {
-    "badge": "Pro",
-    "title": "About Pro",
-    "freeForever": "The whole app stays free. Every dinner, every number of guests, every feature that changes how the game is played — the point is that everyone can do everything.",
-    "what": "Pro only sells flavour: better-looking tables, themed evenings (a Christmas one, a midsummer one), and — an idea still being worked out — letting a host share what they have bought with the guests at their table."
+    "badge": "Crème",
+    "title": "About Crème",
+    "freeForever": "Everything a dinner needs is free, and stays free: any dinner, any number of guests, every rule of the game. Nobody at a table is ever playing a smaller version of it.",
+    "what": "Crème adds no powers. It makes the evening run smoother and look better: tables laid with more care, themed nights (a Christmas one, a midsummer one), more room to be kind to your cook, and — an idea still being worked out — letting a host share what they have bought with the guests at their table.",
+    "needed": "That setting is part of Crème.",
+    "lockedHere": "Part of Crème.",
+    "whatIsIt": "What is Crème?",
+    "seeWhatItOpens": "See what Crème opens →",
+    "status": {
+      "on": "You have Crème.",
+      "off": "You are on the free app — which has everything a dinner needs.",
+      "window": "Crème is free to try while CovertCook is being tested, until {{date}}.",
+      "until": "Yours until {{date}}."
+    },
+    "trial": {
+      "why": "Switch it on and everything below is yours until {{date}}, for nothing. Switch it off whenever you like — the free app is a whole app and it is waiting exactly where you left it.",
+      "on": "Try Crème — free until {{date}}",
+      "off": "Turn Crème off",
+      "closed": "The test period is over — this switch does nothing now."
+    },
+    "opens": {
+      "title": "What Crème opens",
+      "count": "{{count}} to unlock",
+      "yours": "Yours",
+      "recipes": "Offer your cook two or three ideas instead of one, and let them make whichever suits their kitchen, their week and their budget.",
+      "recipesEg1": "Pasta alla Norma",
+      "recipesEg2": "Ribollita",
+      "recipesEg3": "Idea 3",
+      "recipesWhy": "It is more writing for you and more room for them. Nobody at the table is at a disadvantage — and because a dinner carries its host’s Crème, every guest writes three when the Executive Chef has it.",
+      "names": "The word list your table’s pseudonyms are drawn from. It also gives the dinner its mark and every chef their face in the fridge.",
+      "tables": "The cloth the evening is laid on. Look only — nothing here changes a rule of the game."
+    },
+    "ways": {
+      "title": "How you would get it",
+      "oneByOne": "Buy one thing, keep it forever",
+      "oneByOneWhat": "A word list or a cloth, bought once and yours on every dinner you ever organise.",
+      "yearly": "Everything, for a year — {{price}}",
+      "yearlyWhat": "Every list, every cloth, and three recipes per cook, on every dinner you organise for a year.",
+      "yearlyRefund": "Bought through the store, so the store handles refunds under its own rules.",
+      "freeWhileTesting": "Free while CovertCook is being tested: switch Crème on above and all of this is yours until {{date}}, without paying for anything. After that date this is where it is bought — here, in the app.",
+      "notYet": "Not yet: there is no way to pay inside the app at the moment. Nothing here can be bought, and nothing is being held back from you."
+    },
+    "redeem": {
+      "title": "Redeem a code",
+      "what": "The only route that works today. Codes are single-use and short-lived.",
+      "label": "Your code",
+      "go": "Redeem",
+      "done": "Done — {{what}} is on your account.",
+      "invalid": "That code does not work. Check the spelling — they expire quickly, and each one can only be used once.",
+      "already": "You have already used that code.",
+      "kind": {
+        "PRO": "Crème",
+        "NAME_THEME": "the word list",
+        "TABLE_THEME": "the table cloth"
+      }
+    },
+    "ending": {
+      "MONTH": "Your Crème ends on {{date}}.",
+      "WEEK": "Your Crème ends on {{date}} — that is under a week.",
+      "whatHappens": "Dinners you have already created that use a Crème feature keep working for {{hours}} hours after that, and then go on hold until you renew. Nothing is deleted, and dinners that use nothing Crème are not affected at all.",
+      "renew": "What Crème is, and how to keep it →"
+    },
+    "round": {
+      "ending": "This dinner’s Crème cover ends on {{date}}.",
+      "endingWhat": "It was built with a Crème feature. {{hours}} hours after that date it goes on hold — still readable, but it stops moving and no more recipes can be written.",
+      "held": "This dinner is on hold.",
+      "heldWhat": "It was built with a Crème feature and its cover ran out more than {{hours}} hours ago. Nothing has been lost — everything written is still here — but it cannot move on until the Executive Chef renews."
+    },
+    "freeForNow": "free until {{date}}"
   },
   "legal": {
     "terms": "Terms",
@@ -1059,7 +1254,7 @@
     "revealConfirm": "Reveal, and record it",
     "revealed": "Written by {{name}}. This reveal has been recorded.",
     "youWereWarned": "A word from the Executive Chef",
-    "warningNoReason": "They did not say more than that.",
+    "warningGuidelines": "Something you sent did not follow the app’s guidelines. Nothing has happened to your seat. If it happens again at this dinner, the Executive Chef can remove you from it.",
     "warningRead": "I have read this",
     "blockedTitle": "People you have blocked",
     "blockHelp": "Blocking happens at a dinner, on the seat, so you never have to learn who somebody is to decide you would rather not sit with them again. Their messages leave your board straight away, and neither of you can take a seat at a dinner the other is already at. It does not end a dinner already under way — three other people’s evening is built on the chain.",
@@ -1071,7 +1266,8 @@
       "REVEAL_ONLY_FOR_REPORTED": "Only the author of a reported message can be revealed.",
       "CANNOT_BLOCK_YOURSELF": "That seat is yours.",
       "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner."
-    }
+    },
+    "fromChef": "Written by {{name}}."
   },
   "album": {
     "title": "The table, at the end",
@@ -1140,7 +1336,29 @@
       "COSTS_NOT_SHARED": "This dinner does not split its costs.",
       "SETTLEMENT_TOO_EARLY": "The bill comes after the food.",
       "BUDGET_TOO_LATE": "The roulette has run and people are writing against this budget — it cannot move now.",
-      "AMOUNT_INVALID": "Write an amount like 12.50."
+      "AMOUNT_INVALID": "Write an amount like 12.50.",
+      "MODE_SETTLED": "Whether this dinner splits its costs was settled when it was created.",
+      "ROUND_IS_OVER": "This dinner is over. Its numbers are a record now."
+    },
+    "shareFixed": "Decided now and only now: turning this on halfway through a dinner would change the deal for people who have already shopped. The budget itself can move all evening.",
+    "noCeiling": "No ceiling",
+    "setBudget": "Change the budget",
+    "budgetSaved": "The new budget is in.",
+    "budgetHostOnly": "Only the Executive Chef changes the budget.",
+    "mode": {
+      "NONE": "Not shared",
+      "NONEHint": "Everyone pays for what they bring. Nothing to tally, nothing to settle.",
+      "BUDGET": "Shared, with a budget each",
+      "BUDGETHint": "You agree a figure now, before anybody shops, so it shapes what people write rather than judging their receipts afterwards.",
+      "NO_BUDGET": "Shared, no ceiling",
+      "NO_BUDGETHint": "The table splits whatever it comes to. Everyone records what they spent and the app says who owes whom."
     }
+  },
+  "themes": {
+    "free": "Free",
+    "notYet": "Not yours yet — nothing can be bought in the app at the moment, so this one is waiting.",
+    "locked": "That theme is not unlocked on this account.",
+    "paused": "Back in the workshop. It is being redrawn, so nobody can lay a table with it yet — not even with Crème. It will come back on this shelf when it is finished.",
+    "pausedTag": "In the workshop"
   }
 }

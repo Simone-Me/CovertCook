@@ -6,7 +6,8 @@ import { ChatThread } from '../chat/ChatThread'
 import { useRound } from '../rounds/hooks'
 import {
   getMyAssignment,
-  getMyBrief,
+  getMyBriefOffers,
+  pickChosenBrief,
   getResults,
   listRoundRecipes,
   saveRecipes,
@@ -69,9 +70,15 @@ export function ResultsPage() {
     queryFn: () => getMyAssignment(roundId as string),
   })
   const { data: myBrief } = useQuery({
+    // One key, one shape (see the note above the same query in
+    // RoundHomePage). CookViewPage holds this exact key with the array, and a
+    // fetcher here that returned a single row put an object in the cache for
+    // it to call .filter() on — a throw during render, which is a blank page.
+    // The row this screen wants is picked from the array instead.
     queryKey: ['rounds', roundId, 'my-brief'],
     enabled: !!roundId,
-    queryFn: () => getMyBrief(roundId as string),
+    queryFn: () => getMyBriefOffers(roundId as string),
+    select: pickChosenBrief,
   })
   // The recipes themselves — the one call in this app that reads somebody
   // else's brief (0058). Fetched with the page rather than on arming, so the

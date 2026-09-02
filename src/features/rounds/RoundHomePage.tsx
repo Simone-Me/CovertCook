@@ -9,11 +9,15 @@ import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { MyWarnings } from './MyWarnings'
 import { fromCents, roundDeletesAt } from '../../lib/rpc'
+import { tableThemeClass, themeMark } from '../../lib/themes'
 import { Envelope } from './Envelope'
 import { CutleryLink } from '../../components/CutleryLink'
 import { CopyButton } from '../../components/CopyButton'
 import { Icon } from '../../components/Icon'
 import { InlineConfirm } from '../../components/InlineConfirm'
+import { TurnBackRow } from '../../components/TurnBack'
+import { ChoiceList } from '../../components/ChoiceList'
+import { RoundProNotice } from '../pro/ProNotices'
 import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
 import { MenuPanel } from './MenuPanel'
@@ -21,6 +25,8 @@ import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import { CostsPanel } from './CostsPanel'
 import {
+  accessAdmitsCode,
+  accessAdmitsInvites,
   advancePhase,
   cancelLeaveRequest,
   leaveRound,
@@ -39,7 +45,7 @@ import {
   getPendingMembers,
   getBoardUnread,
   getRoundProgress,
-  getMyBriefDraft,
+  getMyBriefDrafts,
   getUnreadCount,
   getVoteProgress,
   inviteMember,
@@ -51,12 +57,17 @@ import {
   skipVoting,
   type DeadlineMinutes,
   NO_SUCH_CHEF,
+  NOT_BY_INVITATION,
   ROUND_PHASE_ORDER,
   type RemovalMode,
   type VotingMode,
 } from '../../lib/rpc'
 
 type OpenDrawer = 'chefs' | 'allergies' | 'info' | 'costs' | null
+
+// The same order the creation form asks in, so a host meets the four choices
+// laid out the way they first met them.
+const PASS_VOTING_ORDER: VotingMode[] = ['MANUAL', 'LIVE', 'TIMED', 'DISABLED']
 
 // The two marks the Messages envelope can carry, in rank order — see
 // messageMark below for which wins.
@@ -75,13 +86,17 @@ export function RoundHomePage() {
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
-  const [inviteEmail, setInviteEmail] = useState('')
+  const [inviteName, setInviteName] = useState('')
   const [inviteNote, setInviteNote] = useState<string | null>(null)
   const [inviting, setInviting] = useState(false)
   const [open, setOpen] = useState<OpenDrawer>(null)
   // Two decisions that used to be browser dialogs. Both are held here and
   // answered on the page, beside the control that raised them.
   const [rerollAsk, setRerollAsk] = useState(false)
+  // The turning arrow on the pass, armed. Going back on the voting method
+  // chosen weeks ago at creation is exactly the kind of decision the arrow
+  // exists for: offered, never one tap away.
+  const [reVoting, setReVoting] = useState(false)
   const [removeAsk, setRemoveAsk] = useState<{ memberId: string; mode: RemovalMode } | null>(null)
 
   const { data: dietaryPanel } = useQuery({
@@ -93,10 +108,20 @@ export function RoundHomePage() {
   // Your own recipe, not the table's tally. The envelope used to read
   // "1 / 3" — a number about everyone else, on the one drawer that is
   // entirely about you, so it looked like a score you were losing.
+  //
+  // THE FETCHER HERE HAS TO BE THE ONE THE EDITOR USES, not the convenience
+  // wrapper that returns the first row. React Query caches by key, not by
+  // function: this key held a single object while BriefEditorPage's copy of it
+  // expected the array, so opening this page and then the editor handed the
+  // editor an object to call .find() on — a throw during render, and with no
+  // error boundary above it React unmounted the whole application. A white
+  // page, nothing in it, F5 the only way out. One key, one shape; the first
+  // row is picked here, where only this page wants it.
   const { data: myBrief } = useQuery({
     queryKey: ['rounds', roundId, 'my-brief-draft'],
     enabled: !!roundId && ROUND_PHASE_ORDER.indexOf(round?.status ?? 'DRAFT') >= ROUND_PHASE_ORDER.indexOf('ASSIGNED'),
-    queryFn: () => getMyBriefDraft(roundId as string),
+    queryFn: () => getMyBriefDrafts(roundId as string),
+    select: (rows) => rows[0] ?? null,
   })
 
   const { data: hasAssignment } = useQuery({
@@ -269,7 +294,12 @@ export function RoundHomePage() {
   // the list is seats rather than people. Everyone is uncovered at the same
   // instant when the round locks — see "Quando si scoprono i chef" in
   // DESIGN.md for why arrival order is the thing being hidden.
-  const rosterCovered = round.status === 'DRAFT' || round.status === 'OPEN'
+  // …except on an OPEN dinner, which has no pseudonyms to reveal: the names
+  // are already everybody's own, so there is nothing for the bar to cover and
+  // saying "they'll be uncovered when sign-ups close" would be a promise about
+  // a thing that is not happening.
+  const rosterCovered =
+    round.anonymity !== 'OPEN' && (round.status === 'DRAFT' || round.status === 'OPEN')
 
   // Read in the dinner's timezone, not the reader's: a guest flying in wants
   // the time they have to be at the door, not what their own phone calls that
@@ -481,12 +511,18 @@ export function RoundHomePage() {
     setInviteNote(null)
     setInviting(true)
     try {
-      await inviteMember(roundId, inviteEmail)
-      setInviteEmail('')
+      await inviteMember(roundId, inviteName)
+      setInviteName('')
       setInviteNote(t('rounds.invitations.inviteSent'))
     } catch (err) {
       const message = err instanceof Error ? err.message : t('errors.generic')
-      setInviteNote(message === NO_SUCH_CHEF ? t('rounds.invitations.noSuchChef') : message)
+      const known =
+        message === NO_SUCH_CHEF
+          ? t('rounds.invitations.noSuchChef')
+          : message === NOT_BY_INVITATION
+            ? t('rounds.invitations.notByInvitation')
+            : null
+      setInviteNote(known ?? message)
     } finally {
       setInviting(false)
     }
@@ -533,14 +569,22 @@ export function RoundHomePage() {
   }
 
   return (
-    <div className="cloth table-scene">
+    // The cloth this dinner is laid on (0072). One class, and the .theme-*
+    // block in table.css swaps the three --cloth-* tokens underneath: the
+    // papers, envelopes and documents on top of it keep their own colours,
+    // because paper on a dark table is still paper.
+    <div className={`cloth table-scene ${tableThemeClass(round.table_theme)}`}>
       <TableProps status={round.status} />
 
       <div className="stack" style={{ position: 'relative', zIndex: 2, gap: 11 }}>
         <div className="paper">
           <div className="row" style={{ justifyContent: 'space-between' }}>
+            {/* The list's own mark, not a random accent: choosing herbs or
+                the brigade chooses the glyph that stands for the dinner and
+                the faces the fridge hands out, so the evening reads as one
+                thing rather than three unrelated decorations (0072). */}
             <h1 style={{ margin: 0 }}>
-              {round.accent_emoji} {round.name}
+              {themeMark(round.name_theme)} {round.name}
             </h1>
             {isHost && <CutleryLink to={`/rounds/${roundId}/settings`} />}
           </div>
@@ -556,6 +600,12 @@ export function RoundHomePage() {
         {/* Said once, so the missing controls read as a rule rather than as
             something broken. */}
         {frozen && <p className="notice">{t('rounds.frozen')}</p>}
+
+        {/* Above the pass, not inside it: everybody at this table needs to know
+            why the dinner has stopped, and the pass is the Executive Chef's
+            drawer. Only the host is offered the way out, because only the host
+            has one. */}
+        <RoundProNotice round={round} isHost={round.host_id === profile?.id} />
 
         {/* The countdown, on the dinner it is about. Two sentences: when it
             goes, and what you keep — because "this will be deleted" on its own
@@ -599,38 +649,57 @@ export function RoundHomePage() {
         {round.status === 'OPEN' && (
           <div className="stack">
             <span className="pass__section-title">{t('rounds.actions.fillTable')}</span>
-            <label>{t('rounds.shareLink')}</label>
-            {/* Two buttons, because there are two things to hand somebody and
-                they are not interchangeable. A link opens the app on the right
-                screen with the code already in it — best by far, when you can
-                send one. The code alone is what you read out at a table, put in
-                a group chat that mangles links, or type into a phone that has
-                the app already open. One button beside a printed code, copying
-                the link, said neither. */}
-            <div className="row">
-              <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
-              <CopyButton value={round.join_code} label={t('rounds.copyCode')} />
-              <CopyButton value={shareLink} label={t('rounds.copyLink')} />
-            </div>
 
-            <label htmlFor="invite-email">{t('rounds.invitations.invite')}</label>
-            <div className="row">
-              <input
-                id="invite-email"
-                type="email"
-                placeholder={t('rounds.invitations.inviteEmail')}
-                value={inviteEmail}
-                onChange={(e) => setInviteEmail(e.target.value)}
-              />
-              <button
-                type="button"
-                className="secondary"
-                disabled={inviting || !inviteEmail.trim()}
-                onClick={onInvite}
-              >
-                {t('actions.add')}
-              </button>
-            </div>
+            {/* Each door is offered only where the host actually left one open
+                (0071). Before this, an invitation-only dinner printed a code
+                that the server now refuses, and a code dinner offered a guest
+                list that goes nowhere — both of them silently, which is the
+                worst way to be told. */}
+            {accessAdmitsCode(round.access) && (
+              <>
+                <label>{t('rounds.shareLink')}</label>
+                {/* Two buttons, because there are two things to hand somebody
+                    and they are not interchangeable. A link opens the app on
+                    the right screen with the code already in it — best by far,
+                    when you can send one. The code alone is what you read out
+                    at a table, put in a group chat that mangles links, or type
+                    into a phone that has the app already open. */}
+                <div className="row">
+                  <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
+                  <CopyButton value={round.join_code} label={t('rounds.copyCode')} />
+                  <CopyButton value={shareLink} label={t('rounds.copyLink')} />
+                </div>
+              </>
+            )}
+
+            {accessAdmitsInvites(round.access) && (
+              <>
+                <label htmlFor="invite-username">{t('rounds.invitations.invite')}</label>
+                <div className="row">
+                  {/* A username, not an address (0071). The address was the one
+                      thing about an account its owner never chose to show
+                      anybody; the username is the name they picked. */}
+                  <input
+                    id="invite-username"
+                    type="text"
+                    autoComplete="off"
+                    autoCapitalize="none"
+                    placeholder={t('rounds.invitations.inviteUsername')}
+                    value={inviteName}
+                    onChange={(e) => setInviteName(e.target.value)}
+                  />
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={inviting || !inviteName.trim()}
+                    onClick={onInvite}
+                  >
+                    {t('actions.add')}
+                  </button>
+                </div>
+                <p className="muted" style={{ margin: 0 }}>{t('rounds.invitations.inviteHelp')}</p>
+              </>
+            )}
             {inviteNote && <p className="muted">{inviteNote}</p>}
           </div>
         )}
@@ -709,12 +778,18 @@ export function RoundHomePage() {
           </>
         )}
 
-        {/* Courses are decided once the table is final, not while it is still
-            filling: the number of slots has to equal the number of chefs, and
-            that number is only settled at LOCKED. Left in OPEN it was a sum
-            that changed under the host every time somebody joined. */}
-        {round.status === 'LOCKED' && roundId && (
-          <MenuPanel roundId={roundId} slotMode={round.slot_mode} />
+        {/* Courses stay changeable for the whole of the dinner's life before
+            the roulette — which is what set_slot_mode has always allowed
+            (DRAFT, OPEN, LOCKED — 0036) and what the pass was not offering.
+            Showing it only at LOCKED made a host who wanted specific courses
+            wait for a phase, and a host who changed their mind at LOCKED think
+            they had missed their chance.
+            The sum still only balances at LOCKED, and the panel says so
+            itself: the number of courses has to equal the number of chefs, and
+            that number is only settled once the door shuts. Earlier it is a
+            choice being made, not a sum being checked. */}
+        {['DRAFT', 'OPEN', 'LOCKED'].includes(round.status) && roundId && (
+          <MenuPanel roundId={roundId} slotMode={round.slot_mode} status={round.status} />
         )}
 
         {/* A hand-counted dinner has no deadline, no progress count and no
@@ -723,7 +798,38 @@ export function RoundHomePage() {
         {(round.status === 'DINNER' || round.status === 'VOTING') && round.voting_mode === 'MANUAL' && (
           <div className="stack">
             <span className="pass__section-title">{t('rounds.actions.voting')}</span>
-            <PassNote short={t('vote.manual.chosen')} long={t('vote.MANUALHint')} />
+            <PassNote short={t('vote.manual.chosen')} long={t('rounds.voting.MANUALHint')} />
+
+            {/* The same arrow the other branch carries, because a table that
+                said "hands up" three weeks ago is exactly as entitled to change
+                its mind as one that said "phones out". Without this, choosing a
+                show of hands at creation was the one voting decision that could
+                not be revisited — and nothing in the database said so. */}
+            {round.status === 'DINNER' && (
+              <TurnBackRow
+                title={t('vote.style')}
+                answer={t('rounds.voting.MANUAL')}
+                open={reVoting}
+                label={t('rounds.voting.changeMethod')}
+                onToggle={() => setReVoting((v) => !v)}
+              >
+                <p className="muted" style={{ margin: 0 }}>{t('rounds.voting.chosenAtCreation')}</p>
+                <ChoiceList
+                  name="vote-style-manual"
+                  value={round.voting_mode}
+                  onChange={(v) => {
+                    onVotingMode(v as VotingMode)
+                    setReVoting(false)
+                  }}
+                  options={PASS_VOTING_ORDER.map((mode) => ({
+                    value: mode,
+                    label: t(`rounds.voting.${mode}`),
+                    hint: t(`rounds.voting.${mode}Hint`),
+                  }))}
+                />
+              </TurnBackRow>
+            )}
+
             {round.status === 'DINNER' ? (
               <button type="button" onClick={onOpenVoting}>
                 {t('vote.openNow')}
@@ -736,35 +842,69 @@ export function RoundHomePage() {
           </div>
         )}
 
+        {/* A DINNER WITH NO VOTE STILL GETS THIS SECTION, because "no vote"
+            is now a choice like the other three rather than a door that shut
+            behind the host (0078). Without it the arrow had nowhere to live on
+            exactly the dinner that most needed it: the one where somebody said
+            in June that nobody would want to vote, and the table said in
+            October that they did.
+            The moment a method is chosen the round stops being voteless — 
+            `voting_enabled` is generated from `voting_mode` — so the button to
+            open the vote and the ballot envelope below appear on their own. */}
         {(round.status === 'DINNER' || round.status === 'VOTING') &&
-          round.voting_mode !== 'DISABLED' &&
           round.voting_mode !== 'MANUAL' && (
           <div className="stack">
             <span className="pass__section-title">{t('rounds.actions.voting')}</span>
 
-            {/* Chosen here rather than at creation. Three weeks before a
-                dinner nobody knows whether the eight of them will be round a
-                table with phones away or scattered home afterwards. */}
+            {/* THE ARROW, NOT A SELECT. The method was chosen when the dinner
+                was created, possibly weeks ago and possibly by somebody who
+                did not yet know whether the eight of them would be round a
+                table with phones away or scattered home afterwards. So it is
+                offered here as a decision to go back on rather than as an
+                open dropdown: the same turning arrow that un-serves a course
+                on the phase menu, armed by a tap and answered by a second one.
+                An always-open select in the middle of the pass invited a host
+                to change the rules of a vote by brushing the screen. */}
             {round.status === 'DINNER' && (
-              <div>
+              <TurnBackRow
+                title={t('vote.style')}
+                answer={t(`rounds.voting.${round.voting_mode}`)}
+                open={reVoting}
+                label={t('rounds.voting.changeMethod')}
+                onToggle={() => setReVoting((v) => !v)}
+              >
+                <p className="muted" style={{ margin: 0 }}>{t('rounds.voting.chosenAtCreation')}</p>
                 <label htmlFor="vote-style">{t('vote.style')}</label>
-                <select
-                  id="vote-style"
+                {/* All four, including "no voting" — which is why 0078
+                    exists. Rows rather than a dropdown, the same shape the
+                    creation form uses, so the four are compared rather than
+                    revealed one at a time. */}
+                <ChoiceList
+                  name="vote-style"
                   value={round.voting_mode}
-                  onChange={(e) => onVotingMode(e.target.value as VotingMode)}
-                >
-                  <option value="LIVE">{t('rounds.voting.LIVE')}</option>
-                  <option value="TIMED">{t('rounds.voting.TIMED')}</option>
-                  <option value="MANUAL">{t('vote.MANUAL')}</option>
-                </select>
-                <p className="muted">{t(`rounds.voting.${round.voting_mode}Hint`)}</p>
-              </div>
+                  onChange={(v) => {
+                    onVotingMode(v as VotingMode)
+                    setReVoting(false)
+                  }}
+                  options={PASS_VOTING_ORDER.map((mode) => ({
+                    value: mode,
+                    label: t(`rounds.voting.${mode}`),
+                    hint: t(`rounds.voting.${mode}Hint`),
+                  }))}
+                />
+              </TurnBackRow>
             )}
 
-            {round.status === 'DINNER' && (
+            {/* Only once there is a method to open. On a voteless dinner the
+                section is just the arrow and its explanation. */}
+            {round.status === 'DINNER' && round.voting_mode !== 'DISABLED' && (
               <button type="button" onClick={onOpenVoting}>
                 {t('vote.openNow')}
               </button>
+            )}
+
+            {round.voting_mode === 'DISABLED' && (
+              <p className="muted" style={{ margin: 0 }}>{t('rounds.voting.DISABLEDHint')}</p>
             )}
 
             {/* How many have finished, never who and never what. A share as
@@ -840,9 +980,11 @@ export function RoundHomePage() {
               )
             )}
 
-            <button type="button" className="secondary" onClick={onSkipVoting}>
-              {t('vote.skip')}
-            </button>
+            {round.voting_mode !== 'DISABLED' && (
+              <button type="button" className="secondary" onClick={onSkipVoting}>
+                {t('vote.skip')}
+              </button>
+            )}
           </div>
         )}
 
@@ -905,6 +1047,28 @@ export function RoundHomePage() {
           <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.nothing')}</p>
         )}
 
+        {/* MOVING THE DINNER ON, at the foot of the pass rather than at the
+            foot of the page.
+            It used to sit under the last envelope — past the roster, the
+            recipes, the messages, the vote, the allergies and the address —
+            which put the single most consequential control the Executive Chef
+            has at the end of a scroll everybody else's drawers were in the
+            middle of. Worse, it was outside the one place this app says every
+            host action lives: the pass only ever carried half the job, and the
+            other half was somewhere you had to remember.
+            So it closes the pass. Everything the Executive Chef is asked to do
+            for this phase is read on the way down, and the last thing under it
+            is the button that ends the phase. */}
+        {nextPhase && (
+          <div className="stack pass__advance">
+            <hr className="pass__rule" />
+            {nextBlockedReason && <p className="muted" style={{ margin: 0 }}>{nextBlockedReason}</p>}
+            <button type="button" onClick={onAdvance} disabled={!!nextBlockedReason}>
+              {t('actions.next')} → {t(`rounds.phase.${nextPhase}`)}
+            </button>
+          </div>
+        )}
+
           </HostPass>
         )}
 
@@ -929,7 +1093,12 @@ export function RoundHomePage() {
                 // Pending members show their real name — approving a
                 // pseudonym is approving nobody (0015). Once approved they
                 // are their secret name to everyone, host too.
-                const name = pendingById.get(m.id)?.real_name ?? m.secret_name
+                // Real name first wherever the server sent one — an OPEN
+                // round, a SPY round read by its host, or a dinner that is
+                // over (0073). A pseudonym printed beside a name you already
+                // know is a second name to learn for nothing.
+                const name =
+                  pendingById.get(m.id)?.real_name ?? m.display_name ?? m.secret_name
                 return (
                 <div key={m.id} className="row" style={{ justifyContent: 'space-between' }}>
                   <span>
@@ -1041,7 +1210,11 @@ export function RoundHomePage() {
         <Envelope
           icon={<Icon name="myRecipe" />}
           name={t('rounds.drawers.myRecipe')}
-          meta={assigned ? t(`briefs.state.${briefState}`) : undefined}
+          // Before the roulette, what this drawer IS; after it, how far you
+          // have got. The name alone was carrying both jobs and doing the
+          // first one badly — "My order" says the direction but not that the
+          // order is yours to write.
+          meta={assigned ? t(`briefs.state.${briefState}`) : t('rounds.drawers.myRecipeMeta')}
           waitingFor={waitBrief}
           to={`/rounds/${roundId}/brief`}
           tilt={2}
@@ -1133,6 +1306,7 @@ export function RoundHomePage() {
                 status={round.status}
                 budgetPerHead={round.budget_per_head}
                 currency={round.currency}
+                isHost={isHost}
               />
             )}
           </Envelope>
@@ -1210,14 +1384,6 @@ export function RoundHomePage() {
           )}
         </Envelope>
 
-        {isHost && nextPhase && (
-          <div className="paper stack">
-            {nextBlockedReason && <p className="muted">{nextBlockedReason}</p>}
-            <button type="button" onClick={onAdvance} disabled={!!nextBlockedReason}>
-              {t('actions.next')} → {t(`rounds.phase.${nextPhase}`)}
-            </button>
-          </div>
-        )}
       </div>
     </div>
   )

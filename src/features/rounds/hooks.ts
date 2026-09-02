@@ -6,6 +6,7 @@ import type {
   RoundAnonymity,
   RoundStatus,
   SlotMode,
+  TableTheme,
   VotingMode,
 } from '../../lib/rpc'
 
@@ -39,6 +40,22 @@ export interface RoundRow {
   // Which pseudonym set this dinner draws from (0038). Fixed at creation:
   // renaming people mid-game would orphan every message addressed to them.
   name_theme: NameTheme
+  // How the cloth is dressed (0072). Also fixed at creation — the table is the
+  // one thing everybody is looking at, and re-dressing it mid-evening changes
+  // the room under people who are mid-sentence.
+  table_theme: TableTheme
+  // Whether the Executive Chef was PRO when this dinner was created (0075).
+  // Stamped rather than read live, and it covers everybody at the table: a
+  // guest at a PRO host's dinner gets what it opens without owning anything.
+  is_pro: boolean
+  // How many recipes each sender may offer their cook (0077). 1 everywhere but
+  // a PRO dinner; fixed once the dinner exists.
+  recipes_per_brief: number
+  // When this dinner's PRO cover runs out, the 72-hour grace included (0079).
+  // Null means it never does — a perpetual unlock, or a dinner that was never
+  // PRO. Past it, a dinner that is actually built on something PRO stops
+  // moving until its host renews.
+  pro_until: string | null
   // How many hands are in the room for a MANUAL vote (0045).
   manual_voters: number | null
   requires_approval: boolean
@@ -59,7 +76,7 @@ export interface RoundRow {
 }
 
 const ROUND_COLUMNS =
-  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency,photographer_profile_id'
+  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,table_theme,is_pro,recipes_per_brief,pro_until,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency,photographer_profile_id'
 
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing
@@ -142,6 +159,11 @@ export interface RoundMemberRow {
   // once when the door closes, so that arrival order can't be read back as
   // identity (0032). Your own name is always present.
   secret_name: string | null
+  // The real one, and only where this reader is entitled to it: an OPEN round,
+  // a SPY round read by its host, or a dinner that is over (0073). Where it is
+  // present it is the name to print — a pseudonym beside a real name is a
+  // second name to learn for nothing.
+  display_name: string | null
   role: 'HOST' | 'PLAYER'
   status: 'ACTIVE' | 'LEFT' | 'REMOVED'
   approved: boolean

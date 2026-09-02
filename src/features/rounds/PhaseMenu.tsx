@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { visiblePhaseOrder, ROUND_PHASE_ORDER, type RoundStatus } from '../../lib/rpc'
 import { InlineConfirm } from '../../components/InlineConfirm'
+import { TurnBack } from '../../components/TurnBack'
 
 /**
  * The dinner's phases, written as a menu card.
@@ -57,16 +58,11 @@ export function PhaseMenu({
                 <span className="menucard__name">{t(`rounds.phase.${phase}`)}</span>
 
                 {isLastDone && previousPhase && (
-                  <button
-                    type="button"
-                    className={`menucard__turn${offering ? ' is-open' : ''}`}
-                    aria-expanded={offering}
-                    title={t('rounds.settings.stepBackTo', { phase: t(`rounds.phase.${previousPhase}`) })}
-                    aria-label={t('rounds.settings.stepBackTo', { phase: t(`rounds.phase.${previousPhase}`) })}
-                    onClick={() => setOffering((v) => !v)}
-                  >
-                    ↺
-                  </button>
+                  <TurnBack
+                    open={offering}
+                    label={t('rounds.settings.stepBackTo', { phase: t(`rounds.phase.${previousPhase}`) })}
+                    onToggle={() => setOffering((v) => !v)}
+                  />
                 )}
               </div>
 

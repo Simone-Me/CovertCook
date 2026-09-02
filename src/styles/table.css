@@ -509,8 +509,52 @@
   filter: brightness(1.08);
 }
 
+/* Nothing waiting. Present, so it can be looked at and believed, and quiet
+   enough that it never competes with the one that is asking for something. */
+.alert-pip.is-quiet {
+  border-color: var(--border);
+  background: none;
+  color: var(--text-muted);
+  font-weight: 500;
+  opacity: 0.65;
+  cursor: default;
+}
+
+.alert-pip.is-quiet:hover,
+.alert-pip.is-quiet:focus-visible {
+  filter: none;
+}
+
 .alert-pip__count {
   font-variant-numeric: tabular-nums;
+}
+
+/* The small, last button on a card: the one that says "I have read this and
+   it is over". Shaped like the language pills in the profile on purpose —
+   same weight of decision, same size of target. */
+.pillbtn {
+  width: auto;
+  padding: 3px 12px;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: none;
+  color: var(--text-muted);
+  cursor: pointer;
+}
+
+.pillbtn:hover:not(:disabled),
+.pillbtn:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+/* A reported photograph on the alert that reported it: big enough to judge,
+   small enough that a moderation screen is not a gallery. */
+.alert-photo {
+  max-width: min(100%, 320px);
+  border-radius: 8px;
+  border: 1px solid var(--border);
 }
 
 /* A reported phrase, quoted rather than restated. It is somebody's words on a
@@ -727,6 +771,23 @@
   flex-direction: row-reverse;
   background: var(--accent);
   color: var(--accent-contrast);
+}
+
+/* A notice from the Executive Chef. Wider than a phrase, because it is one,
+ * and pinned in the fridge's own paper rather than in a bubble — it should
+ * read as something stuck to the door, not as somebody talking. */
+.chat-bubble--notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 6px;
+  max-width: 96%;
+  padding: 6px 9px;
+  border-left: 3px solid var(--accent);
+  border-radius: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+  background: rgba(255, 250, 235, 0.98);
+  box-shadow: 0 1px 1px rgba(60, 90, 105, 0.16), 0 3px 8px rgba(60, 90, 105, 0.14);
 }
 
 .chat-bubble__food {
@@ -1977,4 +2038,510 @@
    pretending to be a destination. */
 .editable-note {
   margin: 8px 0 0;
+}
+
+/* ---------------------------------------------------------------------------
+ * How the cloth is dressed (0072).
+ *
+ * The default table — red checks on cream — is still the app's own face and
+ * nothing here changes it: `.theme-checks` is written out for completeness and
+ * sets exactly what :root already says. The rest are a *dinner's* choice, not
+ * the reader's, which is why this is not the dark-mode block tokens.css says
+ * there will never be: it is one host dressing one evening, and every guest at
+ * that evening sees the same cloth.
+ *
+ * Each theme is a token swap and nothing else. The papers, envelopes and
+ * documents laid on the table keep their own light ground on purpose — paper
+ * on a dark table is still paper, and re-inventing the readable surfaces per
+ * theme is how a look becomes seven codebases.
+ * ------------------------------------------------------------------------- */
+
+.theme-checks {
+  --cloth-ground: #fffcf6;
+  --cloth-check: rgba(198, 32, 44, 0.5);
+  --cloth-square: 13px;
+}
+
+/* Linen, pressed. No checks at all — the whole point of the elegant table is
+   that there is nothing printed on it — so the two gradients are turned into a
+   whisper of weave rather than a grid. */
+.theme-elegant {
+  --cloth-ground: #f4f1e8;
+  --cloth-check: rgba(120, 110, 92, 0.07);
+  --cloth-square: 4px;
+}
+
+.theme-scifi {
+  --cloth-ground: #101820;
+  --cloth-check: rgba(94, 234, 212, 0.22);
+  --cloth-square: 22px;
+}
+
+/* Damask: gold on wine, and the grid pulled wide enough to read as a repeat
+   rather than as graph paper. */
+.theme-baroque {
+  --cloth-ground: #3c1220;
+  --cloth-check: rgba(198, 162, 74, 0.28);
+  --cloth-square: 18px;
+}
+
+.theme-halloween {
+  --cloth-ground: #1c1614;
+  --cloth-check: rgba(232, 121, 27, 0.32);
+  --cloth-square: 15px;
+}
+
+.theme-xmas {
+  --cloth-ground: #f6f3e9;
+  --cloth-check: rgba(23, 96, 58, 0.42);
+  --cloth-square: 13px;
+}
+
+/* Confetti rather than a grid: the one theme where the repeat is dots, because
+   a carnival table is covered in things that fell on it. */
+.theme-carnival {
+  --cloth-ground: #fffdf5;
+  --cloth-check: transparent;
+}
+
+.theme-carnival.cloth {
+  background-image:
+    radial-gradient(circle at 20% 30%, rgba(198, 32, 44, 0.5) 0 3px, transparent 3px),
+    radial-gradient(circle at 70% 15%, rgba(240, 170, 30, 0.55) 0 3px, transparent 3px),
+    radial-gradient(circle at 45% 75%, rgba(40, 120, 190, 0.45) 0 3px, transparent 3px),
+    radial-gradient(circle at 88% 62%, rgba(90, 160, 80, 0.45) 0 3px, transparent 3px);
+  background-size: 76px 76px;
+}
+
+/* The dark cloths need their own muted ink for the few lines that sit directly
+   on the table rather than on paper — a page-level "…" or an error above the
+   first envelope. Everything inside .paper keeps the app's own colours. */
+.theme-scifi,
+.theme-baroque,
+.theme-halloween {
+  --text-muted: #cdbfae;
+}
+
+/* Nothing animates per theme, and that is a decision rather than an omission:
+   the cloth is a background, and a background that moves is a background you
+   end up reading instead of the dinner. */
+
+/* ---------------------------------------------------------------------------
+ * The shelf: a list of looks, some of them locked (0072).
+ *
+ * A locked row is dimmed and still fully readable — the name, what it is, and
+ * what it costs. Dimming it to the point of illegibility would be a shopfront
+ * with the lights off.
+ * ------------------------------------------------------------------------- */
+
+/* Capped and scrolling, so a shelf of seven does not push the dinner off the
+   screen. The row height is an estimate rather than a measurement — the rows
+   are two lines of text and a mark — and it only has to be close: the point is
+   that the box ends mid-row, which is what says "there is more under this"
+   far better than a scrollbar does. */
+.shelf--scroll {
+  max-height: calc(var(--shelf-rows, 3.5) * 62px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+}
+
+.shelf__row {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 10px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-paper);
+}
+
+.shelf__row.is-chosen {
+  border-color: var(--paper-edge);
+  background: var(--bg-elevated);
+}
+
+.shelf__row.is-locked {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.shelf__mark {
+  flex: none;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.shelf__text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.shelf__name {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.shelf__hint {
+  font-size: 12.5px;
+}
+
+/* Free, or a price. Both are the same shape so the eye can compare down the
+   column instead of hunting for which rows have one. */
+.shelf__tag {
+  margin-left: 7px;
+  padding: 1px 6px;
+  border: 1px solid var(--env-edge);
+  border-radius: 999px;
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  vertical-align: 1px;
+}
+
+.shelf__tag--price {
+  border-color: var(--paper-edge);
+  color: var(--accent);
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.shelf__locked {
+  font-size: 11.5px;
+  color: var(--text-muted);
+  font-style: italic;
+}
+
+/* ---------------------------------------------------------------------------
+ * The two boxes of rules on the creation form.
+ *
+ * A HOST IS MAKING TWO DIFFERENT KINDS OF DECISION and the form used to make
+ * them look identical: seven folded rows in one card, some of which could be
+ * revisited over dinner and some of which could never be touched again. The
+ * only reliable way to tell them apart was to try.
+ *
+ * So they are two objects. The fixed box is bound in the app's own red — the
+ * colour it already uses for wax seals and for the pass, which is to say for
+ * the things that are settled — and it carries the warning in its heading. The
+ * changeable box is bound in green and says, once, that the turning arrow can
+ * come back to any of it. Colour is doing the work here rather than repeating
+ * "fixed" under every control, but colour is never doing it *alone*: each
+ * heading also says which kind of box it is, because a host who cannot
+ * distinguish red from green is still making the same commitment.
+ * ------------------------------------------------------------------------- */
+
+.rules {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px 15px 16px;
+  border: 1px solid var(--border);
+  border-left-width: 4px;
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+  box-shadow: var(--paper-shadow);
+}
+
+.rules__head {
+  padding-bottom: 9px;
+  border-bottom: 1px solid var(--env-edge);
+}
+
+.rules__title {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.rules__warn,
+.rules__note {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+}
+
+.rules--fixed {
+  border-color: var(--paper-edge);
+  border-left-color: var(--accent);
+}
+
+.rules--fixed .rules__title {
+  color: var(--accent);
+}
+
+.rules--fixed .rules__warn {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.rules--live {
+  border-color: var(--diet-bg);
+  border-left-color: var(--ok);
+}
+
+.rules--live .rules__title {
+  color: var(--ok);
+}
+
+.rules--live .rules__note {
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+ * A setting with the turning arrow beside it (components/TurnBack.tsx).
+ *
+ * Closed, it is a line of fact: what this dinner is doing right now. Open, the
+ * way to change it drops out underneath. The arrow is the same one the phase
+ * menu uses to un-serve a course, because it is the same gesture.
+ * ------------------------------------------------------------------------- */
+
+.turnrow {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.turnrow__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.turnrow__text {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.turnrow__title {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.turnrow__answer {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.turnrow__body {
+  padding-left: 2px;
+  border-left: 2px solid var(--paper-edge);
+  padding-inline-start: 10px;
+}
+
+/* The last thing in the pass: the button that ends the phase. Ruled off from
+   whatever the phase was asking for, because reading "you have five recipes in"
+   and "move the dinner on" as one paragraph is how a host advances a phase they
+   meant to wait on. */
+.pass__advance {
+  margin-top: 4px;
+}
+
+/* ---------------------------------------------------------------------------
+ * The sender's ideas, and the cook's choice between them (0077).
+ *
+ * One strip of tabs, used from both sides — writing three and reading three
+ * are the same shape of decision — so a reader who has learned it as a sender
+ * already knows it as a cook. They wrap rather than scroll: there are at most
+ * three, and a dish name is as long as somebody felt like making it.
+ * ------------------------------------------------------------------------- */
+
+.ideatabs {
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.ideatab {
+  flex: 0 1 auto;
+  max-width: 100%;
+  padding: 6px 12px;
+  font-size: 13px;
+  overflow-wrap: anywhere;
+}
+
+.ideatab.is-now {
+  font-weight: 700;
+}
+
+/* The tick on the one being cooked. It is not the same fact as "the tab you
+   are reading", and the two have to be legible at once. */
+.ideatab__mark {
+  opacity: 0.75;
+}
+
+/* ---------------------------------------------------------------------------
+ * PRO: the shopfront, and the honest label on it (0075).
+ * ------------------------------------------------------------------------- */
+
+.pro-chip {
+  flex: none;
+  padding: 3px 9px;
+  border: 1px solid var(--paper-edge);
+  border-radius: 999px;
+  background: var(--pass-env);
+  color: var(--pass-ink);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.pro-status {
+  border-left: 3px solid var(--accent);
+}
+
+/* One card per thing PRO opens, laid out as a shelf that scrolls sideways on a
+   phone. Sideways rather than a grid: these are objects on a shelf and there
+   are five of them, and a two-column grid of five leaves a hole. */
+.prorow {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  padding-bottom: 6px;
+  scroll-snap-type: x mandatory;
+}
+
+.procard {
+  flex: 0 0 148px;
+  scroll-snap-align: start;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  font-size: 13px;
+}
+
+.procard.is-owned {
+  border-color: var(--ok);
+}
+
+.procard__mark {
+  font-size: 26px;
+  line-height: 1.1;
+}
+
+/* The cloth, actually drawn. Everything being sold here is what it looks like,
+   so a swatch is the description — the .cloth and .theme-* classes are the same
+   ones the real table wears, which is what makes this a preview rather than an
+   approximation of one. */
+.procard__swatch {
+  display: block;
+  height: 46px;
+  border: 1px solid var(--env-edge);
+  border-radius: 3px;
+}
+
+.procard__eg {
+  font-size: 11.5px;
+  line-height: 1.35;
+}
+
+.procard__price {
+  margin-top: auto;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.procard.is-owned .procard__price {
+  color: var(--ok);
+}
+
+.profree__link {
+  margin: 8px 0 0;
+  font-size: 13px;
+}
+
+/* The two PRO warnings, and the hold. A month out is a note; a week out is the
+   same note leaning on the accent; on hold uses the error card, because the
+   dinner has actually stopped. */
+.pro-notice {
+  border-left: 3px solid var(--border);
+}
+
+.pro-notice--month {
+  border-left-color: var(--text-muted);
+}
+
+.pro-notice--week {
+  border-left-color: var(--accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * The door: how many seats, on a slider.
+ *
+ * A tick and a number field were one question asked twice, and the far-right
+ * position of the track is what replaced the tick — pushed all the way over,
+ * the dinner has no cap. That only works if the end of the track is LABELLED,
+ * which is what .seatslider__ends is for: a slider whose extremes are unmarked
+ * is a slider you have to drag to understand.
+ * ------------------------------------------------------------------------- */
+
+.seatcount {
+  margin: 0;
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--accent);
+  font-variant-numeric: tabular-nums;
+}
+
+/* "No limit" is words where the others are a numeral, so it is set smaller —
+   at 30px it would tower over every number it is meant to sit among. */
+.seatcount.is-open {
+  font-size: 19px;
+  letter-spacing: 0.01em;
+}
+
+.seatslider {
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  accent-color: var(--accent);
+  /* The ball needs somewhere to be grabbed on a phone. The track is thin; the
+     touch target is not. */
+  height: 28px;
+}
+
+.seatslider__ends {
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+/* PRO on a row that is currently usable. The pill says what the thing is; the
+   italic beside it says how long that stays true. Deliberately quiet — it is a
+   footnote on an option, not a second price tag. */
+.shelf__tag--pro {
+  border-color: var(--pass-edge);
+  background: var(--pass-env);
+  color: var(--pass-ink);
+}
+
+.shelf__freenow {
+  margin-left: 6px;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+/* On a shelf card the note goes under the price rather than beside it — the
+   cards are 148px wide and there is no room for a second thing on that line. */
+.procard__freenow {
+  display: block;
+  font-size: 10.5px;
+  font-weight: 400;
+  color: var(--text-muted);
 }

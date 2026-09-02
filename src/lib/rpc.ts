@@ -7,21 +7,223 @@ import { supabase } from './supabase'
 import { invokeFunction } from './functions'
 
 // How someone gets a seat. CODE = share a code, anyone holding it can ask;
-// INVITE = the host names existing accounts, who accept or decline in-app.
-// Replaces PUBLIC_LINK/PRIVATE_CODE, which were two names for one act.
-export type RoundAccess = 'CODE' | 'INVITE'
+// INVITE = the host names existing accounts by username, who accept or
+// decline in-app; CODE_AND_INVITE = both doors open, which is the ordinary
+// case of a host who invites the four people they know and hands the code to
+// whoever else turns up (0071). All three are enforced server-side now: the
+// code is refused on an INVITE round and the guest list on a CODE one.
+export type RoundAccess = 'CODE' | 'INVITE' | 'CODE_AND_INVITE'
+
+export function accessAdmitsCode(access: RoundAccess) {
+  return access === 'CODE' || access === 'CODE_AND_INVITE'
+}
+
+export function accessAdmitsInvites(access: RoundAccess) {
+  return access === 'INVITE' || access === 'CODE_AND_INVITE'
+}
 
 // What members know about each other once seated. SPY sits between the
 // other two: the host sees real names, nobody else does.
-// The two pseudonym sets a dinner can draw from (0038). FOOD is herbs and
-// spices; BRIGADE is the kitchen's own stations — saucier, pâtissier, aboyeur.
-export type NameTheme = 'FOOD' | 'BRIGADE'
+// The pseudonym sets a dinner can draw from (0038, 0072). The codes are rows
+// in name_theme_catalogue — this union is the set the client knows how to
+// describe, and listNameThemes() is what says which of them this account may
+// actually use.
+export type NameTheme = 'FOOD' | 'BRIGADE' | 'PASTA' | 'PATISSERIE' | 'BATTERIE'
+
+// How the cloth is dressed (0072). Look only: nothing here touches a rule.
+export type TableTheme =
+  | 'CHECKS' | 'ELEGANT' | 'SCIFI' | 'BAROQUE' | 'HALLOWEEN' | 'XMAS' | 'CARNIVAL'
+
+/** DEFAULT is what a dinner gets for free by default, FREE is the second one
+ *  everybody also gets, PAID carries a price and is refused until it is
+ *  owned — and nothing can be bought yet, so PAID means locked. */
+export type ThemeTier = 'DEFAULT' | 'FREE' | 'PAID'
+
+export interface NameThemeOption {
+  code: NameTheme
+  tier: ThemeTier
+  price_cents: number | null
+  /** The list's own mark, used wherever the dinner is one character wide. */
+  mark: string
+  owned: boolean
+  /** Withdrawn while it is being worked on (0082): listed, never selectable,
+   *  by anybody — Crème and ownership do not open a paused one. */
+  paused: boolean
+}
+
+export interface TableThemeOption {
+  code: TableTheme
+  tier: ThemeTier
+  price_cents: number | null
+  owned: boolean
+  /** Withdrawn while it is being worked on (0082): listed, never selectable,
+   *  by anybody — Crème and ownership do not open a paused one. */
+  paused: boolean
+}
+
+/** Raised by create_round when a theme is named that this account cannot use. */
+export const THEME_LOCKED = 'THEME_LOCKED'
+
+/** Raised by create_round when a free dinner asks for a PRO-only setting. */
+export const PRO_REQUIRED = 'PRO_REQUIRED'
+
+/**
+ * Raised by the triggers in 0079 when a dinner built on something PRO has run
+ * past its cover and its three days of grace. The dinner is on hold, not gone:
+ * nothing is deleted, it simply stops moving until the host renews.
+ */
+export const PRO_LAPSED = 'PRO_LAPSED'
+
+/** The grace after a subscription ends, in hours. Mirrors pro_grace() in
+ *  0079 — the client only uses it to say the number out loud. */
+export const PRO_GRACE_HOURS = 72
+
+/**
+ * How a dinner stands against its PRO cover.
+ *
+ * Three states and they are genuinely different: nothing to lose (it was never
+ * PRO, or it uses nothing PRO), running out soon, and on hold. Only a dinner
+ * that actually uses a PRO feature can be held — see round_uses_pro in 0079
+ * for why, which is that on the day the free-for-all ends every dinner ever
+ * created during it would otherwise stop at once.
+ */
+export type ProCover = 'NONE' | 'OK' | 'ENDING' | 'HELD'
+
+export function roundProCover(round: {
+  is_pro: boolean
+  pro_until: string | null
+  recipes_per_brief: number
+  name_theme: NameTheme
+  table_theme: TableTheme
+  paidNameThemes?: string[]
+  paidTableThemes?: string[]
+}): ProCover {
+  if (!round.is_pro || round.pro_until === null) return 'NONE'
+  // Mirrors round_uses_pro(). The theme tiers come from the catalogue, so the
+  // caller passes them when it has them; without them the recipe count alone
+  // is the honest answer this side of the wire, and the server is the
+  // authority either way.
+  const usesPro =
+    round.recipes_per_brief > 1 ||
+    (round.paidNameThemes ?? []).includes(round.name_theme) ||
+    (round.paidTableThemes ?? []).includes(round.table_theme)
+  if (!usesPro) return 'NONE'
+
+  const until = new Date(round.pro_until).getTime()
+  const now = Date.now()
+  if (until <= now) return 'HELD'
+  // A fortnight is the window where saying something is useful rather than
+  // nagging: long enough to renew without hurrying, short enough that the
+  // dinner it is about is real.
+  return until - now < 14 * 24 * 3600 * 1000 ? 'ENDING' : 'OK'
+}
+
+/**
+ * How long until a subscription ends, in days, or null when it does not.
+ *
+ * The two moments worth interrupting somebody about are a month out and a week
+ * out — far enough to act, close enough to matter — and everything between is
+ * silence. A banner that appears the day after you subscribe is a banner
+ * people learn to look past.
+ */
+export function proWarningLevel(status: ProStatus | null | undefined): 'MONTH' | 'WEEK' | null {
+  if (!status || status.window_open || !status.expires_at) return null
+  const days = (new Date(status.expires_at).getTime() - Date.now()) / (24 * 3600 * 1000)
+  if (days < 0) return null
+  if (days <= 7) return 'WEEK'
+  if (days <= 30) return 'MONTH'
+  return null
+}
+
+/**
+ * What PRO is, for this account, right now (0075).
+ *
+ * `window_open` is the thing to read first: while the free-for-all is on,
+ * `pro` is true for everybody and means nothing about whether they have paid.
+ * Every screen that says "you have PRO" has to say which of the two it is, or
+ * it is setting up a disappointment for the day the window shuts.
+ */
+export interface ProStatus {
+  pro: boolean
+  window_open: boolean
+  window_until: string | null
+  source: 'PURCHASE' | 'CODE' | 'GRANT' | null
+  expires_at: string | null
+  test_override: 'FORCE_ON' | 'FORCE_OFF' | null
+}
+
+export async function myProStatus() {
+  const res = await supabase.rpc('my_pro_status', {})
+  const rows = unwrap<ProStatus[]>(res)
+  return rows[0] ?? null
+}
+
+/** Test-period only, and the server refuses it once the window shuts — see
+ *  0075 for why a switch that outlives its window is a hole. */
+export const TEST_WINDOW_CLOSED = 'TEST_WINDOW_CLOSED'
+
+export async function setProTestOverride(mode: 'FORCE_ON' | 'FORCE_OFF' | null) {
+  const res = await supabase.rpc('set_pro_test_override', { p_mode: mode })
+  return unwrap(res)
+}
+
+/** Both refusals a code can give. Everything else — no such code, expired,
+ *  used up — comes back as INVALID_CODE on purpose: distinguishing them would
+ *  turn the field into an oracle for guessing the format of real ones. */
+export const INVALID_CODE = 'INVALID_CODE'
+export const ALREADY_REDEEMED = 'ALREADY_REDEEMED'
+
+/** Returns what was handed over: 'PRO', 'NAME_THEME' or 'TABLE_THEME'. */
+export async function redeemCode(code: string) {
+  const res = await supabase.rpc('redeem_code', { p_code: code })
+  return unwrap<string>(res)
+}
+
+export async function listNameThemes() {
+  const res = await supabase.rpc('list_name_themes', {})
+  return unwrap<NameThemeOption[]>(res)
+}
+
+export async function listTableThemes() {
+  const res = await supabase.rpc('list_table_themes', {})
+  return unwrap<TableThemeOption[]>(res)
+}
 
 export type RoundAnonymity = 'ANONYMOUS' | 'SPY' | 'OPEN'
 
-// Not whether voting happens, but how. LIVE = the host opens it during
-// dinner and publishes results when ready; TIMED = a deadline publishes
-// them itself; DISABLED = no voting, and that choice is final.
+/**
+ * Whether this reader is entitled to real names on this round.
+ *
+ * The mirror of `names_are_open` in 0073, and kept in step with it by hand —
+ * the cost of not asking the database, worth paying because the answer is two
+ * columns the round row already carries and the alternative is a round-trip on
+ * every screen that prints a name.
+ *
+ * The server is still the authority: every function that returns a name asks
+ * the SQL version before it sends one, so the worst this can do when it drifts
+ * is print a pseudonym where a real name was available. It can never invent a
+ * name that was not sent.
+ */
+export function namesAreOpen(
+  round: { anonymity: RoundAnonymity; status: RoundStatus },
+  isHost: boolean,
+) {
+  return (
+    round.anonymity === 'OPEN' ||
+    (round.anonymity === 'SPY' && isHost) ||
+    round.status === 'RESULTS' ||
+    round.status === 'ARCHIVED' ||
+    round.status === 'CANCELLED'
+  )
+}
+
+// Not whether voting happens, but how. LIVE = the host opens it during dinner
+// and publishes results when ready; TIMED = a deadline publishes them itself;
+// MANUAL = hands up at the table; DISABLED = no voting.
+//
+// None of the four is final. DISABLED used to be — set_voting_mode refused to
+// leave it — and 0078 took that door out: what actually needs protecting is a
+// ballot somebody has already cast, and that is guarded separately.
 export type VotingMode = 'LIVE' | 'TIMED' | 'DISABLED' | 'MANUAL'
 export type SlotMode = 'FREE' | 'CATEGORIES'
 export type RoundStatus =
@@ -279,6 +481,8 @@ export async function createRound(input: {
   requiresApproval?: boolean
   votingMode?: VotingMode
   nameTheme?: NameTheme
+  tableTheme?: TableTheme
+  recipesPerBrief?: number
 }) {
   const res = await supabase.rpc('create_round', {
     p_name: input.name,
@@ -293,6 +497,8 @@ export async function createRound(input: {
     p_requires_approval: input.requiresApproval ?? true,
     p_voting_mode: input.votingMode ?? 'LIVE',
     p_name_theme: input.nameTheme ?? 'FOOD',
+    p_table_theme: input.tableTheme ?? 'CHECKS',
+    p_recipes_per_brief: input.recipesPerBrief ?? 1,
   })
   return unwrap<string>(res) // round id
 }
@@ -309,13 +515,19 @@ export async function getMemberIdentities(roundId: string) {
   return unwrap<MemberIdentity[]>(res)
 }
 
-// Raised by invite_member when no account uses that address. Surfaced as a
-// named constant rather than prose so the UI can say "no chef with this
-// address" in the user's own language.
+// Raised by invite_member when nobody goes by that username. Surfaced as a
+// named constant rather than prose so the UI can say "no chef by that name"
+// in the user's own language.
 export const NO_SUCH_CHEF = 'NO_SUCH_CHEF'
 
-export async function inviteMember(roundId: string, email: string) {
-  const res = await supabase.rpc('invite_member', { p_round_id: roundId, p_email: email })
+/** Raised when the round's access is CODE: there is no guest list to add to. */
+export const NOT_BY_INVITATION = 'NOT_BY_INVITATION'
+
+// By username, not by email (0071). The address was the one thing about an
+// account its owner never chose to show anyone; `display_name` has been a
+// unique identity since 0046 and is the name they picked themselves.
+export async function inviteMember(roundId: string, username: string) {
+  const res = await supabase.rpc('invite_member', { p_round_id: roundId, p_username: username })
   return unwrap<string>(res) // invitation id
 }
 
@@ -602,6 +814,11 @@ export interface BriefIngredient {
 export interface MyBrief {
   pairing_id: string
   brief_id: string | null
+  /** 1, 2 or 3 — which of the sender's ideas this is (0077). */
+  recipe_no: number
+  /** The one being cooked. Exactly one offer per pairing carries it, and the
+   *  database enforces that with a partial unique index, not a convention. */
+  chosen: boolean
   dish_name: string | null
   course: Course
   procedure: string | null
@@ -613,13 +830,47 @@ export interface MyBrief {
   contains_tags: string[]
   ingredients: BriefIngredient[]
   acknowledged: boolean
+  /** Who wrote it, where this reader is entitled to know: an OPEN dinner, a
+   *  SPY host, or any dinner that has finished (0073, wired here in 0081).
+   *  Null everywhere else — and null is what the black bar in the thread is
+   *  covering, which is the only honest way to redact in a browser. */
+  sender_display_name: string | null
 }
 
-export async function getMyBrief(roundId: string) {
+/**
+ * Every recipe your sender offered you, and which of them is the dish.
+ *
+ * One row on a free dinner, up to three where the Executive Chef was PRO
+ * (0077). The array shape is the honest one even at one — the caller that
+ * wants "the dish" asks for it, and a caller that forgets gets a list rather
+ * than silently the wrong recipe.
+ */
+export async function getMyBriefOffers(roundId: string) {
   const res = await supabase.rpc('get_my_brief', { p_round_id: roundId })
-  const rows = unwrap<MyBrief[]>(res)
-  return rows[0] ?? null
+  return unwrap<MyBrief[]>(res)
 }
+
+/**
+ * The dish, for every caller that only ever wanted the one.
+ *
+ * Falls back to the first row rather than to null when nothing is chosen,
+ * because a pairing with nothing written still comes back as one row — the
+ * LEFT join, all nulls but `pairing_id` — and several callers need exactly
+ * that: the thread with the chef writing for you hangs off the pairing, and it
+ * has to exist before the recipe does.
+ */
+export function pickChosenBrief(rows: MyBrief[]) {
+  return rows.find((r) => r.chosen) ?? rows[0] ?? null
+}
+
+/** The cook picks the one that suits them. Nobody else may. */
+export async function chooseBrief(briefId: string) {
+  const res = await supabase.rpc('choose_brief', { p_brief_id: briefId })
+  return unwrap(res)
+}
+
+/** Raised by choose_brief once the dinner is voting or over. */
+export const CHOICE_CLOSED = 'CHOICE_CLOSED'
 
 export async function saveBriefDraft(input: {
   roundId: string
@@ -634,6 +885,9 @@ export async function saveBriefDraft(input: {
   noteToCook: string | null
   containsTags: string[]
   containsTagsConfirmed: boolean
+  /** Which of the sender's ideas this is, 1-based. Refused past the dinner's
+   *  own `recipes_per_brief`, so a hand-made call cannot buy a second recipe. */
+  position?: number
 }) {
   const res = await supabase.rpc('save_brief_draft', {
     p_round_id: input.roundId,
@@ -646,6 +900,7 @@ export async function saveBriefDraft(input: {
     p_est_cost: input.estCost,
     p_prep_minutes: input.prepMinutes,
     p_note_to_cook: input.noteToCook,
+    p_position: input.position ?? 1,
     p_contains_tags: input.containsTags,
     p_contains_tags_confirmed: input.containsTagsConfirmed,
   })
@@ -659,7 +914,10 @@ export async function submitBrief(roundId: string) {
 
 export interface MyBriefDraft {
   brief_id: string
-  status: 'DRAFT' | 'SUBMITTED'
+  recipe_no: number
+  // OFFERED is a recipe that was sent, is complete, and is not the one the
+  // cook is making (0076). From the sender's side it is as final as SUBMITTED.
+  status: 'DRAFT' | 'OFFERED' | 'SUBMITTED'
   dish_name: string
   course: Course
   procedure: string
@@ -673,10 +931,27 @@ export interface MyBriefDraft {
   ingredients: BriefIngredient[]
 }
 
-export async function getMyBriefDraft(roundId: string) {
+/** All of them, lowest first. */
+export async function getMyBriefDrafts(roundId: string) {
   const res = await supabase.rpc('get_my_brief_draft', { p_round_id: roundId })
-  const rows = unwrap<MyBriefDraft[]>(res)
-  return rows[0] ?? null
+  return unwrap<MyBriefDraft[]>(res)
+}
+
+// There was a `getMyBriefDraft` here — the same call, returning only the first
+// row, for the callers that just want "has this person written anything?". It
+// is gone on purpose. Two fetchers for one RPC meant two shapes could land
+// under one React Query key, and that is precisely what emptied the screen:
+// see the note above the query in RoundHomePage. A caller that wants the first
+// one takes the first one, at the call site, where it is visible.
+
+/** A second idea thought better of. Drafts only — an offer already in front of
+ *  the cook is not the sender's to withdraw. */
+export async function discardBriefDraft(roundId: string, position: number) {
+  const res = await supabase.rpc('discard_brief_draft', {
+    p_round_id: roundId,
+    p_position: position,
+  })
+  return unwrap(res)
 }
 
 // ---------------------------------------------------------------------------
@@ -709,6 +984,11 @@ export async function getMessageTemplates(locale: string) {
     .select('id,category,locale,body,slot_type,day_of')
     .eq('locale', locale)
     .eq('active', true)
+    // The Executive Chef's notices are BOARD phrases like any other and must
+    // never be in a list somebody can pick from (0080). Filtered here as well
+    // as refused in post_host_notice: this is the half that keeps them out of
+    // sight, the server is the half that keeps them out of the table.
+    .eq('host_only', false)
   if (error) throw new Error(error.message)
   return (data ?? []) as MessageTemplate[]
 }
@@ -762,6 +1042,10 @@ export interface ReportedMessage {
   // enough to remove; deliberately not enough to know who it was.
   author_member_id: string
   author_secret_name: string | null
+  // Present only where this host is entitled to it: a SPY or OPEN round, or
+  // one that has finished (0073). Warning somebody is the start of talking to
+  // a person, and on those rounds the host may know which one.
+  author_display_name: string | null
   already_warned: boolean
 }
 
@@ -973,27 +1257,83 @@ export async function removeMember(
 // supabase/migrations/0014_brief_pairing_and_alerts.sql).
 // ---------------------------------------------------------------------------
 
-export type HostAlertKind = 'CANNOT_COOK' | 'NO_BRIEF' | 'DROPOUT' | 'REPORTED_MESSAGE' | 'OTHER'
+/**
+ * WHAT HAPPENED, NOT WHICH ENUM VALUE IT WAS FILED UNDER.
+ *
+ * `host_alerts.kind` has five values and the app raises twelve different
+ * events, because adding to a Postgres enum is a one-way door and the writing
+ * side was right to avoid it: seven of them are stored as OTHER with the real
+ * type in the payload. This union is the reading side of that — one name per
+ * thing that can actually happen, resolved in SQL by
+ * get_host_alerts_detailed (0080).
+ *
+ * UNKNOWN is not paranoia. A payload written by a migration this client has
+ * never heard of has to land somewhere that can still be read and resolved.
+ */
+export type HostAlertType =
+  | 'CANNOT_COOK'
+  | 'NO_BRIEF'
+  | 'DROPOUT'
+  | 'ACCOUNT_CLOSED'
+  | 'REPORTED_PRIVATE'
+  | 'REPORTED_FRIDGE'
+  | 'REPORTED_PHOTO'
+  | 'ENTER_REQUEST'
+  | 'LATE_ENTRY_CHAIN'
+  | 'CLOSED_CHAIN'
+  | 'ORFAN_MEAL'
+  | 'ALLERGY_ALERT'
+  | 'UNKNOWN'
 
-export interface HostAlert {
-  id: string
-  round_id: string
-  kind: HostAlertKind
-  pairing_id: string | null
-  payload: Record<string, unknown>
-  created_at: string
-  resolved_at: string | null
+export interface HostAlertDetail {
+  alert_id: string
+  alert_type: HostAlertType
+  happened_at: string
+  /** The seat the alert is about, as a pseudonym — or a real name at the door,
+   *  where nobody has taken a seat yet and the host is entitled to know who is
+   *  asking. */
+  who: string | null
+  /** The other half of a pair, when the event has two sides. */
+  counterpart: string | null
+  /** The seat to act on: approve it, warn it. Null when there is nothing to do
+   *  to anybody. */
+  seat_id: string | null
+  /** The phrase a warning or a reveal is about. Only ever set for a message in
+   *  a private thread: a fridge phrase lives in another table, and a warning
+   *  records a `messages` id or nothing. */
+  seat_message_id: string | null
+  seat_pairing_id: string | null
+  seat_photo_id: string | null
+  photo_path: string | null
+  /** What was said, in the reader's language, slot already filled in. */
+  phrase: string | null
+  dish: string | null
+  /** The method, on CANNOT_COOK only: whether a refusal is fair is not a
+   *  question anybody can answer without reading the recipe. */
+  recipe: string | null
+  labels: string[] | null
+  already_warned: boolean
+  /** Has it sorted itself out? The pair have spoken since, the person at the
+   *  door is already in, the photograph is already down. */
+  answered: boolean
 }
 
-export async function getHostAlerts(roundId: string) {
-  const { data, error } = await supabase
-    .from('host_alerts')
-    .select('id,round_id,kind,pairing_id,payload,created_at,resolved_at')
-    .eq('round_id', roundId)
-    .is('resolved_at', null)
-    .order('created_at', { ascending: false })
-  if (error) throw new Error(error.message)
-  return (data ?? []) as HostAlert[]
+export async function getHostAlertsDetailed(roundId: string) {
+  const res = await supabase.rpc('get_host_alerts_detailed', { p_round_id: roundId })
+  return unwrap<HostAlertDetail[]>(res)
+}
+
+/** The two things the Executive Chef can say to the whole table (0080). Fixed
+ *  keys rather than a phrase id: a button means one thing. */
+export type HostNotice = 'HOST_RECIPE_REVIEW' | 'HOST_ALLERGEN_CARE'
+
+/** Raised when the same notice is already an hour old or less. A double press
+ *  should not read as the host shouting. */
+export const NOTICE_ALREADY_POSTED = 'NOTICE_ALREADY_POSTED'
+
+export async function postHostNotice(roundId: string, key: HostNotice) {
+  const res = await supabase.rpc('post_host_notice', { p_round_id: roundId, p_key: key })
+  return unwrap(res)
 }
 
 /**
@@ -1039,6 +1379,10 @@ export function fromCents(cents: number, locale = 'en', currency = 'EUR'): strin
   return new Intl.NumberFormat(locale, { style: 'currency', currency }).format(cents / 100)
 }
 
+/** Raised when a live round is asked to start or stop splitting costs. The
+ *  rule is settled at creation (0074) — only the number moves after that. */
+export const MODE_SETTLED = 'MODE_SETTLED'
+
 export async function setCostSettings(input: {
   roundId: string
   mode: CostMode
@@ -1050,6 +1394,22 @@ export async function setCostSettings(input: {
     p_mode: input.mode,
     p_budget_per_head: input.budgetPerHead,
     p_currency: input.currency ?? 'EUR',
+  })
+  return unwrap(res)
+}
+
+/**
+ * The number, on its own, for the whole life of the dinner (0074).
+ *
+ * Separate from setCostSettings because they are separate decisions: whether
+ * the table splits at all is a deal struck before anybody shops, and the
+ * ceiling is a thing that moves when the fish turns out to be expensive. Null
+ * is a real answer — "we're splitting, with no ceiling".
+ */
+export async function setBudgetPerHead(roundId: string, budgetPerHead: number | null) {
+  const res = await supabase.rpc('set_budget_per_head', {
+    p_round_id: roundId,
+    p_budget_per_head: budgetPerHead,
   })
   return unwrap(res)
 }
@@ -1408,8 +1768,20 @@ export interface SlotRow {
   course: Course
 }
 
+/**
+ * The courses this dinner is laid for.
+ *
+ * Ordered here rather than at two of the three call sites: the three of them
+ * share one React Query key, so whichever ran last decided whether the menu
+ * came back in course order or in whatever order Postgres felt like. One key,
+ * one fetcher, one shape — the rule the blank screen taught us.
+ */
 export async function getSlots(roundId: string) {
-  const { data, error } = await supabase.from('slots').select('id,round_id,course').eq('round_id', roundId)
+  const { data, error } = await supabase
+    .from('slots')
+    .select('id,round_id,course')
+    .eq('round_id', roundId)
+    .order('course')
   if (error) throw new Error(error.message)
   return (data ?? []) as SlotRow[]
 }
@@ -1644,13 +2016,17 @@ export interface BoardMessage {
   // original unattributability: you can see who said what and pick the
   // conversation up later, at the cost of a pseudonym being followable
   // across an evening. Real identities are still the game's secret.
-  author_name: string
+  // Null on a notice from the Executive Chef (0080), which is the one thing in
+  // the fridge that comes from outside the table rather than from a seat at it.
+  author_name: string | null
   is_mine: boolean
   reported: boolean
   // The seat behind the pseudonym (0059), so a phrase can be blocked without
   // anybody being named. Opaque: it adds nothing a reader did not already have
-  // from `author_name`.
-  author_member_id: string
+  // from `author_name`. Null for the same reason as above — and there is
+  // nothing to block, because the host is not a seat.
+  author_member_id: string | null
+  from_host: boolean
 }
 
 export async function getBoard(roundId: string) {

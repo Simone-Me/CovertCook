@@ -7,16 +7,16 @@ import { DietaryPanelGrid } from '../rounds/DietaryPanelGrid'
 import { ChatThread } from '../chat/ChatThread'
 import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
-import { supabase } from '../../lib/supabase'
 import {
+  discardBriefDraft,
   getDietaryPanel,
+  getSlots,
   getMyAssignment,
-  getMyBriefDraft,
+  getMyBriefDrafts,
   saveBriefDraft,
   submitBrief,
   notifyMyCook,
   type BriefIngredient,
-  type Course,
 } from '../../lib/rpc'
 
 // Two ways to write a recipe, because there are two kinds of person here and
@@ -68,10 +68,10 @@ export function BriefEditorPage() {
     enabled: !!roundId,
     queryFn: () => getMyAssignment(roundId as string),
   })
-  const { data: draft, isLoading: draftLoading, refetch: refetchDraft } = useQuery({
+  const { data: drafts, isLoading: draftLoading, refetch: refetchDraft } = useQuery({
     queryKey: ['rounds', roundId, 'my-brief-draft'],
     enabled: !!roundId,
-    queryFn: () => getMyBriefDraft(roundId as string),
+    queryFn: () => getMyBriefDrafts(roundId as string),
   })
   const { data: dietaryPanel } = useQuery({
     queryKey: ['rounds', roundId, 'dietary-panel'],
@@ -86,17 +86,17 @@ export function BriefEditorPage() {
   const { data: slots } = useQuery({
     queryKey: ['rounds', roundId, 'slots'],
     enabled: !!roundId && round?.slot_mode === 'CATEGORIES',
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('slots')
-        .select('id,course')
-        .eq('round_id', roundId as string)
-        .order('course')
-      if (error) throw error
-      return data as { id: string; course: Course }[]
-    },
+    queryFn: () => getSlots(roundId as string),
   })
 
+  // WHICH OF THE SENDER'S IDEAS IS ON THE PAGE (0077).
+  //
+  // The form itself is untouched — one recipe, the same two ways of writing
+  // it. What is new is that there may be up to three of them and this says
+  // which. Keeping one form and swapping its contents was deliberate: three
+  // copies of a long form stacked down a page is not "more room to be kind to
+  // your cook", it is a wall, and the second and third ideas are optional.
+  const [position, setPosition] = useState(1)
   const [mode, setMode] = useState<Mode>('quick')
   const [dishName, setDishName] = useState('')
   const [ingredients, setIngredients] = useState<BriefIngredient[]>([{ name: '', quantity: null, unit: null }])
@@ -107,31 +107,41 @@ export function BriefEditorPage() {
   const [saved, setSaved] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [busy, setBusy] = useState(false)
-  const [loadedFromDraft, setLoadedFromDraft] = useState(false)
+  // Which idea the fields currently hold, so switching between them reloads
+  // rather than leaving idea 1's method under idea 2's title.
+  const [loadedFor, setLoadedFor] = useState<number | null>(null)
   // Sending is the one irreversible thing on this page, and the button that
   // does it used to be the same size and weight as "Save". This is what stands
   // between them.
   const [confirmingSubmit, setConfirmingSubmit] = useState(false)
 
+  const draft = drafts?.find((d) => d.recipe_no === position)
+  // Sending sends everything at once, so "already sent" is a fact about the
+  // whole page rather than about the idea currently showing.
+  const anySent = (drafts ?? []).some((d) => d.status !== 'DRAFT')
+
   useEffect(() => {
-    if (draft && !loadedFromDraft) {
-      setDishName(draft.dish_name)
-      setProcedure(draft.procedure)
-      setExternalUrl(draft.external_url ?? '')
-      setSubmitted(draft.status === 'SUBMITTED')
-      // Quantities and units are the only thing careful mode adds. A list
-      // carrying none of them was typed as free text, so it comes back as
-      // the block it was written in instead of exploding into rows.
-      const itemised = draft.ingredients.some((i) => i.quantity !== null || (i.unit ?? '').trim() !== '')
-      if (draft.ingredients.length > 0 && itemised) {
-        setIngredients(draft.ingredients)
-        setMode('careful')
-      } else {
-        setQuickIngredients(draft.ingredients.map((i) => i.name).join('\n'))
-      }
-      setLoadedFromDraft(true)
+    if (!drafts || loadedFor === position) return
+    setDishName(draft?.dish_name ?? '')
+    setProcedure(draft?.procedure ?? '')
+    setExternalUrl(draft?.external_url ?? '')
+    setSubmitted(anySent)
+    // Quantities and units are the only thing careful mode adds. A list
+    // carrying none of them was typed as free text, so it comes back as
+    // the block it was written in instead of exploding into rows.
+    const rows = draft?.ingredients ?? []
+    const itemised = rows.some((i) => i.quantity !== null || (i.unit ?? '').trim() !== '')
+    if (rows.length > 0 && itemised) {
+      setIngredients(rows)
+      setQuickIngredients('')
+      setMode('careful')
+    } else {
+      setIngredients([{ name: '', quantity: null, unit: null }])
+      setQuickIngredients(rows.map((i) => i.name).join('\n'))
+      setMode('quick')
     }
-  }, [draft, loadedFromDraft])
+    setLoadedFor(position)
+  }, [drafts, draft, anySent, loadedFor, position])
 
   // Everything the sender wrote, as one searchable string. The quick mode
   // has no ingredient rows, so the block of text has to be scanned too.
@@ -234,6 +244,14 @@ export function BriefEditorPage() {
     if (raw.startsWith('DIETARY_CONFLICT|')) {
       return t('briefs.errors.DIETARY_CONFLICT', { items: raw.slice('DIETARY_CONFLICT|'.length) })
     }
+    // submit_brief validates every idea and names the one that failed
+    // ("PROCEDURE_TOO_SHORT:2"), because "the method is too short" is no help
+    // at all when there are three methods on the page (0077).
+    const parts = raw.match(/^([A-Z_]+):(\d)$/)
+    if (parts) {
+      const what = t(`briefs.errors.${parts[1]}`, { defaultValue: parts[1] })
+      return t('briefs.errors.inRecipe', { recipe: parts[2], what })
+    }
     const known = t(`briefs.errors.${raw}`, { defaultValue: '' })
     if (known) return known
 
@@ -267,7 +285,48 @@ export function BriefEditorPage() {
       containsTags: matched,
       // Derived rather than ticked, so there is nothing left to confirm.
       containsTagsConfirmed: true,
+      position,
     })
+  }
+
+  /** Move to another idea, keeping what is on the page.
+   *
+   *  Saved on the way out rather than on the way in: switching tabs is not an
+   *  act of commitment, and losing three paragraphs to a mis-tap is the kind
+   *  of thing people do not come back from. */
+  async function switchTo(next: number) {
+    if (next === position) return
+    setError(null)
+    setSaved(false)
+    if (!editingClosed) {
+      setBusy(true)
+      try {
+        if (dishName.trim() || procedure.trim() || externalUrl.trim()) await save()
+        await refetchDraft()
+      } catch (err) {
+        setError(explain(err instanceof Error ? err.message : ''))
+        setBusy(false)
+        return
+      }
+      setBusy(false)
+    }
+    setPosition(next)
+  }
+
+  async function onDiscard() {
+    if (!roundId || position === 1) return
+    setError(null)
+    setBusy(true)
+    try {
+      await discardBriefDraft(roundId, position)
+      await refetchDraft()
+      setLoadedFor(null)
+      setPosition(1)
+    } catch (err) {
+      setError(explain(err instanceof Error ? err.message : ''))
+    } finally {
+      setBusy(false)
+    }
   }
 
   async function onSave() {
@@ -353,6 +412,53 @@ export function BriefEditorPage() {
             ? t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })
             : t('briefs.freeChoice')}
         </p>
+      )}
+
+      {/* THE IDEAS, AS TABS, and only on a dinner that asked for more than one.
+          A free dinner never sees this row at all — the feature has to be
+          invisible where it is not bought, or every host is looking at a
+          control that does nothing for them.
+          A tab appears for each idea already written plus one empty one, up to
+          the dinner's own limit: three empty tabs on arrival would read as
+          three things to do, and the second and third are a kindness rather
+          than a requirement. */}
+      {round.recipes_per_brief > 1 && (
+        <div className="stack">
+          <div className="row ideatabs" role="tablist" aria-label={t('briefs.ideas.label')}>
+            {Array.from(
+              { length: Math.min(round.recipes_per_brief, (drafts?.length ?? 0) + 1) },
+              (_, i) => i + 1,
+            ).map((n) => {
+              const written = drafts?.find((d) => d.recipe_no === n)
+              return (
+                <button
+                  key={n}
+                  type="button"
+                  role="tab"
+                  aria-selected={position === n}
+                  className={position === n ? 'ideatab is-now' : 'ideatab secondary'}
+                  disabled={busy}
+                  onClick={() => switchTo(n)}
+                >
+                  {written?.dish_name?.trim()
+                    ? written.dish_name
+                    : t('briefs.ideas.tab', { n })}
+                </button>
+              )
+            })}
+          </div>
+          <p className="muted" style={{ margin: 0 }}>
+            {t(anySent ? 'briefs.ideas.sentHint' : 'briefs.ideas.hint')}
+          </p>
+          {/* Only a second or third one, and only before it has gone: the
+              first idea is the recipe, and an offer already in front of the
+              cook is not the sender's to take back. */}
+          {!editingClosed && position > 1 && draft && (
+            <button type="button" className="secondary" disabled={busy} onClick={onDiscard}>
+              {t('briefs.ideas.discard')}
+            </button>
+          )}
+        </div>
       )}
 
       {editingClosed && <p className="muted">{submitted ? t('briefs.alreadySubmitted') : t('briefs.editingClosed')}</p>}

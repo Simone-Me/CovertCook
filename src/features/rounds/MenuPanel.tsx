@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { supabase } from '../../lib/supabase'
 import {
   addCourse,
   changeCourse,
@@ -9,13 +8,16 @@ import {
   BRIEFS_EXIST,
   COURSE_IN_USE,
   getMenuStatus,
+  getSlots,
   removeCourse,
   setSlotMode,
   COURSES,
   type Course,
+  type RoundStatus,
   type SlotMode,
 } from '../../lib/rpc'
 import { HostAction } from './HostAction'
+import { TurnBack } from '../../components/TurnBack'
 
 // Composing the menu, next to the other things the Executive Chef is being
 // asked to do — not buried in a settings page they'd have to know to visit.
@@ -24,7 +26,20 @@ import { HostAction } from './HostAction'
 // refused unless the courses equal the seated chefs (one dish each), but
 // the rule was enforced and never stated: being one course short produced a
 // refusal rather than a count, which reads as a broken button.
-export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: SlotMode }) {
+export function MenuPanel({
+  roundId,
+  slotMode,
+  status,
+}: {
+  roundId: string
+  slotMode: SlotMode
+  /** Where the dinner is. The panel is offered for the whole of DRAFT → LOCKED
+   *  (0036 allows all three), but the arithmetic below only *means* anything at
+   *  LOCKED: before the door shuts the number of chefs is still moving, so a
+   *  menu that is one course short is a menu in progress, not a menu that is
+   *  wrong. */
+  status: RoundStatus
+}) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
   const [newCourse, setNewCourse] = useState<Course>('MAIN')
@@ -44,18 +59,10 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
   const { data: slots } = useQuery({
     queryKey: ['rounds', roundId, 'slots'],
     enabled: slotMode === 'CATEGORIES',
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('slots')
-        .select('id,course')
-        .eq('round_id', roundId)
-        .order('course')
-      if (error) throw error
-      return data as { id: string; course: Course }[]
-    },
+    queryFn: () => getSlots(roundId),
   })
 
-  const { data: status } = useQuery({
+  const { data: menu } = useQuery({
     queryKey: ['rounds', roundId, 'menu-status'],
     queryFn: () => getMenuStatus(roundId),
   })
@@ -111,14 +118,16 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
     }
   }
 
-  const courses = status?.courses ?? 0
-  const seats = status?.seats ?? 0
+  const courses = menu?.courses ?? 0
+  const seats = menu?.seats ?? 0
   const balanced = courses === seats
+  // The count is a demand at LOCKED and a running total before it.
+  const counting = status === 'LOCKED'
 
   return (
     <HostAction
       title={t('rounds.menu.title')}
-      waiting={slotMode === 'CATEGORIES' && !balanced}
+      waiting={counting && slotMode === 'CATEGORIES' && !balanced}
     >
       {/* An error with no way out is a dead end: the arrow stayed armed, the
           message stayed on screen, and the only escape was leaving the page.
@@ -211,7 +220,18 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
         </span>
       </label>
 
-      {slotMode === 'CATEGORIES' && (
+      {/* WHICH COURSES WAITS FOR THE DOOR TO SHUT, and the mode does not.
+          There has to be exactly one course per chef, and until sign-ups close
+          the number of chefs keeps moving: every arrival broke the sum the
+          host had just finished making, and the panel answered with a red line
+          about a menu that was not wrong yet. So before LOCKED this offers the
+          choice between a free-for-all and a composed menu, says when the menu
+          gets composed, and stops there. */}
+      {slotMode === 'CATEGORIES' && !counting && (
+        <p className="muted">{t('rounds.menu.composedAtLock')}</p>
+      )}
+
+      {slotMode === 'CATEGORIES' && counting && (
         <>
           {/* One course per chef, because every chef cooks exactly one
               dish. Shown as it happens instead of as a refusal later. */}
@@ -231,16 +251,11 @@ export function MenuPanel({ roundId, slotMode }: { roundId: string; slotMode: Sl
                       acts. Removing and re-adding left the menu one course
                       short of the table in between, which is the exact state
                       the roulette refuses on. */}
-                  <button
-                    type="button"
-                    className={`menucard__turn${swapping === slot.id ? ' is-open' : ''}`}
-                    aria-pressed={swapping === slot.id}
-                    title={t('rounds.menu.swap')}
-                    aria-label={t('rounds.menu.swap')}
-                    onClick={() => setSwapping((cur) => (cur === slot.id ? null : slot.id))}
-                  >
-                    ↺
-                  </button>
+                  <TurnBack
+                    open={swapping === slot.id}
+                    label={t('rounds.menu.swap')}
+                    onToggle={() => setSwapping((cur) => (cur === slot.id ? null : slot.id))}
+                  />
                   <button
                     type="button"
                     className="chef-remove"

@@ -3,7 +3,16 @@ import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { ChatThread } from '../chat/ChatThread'
-import { acknowledgeBrief, getMessageTemplates, getMyBrief, sendMessage } from '../../lib/rpc'
+import {
+  acknowledgeBrief,
+  chooseBrief,
+  getMessageTemplates,
+  getMyBriefOffers,
+  sendMessage,
+  CHOICE_CLOSED,
+} from '../../lib/rpc'
+import { useQueryClient } from '@tanstack/react-query'
+import { useRound } from '../rounds/hooks'
 import { useAuth } from '../../lib/auth'
 import { BackToTable } from '../../components/BackToTable'
 
@@ -36,11 +45,16 @@ export function CookViewPage() {
   const { profile } = useAuth()
   const locale = profile?.locale ?? 'en'
 
-  const { data: brief, isLoading } = useQuery({
+  const queryClient = useQueryClient()
+  const { data: round } = useRound(roundId)
+  const { data: offers, isLoading } = useQuery({
     queryKey: ['rounds', roundId, 'my-brief'],
     enabled: !!roundId,
-    queryFn: () => getMyBrief(roundId as string),
+    queryFn: () => getMyBriefOffers(roundId as string),
   })
+  // Which one is on the page. Null means "whichever is the dish" — the normal
+  // case, and the only case on a free dinner.
+  const [reading, setReading] = useState<string | null>(null)
   const { data: templates } = useQuery({
     queryKey: ['message-templates', locale],
     queryFn: () => getMessageTemplates(locale),
@@ -94,11 +108,37 @@ export function CookViewPage() {
   // No pairing at all, which is a different thing from no recipe: the roulette
   // has not dealt this player a dish to cook. There is no thread to open and
   // nobody to remind.
-  if (!brief) {
+  if (!offers || offers.length === 0) {
     return <p className="muted">{t('briefs.noBriefYet')}</p>
   }
 
+  // Everything actually written. A pairing with nothing on it comes back as
+  // one row of nulls — the LEFT join — which is "not written yet" rather than
+  // an offer of nothing.
+  const written = offers.filter((o) => o.brief_id !== null)
+  const chosen = written.find((o) => o.chosen) ?? null
+  const brief = written.find((o) => o.brief_id === reading) ?? chosen ?? offers[0]
   const waiting = brief.brief_id === null
+  // Up to the dinner itself, which is when somebody standing in a kitchen at
+  // six o'clock changes their mind — the case the whole feature is for. The
+  // server decides; this only matches it so the button is not offered into a
+  // refusal.
+  const canChoose = ['ASSIGNED', 'BRIEFS_CLOSED', 'DINNER'].includes(round?.status ?? '')
+
+  async function onChoose(briefId: string) {
+    setError(null)
+    setBusy(true)
+    try {
+      await chooseBrief(briefId)
+      await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'my-brief'] })
+      setReading(null)
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : ''
+      setError(raw === CHOICE_CLOSED ? t('briefs.offers.closed') : raw || t('errors.generic'))
+    } finally {
+      setBusy(false)
+    }
+  }
 
   return (
     <div className="stack sheet">
@@ -106,6 +146,46 @@ export function CookViewPage() {
       <h1>{waiting ? t('briefs.waiting.title') : brief.dish_name}</h1>
       <span className="badge">{t(`briefs.courseOption.${brief.course}`)}</span>
       {error && <div className="error">{error}</div>}
+
+      {/* MORE THAN ONE IDEA, AND THE CHOICE IS YOURS.
+          Only where the sender actually wrote more than one — on every other
+          dinner this row does not exist, because a chooser with one option is
+          a control that teaches people it does nothing.
+          The dish is marked rather than merely selected: you can read the
+          other one without changing what you are cooking, and swapping is a
+          separate, deliberate press. Reading is not choosing. */}
+      {written.length > 1 && (
+        <div className="stack">
+          <div className="row ideatabs" role="tablist" aria-label={t('briefs.offers.label')}>
+            {written.map((o) => (
+              <button
+                key={o.brief_id}
+                type="button"
+                role="tab"
+                aria-selected={o.brief_id === brief.brief_id}
+                className={o.brief_id === brief.brief_id ? 'ideatab is-now' : 'ideatab secondary'}
+                onClick={() => setReading(o.brief_id)}
+              >
+                {o.dish_name}
+                {o.chosen && <span className="ideatab__mark" aria-hidden="true"> ✓</span>}
+              </button>
+            ))}
+          </div>
+          {brief.chosen ? (
+            <p className="muted" style={{ margin: 0 }}>{t('briefs.offers.thisIsIt')}</p>
+          ) : canChoose ? (
+            <button
+              type="button"
+              disabled={busy}
+              onClick={() => brief.brief_id && onChoose(brief.brief_id)}
+            >
+              {t('briefs.offers.cookThisOne')}
+            </button>
+          ) : (
+            <p className="muted" style={{ margin: 0 }}>{t('briefs.offers.closed')}</p>
+          )}
+        </div>
+      )}
 
       <div className="card stack">
         {waiting ? (
