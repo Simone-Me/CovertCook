@@ -178,6 +178,24 @@ shown.
   ISO codes, the app carries no country strings at all, and a third language
   costs nothing. 388 translation strings that do not exist.
 
+### Three dishes from each of the 194
+
+The draw is honest, so some weeks are Tuvalu and Liechtenstein rather than
+Italy and Mexico — and a country nobody at the table has cooked from is not a
+constraint, it is a dead end. Three names turn one into the other, and they are
+shown to the two people who can act on them: the host choosing, and the sender
+writing. Not to the cook, for whom the recipe has already been written.
+
+**Never "the national dish".** Naming one is a claim, and a wrong or reductive
+one is what gets screenshotted; the interface says *some dishes from there*,
+and adds that they are ideas rather than a menu — three is deliberately few, so
+that six people cooking the three named dishes is not the likely outcome.
+
+**Not translated, and that is not an omission.** A dish name is a proper noun:
+paella is paella in every language and so is phở. One list, no locale, no 582
+strings to keep in step. Where a dish is genuinely known in French by a French
+name, that is the one used.
+
 ### LICENSE
 
 All rights reserved, no permission granted, sole rights holder named. The

@@ -1497,6 +1497,7 @@
     "hours": "{{count}} heure",
     "hours_other": "{{count}} heures",
     "nextWeek": "Dimanche : {{items}}",
-    "saved": "Le fil rouge est enregistré. Il reste modifiable jusqu'au tirage."
+    "saved": "Le fil rouge est enregistré. Il reste modifiable jusqu'au tirage.",
+    "someDishes": "Quelques plats de là-bas : {{items}}. Des pistes, pas un menu."
   }
 }

@@ -870,10 +870,6 @@ Ordered roughly by how much the product misses them.
   would add a third privilege level to an app that has two (a member, and the
   Executive Chef of one dinner), and that deserves its own decision with its
   own audit rather than a grant added quietly to a line.
-- **Typical dishes for a country fil rouge** — the one thing the world
-  catalogue is missing. A week that draws Tuvalu is a dead end without two or
-  three dishes offered as a starting point, and 194 countries is a data job of
-  its own rather than a line of code.
 - **The shareable menu card** — the results screen is already a menu; rendering
   it as an image the browser can hand to WhatsApp or Instagram is the only
   thing on this list that brings new people in. Names never on it, pseudonyms
@@ -883,6 +879,11 @@ Ordered roughly by how much the product misses them.
 - **An in-app help layer** and a first-run tour. (Terms and Privacy now exist
   as drafts at `/legal/*`, accepted at sign-up — but they have not been read by
   a lawyer, and they must be before any money changes hands.)
+- **The country dish suggestions want a second pair of eyes.** All 194 are
+  written (`src/lib/countryDishes.ts`) and the interface calls them *some*
+  dishes rather than national ones, but the small island states and the
+  Pacific are the entries most likely to be thin or wrong, and nobody has
+  checked them against somebody who eats there.
 - **Final allergen and app icons** — current ones are functional
   placeholders.
 - **A manual pen-test** and an automated test suite — today's coverage is

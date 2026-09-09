@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { ChoiceList } from '../../components/ChoiceList'
 import { useFilRougeLabel } from '../../lib/filRouge'
+import { FilRougeDishes } from './FilRougeDishes'
 import {
   filRougeTurnsAt,
   filRougeUpcoming,
@@ -196,6 +197,10 @@ export function FilRougePicker({
               }))}
             />
           )}
+
+          {/* What the choice actually means, for the one category where a
+              host can pick something they have never cooked from. */}
+          {scope === 'SHARED' && <FilRougeDishes category={category} code={code} />}
 
           {/* A hard week is answered by showing the next one rather than by
               widening this one. Sunday is three days away; the dinner is

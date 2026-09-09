@@ -1497,6 +1497,7 @@
     "hours": "{{count}} hour",
     "hours_other": "{{count}} hours",
     "nextWeek": "On Sunday: {{items}}",
-    "saved": "The thread is set. It stays changeable until the roulette deals."
+    "saved": "The thread is set. It stays changeable until the roulette deals.",
+    "someDishes": "Some dishes from there: {{items}}. Ideas, not a menu."
   }
 }
