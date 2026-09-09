@@ -5,6 +5,8 @@ import { Fold } from '../../components/Fold'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { ThemePicker } from './ThemePicker'
+import { FilRougePicker } from './FilRougePicker'
+import { useFilRougeLabel } from '../../lib/filRouge'
 import { ChoiceList } from '../../components/ChoiceList'
 import { DoorRules } from './DoorRules'
 import { Link } from 'react-router-dom'
@@ -23,6 +25,8 @@ import {
   type VotingMode,
   type NameTheme,
   type TableTheme,
+  type FilRougeCategory,
+  type FilRougeScope,
 } from '../../lib/rpc'
 
 // Classic is the whole product with nothing to decide: a covered dinner,
@@ -66,6 +70,7 @@ const COST_MODES: CostChoice[] = ['NONE', 'BUDGET', 'NO_BUDGET']
 
 export function CreateRoundPage() {
   const { t, i18n } = useTranslation()
+  const filRougeLabel = useFilRougeLabel()
   const navigate = useNavigate()
   const { profile } = useAuth()
   const locale = profile?.locale ?? i18n.language ?? 'en'
@@ -87,6 +92,13 @@ export function CreateRoundPage() {
   const [costMode, setCostMode] = useState<CostChoice>('NONE')
   const [budget, setBudget] = useState('')
   const [recipesPerBrief, setRecipesPerBrief] = useState(1)
+  // The thread the whole table cooks against (0085). Null is the default and
+  // stays it: a classic dinner is never asked the question.
+  const [filRouge, setFilRouge] = useState<{
+    category: FilRougeCategory | null
+    code: string | null
+    scope: FilRougeScope
+  }>({ category: null, code: null, scope: 'SHARED' })
   // Null is "no cap", which is what the slider's far-right position means. One
   // value instead of a flag and a number, because they were one question.
   const [seats, setSeats] = useState<number | null>(8)
@@ -134,6 +146,9 @@ export function CreateRoundPage() {
           ? {
               access, anonymity, slotMode, votingMode, requiresApproval,
               nameTheme, tableTheme, recipesPerBrief,
+              filRougeCategory: filRouge.category,
+              filRougeCode: filRouge.scope === 'SHARED' ? filRouge.code : null,
+              filRougeScope: filRouge.scope,
             }
           : CLASSIC),
         // The door is asked of a classic host too, so its two answers have to
@@ -245,6 +260,31 @@ export function CreateRoundPage() {
                     label: t(`rounds.anonymity.${code}`),
                     hint: t(`rounds.anonymity.${code}Hint`),
                   }))}
+                />
+              </Fold>
+
+              {/* Le fil rouge: the one thing on this form that tells a host
+                  what the evening will be ABOUT rather than how it will run.
+                  Above the looks because it is not a look — it changes what
+                  gets cooked, which is why it is free. */}
+              <Fold
+                title={t('filRouge.label')}
+                aside={
+                  filRouge.category === null
+                    ? t('filRouge.none')
+                    : filRouge.scope === 'PER_COOK'
+                      ? t(`filRouge.category.${filRouge.category}`)
+                      : filRouge.code
+                        ? filRougeLabel(filRouge.category, filRouge.code)
+                        : t(`filRouge.category.${filRouge.category}`)
+                }
+              >
+                <p className="muted">{t('filRouge.explain')}</p>
+                <FilRougePicker
+                  category={filRouge.category}
+                  code={filRouge.code}
+                  scope={filRouge.scope}
+                  onChange={setFilRouge}
                 />
               </Fold>
 

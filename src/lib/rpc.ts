@@ -67,6 +67,11 @@ export const THEME_LOCKED = 'THEME_LOCKED'
 /** Raised by create_round when a free dinner asks for a PRO-only setting. */
 export const PRO_REQUIRED = 'PRO_REQUIRED'
 
+/** The chosen fil rouge is not on this week's shelf for this account (0085). */
+export const FIL_ROUGE_LOCKED = 'FIL_ROUGE_LOCKED'
+/** The roulette has dealt, so the thread can no longer move (0085). */
+export const FIL_ROUGE_FROZEN = 'FIL_ROUGE_FROZEN'
+
 /**
  * Raised by the triggers in 0079 when a dinner built on something PRO has run
  * past its cover and its three days of grace. The dinner is on hold, not gone:
@@ -483,6 +488,9 @@ export async function createRound(input: {
   nameTheme?: NameTheme
   tableTheme?: TableTheme
   recipesPerBrief?: number
+  filRougeCategory?: FilRougeCategory | null
+  filRougeCode?: string | null
+  filRougeScope?: FilRougeScope
 }) {
   const res = await supabase.rpc('create_round', {
     p_name: input.name,
@@ -499,6 +507,9 @@ export async function createRound(input: {
     p_name_theme: input.nameTheme ?? 'FOOD',
     p_table_theme: input.tableTheme ?? 'CHECKS',
     p_recipes_per_brief: input.recipesPerBrief ?? 1,
+    p_fil_rouge_category: input.filRougeCategory ?? null,
+    p_fil_rouge_code: input.filRougeCode ?? null,
+    p_fil_rouge_scope: input.filRougeScope ?? 'SHARED',
   })
   return unwrap<string>(res) // round id
 }
@@ -2067,4 +2078,96 @@ export interface AllergenDish {
 export async function getAllergenDishes(roundId: string) {
   const res = await supabase.rpc('get_allergen_dishes', { p_round_id: roundId })
   return unwrap<AllergenDish[]>(res)
+}
+
+
+// ---------------------------------------------------------------------------
+// Le fil rouge (0083, 0084, 0085)
+//
+// The direction a whole dinner cooks against. Six kinds; only the world is long
+// enough to rotate, and it rotates on Sunday at midday in Paris.
+// ---------------------------------------------------------------------------
+
+export type FilRougeCategory = 'COUNTRY' | 'COLOUR' | 'LETTER' | 'TECHNIQUE' | 'STAPLE' | 'ERA'
+
+/** SHARED: one thread for the table. PER_COOK: the roulette deals one each. */
+export type FilRougeScope = 'SHARED' | 'PER_COOK'
+
+export interface FilRougeOption {
+  category: FilRougeCategory
+  code: string
+  /** COUNTRY only: the micro-group ('1-A' … '7-B'). Null elsewhere. */
+  group_code: string | null
+  macro_code: string | null
+  /** On this week's shelf for everybody. */
+  drawn: boolean
+  /** This account may choose it right now — the only question a picker asks. */
+  offered: boolean
+  /** Never in a free draw; Crème or nothing. */
+  premium: boolean
+  /** What it puts on the table, in the vocabulary of foodTags.ts. */
+  contains_tags: string[]
+}
+
+export async function listFilRouge() {
+  const res = await supabase.rpc('list_fil_rouge', {})
+  return unwrap<FilRougeOption[]>(res)
+}
+
+/** Next Sunday's selection, readable today — a hard week becomes a reason to
+ *  come back rather than a disappointment. */
+export async function filRougeUpcoming() {
+  const res = await supabase.rpc('fil_rouge_upcoming', {})
+  return unwrap<{ category: FilRougeCategory; code: string; group_code: string | null }[]>(res)
+}
+
+/** When the shelf turns over. Asked of the server rather than worked out here:
+ *  the rule is midday in Paris, which is not a fixed offset from UTC. */
+export async function filRougeTurnsAt() {
+  const res = await supabase.rpc('fil_rouge_turns_at', { p_at: new Date().toISOString() })
+  return unwrap<string>(res)
+}
+
+export async function setFilRouge(
+  roundId: string,
+  category: FilRougeCategory | null,
+  code: string | null,
+  scope: FilRougeScope = 'SHARED',
+) {
+  const res = await supabase.rpc('set_fil_rouge', {
+    p_round_id: roundId,
+    p_category: category,
+    p_code: code,
+    p_scope: scope,
+  })
+  return unwrap(res)
+}
+
+/** What this thread would put on the table that somebody here cannot eat.
+ *  Informs, never refuses (0069) — the host is the only person who can still
+ *  change it, so they are the person to tell. */
+export async function filRougeClash(roundId: string, category: FilRougeCategory, codes: string[]) {
+  const res = await supabase.rpc('fil_rouge_clash', {
+    p_round_id: roundId,
+    p_category: category,
+    p_codes: codes,
+  })
+  return unwrap<string[]>(res)
+}
+
+export interface RoundFilRouge {
+  category: FilRougeCategory | null
+  scope: FilRougeScope | null
+  /** The table's own thread. Null when every cook has their own. */
+  code: string | null
+  /** PER_COOK: the one I have to cook. */
+  my_code: string | null
+  /** PER_COOK: the one the person I am writing for has to cook. */
+  my_cook_code: string | null
+}
+
+export async function getFilRouge(roundId: string) {
+  const res = await supabase.rpc('get_fil_rouge', { p_round_id: roundId })
+  const rows = unwrap<RoundFilRouge[]>(res)
+  return rows?.[0] ?? null
 }

@@ -1402,7 +1402,7 @@
     },
     "macro": {
       "1": "Le blé et le lait",
-      "2": "Le pain plat et l'agneau",
+      "2": "Le blé et le riz",
       "3": "Le riz",
       "4": "Les racines et les tubercules",
       "5": "Le mil et le sorgho",
@@ -1423,10 +1423,10 @@
       "4-A": "Le Zambèze",
       "4-B": "Les Grands Lacs",
       "4-C": "Le bassin du Congo",
-      "4-D": "La ceinture de l'igname",
+      "4-D": "L'Afrique de l'Ouest",
       "4-E": "La côte du riz",
-      "5-A": "Le Sahel oriental",
-      "5-B": "Le Sahel et la Corne",
+      "5-A": "Nilo-saharien",
+      "5-B": "Le Sahel africain",
       "5-C": "Les hauts plateaux éthiopiens",
       "6-A": "L'Afrique australe",
       "6-B": "L'Amérique latine",
@@ -1489,6 +1489,11 @@
       "FAMILY_PICNIC": "Un pique-nique en famille",
       "SUNDAY_AT_GRANDMAS": "Le dimanche chez mamie",
       "CAMPING": "Le camping"
-    }
+    },
+    "days": "{{count}} jour",
+    "days_other": "{{count}} jours",
+    "hours": "{{count}} heure",
+    "hours_other": "{{count}} heures",
+    "nextWeek": "Dimanche : {{items}}"
   }
 }

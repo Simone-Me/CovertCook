@@ -487,5 +487,40 @@ $$;
 
 grant execute on function list_fil_rouge() to authenticated;
 
+-- ---------------------------------------------------------------------------
+-- 7. What Sunday brings.
+--
+-- The draw is a pure function of the week number, so next week is already
+-- knowable — and showing it turns a hard week into a reason to come back
+-- rather than a disappointment. A host who draws Liechtenstein and Tuvalu can
+-- see that Mexico arrives on Sunday and plan the dinner for the weekend after.
+--
+-- No entitlement question is asked or answered here: this is a window, not a
+-- shelf. Nothing can be chosen from next week until next week, for everybody
+-- alike, which is what keeps the shared week shared.
+-- ---------------------------------------------------------------------------
+
+create or replace function fil_rouge_upcoming()
+returns table (category text, code text, group_code text)
+language sql
+stable
+security definer
+set search_path = public, pg_temp
+as $$
+  select 'COUNTRY', w.code, w.group_code
+  from fil_rouge_world_draw(fil_rouge_week(now()) + 1) w
+  union all
+  select fc.code, d.code, null
+  from fil_rouge_category fc
+  cross join lateral fil_rouge_flat_draw(fc.code, fil_rouge_week(now()) + 1) d
+  where fc.rotates and fc.code <> 'COUNTRY';
+$$;
+
+grant execute on function fil_rouge_upcoming() to authenticated;
+
+comment on function fil_rouge_upcoming() is
+  'Next Sunday''s selection, readable today. Costs nothing because the draw is computed rather than stored.';
+
+
 comment on function list_fil_rouge() is
   'The whole catalogue with "may I choose this, this week" already answered. One call per picker, so no screen re-derives the rule and gets it wrong.';

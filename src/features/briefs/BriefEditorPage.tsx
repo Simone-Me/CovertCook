@@ -6,6 +6,7 @@ import { useRound } from '../rounds/hooks'
 import { DietaryPanelGrid } from '../rounds/DietaryPanelGrid'
 import { ChatThread } from '../chat/ChatThread'
 import { BackToTable } from '../../components/BackToTable'
+import { FilRougeLine } from '../rounds/FilRougeLine'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
   discardBriefDraft,
@@ -405,9 +406,14 @@ export function BriefEditorPage() {
           <p className="menucard__note">
             {t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })}
           </p>
+          {/* The thread, printed on the menu card rather than beside it: it is
+              the same kind of instruction as the course, and a direction in a
+              grey sentence somewhere else is a direction people write past. */}
+          <FilRougeLine roundId={roundId} as="sender" className="menucard__note" />
         </div>
       ) : (
         <p className="muted">
+          <FilRougeLine roundId={roundId} as="sender" />
           {assignment && round.slot_mode === 'CATEGORIES'
             ? t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })
             : t('briefs.freeChoice')}

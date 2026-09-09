@@ -1402,7 +1402,7 @@
     },
     "macro": {
       "1": "Wheat and dairy",
-      "2": "Flatbread and lamb",
+      "2": "Wheat and rice",
       "3": "Rice",
       "4": "Roots and tubers",
       "5": "Millet and sorghum",
@@ -1423,10 +1423,10 @@
       "4-A": "The Zambezi",
       "4-B": "The Great Lakes",
       "4-C": "The Congo Basin",
-      "4-D": "The Yam Belt",
+      "4-D": "West Africa",
       "4-E": "The Rice Coast",
-      "5-A": "The Eastern Sahel",
-      "5-B": "The Sahel and the Horn",
+      "5-A": "Nilo-Saharan",
+      "5-B": "The African Sahel",
       "5-C": "The Ethiopian Highlands",
       "6-A": "Southern Africa",
       "6-B": "Latin America",
@@ -1489,6 +1489,11 @@
       "FAMILY_PICNIC": "A family picnic",
       "SUNDAY_AT_GRANDMAS": "Sunday at your grandmother's",
       "CAMPING": "Camping"
-    }
+    },
+    "days": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "nextWeek": "On Sunday: {{items}}"
   }
 }
