@@ -5,20 +5,27 @@
 -- purpose: this list will be argued about for years, and revising it must
 -- never mean touching the draw.
 --
--- THE SOURCE. The grouping is not geographic and that is the whole point of
--- choosing it: countries are grouped by what they actually COOK WITH — the
--- staple a cuisine is built on — which is the only classification that makes a
--- dinner theme mean anything. A continent tells you nothing about a plate.
--- Taken from objectivelists.com/the-23-food-regions-of-the-world, which sorts
--- 176 countries into 7 macro-groups and 23 micro-groups.
+-- THE SOURCE. The grouping is not geographic, and that is why it was chosen:
+-- countries are grouped by what they actually COOK WITH — the staple a cuisine
+-- is built on — which is the only classification that makes a dinner theme
+-- mean anything. A continent tells you nothing about a plate. Taken from
+-- objectivelists.com/the-23-food-regions-of-the-world, which sorts 176
+-- countries into 7 macro-groups and 23 micro-groups.
+--
+-- THE CODE IS ISO 3166-1 ALPHA-2, and that is a deliberate choice over a
+-- readable slug. The browser can turn 'JP' into "Japan" or "Japon" by itself
+-- (`Intl.DisplayNames`), so 194 countries in two languages cost ZERO
+-- translation strings and are spelled the way each language actually spells
+-- them — including the accents a hand-written list gets wrong. Every locale
+-- added later comes free. The group names, which no standard knows, are the
+-- only country strings the app has to carry.
 --
 -- HYBRIDS RESOLVED TO THE FIRST CODE. The source marks many countries with a
 -- second, derived region — the United States as 1-C/1-A, Israel as 1-C/2-B —
 -- for cuisines carrying a colonial or diaspora inheritance. Each country is
--- filed here under its FIRST code only, and the second is kept as a comment.
--- Not a simplification for tidiness: a country in two groups would be in two
--- bags, and would come out of the draw twice while another never arrived. One
--- country, one group, one place in the queue.
+-- filed under its FIRST code only, and the second is kept as a comment. Not
+-- tidiness: a country in two groups would sit in two bags and be drawn twice
+-- while another never arrived.
 --
 -- TWO DUPLICATES DROPPED. The source lists Slovenia in both 1-B and 1-B/1-C,
 -- and Albania in both 2-B and 2-B/1-B. Each is filed once, under the first.
@@ -30,182 +37,182 @@
 -- conspicuous absence and is filed with its neighbours in 1-C.
 
 insert into fil_rouge_catalogue (category, code, group_code, macro_code) values
-  ('COUNTRY', 'FRANCE', '1-A', '1'),
-  ('COUNTRY', 'ITALY', '1-A', '1'),
-  ('COUNTRY', 'PORTUGAL', '1-A', '1'),
-  ('COUNTRY', 'SPAIN', '1-A', '1'),
-  ('COUNTRY', 'GREECE', '1-A', '1'),
-  ('COUNTRY', 'CYPRUS', '1-A', '1'),
-  ('COUNTRY', 'MALTA', '1-A', '1'),
-  ('COUNTRY', 'ARMENIA', '1-B', '1'),
-  ('COUNTRY', 'BOSNIA', '1-B', '1'),
-  ('COUNTRY', 'BULGARIA', '1-B', '1'),
-  ('COUNTRY', 'GEORGIA', '1-B', '1'),
-  ('COUNTRY', 'NORTH_MACEDONIA', '1-B', '1'),
-  ('COUNTRY', 'MONTENEGRO', '1-B', '1'),
-  ('COUNTRY', 'ROMANIA', '1-B', '1'),
-  ('COUNTRY', 'SERBIA', '1-B', '1'),
-  ('COUNTRY', 'SLOVENIA', '1-B', '1'),
-  ('COUNTRY', 'RUSSIA', '1-B', '1'),
-  ('COUNTRY', 'UKRAINE', '1-B', '1'),
-  ('COUNTRY', 'BELARUS', '1-B', '1'),  -- also 1-C
-  ('COUNTRY', 'CROATIA', '1-B', '1'),  -- also 1-C
-  ('COUNTRY', 'HUNGARY', '1-C', '1'),  -- also 1-B
-  ('COUNTRY', 'AUSTRIA', '1-C', '1'),
-  ('COUNTRY', 'BELGIUM', '1-C', '1'),
-  ('COUNTRY', 'CZECHIA', '1-C', '1'),
-  ('COUNTRY', 'DENMARK', '1-C', '1'),
-  ('COUNTRY', 'ESTONIA', '1-C', '1'),
-  ('COUNTRY', 'FINLAND', '1-C', '1'),
-  ('COUNTRY', 'ICELAND', '1-C', '1'),
-  ('COUNTRY', 'IRELAND', '1-C', '1'),
-  ('COUNTRY', 'LATVIA', '1-C', '1'),
-  ('COUNTRY', 'LITHUANIA', '1-C', '1'),
-  ('COUNTRY', 'NETHERLANDS', '1-C', '1'),
-  ('COUNTRY', 'NORWAY', '1-C', '1'),
-  ('COUNTRY', 'POLAND', '1-C', '1'),
-  ('COUNTRY', 'SLOVAKIA', '1-C', '1'),
-  ('COUNTRY', 'SWEDEN', '1-C', '1'),
-  ('COUNTRY', 'UNITED_KINGDOM', '1-C', '1'),
-  ('COUNTRY', 'UNITED_STATES', '1-C', '1'),  -- also 1-A
-  ('COUNTRY', 'CANADA', '1-C', '1'),  -- also 1-A
-  ('COUNTRY', 'NEW_ZEALAND', '1-C', '1'),  -- also 1-A
-  ('COUNTRY', 'AUSTRALIA', '1-C', '1'),  -- also 1-A
-  ('COUNTRY', 'CHILE', '1-C', '1'),  -- also 1-A
-  ('COUNTRY', 'SWITZERLAND', '1-C', '1'),  -- also 1-A
-  ('COUNTRY', 'LUXEMBOURG', '1-C', '1'),  -- also 1-A
-  ('COUNTRY', 'ARGENTINA', '1-C', '1'),  -- also 6-B
-  ('COUNTRY', 'URUGUAY', '1-C', '1'),  -- also 6-B
-  ('COUNTRY', 'ISRAEL', '1-C', '1'),  -- also 2-B
-  ('COUNTRY', 'SAUDI_ARABIA', '2-A', '2'),
-  ('COUNTRY', 'OMAN', '2-A', '2'),
-  ('COUNTRY', 'UNITED_ARAB_EMIRATES', '2-A', '2'),
-  ('COUNTRY', 'QATAR', '2-A', '2'),
-  ('COUNTRY', 'KUWAIT', '2-A', '2'),
-  ('COUNTRY', 'BAHRAIN', '2-A', '2'),
-  ('COUNTRY', 'EGYPT', '2-A', '2'),  -- also 2-B
-  ('COUNTRY', 'PAKISTAN', '2-A', '2'),  -- also 2-B
-  ('COUNTRY', 'YEMEN', '2-A', '2'),  -- also 2-B
-  ('COUNTRY', 'ALGERIA', '2-B', '2'),
-  ('COUNTRY', 'MOROCCO', '2-B', '2'),
-  ('COUNTRY', 'TUNISIA', '2-B', '2'),
-  ('COUNTRY', 'TURKEY', '2-B', '2'),
-  ('COUNTRY', 'ALBANIA', '2-B', '2'),
-  ('COUNTRY', 'JORDAN', '2-B', '2'),
-  ('COUNTRY', 'LEBANON', '2-B', '2'),
-  ('COUNTRY', 'SYRIA', '2-B', '2'),
-  ('COUNTRY', 'IRAQ', '2-B', '2'),
-  ('COUNTRY', 'IRAN', '2-B', '2'),
-  ('COUNTRY', 'LIBYA', '2-B', '2'),
-  ('COUNTRY', 'AZERBAIJAN', '2-B', '2'),  -- also 1-B
-  ('COUNTRY', 'AFGHANISTAN', '2-C', '2'),
-  ('COUNTRY', 'KYRGYZSTAN', '2-C', '2'),
-  ('COUNTRY', 'MONGOLIA', '2-C', '2'),
-  ('COUNTRY', 'TAJIKISTAN', '2-C', '2'),
-  ('COUNTRY', 'TURKMENISTAN', '2-C', '2'),
-  ('COUNTRY', 'UZBEKISTAN', '2-C', '2'),
-  ('COUNTRY', 'KAZAKHSTAN', '2-C', '2'),  -- also 1-B
-  ('COUNTRY', 'MAURITANIA', '2-A', '2'),  -- also 5-B
-  ('COUNTRY', 'DJIBOUTI', '2-A', '2'),  -- also 5-B
-  ('COUNTRY', 'MALDIVES', '2-A', '2'),  -- also 3-A
-  ('COUNTRY', 'CHINA', '3-A', '3'),
-  ('COUNTRY', 'JAPAN', '3-A', '3'),
-  ('COUNTRY', 'NORTH_KOREA', '3-A', '3'),
-  ('COUNTRY', 'SOUTH_KOREA', '3-A', '3'),
-  ('COUNTRY', 'TAIWAN', '3-A', '3'),
-  ('COUNTRY', 'MALAYSIA', '3-A', '3'),  -- also 3-B
-  ('COUNTRY', 'PHILIPPINES', '3-B', '3'),
-  ('COUNTRY', 'INDONESIA', '3-B', '3'),
-  ('COUNTRY', 'THAILAND', '3-C', '3'),  -- also 3-B
-  ('COUNTRY', 'VIETNAM', '3-C', '3'),  -- also 3-B
-  ('COUNTRY', 'CAMBODIA', '3-C', '3'),
-  ('COUNTRY', 'MYANMAR', '3-C', '3'),
-  ('COUNTRY', 'LAOS', '3-C', '3'),
-  ('COUNTRY', 'SRI_LANKA', '3-C', '3'),  -- also 3-D
-  ('COUNTRY', 'INDIA', '3-D', '3'),
-  ('COUNTRY', 'BANGLADESH', '3-D', '3'),
-  ('COUNTRY', 'NEPAL', '3-D', '3'),
-  ('COUNTRY', 'BHUTAN', '3-D', '3'),
-  ('COUNTRY', 'EAST_TIMOR', '3-A', '3'),  -- also 4-E
-  ('COUNTRY', 'GUYANA', '3-B', '3'),  -- also 6-C
-  ('COUNTRY', 'SURINAME', '3-B', '3'),  -- also 6-C
-  ('COUNTRY', 'DOMINICAN_REPUBLIC', '3-B', '3'),  -- also 6-B
-  ('COUNTRY', 'ZAMBIA', '4-A', '4'),
-  ('COUNTRY', 'ZIMBABWE', '4-A', '4'),
-  ('COUNTRY', 'UGANDA', '4-B', '4'),
-  ('COUNTRY', 'KENYA', '4-B', '4'),
-  ('COUNTRY', 'BURUNDI', '4-B', '4'),
-  ('COUNTRY', 'MALAWI', '4-B', '4'),
-  ('COUNTRY', 'TANZANIA', '4-B', '4'),
-  ('COUNTRY', 'RWANDA', '4-B', '4'),
-  ('COUNTRY', 'REP_OF_CONGO', '4-C', '4'),
-  ('COUNTRY', 'MOZAMBIQUE', '4-C', '4'),
-  ('COUNTRY', 'DEM_REP_OF_CONGO', '4-C', '4'),
-  ('COUNTRY', 'ANGOLA', '4-C', '4'),
-  ('COUNTRY', 'CENTRAL_AFRICAN_REP', '4-D', '4'),
-  ('COUNTRY', 'CAMEROON', '4-D', '4'),
-  ('COUNTRY', 'NIGERIA', '4-D', '4'),
-  ('COUNTRY', 'TOGO', '4-D', '4'),
-  ('COUNTRY', 'BENIN', '4-D', '4'),
-  ('COUNTRY', 'GHANA', '4-D', '4'),
-  ('COUNTRY', 'IVORY_COAST', '4-D', '4'),
-  ('COUNTRY', 'GUINEA', '4-E', '4'),  -- also 4-D
-  ('COUNTRY', 'GUINEA_BISSAU', '4-E', '4'),
-  ('COUNTRY', 'SIERRA_LEONE', '4-E', '4'),
-  ('COUNTRY', 'LIBERIA', '4-E', '4'),
-  ('COUNTRY', 'MADAGASCAR', '4-E', '4'),
-  ('COUNTRY', 'CHAD', '5-A', '5'),
-  ('COUNTRY', 'SOUTH_SUDAN', '5-A', '5'),
-  ('COUNTRY', 'SENEGAL', '5-B', '5'),
-  ('COUNTRY', 'MALI', '5-B', '5'),
-  ('COUNTRY', 'NIGER', '5-B', '5'),
-  ('COUNTRY', 'BURKINA_FASO', '5-B', '5'),
-  ('COUNTRY', 'SUDAN', '5-B', '5'),
-  ('COUNTRY', 'ETHIOPIA', '5-C', '5'),
-  ('COUNTRY', 'GAMBIA', '5-B', '5'),  -- also 4-E
-  ('COUNTRY', 'SOUTH_AFRICA', '6-A', '6'),
-  ('COUNTRY', 'NAMIBIA', '6-A', '6'),
-  ('COUNTRY', 'BOTSWANA', '6-A', '6'),
-  ('COUNTRY', 'ESWATINI', '6-A', '6'),
-  ('COUNTRY', 'LESOTHO', '6-A', '6'),
-  ('COUNTRY', 'BRAZIL', '6-B', '6'),
-  ('COUNTRY', 'MEXICO', '6-B', '6'),
-  ('COUNTRY', 'COLOMBIA', '6-B', '6'),
-  ('COUNTRY', 'VENEZUELA', '6-B', '6'),
-  ('COUNTRY', 'PERU', '6-B', '6'),
-  ('COUNTRY', 'BOLIVIA', '6-B', '6'),
-  ('COUNTRY', 'GUATEMALA', '6-B', '6'),
-  ('COUNTRY', 'ECUADOR', '6-B', '6'),
-  ('COUNTRY', 'HONDURAS', '6-B', '6'),
-  ('COUNTRY', 'EL_SALVADOR', '6-B', '6'),
-  ('COUNTRY', 'NICARAGUA', '6-B', '6'),
-  ('COUNTRY', 'COSTA_RICA', '6-B', '6'),
-  ('COUNTRY', 'PANAMA', '6-B', '6'),
-  ('COUNTRY', 'CAPE_VERDE', '6-B', '6'),
-  ('COUNTRY', 'BELIZE', '6-B', '6'),  -- also 6-C
-  ('COUNTRY', 'JAMAICA', '6-C', '6'),
-  ('COUNTRY', 'TRINIDAD_AND_TOBAGO', '6-C', '6'),
-  ('COUNTRY', 'BAHAMAS', '6-C', '6'),
-  ('COUNTRY', 'BARBADOS', '6-C', '6'),
-  ('COUNTRY', 'ST_LUCIA', '6-C', '6'),
-  ('COUNTRY', 'ANTIGUA_AND_BARBUDA', '6-C', '6'),
-  ('COUNTRY', 'ST_VINCENT', '6-C', '6'),
-  ('COUNTRY', 'GRENADA', '6-C', '6'),
-  ('COUNTRY', 'SEYCHELLES', '6-C', '6'),
-  ('COUNTRY', 'CUBA', '6-B', '6'),  -- also 3-B
-  ('COUNTRY', 'HAITI', '6-B', '6'),  -- also 4-E
-  ('COUNTRY', 'PARAGUAY', '6-B', '6'),  -- also 4-A
-  ('COUNTRY', 'FIJI', '6-C', '6'),  -- also 3-B
-  ('COUNTRY', 'MAURITIUS', '6-C', '6'),  -- also 2-A
-  ('COUNTRY', 'SOLOMON_ISLANDS', '7-A', '7'),
-  ('COUNTRY', 'SAMOA', '7-A', '7'),
-  ('COUNTRY', 'KIRIBATI', '7-A', '7'),
-  ('COUNTRY', 'VANUATU', '7-A', '7'),
-  ('COUNTRY', 'MICRONESIA', '7-A', '7'),
-  ('COUNTRY', 'COMOROS', '7-A', '7'),
-  ('COUNTRY', 'PAPUA_NEW_GUINEA', '7-A', '7'),  -- also 7-B
-  ('COUNTRY', 'GABON', '7-B', '7'),
-  ('COUNTRY', 'SAO_TOME_AND_PRINCIPE', '7-B', '7')
+  ('COUNTRY', 'FR', '1-A', '1'),  -- France
+  ('COUNTRY', 'IT', '1-A', '1'),  -- Italy
+  ('COUNTRY', 'PT', '1-A', '1'),  -- Portugal
+  ('COUNTRY', 'ES', '1-A', '1'),  -- Spain
+  ('COUNTRY', 'GR', '1-A', '1'),  -- Greece
+  ('COUNTRY', 'CY', '1-A', '1'),  -- Cyprus
+  ('COUNTRY', 'MT', '1-A', '1'),  -- Malta
+  ('COUNTRY', 'AM', '1-B', '1'),  -- Armenia
+  ('COUNTRY', 'BA', '1-B', '1'),  -- Bosnia
+  ('COUNTRY', 'BG', '1-B', '1'),  -- Bulgaria
+  ('COUNTRY', 'GE', '1-B', '1'),  -- Georgia
+  ('COUNTRY', 'MK', '1-B', '1'),  -- North Macedonia
+  ('COUNTRY', 'ME', '1-B', '1'),  -- Montenegro
+  ('COUNTRY', 'RO', '1-B', '1'),  -- Romania
+  ('COUNTRY', 'RS', '1-B', '1'),  -- Serbia
+  ('COUNTRY', 'SI', '1-B', '1'),  -- Slovenia
+  ('COUNTRY', 'RU', '1-B', '1'),  -- Russia
+  ('COUNTRY', 'UA', '1-B', '1'),  -- Ukraine
+  ('COUNTRY', 'BY', '1-B', '1'),  -- Belarus, also 1-C
+  ('COUNTRY', 'HR', '1-B', '1'),  -- Croatia, also 1-C
+  ('COUNTRY', 'HU', '1-C', '1'),  -- Hungary, also 1-B
+  ('COUNTRY', 'AT', '1-C', '1'),  -- Austria
+  ('COUNTRY', 'BE', '1-C', '1'),  -- Belgium
+  ('COUNTRY', 'CZ', '1-C', '1'),  -- Czechia
+  ('COUNTRY', 'DK', '1-C', '1'),  -- Denmark
+  ('COUNTRY', 'EE', '1-C', '1'),  -- Estonia
+  ('COUNTRY', 'FI', '1-C', '1'),  -- Finland
+  ('COUNTRY', 'IS', '1-C', '1'),  -- Iceland
+  ('COUNTRY', 'IE', '1-C', '1'),  -- Ireland
+  ('COUNTRY', 'LV', '1-C', '1'),  -- Latvia
+  ('COUNTRY', 'LT', '1-C', '1'),  -- Lithuania
+  ('COUNTRY', 'NL', '1-C', '1'),  -- Netherlands
+  ('COUNTRY', 'NO', '1-C', '1'),  -- Norway
+  ('COUNTRY', 'PL', '1-C', '1'),  -- Poland
+  ('COUNTRY', 'SK', '1-C', '1'),  -- Slovakia
+  ('COUNTRY', 'SE', '1-C', '1'),  -- Sweden
+  ('COUNTRY', 'GB', '1-C', '1'),  -- United Kingdom
+  ('COUNTRY', 'US', '1-C', '1'),  -- United States, also 1-A
+  ('COUNTRY', 'CA', '1-C', '1'),  -- Canada, also 1-A
+  ('COUNTRY', 'NZ', '1-C', '1'),  -- New Zealand, also 1-A
+  ('COUNTRY', 'AU', '1-C', '1'),  -- Australia, also 1-A
+  ('COUNTRY', 'CL', '1-C', '1'),  -- Chile, also 1-A
+  ('COUNTRY', 'CH', '1-C', '1'),  -- Switzerland, also 1-A
+  ('COUNTRY', 'LU', '1-C', '1'),  -- Luxembourg, also 1-A
+  ('COUNTRY', 'AR', '1-C', '1'),  -- Argentina, also 6-B
+  ('COUNTRY', 'UY', '1-C', '1'),  -- Uruguay, also 6-B
+  ('COUNTRY', 'IL', '1-C', '1'),  -- Israel, also 2-B
+  ('COUNTRY', 'SA', '2-A', '2'),  -- Saudi Arabia
+  ('COUNTRY', 'OM', '2-A', '2'),  -- Oman
+  ('COUNTRY', 'AE', '2-A', '2'),  -- United Arab Emirates
+  ('COUNTRY', 'QA', '2-A', '2'),  -- Qatar
+  ('COUNTRY', 'KW', '2-A', '2'),  -- Kuwait
+  ('COUNTRY', 'BH', '2-A', '2'),  -- Bahrain
+  ('COUNTRY', 'EG', '2-A', '2'),  -- Egypt, also 2-B
+  ('COUNTRY', 'PK', '2-A', '2'),  -- Pakistan, also 2-B
+  ('COUNTRY', 'YE', '2-A', '2'),  -- Yemen, also 2-B
+  ('COUNTRY', 'DZ', '2-B', '2'),  -- Algeria
+  ('COUNTRY', 'MA', '2-B', '2'),  -- Morocco
+  ('COUNTRY', 'TN', '2-B', '2'),  -- Tunisia
+  ('COUNTRY', 'TR', '2-B', '2'),  -- Turkey
+  ('COUNTRY', 'AL', '2-B', '2'),  -- Albania
+  ('COUNTRY', 'JO', '2-B', '2'),  -- Jordan
+  ('COUNTRY', 'LB', '2-B', '2'),  -- Lebanon
+  ('COUNTRY', 'SY', '2-B', '2'),  -- Syria
+  ('COUNTRY', 'IQ', '2-B', '2'),  -- Iraq
+  ('COUNTRY', 'IR', '2-B', '2'),  -- Iran
+  ('COUNTRY', 'LY', '2-B', '2'),  -- Libya
+  ('COUNTRY', 'AZ', '2-B', '2'),  -- Azerbaijan, also 1-B
+  ('COUNTRY', 'AF', '2-C', '2'),  -- Afghanistan
+  ('COUNTRY', 'KG', '2-C', '2'),  -- Kyrgyzstan
+  ('COUNTRY', 'MN', '2-C', '2'),  -- Mongolia
+  ('COUNTRY', 'TJ', '2-C', '2'),  -- Tajikistan
+  ('COUNTRY', 'TM', '2-C', '2'),  -- Turkmenistan
+  ('COUNTRY', 'UZ', '2-C', '2'),  -- Uzbekistan
+  ('COUNTRY', 'KZ', '2-C', '2'),  -- Kazakhstan, also 1-B
+  ('COUNTRY', 'MR', '2-A', '2'),  -- Mauritania, also 5-B
+  ('COUNTRY', 'DJ', '2-A', '2'),  -- Djibouti, also 5-B
+  ('COUNTRY', 'MV', '2-A', '2'),  -- Maldives, also 3-A
+  ('COUNTRY', 'CN', '3-A', '3'),  -- China
+  ('COUNTRY', 'JP', '3-A', '3'),  -- Japan
+  ('COUNTRY', 'KP', '3-A', '3'),  -- North Korea
+  ('COUNTRY', 'KR', '3-A', '3'),  -- South Korea
+  ('COUNTRY', 'TW', '3-A', '3'),  -- Taiwan
+  ('COUNTRY', 'MY', '3-A', '3'),  -- Malaysia, also 3-B
+  ('COUNTRY', 'PH', '3-B', '3'),  -- Philippines
+  ('COUNTRY', 'ID', '3-B', '3'),  -- Indonesia
+  ('COUNTRY', 'TH', '3-C', '3'),  -- Thailand, also 3-B
+  ('COUNTRY', 'VN', '3-C', '3'),  -- Vietnam, also 3-B
+  ('COUNTRY', 'KH', '3-C', '3'),  -- Cambodia
+  ('COUNTRY', 'MM', '3-C', '3'),  -- Myanmar
+  ('COUNTRY', 'LA', '3-C', '3'),  -- Laos
+  ('COUNTRY', 'LK', '3-C', '3'),  -- Sri Lanka, also 3-D
+  ('COUNTRY', 'IN', '3-D', '3'),  -- India
+  ('COUNTRY', 'BD', '3-D', '3'),  -- Bangladesh
+  ('COUNTRY', 'NP', '3-D', '3'),  -- Nepal
+  ('COUNTRY', 'BT', '3-D', '3'),  -- Bhutan
+  ('COUNTRY', 'TL', '3-A', '3'),  -- East Timor, also 4-E
+  ('COUNTRY', 'GY', '3-B', '3'),  -- Guyana, also 6-C
+  ('COUNTRY', 'SR', '3-B', '3'),  -- Suriname, also 6-C
+  ('COUNTRY', 'DO', '3-B', '3'),  -- Dominican Republic, also 6-B
+  ('COUNTRY', 'ZM', '4-A', '4'),  -- Zambia
+  ('COUNTRY', 'ZW', '4-A', '4'),  -- Zimbabwe
+  ('COUNTRY', 'UG', '4-B', '4'),  -- Uganda
+  ('COUNTRY', 'KE', '4-B', '4'),  -- Kenya
+  ('COUNTRY', 'BI', '4-B', '4'),  -- Burundi
+  ('COUNTRY', 'MW', '4-B', '4'),  -- Malawi
+  ('COUNTRY', 'TZ', '4-B', '4'),  -- Tanzania
+  ('COUNTRY', 'RW', '4-B', '4'),  -- Rwanda
+  ('COUNTRY', 'CG', '4-C', '4'),  -- Rep. of Congo
+  ('COUNTRY', 'MZ', '4-C', '4'),  -- Mozambique
+  ('COUNTRY', 'CD', '4-C', '4'),  -- Dem. Rep of Congo
+  ('COUNTRY', 'AO', '4-C', '4'),  -- Angola
+  ('COUNTRY', 'CF', '4-D', '4'),  -- Central African Rep.
+  ('COUNTRY', 'CM', '4-D', '4'),  -- Cameroon
+  ('COUNTRY', 'NG', '4-D', '4'),  -- Nigeria
+  ('COUNTRY', 'TG', '4-D', '4'),  -- Togo
+  ('COUNTRY', 'BJ', '4-D', '4'),  -- Benin
+  ('COUNTRY', 'GH', '4-D', '4'),  -- Ghana
+  ('COUNTRY', 'CI', '4-D', '4'),  -- Ivory Coast
+  ('COUNTRY', 'GN', '4-E', '4'),  -- Guinea, also 4-D
+  ('COUNTRY', 'GW', '4-E', '4'),  -- Guinea-Bissau
+  ('COUNTRY', 'SL', '4-E', '4'),  -- Sierra Leone
+  ('COUNTRY', 'LR', '4-E', '4'),  -- Liberia
+  ('COUNTRY', 'MG', '4-E', '4'),  -- Madagascar
+  ('COUNTRY', 'TD', '5-A', '5'),  -- Chad
+  ('COUNTRY', 'SS', '5-A', '5'),  -- South Sudan
+  ('COUNTRY', 'SN', '5-B', '5'),  -- Senegal
+  ('COUNTRY', 'ML', '5-B', '5'),  -- Mali
+  ('COUNTRY', 'NE', '5-B', '5'),  -- Niger
+  ('COUNTRY', 'BF', '5-B', '5'),  -- Burkina Faso
+  ('COUNTRY', 'SD', '5-B', '5'),  -- Sudan
+  ('COUNTRY', 'ET', '5-C', '5'),  -- Ethiopia
+  ('COUNTRY', 'GM', '5-B', '5'),  -- Gambia, also 4-E
+  ('COUNTRY', 'ZA', '6-A', '6'),  -- South Africa
+  ('COUNTRY', 'NA', '6-A', '6'),  -- Namibia
+  ('COUNTRY', 'BW', '6-A', '6'),  -- Botswana
+  ('COUNTRY', 'SZ', '6-A', '6'),  -- Eswatini
+  ('COUNTRY', 'LS', '6-A', '6'),  -- Lesotho
+  ('COUNTRY', 'BR', '6-B', '6'),  -- Brazil
+  ('COUNTRY', 'MX', '6-B', '6'),  -- Mexico
+  ('COUNTRY', 'CO', '6-B', '6'),  -- Colombia
+  ('COUNTRY', 'VE', '6-B', '6'),  -- Venezuela
+  ('COUNTRY', 'PE', '6-B', '6'),  -- Peru
+  ('COUNTRY', 'BO', '6-B', '6'),  -- Bolivia
+  ('COUNTRY', 'GT', '6-B', '6'),  -- Guatemala
+  ('COUNTRY', 'EC', '6-B', '6'),  -- Ecuador
+  ('COUNTRY', 'HN', '6-B', '6'),  -- Honduras
+  ('COUNTRY', 'SV', '6-B', '6'),  -- El Salvador
+  ('COUNTRY', 'NI', '6-B', '6'),  -- Nicaragua
+  ('COUNTRY', 'CR', '6-B', '6'),  -- Costa Rica
+  ('COUNTRY', 'PA', '6-B', '6'),  -- Panama
+  ('COUNTRY', 'CV', '6-B', '6'),  -- Cape Verde
+  ('COUNTRY', 'BZ', '6-B', '6'),  -- Belize, also 6-C
+  ('COUNTRY', 'JM', '6-C', '6'),  -- Jamaica
+  ('COUNTRY', 'TT', '6-C', '6'),  -- Trinidad & Tobago
+  ('COUNTRY', 'BS', '6-C', '6'),  -- Bahamas
+  ('COUNTRY', 'BB', '6-C', '6'),  -- Barbados
+  ('COUNTRY', 'LC', '6-C', '6'),  -- St. Lucia
+  ('COUNTRY', 'AG', '6-C', '6'),  -- Antigua & Barbuda
+  ('COUNTRY', 'VC', '6-C', '6'),  -- St. Vincent
+  ('COUNTRY', 'GD', '6-C', '6'),  -- Grenada
+  ('COUNTRY', 'SC', '6-C', '6'),  -- Seychelles
+  ('COUNTRY', 'CU', '6-B', '6'),  -- Cuba, also 3-B
+  ('COUNTRY', 'HT', '6-B', '6'),  -- Haiti, also 4-E
+  ('COUNTRY', 'PY', '6-B', '6'),  -- Paraguay, also 4-A
+  ('COUNTRY', 'FJ', '6-C', '6'),  -- Fiji, also 3-B
+  ('COUNTRY', 'MU', '6-C', '6'),  -- Mauritius, also 2-A
+  ('COUNTRY', 'SB', '7-A', '7'),  -- Solomon Islands
+  ('COUNTRY', 'WS', '7-A', '7'),  -- Samoa
+  ('COUNTRY', 'KI', '7-A', '7'),  -- Kiribati
+  ('COUNTRY', 'VU', '7-A', '7'),  -- Vanuatu
+  ('COUNTRY', 'FM', '7-A', '7'),  -- Micronesia
+  ('COUNTRY', 'KM', '7-A', '7'),  -- Comoros
+  ('COUNTRY', 'PG', '7-A', '7'),  -- Papua New Guinea, also 7-B
+  ('COUNTRY', 'GA', '7-B', '7'),  -- Gabon
+  ('COUNTRY', 'ST', '7-B', '7')  -- Sao Tome and Principe
 
 on conflict do nothing;
 
@@ -214,22 +221,22 @@ on conflict do nothing;
 -- ---------------------------------------------------------------------------
 
 insert into fil_rouge_catalogue (category, code, group_code, macro_code) values
-  ('COUNTRY', 'GERMANY', '1-C', '1'),
-  ('COUNTRY', 'MOLDOVA', '1-B', '1'),
-  ('COUNTRY', 'ANDORRA', '1-A', '1'),
-  ('COUNTRY', 'MONACO', '1-A', '1'),
-  ('COUNTRY', 'SAN_MARINO', '1-A', '1'),
-  ('COUNTRY', 'LIECHTENSTEIN', '1-C', '1'),
-  ('COUNTRY', 'BRUNEI', '3-B', '3'),
-  ('COUNTRY', 'SINGAPORE', '3-B', '3'),
-  ('COUNTRY', 'DOMINICA', '6-C', '6'),
-  ('COUNTRY', 'ST_KITTS_AND_NEVIS', '6-C', '6'),
-  ('COUNTRY', 'EQUATORIAL_GUINEA', '7-B', '7'),
-  ('COUNTRY', 'ERITREA', '5-C', '5'),
-  ('COUNTRY', 'SOMALIA', '5-B', '5'),
-  ('COUNTRY', 'MARSHALL_ISLANDS', '7-A', '7'),
-  ('COUNTRY', 'NAURU', '7-A', '7'),
-  ('COUNTRY', 'PALAU', '7-A', '7'),
-  ('COUNTRY', 'TONGA', '7-A', '7'),
-  ('COUNTRY', 'TUVALU', '7-A', '7')
+  ('COUNTRY', 'DE', '1-C', '1'),  -- Germany
+  ('COUNTRY', 'MD', '1-B', '1'),  -- Moldova
+  ('COUNTRY', 'AD', '1-A', '1'),  -- Andorra
+  ('COUNTRY', 'MC', '1-A', '1'),  -- Monaco
+  ('COUNTRY', 'SM', '1-A', '1'),  -- San Marino
+  ('COUNTRY', 'LI', '1-C', '1'),  -- Liechtenstein
+  ('COUNTRY', 'BN', '3-B', '3'),  -- Brunei
+  ('COUNTRY', 'SG', '3-B', '3'),  -- Singapore
+  ('COUNTRY', 'DM', '6-C', '6'),  -- Dominica
+  ('COUNTRY', 'KN', '6-C', '6'),  -- St. Kitts & Nevis
+  ('COUNTRY', 'GQ', '7-B', '7'),  -- Equatorial Guinea
+  ('COUNTRY', 'ER', '5-C', '5'),  -- Eritrea
+  ('COUNTRY', 'SO', '5-B', '5'),  -- Somalia
+  ('COUNTRY', 'MH', '7-A', '7'),  -- Marshall Islands
+  ('COUNTRY', 'NR', '7-A', '7'),  -- Nauru
+  ('COUNTRY', 'PW', '7-A', '7'),  -- Palau
+  ('COUNTRY', 'TO', '7-A', '7'),  -- Tonga
+  ('COUNTRY', 'TV', '7-A', '7')  -- Tuvalu
 on conflict do nothing;
