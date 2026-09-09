@@ -669,7 +669,8 @@
     "turnout": "{{voted}} of {{eligible}} have voted ({{percent}}%)",
     "allVoted": "Everybody has voted. Closing the vote…",
     "deadlineSetAlready": "This vote already has a closing time, and it does not move. Remove it first if it has to change.",
-    "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else."
+    "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else.",
+    "themeRespect": "Thread"
   },
   "results": {
     "title": "Results",
@@ -682,7 +683,8 @@
       "BEST_DESSERT": "Best dessert",
       "BEST_DRINK": "Best drink",
       "MOST_ORIGINAL": "Most original",
-      "BEST_BRIEF_RESPECT": "Best brief respect"
+      "BEST_BRIEF_RESPECT": "Best brief respect",
+      "BEST_FIL_ROUGE": "Best interpretation of the thread"
     },
     "nothingServed": "No dishes were recorded for this dinner.",
     "notServed": "not served",
@@ -1494,6 +1496,7 @@
     "days_other": "{{count}} days",
     "hours": "{{count}} hour",
     "hours_other": "{{count}} hours",
-    "nextWeek": "On Sunday: {{items}}"
+    "nextWeek": "On Sunday: {{items}}",
+    "saved": "The thread is set. It stays changeable until the roulette deals."
   }
 }

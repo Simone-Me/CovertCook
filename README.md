@@ -28,6 +28,7 @@ cook, you don't know who chose yours, and you all find out at the end.
 | **Sender** | The Player who writes a Brief. |
 | **Cook** | The Player who receives it and must prepare it. |
 | **Slot** | A course to fill: aperitif / nibbles / starter / first course / main / side / cheese / dessert / drink / other (`0066`, in the order a meal is eaten). |
+| **Fil rouge** | A direction the whole dinner cooks against — a country, a colour, a letter, a technique, an ingredient, an era (`0083`). Optional, unchecked, and free. |
 | **Pairing** | The Sender → Cook link. |
 | **Chain** | The full cycle of pairings: A→B→C→…→A. |
 
@@ -75,6 +76,14 @@ question gets answered once instead of re-argued.
   `SECURITY DEFINER` SQL functions. The frontend calls RPCs; it never writes
   game tables directly. The browser is assumed hostile — it can read every
   byte it receives, so nothing sensitive is ever sent that isn't displayed.
+- **The fil rouge is copied onto the dinner, never referenced.** The shelf it
+  is chosen from rotates every Sunday at midday in Paris, and a dinner is often
+  set up three weeks ahead — so the round stores the code itself and the draw
+  is asked one question, once, at the moment of choosing. The rotation can
+  never take back a thread a dinner already holds. The draw itself is
+  *computed* from the week number rather than written by a scheduled job:
+  every list has a stable shuffled order, the week walks it, and nothing
+  repeats until the list is exhausted.
 - **Assignment is a single Sattolo cycle**, always. Every player is exactly
   one Sender's Cook and exactly one Cook's Sender — that's what makes the
   chain reveal work as "one long chain." `sum(slots)` must equal the active
@@ -788,7 +797,11 @@ names, migration numbers, bugs found and fixed) see
   custom panel to choose how people get in (a code, or in-app invitations
   by account address), who knows whom (undercover / spy / open), how you
   vote (during dinner, after dinner on a timer, or not at all), and
-  whether the menu is free-for-all or composed course by course.
+  whether the menu is free-for-all or composed course by course, and
+  whether the evening has a **fil rouge** — one direction every recipe is
+  written against, the same for the whole table or one dealt to each cook.
+  The seven countries on the shelf change every Sunday; everything else
+  (colours, letters, ways of cooking) is shown whole and is free.
 - **The round page**: a table seen from above, with each section drawn as
   a sealed envelope laid on the cloth. The Executive Chef's actions all go
   through one panel — the pass — which shows only what's up right now and
@@ -799,6 +812,27 @@ names, migration numbers, bugs found and fixed) see
   **Production now carries the whole migration set** — `0015` → `0045` were
   deployed on 2026-08-24, closing the schema/client mismatch that had every
   RPC added since `0015` failing against the live database.
+
+### Authorship and licence
+
+**Simone Melotti** is the sole author and sole rights holder: the concept, the
+product decisions, the design and the validation of every change here are his.
+The code was written with AI assistance under that direction, which is recorded
+where it belongs — in `CHANGELOG.md`, `DESIGN.md` and `PRESENTATION.md`, which
+between them hold the reasoning behind each decision and the alternatives that
+were rejected.
+
+Stated in the README rather than in the app: it is what a reader of the
+repository wants to know and what a diner does not. Nothing here is an
+obligation under the EU AI Act — its transparency rules (Article 50, applicable
+from 2 August 2026) cover systems that interact with people, synthetic content,
+deepfakes and AI-generated text published to inform the public, and this app
+ships none of those. It is stated because a human creative contribution is what
+makes a work protectable in the first place.
+
+`LICENSE` is **all rights reserved**: the source is published for reading, and
+no permission is granted to use, copy, modify, deploy or operate it. Third-party
+dependencies keep their own licences.
 
 ### Not built yet
 
@@ -836,6 +870,14 @@ Ordered roughly by how much the product misses them.
   would add a third privilege level to an app that has two (a member, and the
   Executive Chef of one dinner), and that deserves its own decision with its
   own audit rather than a grant added quietly to a line.
+- **Typical dishes for a country fil rouge** — the one thing the world
+  catalogue is missing. A week that draws Tuvalu is a dead end without two or
+  three dishes offered as a starting point, and 194 countries is a data job of
+  its own rather than a line of code.
+- **The shareable menu card** — the results screen is already a menu; rendering
+  it as an image the browser can hand to WhatsApp or Instagram is the only
+  thing on this list that brings new people in. Names never on it, pseudonyms
+  only, and the tablecloth as the background.
 - **Dinner-day tools**: shopping list, printable buffet labels,
   offline-cache verification.
 - **An in-app help layer** and a first-run tour. (Terms and Privacy now exist

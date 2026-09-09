@@ -669,7 +669,8 @@
     "turnout": "{{voted}} sur {{eligible}} ont voté ({{percent}} %)",
     "allVoted": "Tout le monde a voté. Fermeture du vote…",
     "deadlineSetAlready": "Ce vote a déjà une heure de fermeture, et elle ne bouge pas. Retirez-la d'abord si elle doit changer.",
-    "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde."
+    "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde.",
+    "themeRespect": "Fil rouge"
   },
   "results": {
     "title": "Résultats",
@@ -682,7 +683,8 @@
       "BEST_DESSERT": "Meilleur dessert",
       "BEST_DRINK": "Meilleure boisson",
       "MOST_ORIGINAL": "Plus original",
-      "BEST_BRIEF_RESPECT": "Meilleur respect de la recette"
+      "BEST_BRIEF_RESPECT": "Meilleur respect de la recette",
+      "BEST_FIL_ROUGE": "Meilleure interprétation du fil rouge"
     },
     "nothingServed": "Aucun plat n’a été enregistré pour ce dîner.",
     "notServed": "non servi",
@@ -1494,6 +1496,7 @@
     "days_other": "{{count}} jours",
     "hours": "{{count}} heure",
     "hours_other": "{{count}} heures",
-    "nextWeek": "Dimanche : {{items}}"
+    "nextWeek": "Dimanche : {{items}}",
+    "saved": "Le fil rouge est enregistré. Il reste modifiable jusqu'au tirage."
   }
 }

@@ -15,6 +15,7 @@ import {
   type RoundResult,
 } from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
+import { FilRougeLine } from '../rounds/FilRougeLine'
 import { DinnerAlbum } from '../rounds/DinnerAlbum'
 
 /**
@@ -184,6 +185,10 @@ export function ResultsPage() {
 
       <div className={`menucard menucard--carte${arming ? ' is-arming' : ''}`}>
         <p className="menucard__head">{round?.name ?? t('results.title')}</p>
+        {/* Printed under the dinner's name, where a real menu prints the
+            evening it belongs to. The one line that says what the table was
+            all cooking towards, kept with the dishes rather than beside them. */}
+        <FilRougeLine roundId={roundId} className="menucard__note" />
 
         {dishes.length === 0 && <p className="muted">{t('results.nothingServed')}</p>}
 

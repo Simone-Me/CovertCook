@@ -91,6 +91,9 @@ export function FilRougePicker({
       list.push(o)
       by.set(o.group_code, list)
     }
+    // Sorted by micro-group code, which sorts by macro group first ('1-A'
+    // before '2-B') — so the seven rows arrive in a stable order and the macro
+    // heading below changes exactly once per macro group.
     return [...by.entries()].sort(([a], [b]) => a.localeCompare(b))
   }, [inCategory, category])
 
@@ -136,12 +139,21 @@ export function FilRougePicker({
 
           {scope === 'SHARED' && category === 'COUNTRY' && (
             <div className="stack">
-              {groups.map(([groupCode, options]) => {
+              {groups.map(([groupCode, options], i) => {
                 const drawn = options.find((o) => o.drawn)
                 const rest = options.filter((o) => !o.drawn)
+                const macro = groupCode.split('-')[0]
+                // The macro group is the staple the whole family is built on —
+                // wheat, rice, maize — and it is a different fact from where
+                // the micro group is. Printed once, above the first micro
+                // group that belongs to it.
+                const newMacro = i === 0 || groups[i - 1][0].split('-')[0] !== macro
                 return (
                   <div key={groupCode} className="stack">
-                    <p className="menucard__head">{t(`filRouge.group.${groupCode}`)}</p>
+                    {newMacro && (
+                      <p className="menucard__head">{t(`filRouge.macro.${macro}`)}</p>
+                    )}
+                    <p className="muted">{t(`filRouge.group.${groupCode}`)}</p>
                     <ChoiceList
                       name={`fil-rouge-${groupCode}`}
                       value={code ?? ''}

@@ -1076,6 +1076,9 @@ export interface BallotOption {
   difficulty: number | null
   est_cost: string | null
   prep_minutes: number | null
+  /** The thread THIS dish had to honour (0086). Null on a shared dinner, where
+   *  the round carries one for the whole table, and null when there is none. */
+  fil_rouge_code: string | null
 }
 
 export async function getBallotOptions(roundId: string) {
@@ -1088,6 +1091,9 @@ export interface BallotItemInput {
   rank: number
   originality_score?: number | null
   brief_respect_score?: number | null
+  /** How well it followed the fil rouge. Optional like the other two, and
+   *  never asked on a dinner that has none. */
+  theme_score?: number | null
 }
 
 export async function submitBallot(roundId: string, items: BallotItemInput[]) {

@@ -8,9 +8,15 @@ there.
 
 ## Where to pick up
 
-Production is **up to date**: `0015` → `0045` were deployed on 2026-08-24
-and the client and the database agree again. The schema/client mismatch
-that made every RPC added since `0015` fail is closed.
+Production carried `0015` → `0045` on 2026-08-24, closing the schema/client
+mismatch that made every RPC added since `0015` fail.
+
+**`0083`–`0086` (le fil rouge) are written, tested and NOT deployed.** They
+replay clean from an empty database and were exercised end to end against a
+local Postgres 16; nothing has run against production. Deploy them together —
+`0085` drops and recreates `create_round`, and `0086` drops and recreates
+`get_ballot_options`, so a partial apply leaves the client calling a signature
+that is not there.
 
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
@@ -18,8 +24,10 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 1. **Free-text chat** alongside the templates — the length cap (280) and
    the rate limit (the existing 10/hour) are already decided.
-2. **Notifications** (`PRESENTATION.md` phase 5) — email, not push, and
-   the reasoning is written down. Needs the Resend key below.
+2. **Notifications** — superseded: push shipped (`0047`, `0048`) and covers
+   the four moments worth interrupting for. What is left is the asynchronous
+   half — the invitation, and reaching people who never switch push on — which
+   is item 4 below and still needs the Resend key.
 3. **Real table props** — drawings today, not renders. `DESIGN.md` §4 has
    the three constraints any render has to meet, and the three questions
    still open (which objects, how many variants, single objects or one
@@ -56,6 +64,125 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-09-09
+
+**Le fil rouge: a dinner can be given a direction, and the world turns over
+every Sunday.** Migrations `0083`–`0086`, and a `LICENSE`.
+
+### What it is
+
+Everything the app did until now told you WHO to write for. Nothing told you
+WHAT to write, and a blank page addressed to a stranger is the hardest form a
+recipe brief can take. A dinner can now carry one direction that every recipe
+is written against: a country, a colour, a letter, a way of cooking, one
+ingredient, or a time. Nothing checks it — the table is the judge — and a
+dinner without one is unchanged, which is most dinners.
+
+It is **free**, and that follows the line already drawn: Crème sells how an
+evening looks, never how the game is played, and this changes what gets cooked.
+
+### What is free is no longer a tier on every row
+
+`0072` could answer "what is free" with a column, because a cloth is yours for
+ever. Here it changes with the week, so `rotates` and `draw_size` sit on the
+CATEGORY and are data: whether a list rotates, and how much of it shows, is an
+`UPDATE` and not a deploy.
+
+**Short lists are never rationed.** Ten colours and twelve techniques are shown
+whole and free, all of them, always. Putting seven locks on a list of ten does
+not create desire, it reads as meanness. Only the world — 194 countries — is
+long enough to rotate, and there Crème opens the whole group the week's country
+came from rather than all 194, because the constraint is the fun.
+
+### The draw has no job and no table
+
+The obvious build is a Sunday cron writing "this week's selection" into a
+table. Four scheduled workflows already exist and each is a thing that can fail
+at four in the morning; a fifth that fails leaves the shelf empty.
+
+So the selection is **computed** from the week number. Every list has a stable
+shuffled order, the week walks it, nothing repeats until the list is exhausted
+— the bag-of-names behaviour a plain random pick does not give, where Italy can
+come three weeks running while Peru never arrives — and the seed carries the
+tour number, so the second pass is not the first again.
+
+**A programmed skip was asked for and rejected.** It would do the opposite of
+what it was wanted for: skipping ahead skips countries, and a skipped country
+does not return before the repeats start. The order is already unreadable from
+outside; there was no pattern on the shelf to break.
+
+The week turns **Sunday at midday in Paris**, converted to Paris wall-clock
+before subtracting, so the changeover does not move by an hour twice a year.
+
+### The world, grouped by what it cooks with
+
+7 macro groups, 23 micro groups, 194 countries, from
+objectivelists.com/the-23-food-regions-of-the-world. Not geography — countries
+grouped by the staple their cuisine is built on, which is the only
+classification that makes a dinner theme mean anything. One country per macro
+group every week, so no part of the world is ever the one left out.
+
+Three things the source needed: hybrid codes resolve to the first (a country in
+two bags is drawn twice while another never arrives); Slovenia and Albania were
+listed twice and are filed once; and eighteen UN members it omits — **Germany
+among them** — are added in a separate, marked block so they stay separable.
+
+**The full tour takes about twenty months, not six.** The groups are very
+uneven (1-C holds 29 countries, 4-A holds 2) and a group is only visited every
+third week, so the largest takes 87 weeks to exhaust. Kept knowingly: every
+region every week reads better than every country once.
+
+**A hard week is answered by showing the next one.** The draw is a pure
+function of the week number, so next Sunday is already knowable: the week that
+offers Liechtenstein and the Marshall Islands can say that France, Thailand,
+Mali and Honduras arrive on Sunday. Widening this week instead would dissolve
+the shared week everybody cooks to.
+
+### Two shapes, and the leak that turned out not to exist
+
+SHARED is one thread for the table — six blue dishes are a spectacle, and it is
+what makes the menu worth photographing. PER_COOK deals one each, which reads
+badly on colours and beautifully on countries: six countries on one table is a
+world tour in an evening.
+
+The objection raised against PER_COOK was that a menu labelled "blue: tiramisu"
+would identify its cook. It does not. A per-cook value is known to exactly two
+people — the cook, who must know what they are cooking, and their sender, who
+must know it to write for them — and to everybody else a colour beside a dish
+names nobody.
+
+**The value is copied, never referenced.** The shelf rotates every Sunday and a
+dinner is often set up three weeks ahead, so a round storing "whatever the draw
+offers" would lose its thread mid-week with recipes already written against it.
+The draw is asked one question, once. Same split `ROADMAP.md` §5 made for the
+recipe book. The POOL is frozen too, because the roulette runs at LOCKED,
+possibly weeks after the choice, and must deal from the shelf the host was
+shown.
+
+### The rest of it
+
+- **The allergen check informs and does not refuse** (`0069`'s rule): a fil
+  rouge of cheese on a table with a vegan is told to the host while they
+  choose, because they are the one person who can still change it.
+- **Frozen once the roulette deals**, not once the dinner starts — people write
+  against it, so it cannot move under them.
+- **A third ballot line**, optional like the other two and absent entirely on a
+  dinner with no thread, plus a **best interpretation** award. On a per-cook
+  dinner the ballot carries each dish's own thread, because "did it honour it"
+  cannot be answered against the round.
+- **Country names come from the browser.** `Intl.DisplayNames` turns `JP` into
+  Japan or Japon, correctly accented, in any locale — so the catalogue stores
+  ISO codes, the app carries no country strings at all, and a third language
+  costs nothing. 388 translation strings that do not exist.
+
+### LICENSE
+
+All rights reserved, no permission granted, sole rights holder named. The
+repository is source-available for reading and nothing else. Third-party
+dependencies keep their own licences, and the file says so.
 
 ---
 
