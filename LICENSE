@@ -1,0 +1,47 @@
+CovertCook — proprietary software
+Copyright (c) 2026 Simone Melotti (Opus35, opus35.fr). All rights reserved.
+
+
+1. OWNERSHIP
+
+Simone Melotti, a natural person, is the sole author and sole rights holder
+of this software: its source code, its database schema and functions, its
+texts, its graphics and its design. The concept, the product decisions and
+the validation of every change in this repository are his. No transfer of
+any right is made by publishing it.
+
+
+2. NO LICENCE IS GRANTED
+
+This source code is published for reference and consultation only.
+
+No permission is granted to any person to use, copy, reproduce, modify,
+adapt, translate, merge, publish, distribute, sublicense, sell, or create
+derivative works from this software or any part of it, nor to deploy,
+host or operate any instance, clone or derivative of it — whether or not
+for commercial purposes, whether or not free of charge, and whether or
+not the result is made public.
+
+Reading this code does not grant a right to run it. CovertCook is
+operated solely by its owner, and the only authorised way to use it is
+the service he operates.
+
+
+3. THIRD-PARTY COMPONENTS
+
+This repository depends on third-party software (listed in package.json
+and package-lock.json) which remains governed by its own licences. This
+notice covers only the work authored by the rights holder named above;
+it makes no claim over those components.
+
+
+4. NO WARRANTY
+
+The software is provided "as is", without warranty of any kind, express
+or implied. The rights holder is not liable for any claim, damage or
+other liability arising from it.
+
+
+5. CONTACT
+
+Requests for permission: contact@opus35.fr
