@@ -597,6 +597,7 @@
     "send": "Envoyer",
     "report": "Signaler",
     "reported": "Signalé",
+    "you": "Vous",
     "category": {
       "CLARIFICATION": "Demander une précision",
       "SUBSTITUTION": "Demander une substitution",
@@ -670,6 +671,23 @@
     "allVoted": "Tout le monde a voté. Fermeture du vote…",
     "deadlineSetAlready": "Ce vote a déjà une heure de fermeture, et elle ne bouge pas. Retirez-la d'abord si elle doit changer.",
     "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde."
+  },
+  "share": {
+    "dinner": "Partager ce dîner",
+    "what": "Choisissez ce qui part avec. Rien n’est envoyé avant que vous appuyiez sur envoyer, et ce que vous voyez ci-dessous est exactement ce qui quitte ce téléphone.",
+    "realNames": "Les noms",
+    "realNamesHint": "qui était vraiment à table",
+    "pseudonyms": "Les pseudonymes",
+    "pseudonymsHint": "les noms sous lesquels ils ont cuisiné",
+    "photo": "La photo",
+    "photoHint": "envoyée en image, pas en lien",
+    "results": "Le vote",
+    "resultsHint": "les points, et le plat de la soirée",
+    "atTheTable": "À table",
+    "underTheNames": "Sous les noms",
+    "send": "Envoyer",
+    "copied": "Copié. Collez-le où vous voulez.",
+    "photoNotSent": "Envoyé sans la photo — ce navigateur ne sait pas emporter une image dans un partage."
   },
   "results": {
     "title": "Résultats",
@@ -822,16 +840,18 @@
     "toYourSender": "Avec le chef qui écrit pour vous",
     "myOrder": "Ma commande",
     "myDish": "Mon plat",
-    "fromExecutiveChef": "Le Executive Chef"
+    "fromExecutiveChef": "Le Executive Chef",
+    "reply": "Répondre à ce message",
+    "replyingTo": "Réponse à {{name}} : ",
+    "replyCancel": "Ne répondre à personne en particulier"
   },
   "pro": {
     "badge": "Crème",
     "title": "À propos de Crème",
-    "freeForever": "Tout ce qu’il faut pour un dîner est gratuit, et le restera : n’importe quel dîner, n’importe quel nombre d’invités, toutes les règles du jeu. Personne à table ne joue à une version réduite.",
-    "what": "Crème n’ajoute aucun pouvoir. Elle rend la soirée plus fluide et mieux mise : des thématiques (Noël, un solstice d’été), plus de place pour être gentil avec votre cuisinier, et d’autres idées encore à préciser. Crème permet de partager les expériences et les créations avec les autres pendans le dîner.",
+    "freeForever": "Tout ce qu’il faut pour un dîner est gratuit, et le restera, pour n’importe quel dîner.",
+    "what": "Crème débloque des fonctions spéciales.",
     "needed": "Ce réglage fait partie de Crème.",
     "lockedHere": "Fait partie de Crème.",
-    "whatIsIt": "C’est quoi, Crème ?",
     "seeWhatItOpens": "Voir ce que Crème ouvre →",
     "status": {
       "on": "Vous avez Crème.",
@@ -859,11 +879,7 @@
     },
     "ways": {
       "title": "Comment l’obtenir",
-      "oneByOne": "Acheter une chose, la garder pour toujours",
-      "oneByOneWhat": "Une liste de mots ou une nappe, achetée une fois et à vous sur tous les dîners que vous organiserez.",
-      "yearly": "Tout, pour un an — {{price}}",
-      "yearlyWhat": "Toutes les listes, toutes les nappes, et trois recettes par cuisinier, sur tous les dîners que vous organisez pendant un an.",
-      "yearlyRefund": "Acheté via le store, donc c’est le store qui gère les remboursements selon ses propres règles.",
+      "yearly": "Tout, toutes les fonctions, pour un an — {{price}}",
       "freeWhileTesting": "Gratuit pendant la phase de test de CovertCook : activez Crème plus haut et tout ceci est à vous jusqu’au {{date}}, sans rien payer. Après cette date, c’est ici que cela s’achètera — dans l’application.",
       "notYet": "Pas encore : il n’y a aucun moyen de payer dans l’application pour l’instant. Rien ici ne s’achète, et rien ne vous est retiré."
     },

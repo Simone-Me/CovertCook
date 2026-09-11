@@ -2027,6 +2027,13 @@ export interface BoardMessage {
   // nothing to block, because the host is not a seat.
   author_member_id: string | null
   from_host: boolean
+  // What this phrase answers (0083), and enough of it to read the answer even
+  // when the line it answers has fallen out of the fridge's 24-hour window:
+  // the id draws the wire, the body and the name are the quote it falls back
+  // to. Null on a line that starts something, which is most of them.
+  reply_to: string | null
+  reply_to_body: string | null
+  reply_to_author: string | null
 }
 
 export async function getBoard(roundId: string) {
@@ -2034,8 +2041,12 @@ export async function getBoard(roundId: string) {
   return unwrap<BoardMessage[]>(res)
 }
 
-export async function postToBoard(roundId: string, templateId: string) {
-  const res = await supabase.rpc('post_to_board', { p_round_id: roundId, p_template_id: templateId })
+export async function postToBoard(roundId: string, templateId: string, replyTo?: string | null) {
+  const res = await supabase.rpc('post_to_board', {
+    p_round_id: roundId,
+    p_template_id: templateId,
+    p_reply_to: replyTo ?? null,
+  })
   return unwrap(res)
 }
 

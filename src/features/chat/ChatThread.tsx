@@ -96,28 +96,56 @@ export function ChatThread({ pairingId, roundId }: { pairingId: string; roundId?
     <div className="stack">
       {error && <div className="error">{error}</div>}
 
-      <div className="stack">
+      {/* THE CONVERSATION, WRITTEN AS A MENU.
+          Two columns of pale bubbles inside an already-folded panel was the
+          least readable thing in the app: alternating alignment made every
+          line start in a different place, the bubbles fought the paper they
+          were laid on, and the only thing a reader wanted — who said what, in
+          order — was the thing it hid. The menu card is the shape this app
+          already uses when a list has to be read at a glance, and it is the
+          shape the Executive Chef reads their courses in. So the thread is one
+          column of ruled lines: the speaker in small caps, what they said
+          beside it, the day at the end. Yours is marked in the margin rather
+          than moved to the other side of the page. */}
+      <div className="menucard menucard--thread">
+        <p className="menucard__head">{t('chat.title')}</p>
+
         {thread?.length === 0 && <p className="muted">{t('chat.empty')}</p>}
-        {thread?.map((m) => (
-          <div key={m.message_id} className={m.is_mine ? 'chat-bubble mine' : 'chat-bubble'}>
-            {!m.is_mine && (m.other_party_display_name || m.other_party_secret_name) && (
-              <div className="muted">{m.other_party_display_name ?? m.other_party_secret_name}</div>
-            )}
-            <div>{renderBody(m, m.slot_value)}</div>
-            <div className="row chat-bubble__foot">
-              {/* Month and day, nothing else. A dinner is planned over days,
-                  not across years, and the year was the widest thing on the
-                  line while being the one part nobody needed. */}
-              <span className="chat-bubble__day">{m.created_day.slice(5)}</span>
-              {!m.is_mine && !m.reported && (
-                <button type="button" className="secondary" onClick={() => onReport(m.message_id)}>
-                  {t('chat.report')}
-                </button>
-              )}
-              {m.reported && <span className="muted">{t('chat.reported')}</span>}
-            </div>
-          </div>
-        ))}
+
+        <ol className="menucard__list">
+          {thread?.map((m) => (
+            <li key={m.message_id} className="menucard__row">
+              <div className={`menucard__course thread-line${m.is_mine ? ' is-mine' : ''}`}>
+                <span className="menucard__name">
+                  <span className="thread-line__who">
+                    {m.is_mine
+                      ? t('chat.you')
+                      : (m.other_party_display_name ?? m.other_party_secret_name ?? '')}
+                  </span>
+                  <span className="thread-line__said">{renderBody(m, m.slot_value)}</span>
+                </span>
+
+                {/* Month and day, nothing else. A dinner is planned over days,
+                    not across years, and the year was the widest thing on the
+                    line while being the one part nobody needed. */}
+                <span className="thread-line__day">{m.created_day.slice(5)}</span>
+
+                {!m.is_mine && !m.reported && (
+                  <button
+                    type="button"
+                    className="chat-act"
+                    title={t('chat.report')}
+                    aria-label={t('chat.report')}
+                    onClick={() => onReport(m.message_id)}
+                  >
+                    ⚑
+                  </button>
+                )}
+                {m.reported && <span className="muted thread-line__day">{t('chat.reported')}</span>}
+              </div>
+            </li>
+          ))}
+        </ol>
       </div>
 
       <form onSubmit={onSend} className="stack">

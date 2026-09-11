@@ -16,6 +16,7 @@ import {
 } from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
 import { DinnerAlbum } from '../rounds/DinnerAlbum'
+import { ShareDinner } from '../rounds/ShareDinner'
 
 /**
  * The evening, printed as the menu it was.
@@ -242,6 +243,12 @@ export function ResultsPage() {
           )}
         </div>
       )}
+
+      {/* Sending the evening on, from the screen it ended on — and choosing
+          what goes with it. Above the album on purpose: the photograph is one
+          of the four things the box can carry, so the control that carries it
+          should not be below the thing it carries. */}
+      {round && <ShareDinner round={round} dishes={dishes} />}
 
       {/* The picture of the table, on the screen the evening ends on. Not a
           separate page: an album nobody is standing in front of at the moment

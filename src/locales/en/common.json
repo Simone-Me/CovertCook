@@ -597,6 +597,7 @@
     "send": "Send",
     "report": "Report",
     "reported": "Reported",
+    "you": "You",
     "category": {
       "CLARIFICATION": "Ask for clarification",
       "SUBSTITUTION": "Ask about a substitution",
@@ -670,6 +671,23 @@
     "allVoted": "Everybody has voted. Closing the vote…",
     "deadlineSetAlready": "This vote already has a closing time, and it does not move. Remove it first if it has to change.",
     "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else."
+  },
+  "share": {
+    "dinner": "Share this dinner",
+    "what": "Choose what goes with it. Nothing here is sent until you press send, and what you see below is exactly what leaves this phone.",
+    "realNames": "The names",
+    "realNamesHint": "who was actually at the table",
+    "pseudonyms": "The pseudonyms",
+    "pseudonymsHint": "the names they cooked under",
+    "photo": "The photograph",
+    "photoHint": "sent as a picture, not as a link",
+    "results": "The vote",
+    "resultsHint": "points, and the dish of the evening",
+    "atTheTable": "At the table",
+    "underTheNames": "Under the names",
+    "send": "Send it",
+    "copied": "Copied. Paste it wherever you like.",
+    "photoNotSent": "Sent without the photograph — this browser cannot carry a picture into a share."
   },
   "results": {
     "title": "Results",
@@ -822,16 +840,18 @@
     "toYourSender": "With the chef who writes for you",
     "myOrder": "My order",
     "myDish": "My dish",
-    "fromExecutiveChef": "The Executive Chef"
+    "fromExecutiveChef": "The Executive Chef",
+    "reply": "Answer this",
+    "replyingTo": "Answering {{name}}: ",
+    "replyCancel": "Answer nobody in particular"
   },
   "pro": {
     "badge": "Crème",
     "title": "About Crème",
-    "freeForever": "Everything a dinner needs is free, and stays free: any dinner, any number of guests, every rule of the game. Nobody at a table is playing a smaller version of it.",
-    "what": "Crème adds no powers. It makes the evening run smoother and look better: thematic environments (a Christmas one, a midsummer one), more room to be kind to your cook, and others ideas still being worked out. Crème allows the Excutive Chef to share Crème with every guests at the dinner.",
+    "freeForever": "Everything a dinner needs is free, and stays free for any dinner.",
+    "what": "Crème unlocks special features.",
     "needed": "That setting is part of Crème.",
     "lockedHere": "Part of Crème.",
-    "whatIsIt": "What is Crème?",
     "seeWhatItOpens": "See what Crème opens →",
     "status": {
       "on": "You have Crème.",
@@ -859,11 +879,7 @@
     },
     "ways": {
       "title": "How you would get it",
-      "oneByOne": "Buy one thing, keep it forever",
-      "oneByOneWhat": "A word list or a cloth, bought once and yours on every dinner you ever organise.",
-      "yearly": "Everything, for a year — {{price}}",
-      "yearlyWhat": "Every list, every cloth, and three recipes per cook, on every dinner you organise for a year.",
-      "yearlyRefund": "Bought through the store, so the store handles refunds under its own rules.",
+      "yearly": "Everything, all the features for a year — {{price}}",
       "freeWhileTesting": "Free while CovertCook is being tested: switch Crème on above and all of this is yours until {{date}}, without paying for anything. After that date this is where it is bought — here, in the app.",
       "notYet": "Not yet: there is no way to pay inside the app at the moment. Nothing here can be bought, and nothing is being held back from you."
     },
