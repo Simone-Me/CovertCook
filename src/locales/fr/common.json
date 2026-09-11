@@ -607,6 +607,7 @@
     "send": "Envoyer",
     "report": "Signaler",
     "reported": "Signalé",
+    "you": "Vous",
     "category": {
       "CLARIFICATION": "Demander une précision",
       "SUBSTITUTION": "Demander une substitution",
@@ -682,6 +683,20 @@
     "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde.",
     "themeRespect": "Fil rouge"
   },
+  "share": {
+    "what": "Choisissez ce qui figure sur la carte. Rien n’est envoyé avant que vous appuyiez sur envoyer, et l’image ci-dessous est exactement ce qui quitte ce téléphone.",
+    "realNames": "Les noms",
+    "realNamesHint": "qui était vraiment à table",
+    "pseudonyms": "Les pseudonymes",
+    "pseudonymsHint": "les noms sous lesquels ils ont cuisiné",
+    "photo": "La photo",
+    "photoHint": "la photo de la table, envoyée à côté de la carte",
+    "results": "Le vote",
+    "resultsHint": "le plat de la soirée, marqué sur le menu",
+    "atTheTable": "À table",
+    "underTheNames": "Sous les noms",
+    "send": "Envoyer"
+  },
   "results": {
     "title": "Résultats",
     "points": "{{points}} pts",
@@ -705,7 +720,7 @@
     },
     "share": {
       "button": "Partager le menu",
-      "note": "Une image du menu du soir — les plats seulement, jamais le nom de quelqu'un.",
+      "note": "Les plats seulement, sauf si vous cochez une liste ci-dessus. Les noms des gens à table leur appartiennent.",
       "winner": "Plat de la soirée : {{dish}}",
       "downloaded": "Enregistrée. Publiez-la où vous voulez."
     }
@@ -858,11 +873,10 @@
   "pro": {
     "badge": "Crème",
     "title": "À propos de Crème",
-    "freeForever": "Tout ce qu’il faut pour un dîner est gratuit, et le restera : n’importe quel dîner, n’importe quel nombre d’invités, toutes les règles du jeu. Personne à table ne joue à une version réduite.",
-    "what": "Crème n’ajoute aucun pouvoir. Elle rend la soirée plus fluide et mieux mise : des thématiques (Noël, un solstice d’été), plus de place pour être gentil avec votre cuisinier, et d’autres idées encore à préciser. Crème permet de partager les expériences et les créations avec les autres pendans le dîner.",
+    "freeForever": "Tout ce qu’il faut pour un dîner est gratuit, et le restera, pour n’importe quel dîner.",
+    "what": "Crème débloque des fonctions spéciales.",
     "needed": "Ce réglage fait partie de Crème.",
     "lockedHere": "Fait partie de Crème.",
-    "whatIsIt": "C’est quoi, Crème ?",
     "seeWhatItOpens": "Voir ce que Crème ouvre →",
     "status": {
       "on": "Vous avez Crème.",
@@ -890,11 +904,7 @@
     },
     "ways": {
       "title": "Comment l’obtenir",
-      "oneByOne": "Acheter une chose, la garder pour toujours",
-      "oneByOneWhat": "Une liste de mots ou une nappe, achetée une fois et à vous sur tous les dîners que vous organiserez.",
-      "yearly": "Tout, pour un an — {{price}}",
-      "yearlyWhat": "Toutes les listes, toutes les nappes, et trois recettes par cuisinier, sur tous les dîners que vous organisez pendant un an.",
-      "yearlyRefund": "Acheté via le store, donc c’est le store qui gère les remboursements selon ses propres règles.",
+      "yearly": "Tout, toutes les fonctions, pour un an — {{price}}",
       "freeWhileTesting": "Gratuit pendant la phase de test de CovertCook : activez Crème plus haut et tout ceci est à vous jusqu’au {{date}}, sans rien payer. Après cette date, c’est ici que cela s’achètera — dans l’application.",
       "notYet": "Pas encore : il n’y a aucun moyen de payer dans l’application pour l’instant. Rien ici ne s’achète, et rien ne vous est retiré."
     },
@@ -1545,7 +1555,7 @@
         "q": "Est-ce que c'est payant ?",
         "a": [
           "Non. Dîners illimités, autant de convives que vous voulez, et tout ce qui change la façon de jouer est gratuit et le restera.",
-          "Crème est la partie payante et ne vend que l'allure d'une soirée : nappes, listes de pseudonymes, soirées à thème, plus d'une recette par brief. Rien là-dedans ne donne à quelqu'un une meilleure partie qu'à son voisin, et c'est l'organisateur qui l'achète pour un dîner — une table n'est donc jamais coupée en deux. Rien n'est encore réellement achetable."
+          "Crème est la partie payante et ne vend que l'allure d'une soirée : nappes, listes de pseudonymes, soirées à thème, plus d'une recette par brief. Rien là-dedans ne donne à quelqu'un une meilleure partie qu'à son voisin. C'est un seul prix pour tout, 5 € par an, et un dîner porte le Crème de son organisateur — une table n'est donc jamais coupée en deux. Rien n'est encore réellement achetable."
         ]
       },
       {

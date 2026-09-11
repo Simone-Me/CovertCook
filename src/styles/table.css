@@ -808,17 +808,126 @@
   margin-top: 1px;
 }
 
-.chat-bubble__day {
-  font-size: 9px;
-  line-height: 1;
-  opacity: 0.45;
-}
-
 .chat-bubble--food .chef-remove {
   padding: 0 2px;
   font-size: 10px;
   line-height: 1;
   opacity: 0.55;
+}
+
+/* ---------------------------------------------------------------------------
+ * The marks on a phrase: answer it, flag it, never sit with them again.
+ *
+ * They used to be bare glyphs at half opacity, over a photograph of a fridge
+ * full of groceries — which is to say they were not there. Nobody found the
+ * flag, and nobody found the answer at all. A small plate in the table's own
+ * red is the whole fix: the marks sit ON something, so they read as controls
+ * rather than as punctuation left in the phrase.
+ *
+ * The plate is a tint of --accent rather than a colour of its own, so a table
+ * dressed in another cloth one day carries it without a second decision.
+ * ------------------------------------------------------------------------- */
+
+.chat-acts {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 3px;
+  border: 1px solid rgba(198, 32, 44, 0.28);
+  border-radius: 999px;
+  background: rgba(198, 32, 44, 0.12);
+}
+
+.chat-act {
+  flex: none;
+  width: auto;
+  padding: 1px 4px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--accent);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chat-act:hover,
+.chat-act:focus-visible {
+  background: rgba(198, 32, 44, 0.18);
+}
+
+/* ---------------------------------------------------------------------------
+ * The wire between a phrase and its answer.
+ *
+ * An elbow, not a curve and not a rail down the whole column: it leaves the
+ * bubble above through the gap, turns once at a right angle, and ends in a
+ * knot where it meets the answer. The indent said a reply was a reply; one
+ * right angle says WHICH line it answers, which is what a fridge with three
+ * conversations in it actually needs.
+ *
+ * Drawn in the gutter the indent already opens, so it costs no width.
+ * ------------------------------------------------------------------------- */
+
+.chat-tie {
+  position: absolute;
+  top: -12px;
+  left: -15px;
+  width: 9px;
+  height: 22px;
+  border-left: 2px solid rgba(198, 32, 44, 0.45);
+  border-bottom: 2px solid rgba(198, 32, 44, 0.45);
+  border-bottom-left-radius: 7px;
+  pointer-events: none;
+}
+
+/* The knot: the small weight at the end of the wire that says it arrived
+   here, at this phrase, rather than passing by on its way down the column. */
+.chat-tie::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(198, 32, 44, 0.55);
+}
+
+.chat-bubble--reply.mine .chat-tie {
+  left: auto;
+  right: -15px;
+  border-left: none;
+  border-right: 2px solid rgba(198, 32, 44, 0.45);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 7px;
+}
+
+.chat-bubble--reply.mine .chat-tie::after {
+  right: auto;
+  left: -4px;
+}
+
+/* Which opener the roller is answering, said between the fridge and the pin
+   that sends — the last thing read before the tap that posts, and wearing the
+   same plate as the mark that armed it. */
+.chat-answering {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(198, 32, 44, 0.28);
+  border-radius: 999px;
+  background: rgba(198, 32, 44, 0.1);
+  font-size: 12px;
+}
+
+.chat-answering__what {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1114,6 +1223,62 @@
 
 .menucard__row + .menucard__row .menucard__course {
   border-top: 1px dashed var(--env-edge);
+}
+
+/* ---------------------------------------------------------------------------
+ * The private conversation, laid out as a menu.
+ *
+ * Same card, same rules, different content: one column of lines, the speaker
+ * in small caps, the day at the end. The alternative — two columns of pale
+ * bubbles inside an already-folded panel — was the least readable surface in
+ * the app, because alternating alignment means no two lines start in the same
+ * place and the eye has to find the beginning of every one of them.
+ * ------------------------------------------------------------------------- */
+
+.menucard--thread .menucard__head {
+  text-align: left;
+}
+
+.thread-line {
+  align-items: baseline;
+  gap: 6px;
+}
+
+.thread-line .menucard__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.thread-line__who {
+  margin-right: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.thread-line__said {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.thread-line__day {
+  flex: none;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Your own line, marked in the margin. Moving it to the other side of the page
+   is what a chat does; a menu says whose course it is without reflowing. */
+.thread-line.is-mine {
+  padding-left: 8px;
+  border-left: 3px solid var(--accent);
+}
+
+.thread-line.is-mine .thread-line__who {
+  color: var(--accent);
 }
 
 /* A confirmation that stays on the page, shown where the decision was taken.
@@ -2205,13 +2370,6 @@
   vertical-align: 1px;
 }
 
-.shelf__tag--price {
-  border-color: var(--paper-edge);
-  color: var(--accent);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
 .shelf__locked {
   font-size: 11.5px;
   color: var(--text-muted);
@@ -2465,6 +2623,14 @@
   font-size: 13px;
 }
 
+/* A door, not a footnote. The line at the foot of the creation form is the
+   only way into Crème from there, and nobody presses a sentence. */
+.profree__button {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
 /* The two PRO warnings, and the hold. A month out is a note; a week out is the
    same note leaning on the accent; on hold uses the error card, because the
    dinner has actually stopped. */
@@ -2547,14 +2713,20 @@
 }
 
 /* A reply sits under the phrase it answers rather than beside it (0088). The
-   indent is the whole signal — an answer that lines up with the openers reads
-   as another notice, which is what the fridge already had too much of. The rail
-   down the left is what connects it upward without drawing a thread. */
+   indent says it is an answer; the elbow drawn in the gutter it opens says
+   which line it answers — see .chat-tie above. The flat rail that used to run
+   down the left is gone: it connected a reply to the whole column rather than
+   to one phrase, which is the question a reader actually has. */
 .chat-bubble--reply {
+  position: relative;
+  margin-top: 8px;
   margin-left: 26px;
   max-width: calc(96% - 26px);
-  border-left: 2px solid rgba(60, 90, 105, 0.22);
-  padding-left: 8px;
+}
+
+.chat-bubble--reply.mine {
+  margin-left: 0;
+  margin-right: 26px;
 }
 
 /* The opener currently being answered, so the roller full of replies has a
@@ -2564,3 +2736,47 @@
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
+
+/* ---------------------------------------------------------------------------
+ * Sending the evening on, and choosing what goes with it.
+ *
+ * Four boxes and a preview. The preview is not a nicety: it is the only way
+ * somebody can see that ticking "the names" puts eight real names on a card
+ * that is about to be posted publicly — and it is the card itself, redrawn on
+ * every tick, because a description of an image is not a preview of one.
+ * ------------------------------------------------------------------------- */
+
+.sharebox__opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sharebox__opt input {
+  width: auto;
+  margin-top: 2px;
+  flex: none;
+}
+
+/* Something the evening does not have — no photograph, no pseudonyms on an
+   open table. Shown rather than hidden: a box that disappears is a feature
+   somebody goes looking for. */
+.sharebox__opt.is-off {
+  opacity: 0.5;
+}
+
+/* The card itself, as it will be posted. Capped in height so the boxes above
+   it stay on the same screen — the point is to see the choice take effect, not
+   to admire the picture. */
+.sharebox__card {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--paper-shadow);
+}
+

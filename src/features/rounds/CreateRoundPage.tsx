@@ -393,11 +393,11 @@ export function CreateRoundPage() {
                       ) : undefined,
                   }))}
                 />
-                {!isPro && (
-                  <p className="muted">
-                    <Link to="/pro">{t('pro.whatIsIt')}</Link>
-                  </p>
-                )}
+                {/* NO SECOND LINK TO CRÈME HERE. The foot of this form already
+                    carries one, and a row with its own link taught people that
+                    three recipes were a separate thing to go and buy — which
+                    stopped being true the day Crème became one price for
+                    everything. One way in, at the bottom, for the whole form. */}
               </Fold>
 
               {/* How many, and whether you wave them in. Both settled here
@@ -487,11 +487,14 @@ export function CreateRoundPage() {
               <p className="profree__head">{t('pro.title')}</p>
               <p className="profree__free">{t('pro.freeForever')}</p>
               <p className="profree__what">{t('pro.what')}</p>
-              {/* The second of the two ways in, and the one that matters: this
+              {/* The one way in, and it is a door rather than a footnote: this
                   is where somebody is looking at a locked row and wondering
-                  what it would take. */}
+                  what it would take, and a line of small blue text at the foot
+                  of a long form is not something anybody presses. */}
               <p className="profree__link">
-                <Link to="/pro">{t('pro.seeWhatItOpens')}</Link>
+                <Link to="/pro" className="link-button profree__button">
+                  {t('pro.seeWhatItOpens')}
+                </Link>
               </p>
             </div>
           </>

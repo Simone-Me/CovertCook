@@ -1,6 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { ChoiceList } from '../../components/ChoiceList'
-import { fromCents, type ThemeTier } from '../../lib/rpc'
+import { type ThemeTier } from '../../lib/rpc'
 
 export interface ThemeChoice {
   code: string
@@ -17,13 +17,14 @@ export interface ThemeChoice {
  *
  * WHY A LOCKED ROW IS SHOWN AT ALL. The alternative — list only what this
  * account owns — makes the app look like it has two pseudonym lists and one
- * table cloth, and a host who would happily pay fifty cents for the pâtisserie
- * never learns it exists. A locked row with a price on it is an honest
- * shopfront: you read the whole shelf and you see which part of it is yours.
+ * table cloth, and a host who would happily take Crème for the pâtisserie
+ * never learns it exists. A locked row that says which side of the line it is
+ * on is an honest shopfront: you read the whole shelf and you see which part
+ * of it is yours.
  *
- * WHAT IT DOES NOT DO. It does not sell anything. There is no payment provider
- * wired to this app, so a locked row explains itself and points at the PRO
- * page, where the three ways in are described in one place. The entitlement
+ * WHAT IT DOES NOT DO. It does not sell anything, and it no longer prices
+ * anything either: Crème is one purchase for everything, so the row says PRO
+ * and the price is quoted once, on the Crème page. The entitlement
  * check is server-side — `theme_available` in 0072, taught about subscriptions
  * in 0075 — so the day a purchase lands, this shelf unlocks itself.
  *
@@ -100,19 +101,14 @@ export function ThemePicker({
               </>
             )}
 
-            {/* A price on something nobody can have is noise, and a price on
-                something that is being redrawn is a promise about a thing that
-                does not exist yet. The paused row carries one word instead. */}
-            {opt.paused ? (
-              <span className="shelf__tag">{t('themes.pausedTag')}</span>
-            ) : (
-              !opt.owned &&
-              opt.price_cents !== null && (
-                <span className="shelf__tag shelf__tag--price">
-                  {fromCents(opt.price_cents, locale)}
-                </span>
-              )
-            )}
+            {/* NO PRICE ON A ROW ANY MORE. Crème is one thing, bought once a
+                year, so fifty cents beside a cloth was an offer that could not
+                be taken and a second shopfront next to the only real one. The
+                PRO mark above already says which side of the line the row is
+                on; what it costs belongs on the Crème page, once. A paused row
+                still carries its one word, because "being redrawn" is a fact
+                about the cloth rather than about the reader. */}
+            {opt.paused && <span className="shelf__tag">{t('themes.pausedTag')}</span>}
           </>
         ),
       }))}

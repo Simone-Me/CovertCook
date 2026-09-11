@@ -607,6 +607,7 @@
     "send": "Send",
     "report": "Report",
     "reported": "Reported",
+    "you": "You",
     "category": {
       "CLARIFICATION": "Ask for clarification",
       "SUBSTITUTION": "Ask about a substitution",
@@ -682,6 +683,20 @@
     "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else.",
     "themeRespect": "Thread"
   },
+  "share": {
+    "what": "Choose what goes on the card. Nothing is sent until you press send, and the picture below is exactly what leaves this phone.",
+    "realNames": "The names",
+    "realNamesHint": "who was actually at the table",
+    "pseudonyms": "The pseudonyms",
+    "pseudonymsHint": "the names they cooked under",
+    "photo": "The photograph",
+    "photoHint": "the photograph of the table, sent beside the card",
+    "results": "The vote",
+    "resultsHint": "the dish of the evening, marked on the menu",
+    "atTheTable": "At the table",
+    "underTheNames": "Under the names",
+    "send": "Send it"
+  },
   "results": {
     "title": "Results",
     "points": "{{points}} pts",
@@ -705,7 +720,7 @@
     },
     "share": {
       "button": "Share the menu",
-      "note": "An image of tonight's menu — dish names only, never anybody's name.",
+      "note": "Dish names only unless you tick a list above. The names of the people at a table belong to them.",
       "winner": "Dish of the evening: {{dish}}",
       "downloaded": "Saved. Post it wherever you like."
     }
@@ -858,11 +873,10 @@
   "pro": {
     "badge": "Crème",
     "title": "About Crème",
-    "freeForever": "Everything a dinner needs is free, and stays free: any dinner, any number of guests, every rule of the game. Nobody at a table is playing a smaller version of it.",
-    "what": "Crème adds no powers. It makes the evening run smoother and look better: thematic environments (a Christmas one, a midsummer one), more room to be kind to your cook, and others ideas still being worked out. Crème allows the Excutive Chef to share Crème with every guests at the dinner.",
+    "freeForever": "Everything a dinner needs is free, and stays free for any dinner.",
+    "what": "Crème unlocks special features.",
     "needed": "That setting is part of Crème.",
     "lockedHere": "Part of Crème.",
-    "whatIsIt": "What is Crème?",
     "seeWhatItOpens": "See what Crème opens →",
     "status": {
       "on": "You have Crème.",
@@ -890,11 +904,7 @@
     },
     "ways": {
       "title": "How you would get it",
-      "oneByOne": "Buy one thing, keep it forever",
-      "oneByOneWhat": "A word list or a cloth, bought once and yours on every dinner you ever organise.",
-      "yearly": "Everything, for a year — {{price}}",
-      "yearlyWhat": "Every list, every cloth, and three recipes per cook, on every dinner you organise for a year.",
-      "yearlyRefund": "Bought through the store, so the store handles refunds under its own rules.",
+      "yearly": "Everything, all the features for a year — {{price}}",
       "freeWhileTesting": "Free while CovertCook is being tested: switch Crème on above and all of this is yours until {{date}}, without paying for anything. After that date this is where it is bought — here, in the app.",
       "notYet": "Not yet: there is no way to pay inside the app at the moment. Nothing here can be bought, and nothing is being held back from you."
     },
@@ -1545,7 +1555,7 @@
         "q": "Does it cost anything?",
         "a": [
           "No. Unlimited dinners, any number of guests, and every feature that changes how the game is played is free and stays free.",
-          "Crème is the paid side and it sells only how an evening looks and feels — tablecloths, pseudonym sets, themed evenings, more than one recipe per brief. Nothing in it makes anybody's game better than their neighbour's, and it is bought by the host for one dinner, so a table is never split into paying and non-paying guests. Nothing can actually be bought yet."
+          "Crème is the paid side and it sells only how an evening looks and feels — tablecloths, pseudonym sets, themed evenings, more than one recipe per brief. Nothing in it makes anybody's game better than their neighbour's. It is one price for everything, €5 for a year, and a dinner carries its host's Crème, so a table is never split into paying and non-paying guests. Nothing can actually be bought yet."
         ]
       },
       {

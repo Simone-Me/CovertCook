@@ -261,6 +261,14 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
                   m.parent_id ? ' chat-bubble--reply' : ''
                 }${answering === m.message_id ? ' is-answering' : ''}`}
               >
+                {/* The wire between an answer and what it answers: up out of
+                    the phrase above, one right angle, and a knot where it
+                    meets this one. The indent alone said a reply was a reply;
+                    it did not say WHICH line it was answering, which is the
+                    only thing a reader of a fridge with three conversations in
+                    it actually needs. */}
+                {m.parent_id && <span className="chat-tie" aria-hidden="true" />}
+
                 <span className="chat-bubble__food" aria-hidden="true">
                   {faceFor(m.author_name ?? '', round?.name_theme)}
                 </span>
@@ -268,52 +276,61 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
                   {/* Your own name would be telling you something you know. */}
                   {!m.is_mine && <span className="chat-bubble__who">{m.author_name}</span>}
                   <span>{m.body}</span>
+
+                  {/* THE MARKS SIT ON SOMETHING NOW. Three grey glyphs at half
+                      opacity, over a photograph of a fridge full of groceries,
+                      were invisible: people could not find the way to report a
+                      phrase, let alone the way to answer one. The same marks on
+                      a small plate in the table's own red read as controls
+                      without shouting. */}
                   <span className="row chat-bubble__foot">
-                    {/* Answering is offered on openers only: one level, as
-                        the server enforces. Pressing it does not send
-                        anything — it turns the roller over to the replies. */}
-                    {!m.parent_id && !m.reported && (
-                      <button
-                        type="button"
-                        className="chef-remove"
-                        title={t('board.answer')}
-                        aria-label={t('board.answer')}
-                        aria-pressed={answering === m.message_id}
-                        onClick={() => {
-                          setAiming(null)
-                          setAnswering((cur) => (cur === m.message_id ? null : m.message_id))
-                        }}
-                      >
-                        ↩
-                      </button>
-                    )}
-                    {m.reported ? (
-                      <span className="muted">{t('chat.reported')}</span>
-                    ) : (
-                      !m.is_mine &&
-                      m.author_member_id && (
-                        <>
-                          <button
-                            type="button"
-                            className="chef-remove"
-                            title={t('chat.report')}
-                            aria-label={t('chat.report')}
-                            onClick={() => onReport(m.message_id)}
-                          >
-                            ⚑
-                          </button>
-                          <button
-                            type="button"
-                            className="chef-remove"
-                            title={t('moderation.block')}
-                            aria-label={t('moderation.block')}
-                            onClick={() => onBlock(m.author_member_id as string)}
-                          >
-                            🚫
-                          </button>
-                        </>
-                      )
-                    )}
+                    <span className="chat-acts">
+                      {/* Answering is offered on openers only: one level, as
+                          the server enforces. Pressing it does not send
+                          anything — it turns the roller over to the replies. */}
+                      {!m.parent_id && !m.reported && (
+                        <button
+                          type="button"
+                          className="chat-act"
+                          title={t('board.answer')}
+                          aria-label={t('board.answer')}
+                          aria-pressed={answering === m.message_id}
+                          onClick={() => {
+                            setAiming(null)
+                            setAnswering((cur) => (cur === m.message_id ? null : m.message_id))
+                          }}
+                        >
+                          ↩
+                        </button>
+                      )}
+                      {m.reported ? (
+                        <span className="muted">{t('chat.reported')}</span>
+                      ) : (
+                        !m.is_mine &&
+                        m.author_member_id && (
+                          <>
+                            <button
+                              type="button"
+                              className="chat-act"
+                              title={t('chat.report')}
+                              aria-label={t('chat.report')}
+                              onClick={() => onReport(m.message_id)}
+                            >
+                              ⚑
+                            </button>
+                            <button
+                              type="button"
+                              className="chat-act"
+                              title={t('moderation.block')}
+                              aria-label={t('moderation.block')}
+                              onClick={() => onBlock(m.author_member_id as string)}
+                            >
+                              🚫
+                            </button>
+                          </>
+                        )
+                      )}
+                    </span>
                   </span>
                 </span>
               </div>
@@ -323,14 +340,22 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
       </div>
 
       {/* What the roller is doing right now, and the way back. Without this
-          line the pin silently holds a different deck and nobody knows why. */}
+          line the pin silently holds a different deck and nobody knows why —
+          and it wears the same red plate as the marks that armed it, so the
+          two halves of one gesture look like one gesture. */}
       {answering && (
-        <p className="row">
-          <span className="muted">{t('board.answeringOne')}</span>
-          <button type="button" className="secondary" onClick={() => setAnswering(null)}>
-            {t('actions.cancel')}
+        <div className="chat-answering">
+          <span className="chat-answering__what">{t('board.answeringOne')}</span>
+          <button
+            type="button"
+            className="chat-act"
+            title={t('actions.cancel')}
+            aria-label={t('actions.cancel')}
+            onClick={() => setAnswering(null)}
+          >
+            ×
           </button>
-        </p>
+        </div>
       )}
 
       {/* The second half of a chef-shaped phrase. A list, never a text field:

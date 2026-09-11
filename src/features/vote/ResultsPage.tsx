@@ -226,11 +226,13 @@ export function ResultsPage() {
         ))}
       </div>
 
-      {/* The evening as one picture. Under the menu, for the same reason the
-          recipe switch is: the menu is the evening, and a share button living
-          inside it would make the evening look like a form. */}
-      {dishes.some((d) => d.served) && (
+      {/* The evening as one picture, and a box that says what goes on it.
+          Under the menu, for the same reason the recipe switch is: the menu is
+          the evening, and a share button living inside it would make the
+          evening look like a form. */}
+      {dishes.some((d) => d.served) && roundId && (
         <ShareMenuCard
+          roundId={roundId}
           roundName={round?.name ?? t('results.title')}
           dinnerAt={round?.dinner_at ?? null}
           dishes={dishes}

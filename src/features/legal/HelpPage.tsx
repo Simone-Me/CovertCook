@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { BackToTable } from '../../components/BackToTable'
+import { Fold } from '../../components/Fold'
 
 interface QA {
   q: string
@@ -36,13 +37,18 @@ export function HelpPage() {
       <h1>{t('help.title')}</h1>
       <p className="muted">{t('help.intro')}</p>
 
+      {/* ONE QUESTION, ONE FOLD. Printed open, the answers ran to four screens
+          of prose and the list of questions — which is the part somebody scans
+          to find their own — was never visible at once. Folded, the page reads
+          as what it is: the questions, with the answer one tap under the one
+          you came for. Built on <details>, so find-in-page still opens a
+          closed answer and a screen reader still gets the whole list. */}
       {faq.map((item) => (
-        <section key={item.q} className="legal__section">
-          <h2>{item.q}</h2>
+        <Fold key={item.q} title={item.q}>
           {item.a.map((para) => (
             <p key={para}>{para}</p>
           ))}
-        </section>
+        </Fold>
       ))}
 
       <section className="legal__section" id="delete">

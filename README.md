@@ -862,13 +862,14 @@ Ordered roughly by how much the product misses them.
   the three states; what's missing is the artwork. The three rules the real
   ones must follow (one camera angle, one light source, shadow baked in) are
   in `DESIGN.md` §4 and `TableProps.tsx`.
-- **Taking money** — this is the one thing PRO is missing. `0075` builds the
+- **Taking money** — this is the one thing Crème is missing. `0075` builds the
   entitlements (a subscription, a redeemed code, an open test window, and the
   per-item unlocks from `0072`), `is_pro()` is the single question every gate
   asks, and `pro_subscriptions` has no insert path for a signed-in client at
   all: a row gets there by redeeming a code, or by whatever server-side thing
-  eventually handles a purchase. The PRO page describes both offers and says
-  plainly that neither can be bought yet. See "The paid tier" below.
+  eventually handles a purchase. The Crème page describes the one offer there
+  now is — everything, for a year — and says plainly that it cannot be bought
+  yet. See "The paid tier" below.
 - **An admin surface** — deliberately absent. `create_redeem_code` is granted
   to nobody and is run from the Supabase SQL editor; adding an in-app panel
   would add a third privilege level to an app that has two (a member, and the
@@ -914,15 +915,21 @@ one place the rule is written, `create_round` asks it, and the pickers render
 what it answers.
 
 **Nothing sells anything yet, and the shelf says so.** There is no payment
-provider wired to this app, so a `PAID` row is shown, priced, and refused —
-with no "buy" button leading to a checkout that does not exist. The entitlement
-table (`profile_theme_unlocks`) is already the thing the check reads, so the day
-a purchase lands it is a row insert and the shelf unlocks itself.
+provider wired to this app, so a `PAID` row is shown, marked Crème, and refused
+— with no "buy" button leading to a checkout that does not exist. The
+entitlement table (`profile_theme_unlocks`) is already the thing the check
+reads, so the day a purchase lands it is a row insert and the shelf unlocks
+itself.
 
-Prices today: 50 cents a pseudonym list, €1 a table cloth, €5 a year for
-everything. The first two are rows in the catalogue — one `UPDATE`, not a
-deploy. The yearly one is a constant in `ProPage.tsx` and stays there until
-there is a store to be the authority on it.
+**One price, for everything, for a year: €5.** Buying a cloth or a word list on
+its own is withdrawn, and so is every price printed beside a row. It split one
+small decision into six, and somebody who spent fifty cents on the pâtisserie
+still found the third recipe tab shut. The per-item machinery underneath is
+untouched — `price_cents` is still on both catalogues and
+`profile_theme_unlocks` still grants one thing at a time, which is what a
+redeem code writes — but nothing in the interface offers or quotes it. The
+yearly price is a constant in `ProPage.tsx` and stays there until there is a
+store to be the authority on it.
 
 **What PRO opens, in full:** the three paid pseudonym lists, the five paid
 table cloths, and two or three recipes per cook instead of one (`0077`). That
