@@ -8,6 +8,7 @@ import { ChatThread } from '../chat/ChatThread'
 import { BackToTable } from '../../components/BackToTable'
 import { FilRougeLine } from '../rounds/FilRougeLine'
 import { FilRougeDishes } from '../rounds/FilRougeDishes'
+import { SharedMenu } from '../rounds/SharedMenu'
 import { getFilRouge } from '../../lib/rpc'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
@@ -439,6 +440,10 @@ export function BriefEditorPage() {
             : t('briefs.freeChoice')}
         </p>
       )}
+
+      {/* What is already on the menu, so nobody writes the second tiramisù.
+          Renders nothing at all unless the dinner turned this on (0087). */}
+      <SharedMenu roundId={roundId} />
 
       {/* THE IDEAS, AS TABS, and only on a dinner that asked for more than one.
           A free dinner never sees this row at all — the feature has to be

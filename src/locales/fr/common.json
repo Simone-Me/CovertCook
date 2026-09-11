@@ -465,6 +465,16 @@
       "APPROVEHint": "Qui demande une place attend votre oui. Vous voyez son vrai nom avant de décider.",
       "FREE": "Qui a de quoi entrer prend sa place",
       "FREEHint": "Aucune attente et rien à faire pour vous. Qui détient le code, ou accepte une invitation, est à table."
+    },
+    "sharedMenu": {
+      "title": "Déjà au menu",
+      "nothingYet": "Rien n'a encore été envoyé.",
+      "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisùs à la même table.",
+      "label": "Montrer le menu pendant l'écriture des recettes",
+      "HIDDEN": "Garder la surprise",
+      "HIDDENHint": "Personne ne voit un plat avant le dîner.",
+      "NAMES": "Montrer les noms des plats",
+      "NAMESHint": "Les convives voient ce qui a été envoyé — les noms seuls, jamais qui. Évite que deux personnes écrivent le même plat."
     }
   },
   "briefs": {
@@ -824,7 +834,20 @@
     "toYourSender": "Avec le chef qui écrit pour vous",
     "myOrder": "Ma commande",
     "myDish": "Mon plat",
-    "fromExecutiveChef": "Le Executive Chef"
+    "fromExecutiveChef": "Le Executive Chef",
+    "answer": "Répondre",
+    "answeringOne": "Vous répondez à celui-ci.",
+    "whichChef": "Quel chef ?",
+    "errors": {
+      "RATE_LIMIT": "Ça suffit pour cette heure-ci. Le frigo sera toujours là.",
+      "NOT_A_CHEF_HERE": "Personne de ce nom ne cuisine à cette table.",
+      "REPLY_NEEDS_PARENT": "Choisissez d'abord à quoi répondre.",
+      "REPLY_PARENT_NOT_FOUND": "Celui-là a disparu, ou c'était déjà une réponse — le frigo ne descend que d'un cran.",
+      "OPENER_HAS_NO_PARENT": "Cette phrase lance quelque chose ; elle ne répond à rien.",
+      "PHRASE_NEEDS_VALUE": "Cette phrase a un blanc. Remplissez-le.",
+      "PHRASE_TAKES_NO_VALUE": "Cette phrase n'a pas de blanc à remplir.",
+      "VALUE_TOO_LONG": "C'est trop long pour une porte de frigo."
+    }
   },
   "pro": {
     "badge": "Crème",

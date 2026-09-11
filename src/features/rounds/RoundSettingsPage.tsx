@@ -6,6 +6,7 @@ import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
 import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
+import { ChoiceList } from '../../components/ChoiceList'
 import { FilRougePicker } from './FilRougePicker'
 import { useFilRougeLabel } from '../../lib/filRouge'
 import { PhaseMenu } from './PhaseMenu'
@@ -25,6 +26,8 @@ import {
   COURSES,
   type Course,
   filRougeClash,
+  setMenuVisibility,
+  type MenuVisibility,
   getFilRouge,
   setFilRouge,
   FIL_ROUGE_FROZEN,
@@ -383,6 +386,37 @@ export function RoundSettingsPage() {
             <button type="button" onClick={saveThread} disabled={!thread}>
               {t('actions.save')}
             </button>
+          </div>
+        </Fold>
+      )}
+
+      {/* Reversible, and therefore not a creation-time decision: turning it on
+          reveals names that are public at the end of the evening anyway, and
+          turning it off takes back nothing anybody wrote against. */}
+      {!detailsLocked && (
+        <Fold
+          title={t('rounds.sharedMenu.label')}
+          aside={t(`rounds.sharedMenu.${round.menu_visibility}`)}
+        >
+          <div className="card stack">
+            <ChoiceList
+              name="menu-visibility"
+              value={round.menu_visibility}
+              onChange={async (v: string) => {
+                setError(null)
+                try {
+                  await setMenuVisibility(roundId as string, v as MenuVisibility)
+                  await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : t('errors.generic'))
+                }
+              }}
+              options={(['HIDDEN', 'NAMES'] as MenuVisibility[]).map((v) => ({
+                value: v,
+                label: t(`rounds.sharedMenu.${v}`),
+                hint: t(`rounds.sharedMenu.${v}Hint`),
+              }))}
+            />
           </div>
         </Fold>
       )}

@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '../../lib/supabase'
 import type {
+  MenuVisibility,
   NameTheme,
   RoundAccess,
   RoundAnonymity,
@@ -73,10 +74,13 @@ export interface RoundRow {
   // host takes the photograph themselves. A profile rather than a seat, so it
   // can never be joined back to a pseudonym.
   photographer_profile_id: string | null
+  /** HIDDEN keeps the surprise; NAMES lets the table avoid three tiramisùs
+   *  while the recipes are still being written (0087). */
+  menu_visibility: MenuVisibility
 }
 
 const ROUND_COLUMNS =
-  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,table_theme,is_pro,recipes_per_brief,pro_until,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency,photographer_profile_id'
+  'id,name,status,access,anonymity,join_code,accent_color,accent_emoji,host_id,dinner_at,timezone,location,city,notes,voting_mode,voting_enabled,voting_closes_at,results_published_at,slot_mode,name_theme,table_theme,is_pro,recipes_per_brief,pro_until,manual_voters,requires_approval,max_players,finished_at,cost_mode,budget_per_head,currency,photographer_profile_id,menu_visibility'
 
 // A round nobody is playing any more: cancelled, or finished and archived.
 // Kept out of the main list rather than deleted — several people's writing

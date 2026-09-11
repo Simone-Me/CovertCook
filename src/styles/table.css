@@ -2545,3 +2545,22 @@
   font-weight: 400;
   color: var(--text-muted);
 }
+
+/* A reply sits under the phrase it answers rather than beside it (0088). The
+   indent is the whole signal — an answer that lines up with the openers reads
+   as another notice, which is what the fridge already had too much of. The rail
+   down the left is what connects it upward without drawing a thread. */
+.chat-bubble--reply {
+  margin-left: 26px;
+  max-width: calc(96% - 26px);
+  border-left: 2px solid rgba(60, 90, 105, 0.22);
+  padding-left: 8px;
+}
+
+/* The opener currently being answered, so the roller full of replies has a
+   visible subject. Outline rather than a background: the bubbles already carry
+   a background and a second one underneath them muddies both. */
+.chat-bubble.is-answering {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}

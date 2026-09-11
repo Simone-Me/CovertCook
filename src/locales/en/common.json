@@ -465,6 +465,16 @@
       "APPROVEHint": "Anyone who asks for a seat waits until you say yes. You see their real name before you decide.",
       "FREE": "Anyone with the way in takes a seat",
       "FREEHint": "No waiting and nothing for you to do. Whoever holds the code, or accepts an invitation, is at the table."
+    },
+    "sharedMenu": {
+      "title": "Already on the menu",
+      "nothingYet": "Nothing has been sent yet.",
+      "why": "Dish names only — never who wrote them or who is cooking them. It is here so the table does not end up with three tiramisùs.",
+      "label": "Show the menu while recipes are being written",
+      "HIDDEN": "Keep it a surprise",
+      "HIDDENHint": "Nobody sees a dish before the dinner.",
+      "NAMES": "Show the dish names",
+      "NAMESHint": "Members see what has been sent — the names only, never who. Stops two people writing the same dish."
     }
   },
   "briefs": {
@@ -824,7 +834,20 @@
     "toYourSender": "With the chef who writes for you",
     "myOrder": "My order",
     "myDish": "My dish",
-    "fromExecutiveChef": "The Executive Chef"
+    "fromExecutiveChef": "The Executive Chef",
+    "answer": "Answer",
+    "answeringOne": "Answering this one.",
+    "whichChef": "Which chef?",
+    "errors": {
+      "RATE_LIMIT": "That is enough for one hour. The fridge will still be here.",
+      "NOT_A_CHEF_HERE": "Nobody by that name is cooking at this table.",
+      "REPLY_NEEDS_PARENT": "Pick something to answer first.",
+      "REPLY_PARENT_NOT_FOUND": "That one has gone, or it was itself an answer — the fridge only goes one deep.",
+      "OPENER_HAS_NO_PARENT": "That phrase starts something; it does not answer anything.",
+      "PHRASE_NEEDS_VALUE": "That phrase has a blank in it. Fill it in.",
+      "PHRASE_TAKES_NO_VALUE": "That phrase has no blank to fill.",
+      "VALUE_TOO_LONG": "That is too long for a fridge door."
+    }
   },
   "pro": {
     "badge": "Crème",

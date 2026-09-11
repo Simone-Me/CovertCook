@@ -979,6 +979,10 @@ export type MessageSlotType = 'NONE' | 'INGREDIENT' | 'SHORT_TEXT'
 export type MessageDirection = 'SENDER_TO_COOK' | 'COOK_TO_SENDER'
 
 export interface MessageTemplate {
+  /** BOARD only: whether this phrase starts a thread or answers one (0088). */
+  board_role?: BoardRole | null
+  /** MEMBER: the blank is filled from the roster, not typed (0088). */
+  slot_source?: 'MEMBER' | null
   id: string
   category: MessageCategory
   locale: string
@@ -992,7 +996,7 @@ export interface MessageTemplate {
 export async function getMessageTemplates(locale: string) {
   const { data, error } = await supabase
     .from('message_templates')
-    .select('id,category,locale,body,slot_type,day_of')
+    .select('id,category,locale,body,slot_type,day_of,board_role,slot_source')
     .eq('locale', locale)
     .eq('active', true)
     // The Executive Chef's notices are BOARD phrases like any other and must
@@ -2028,6 +2032,8 @@ export async function removeCourse(roundId: string, slotId: string) {
 
 export interface BoardMessage {
   message_id: string
+  /** The phrase this one answers, or null when it starts something (0088). */
+  parent_id: string | null
   body: string
   // The author's secret name (0037). A deliberate reversal of the board's
   // original unattributability: you can see who said what and pick the
@@ -2051,9 +2057,43 @@ export async function getBoard(roundId: string) {
   return unwrap<BoardMessage[]>(res)
 }
 
-export async function postToBoard(roundId: string, templateId: string) {
-  const res = await supabase.rpc('post_to_board', { p_round_id: roundId, p_template_id: templateId })
+export async function postToBoard(
+  roundId: string,
+  templateId: string,
+  /** The blank filled in. For a chef-shaped blank this must be a name from
+   *  this dinner's roster — the server refuses anything else (0088). */
+  slotValue: string | null = null,
+  /** The opener being answered. Required for a reply, refused for anything
+   *  else, and never a reply's own id: the fridge is one level deep. */
+  parentId: string | null = null,
+) {
+  const res = await supabase.rpc('post_to_board', {
+    p_round_id: roundId,
+    p_template_id: templateId,
+    p_slot_value: slotValue,
+    p_parent_id: parentId,
+  })
   return unwrap(res)
+}
+
+/** OPEN starts something, REPLY answers one (0088). */
+export type BoardRole = 'OPEN' | 'REPLY'
+
+/** The menu while it is still being written (0087). HIDDEN keeps the
+ *  surprise; NAMES lets the table avoid three tiramisùs. */
+export type MenuVisibility = 'HIDDEN' | 'NAMES'
+
+export const MENU_NOT_SHARED = 'MENU_NOT_SHARED'
+
+export async function setMenuVisibility(roundId: string, value: MenuVisibility) {
+  const res = await supabase.rpc('set_menu_visibility', { p_round_id: roundId, p_value: value })
+  return unwrap(res)
+}
+
+/** Course and dish name for what has already been sent. No author, no cook. */
+export async function getRoundDishes(roundId: string) {
+  const res = await supabase.rpc('get_round_dishes', { p_round_id: roundId })
+  return unwrap<{ course: Course; dish_name: string }[]>(res)
 }
 
 // How many board lines have appeared since you last opened the fridge. Your

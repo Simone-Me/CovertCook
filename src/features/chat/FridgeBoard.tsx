@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { faceFor } from '../../lib/themes'
-import { useRound } from '../rounds/hooks'
+import { useRound, useRoundMembers } from '../rounds/hooks'
 import {
   getBoard,
   getMessageTemplates,
@@ -136,6 +136,14 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
 
   const [posting, setPosting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Which opener the roller is currently answering. Null means it is offering
+  // openers — the same control doing two jobs, which is what keeps the fridge
+  // to one gesture instead of two.
+  const [answering, setAnswering] = useState<string | null>(null)
+  // A chef-shaped phrase waits here until a name is chosen for it. Held rather
+  // than posted straight away, because the pin commits on a tap and this one
+  // needs a second half.
+  const [aiming, setAiming] = useState<string | null>(null)
 
   const { data: board } = useQuery({
     queryKey: ['rounds', roundId, 'board'],
@@ -160,18 +168,44 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
   // lovely day!" is not what anybody needs to say at 19:40 with a dish in the
   // oven, and "I'm running 30 minutes late" means nothing the week before.
   // Two sets, one at a time.
-  const phrases =
-    templates?.filter((tpl) => tpl.category === 'BOARD' && tpl.day_of === isDinnerDay) ?? []
+  const board_ = templates?.filter((tpl) => tpl.category === 'BOARD') ?? []
+  // Openers swap with the day, as before: "what a lovely day" is not what
+  // anybody needs at 19:40 with a dish in the oven. Replies do not — an answer
+  // is an answer whenever it is given.
+  const phrases = answering
+    ? board_.filter((tpl) => tpl.board_role === 'REPLY')
+    : board_.filter((tpl) => tpl.board_role !== 'REPLY' && tpl.day_of === isDinnerDay)
 
-  async function onPost(templateId: string) {
+  // Who can be named. The roster this dinner already shows on its own page,
+  // so nothing new is disclosed — and the server checks the name again,
+  // because a list in a browser is a suggestion (0088).
+  const { data: members } = useRoundMembers(roundId)
+  const chefs = (members ?? [])
+    .filter((m) => m.status === 'ACTIVE' && m.approved)
+    .map((m) => m.display_name ?? m.secret_name)
+    .filter((n): n is string => !!n)
+
+  async function onPost(templateId: string, slotValue: string | null = null) {
+    // A phrase with a chef in it is not finished yet: it opens the name list
+    // instead of going up half-written.
+    const tpl = templates?.find((x) => x.id === templateId)
+    if (tpl?.slot_source === 'MEMBER' && !slotValue) {
+      setAiming(templateId)
+      return
+    }
     setError(null)
     setPosting(true)
     try {
-      await postToBoard(roundId, templateId)
+      await postToBoard(roundId, templateId, slotValue, answering)
+      setAnswering(null)
+      setAiming(null)
       await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'board'] })
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''
-      setError(raw === 'RATE_LIMIT' ? t('board.rateLimit') : raw || t('errors.generic'))
+      setError(
+        t(`board.errors.${raw}`, { defaultValue: '' }) ||
+          (raw === 'RATE_LIMIT' ? t('board.rateLimit') : raw || t('errors.generic')),
+      )
     } finally {
       setPosting(false)
     }
@@ -221,7 +255,12 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
                 </span>
               </div>
             ) : (
-              <div key={m.message_id} className={`chat-bubble chat-bubble--food${m.is_mine ? ' mine' : ''}`}>
+              <div
+                key={m.message_id}
+                className={`chat-bubble chat-bubble--food${m.is_mine ? ' mine' : ''}${
+                  m.parent_id ? ' chat-bubble--reply' : ''
+                }${answering === m.message_id ? ' is-answering' : ''}`}
+              >
                 <span className="chat-bubble__food" aria-hidden="true">
                   {faceFor(m.author_name ?? '', round?.name_theme)}
                 </span>
@@ -230,6 +269,24 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
                   {!m.is_mine && <span className="chat-bubble__who">{m.author_name}</span>}
                   <span>{m.body}</span>
                   <span className="row chat-bubble__foot">
+                    {/* Answering is offered on openers only: one level, as
+                        the server enforces. Pressing it does not send
+                        anything — it turns the roller over to the replies. */}
+                    {!m.parent_id && !m.reported && (
+                      <button
+                        type="button"
+                        className="chef-remove"
+                        title={t('board.answer')}
+                        aria-label={t('board.answer')}
+                        aria-pressed={answering === m.message_id}
+                        onClick={() => {
+                          setAiming(null)
+                          setAnswering((cur) => (cur === m.message_id ? null : m.message_id))
+                        }}
+                      >
+                        ↩
+                      </button>
+                    )}
                     {m.reported ? (
                       <span className="muted">{t('chat.reported')}</span>
                     ) : (
@@ -265,7 +322,41 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
         </div>
       </div>
 
-      <RollingPin phrases={phrases} disabled={posting} onPick={onPost} />
+      {/* What the roller is doing right now, and the way back. Without this
+          line the pin silently holds a different deck and nobody knows why. */}
+      {answering && (
+        <p className="row">
+          <span className="muted">{t('board.answeringOne')}</span>
+          <button type="button" className="secondary" onClick={() => setAnswering(null)}>
+            {t('actions.cancel')}
+          </button>
+        </p>
+      )}
+
+      {/* The second half of a chef-shaped phrase. A list, never a text field:
+          that is what keeps the fridge free of free text. */}
+      {aiming ? (
+        <div className="stack">
+          <p className="muted">{t('board.whichChef')}</p>
+          <div className="row" style={{ flexWrap: 'wrap' }}>
+            {chefs.map((name) => (
+              <button
+                key={name}
+                type="button"
+                disabled={posting}
+                onClick={() => onPost(aiming, name)}
+              >
+                {name}
+              </button>
+            ))}
+            <button type="button" className="secondary" onClick={() => setAiming(null)}>
+              {t('actions.cancel')}
+            </button>
+          </div>
+        </div>
+      ) : (
+        <RollingPin phrases={phrases} disabled={posting} onPick={onPost} />
+      )}
     </div>
   )
 }
