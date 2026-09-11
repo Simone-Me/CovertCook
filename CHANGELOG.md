@@ -11,19 +11,21 @@ there.
 Production carried `0015` → `0045` on 2026-08-24, closing the schema/client
 mismatch that made every RPC added since `0015` fail.
 
-**`0083`–`0086` (le fil rouge) are written, tested and NOT deployed.** They
+**`0083`–`0088` are written, tested and NOT deployed.** They
 replay clean from an empty database and were exercised end to end against a
 local Postgres 16; nothing has run against production. Deploy them together —
-`0085` drops and recreates `create_round`, and `0086` drops and recreates
-`get_ballot_options`, so a partial apply leaves the client calling a signature
-that is not there.
+`0085` drops and recreates `create_round`, `0086` drops and recreates
+`get_ballot_options`, and `0088` drops both `post_to_board` and `get_board`, so
+a partial apply leaves the client calling a signature that is not there.
 
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 **Next, in order:**
 
 1. **Free-text chat** alongside the templates — the length cap (280) and
-   the rate limit (the existing 10/hour) are already decided.
+   the rate limit (the existing 10/hour) are already decided. Less urgent since
+   `0088`: directed phrases and replies were most of what "the fridge is dead"
+   actually meant.
 2. **Notifications** — superseded: push shipped (`0047`, `0048`) and covers
    the four moments worth interrupting for. What is left is the asynchronous
    half — the invitation, and reaching people who never switch push on — which
@@ -36,9 +38,8 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    moments are covered (`0048`), but only for people who opted in. An invited
    player who has never opened the app cannot be pushed to at all. That is the
    mail that still has to be written, and `send-email` is the natural home.
-5. **A public deletion request URL** — the in-app path is built (`0049`);
-   Google Play also wants a page reachable without installing the app. A form
-   and an inbox, not a schema change.
+5. **Done** — `/help` is public, explains deletion without offering a button
+   that would work without signing in, and carries the contact address.
 6. **A guided demo dinner** on the first-run panel — pre-filled players,
    pop-up arrows pointing at the next control, running through to the vote and
    the results, so the app can be understood without an evening being spent.
@@ -64,6 +65,102 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-09-11
+
+**The fridge answers, the menu stops the second tiramisù, the evening leaves as
+a picture, and there is a page for people who cannot sign in.** Migrations
+`0087`–`0088`.
+
+### The fridge learns to answer
+
+It has been a wall of notices since `0030`: four people produce four unrelated
+cards. What was missing was never more phrases — it was that a phrase could not
+be **aimed** at anybody and could not be **answered**.
+
+Three pieces, and no free text anywhere. The blank the pairing threads have had
+since `0001` reaches the board. A **chef-shaped blank is filled from the
+roster** and the server refuses anything that is not a chef at this table,
+which buys directed phrases without buying the moderation burden and the
+writing-style leak that free text brings. And a **reply set**, one level deep,
+offered only under something already said — a fridge door is not a forum.
+
+Pressing ↩ sends nothing: it turns the rolling pin over to the replies, the
+same control doing a second job. The window moves from 24 to 48 hours, which is
+editorial rather than technical — 24 cut the eve of the dinner off from the day
+of it, and 48 covers both under one rule, so a reply never needs a special case
+to keep its opener alive.
+
+**Two bugs, one ours and one older.** The aimed phrases read "Chef Chef
+Basilic", because a pseudonym already carries the title. And `0080`, rewriting
+`get_board` for host notices, had quietly dropped the open-table naming `0073`
+built — an OPEN dinner, where every other screen prints real names, had gone
+back to pseudonyms in the fridge alone. Restored.
+
+### The menu, while it is being written
+
+In FREE mode nothing stopped three people writing a tiramisù and the table
+finding out at the buffet. `get_round_dishes` returns **course and dish name**
+for the recipes already sent, and nothing else — no author, no cook, no
+ingredients. `briefs` and `pairings` keep having no player-facing SELECT policy.
+
+It leaks nothing, and that is checked rather than assumed: a reader who sees
+"dessert: tiramisù" learns a dish exists; their own they knew, the one they
+wrote they wrote, and nobody can be worked out from names with no people
+attached. Shown where the duplicate would be written — on the recipe editor —
+and nowhere else.
+
+Unlike anonymity or the fil rouge this is **not** a creation-time decision: it
+is reversible, it reveals names that are public by the end of the evening
+anyway, and taking it back costs nothing anybody wrote against. So it is a
+switch in the settings, and `create_round` was left alone rather than rewritten
+a third time before it has ever been deployed.
+
+### The evening, as one picture
+
+The only thing in this app that brings new people in. A guest who has just
+eaten well is the most likely future host there will ever be, and the way to
+reach them is not an email campaign — the one kind of outbound mail that
+carries real legal weight — but a picture they want to post anyway.
+
+Drawn on a canvas at 4:5 rather than screenshotted, so it carries content and
+not controls. Dinner name, date, the fil rouge, the menu, the dish of the
+evening, and `CovertCook · opus35.fr` small at the bottom.
+
+**No names on it. Not real ones, not pseudonyms, not the winner's.** Posting a
+menu card publishes the fact that your friends were at a dinner, and they did
+not agree to that when they agreed to come. A dish name belongs to the evening;
+a person's name belongs to them.
+
+It leaves through `navigator.share` with a file, which opens the native sheet
+where WhatsApp and Instagram already are — Instagram cannot be posted to from a
+web page by any other route, and the sheet handing the image over is the normal
+path rather than a limitation to work around. `canShare` is asked about the
+file specifically, because several browsers expose `share` and then reject
+files, and finding that out after drawing is how you get a button that does
+nothing. Where there is no sheet the image downloads instead.
+
+### /help, and the thing that had to be reachable without an account
+
+Deleting an account has worked since `0049`, behind a login — which is correct,
+because otherwise anybody could delete anybody. A store asks for something
+else as well: a page reachable **without installing the app and without being
+able to sign in**. Those are two different needs, and `/help` serves the second
+without weakening the first.
+
+So there is **no delete button on it, and there must never be one**. It explains
+the path, links to the sign-in that leads there, says exactly what deletion does
+— anonymised in place, thirty days, cancellable, and the dinners stay because
+they belong to seven other people too — and gives an address for somebody who
+cannot sign in at all. That last route is the one the requirement actually
+names, and it is an inbox rather than code.
+
+Seven questions alongside it, in both languages, all answerable without an
+account: what the game is, what costs money and what never will, how allergies
+are handled and why the app informs instead of refusing, what happens when
+somebody drops out, who can read what you wrote.
 
 ---
 

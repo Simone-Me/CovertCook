@@ -806,6 +806,12 @@ names, migration numbers, bugs found and fixed) see
   a sealed envelope laid on the cloth. The Executive Chef's actions all go
   through one panel — the pass — which shows only what's up right now and
   opens itself when the round is blocked on them.
+- **Help, contact and account deletion** live at a public `/help`, reachable
+  without an account and without the app — which is what a store asks for and
+  what somebody locked out of their own account needs. It explains the in-app
+  path and gives an address for people who cannot sign in; it carries no
+  delete button, because one that worked without signing in would let anybody
+  delete anybody.
 - **Platform**: French/English with a working switcher, installable as a
   PWA, deployed on Netlify (frontend) + Supabase (backend), with automated
   keep-alive pings and nightly database backups
@@ -838,10 +844,11 @@ dependencies keep their own licences.
 
 Ordered roughly by how much the product misses them.
 
-- **Free-text chat** — the chat is still canned templates only. Agreed to
-  open it up (with the anonymity trade-off accepted knowingly), then
-  narrow back toward templates once there's real usage data.
-  `PRESENTATION.md` drawer 4.
+- **Free-text chat** — still canned templates only, and less urgent than it
+  was: `0088` gave the fridge directed phrases and replies, which is most of
+  what "the chat is dead" actually meant. If it ships, the compromise worth
+  taking first is free text only *after* the reveal, where writing style can no
+  longer out anybody. `PRESENTATION.md` drawer 4.
 - **Telling people the round moved** — half done. Push now exists (`0047`,
   `src/sw.ts`, `send-push`) and fires when the Executive Chef advances the
   dinner, for whoever has switched it on. What is still missing is the
@@ -850,9 +857,6 @@ Ordered roughly by how much the product misses them.
 - **Outbound email** — invitations already work in-app without it, so this
   is now only for reaching people who aren't looking at the app. Blocked
   on a provider key.
-- **A public deletion request URL** — the in-app path exists (`0049`), but
-  Google Play also wants a page a person can reach *without* installing the
-  app. It is a form and an inbox, not a schema change.
 - **Real table props** — the plate, glass, bowl, napkin, cutlery and bread
   board on the cloth are drawings, not renders. They move correctly between
   the three states; what's missing is the artwork. The three rules the real
@@ -870,10 +874,6 @@ Ordered roughly by how much the product misses them.
   would add a third privilege level to an app that has two (a member, and the
   Executive Chef of one dinner), and that deserves its own decision with its
   own audit rather than a grant added quietly to a line.
-- **The shareable menu card** — the results screen is already a menu; rendering
-  it as an image the browser can hand to WhatsApp or Instagram is the only
-  thing on this list that brings new people in. Names never on it, pseudonyms
-  only, and the tablecloth as the background.
 - **Dinner-day tools**: shopping list, printable buffet labels,
   offline-cache verification.
 - **An in-app help layer** and a first-run tour. (Terms and Privacy now exist

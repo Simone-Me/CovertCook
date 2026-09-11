@@ -16,6 +16,9 @@ import {
 } from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
 import { FilRougeLine } from '../rounds/FilRougeLine'
+import { ShareMenuCard } from './ShareMenuCard'
+import { useFilRougeLabel } from '../../lib/filRouge'
+import { getFilRouge } from '../../lib/rpc'
 import { DinnerAlbum } from '../rounds/DinnerAlbum'
 
 /**
@@ -56,6 +59,16 @@ export function ResultsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const { data: round } = useRound(roundId)
+  const filRougeLabel = useFilRougeLabel()
+  // Already fetched by FilRougeLine on this same screen, so this is the cache
+  // rather than a second request — it is here because the card has to draw the
+  // thread into an image, and an image cannot mount a component.
+  const { data: filRouge } = useQuery({
+    queryKey: ['rounds', roundId, 'fil-rouge'],
+    enabled: !!roundId,
+    queryFn: () => getFilRouge(roundId as string),
+    staleTime: 60 * 1000,
+  })
   const { data: results, isLoading, error: resultsError } = useQuery({
     queryKey: ['rounds', roundId, 'results'],
     enabled: !!roundId,
@@ -212,6 +225,23 @@ export function ResultsPage() {
           </div>
         ))}
       </div>
+
+      {/* The evening as one picture. Under the menu, for the same reason the
+          recipe switch is: the menu is the evening, and a share button living
+          inside it would make the evening look like a form. */}
+      {dishes.some((d) => d.served) && (
+        <ShareMenuCard
+          roundName={round?.name ?? t('results.title')}
+          dinnerAt={round?.dinner_at ?? null}
+          dishes={dishes}
+          filRouge={
+            filRouge?.category && filRouge.scope === 'SHARED' && filRouge.code
+              ? filRougeLabel(filRouge.category, filRouge.code)
+              : null
+          }
+          courseLabel={(c) => t(`briefs.courseOption.${c}`)}
+        />
+      )}
 
       {/* The switch, the confirm, and the line that says where they went.
           Under the menu rather than on it: the menu is the evening, and a

@@ -30,6 +30,7 @@ export function AppFooter() {
         <span>
           © {YEAR} CovertCook <span className="app-foot__version">{__APP_VERSION__}</span>
         </span>
+        <Link to="/help">{t('legal.help')}</Link>
         <Link to="/legal/terms">{t('legal.terms')}</Link>
         <Link to="/legal/privacy">{t('legal.privacy')}</Link>
         <Link to="/legal/moderation">{t('legal.moderation')}</Link>

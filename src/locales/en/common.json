@@ -702,6 +702,12 @@
     "gate": {
       "RESULTS_NOT_READY": "The results are not in yet — the dinner has not reached that point.",
       "RESULTS_NOT_PUBLISHED": "The Executive Chef has the results and has not announced them yet. Sit tight."
+    },
+    "share": {
+      "button": "Share the menu",
+      "note": "An image of tonight's menu — dish names only, never anybody's name.",
+      "winner": "Dish of the evening: {{dish}}",
+      "downloaded": "Saved. Post it wherever you like."
     }
   },
   "chain": {
@@ -1092,7 +1098,8 @@
           ]
         }
       ]
-    }
+    },
+    "help": "Help & contact"
   },
   "push": {
     "title": "Notifications",
@@ -1522,5 +1529,74 @@
     "nextWeek": "On Sunday: {{items}}",
     "saved": "The thread is set. It stays changeable until the roulette deals.",
     "someDishes": "Some dishes from there: {{items}}. Ideas, not a menu."
+  },
+  "help": {
+    "title": "Questions, and how to reach us",
+    "intro": "Everything here is answerable without an account. If what you need is not on this page, the address at the bottom is read by a person.",
+    "faq": [
+      {
+        "q": "What is CovertCook?",
+        "a": [
+          "A dinner among friends where nobody cooks their own idea. Each person is secretly given another guest, and writes them a recipe that the other has to cook. Everyone brings their dish, it is served as a shared buffet, and afterwards the table ranks the dishes and finds out who wrote for whom.",
+          "The tension is the whole point: you choose what somebody else has to cook, you do not know who chose yours, and you all find out at the end."
+        ]
+      },
+      {
+        "q": "Does it cost anything?",
+        "a": [
+          "No. Unlimited dinners, any number of guests, and every feature that changes how the game is played is free and stays free.",
+          "Crème is the paid side and it sells only how an evening looks and feels — tablecloths, pseudonym sets, themed evenings, more than one recipe per brief. Nothing in it makes anybody's game better than their neighbour's, and it is bought by the host for one dinner, so a table is never split into paying and non-paying guests. Nothing can actually be bought yet."
+        ]
+      },
+      {
+        "q": "Someone at the table has an allergy. How does that work?",
+        "a": [
+          "Because it is a shared buffet, allergies and diets are checked against the whole table, not only against the person who will eat that dish.",
+          "The app tells, it does not refuse. While a recipe is being written, anything on it that somebody at the table has declared is named back to the writer so they can change it. If it is sent anyway the dish is served, the Executive Chef is told which allergen is on the table so it can be announced out loud, and a card goes beside the dish.",
+          "Refusing at the moment of sending would arrive at the one person who can do nothing about it, and would tell the allergic guest nothing at all."
+        ]
+      },
+      {
+        "q": "What happens if a guest drops out?",
+        "a": [
+          "The Executive Chef decides, because it is a choice rather than a repair. Closing the chain means everybody still has a dish to make, at the cost of handing one cook a different recipe than the one they already had. Leaving it disturbs nobody and the buffet is one dish shorter.",
+          "A dish whose cook has gone is not listed for a rank nobody can give it."
+        ]
+      },
+      {
+        "q": "Can I change my name?",
+        "a": [
+          "Your public name is a unique handle, so changing it releases the old one for somebody else to take. Your pseudonym inside a dinner — Chef Basilic and the rest — is assigned per dinner and means nothing outside it."
+        ]
+      },
+      {
+        "q": "Who can see what I wrote?",
+        "a": [
+          "Your cook, once you send it, and nobody else until the dinner is over. Recipes, the pairings and the private messages are not readable by other players at all — not by a query, not by a mistake, not afterwards.",
+          "After the results are published, everybody at that table can read the recipes and save the ones they liked."
+        ]
+      },
+      {
+        "q": "Is my data safe?",
+        "a": [
+          "The game rules live in the database rather than in the browser, so nothing sensitive is ever sent to a screen that should not show it. Dietary information is treated as health data, which is what it is.",
+          "The privacy policy says what is collected and why, and the moderation policy says what happens when somebody reports something."
+        ]
+      }
+    ],
+    "delete": {
+      "title": "Deleting your account",
+      "body": [
+        "You can delete your account yourself, from inside the app: sign in, open your profile, and choose to delete it. There is no button on this page on purpose — if deleting an account did not require signing in, anybody could delete anybody's.",
+        "What deletion does: your login is removed and your profile is emptied of anything that identifies you. It takes effect after thirty days and you can cancel it at any point before that by signing in again.",
+        "What it does not do: it does not erase the dinners you took part in. An evening belongs to everybody who was at that table, and deleting one person's account would delete seven other people's evening. What remains carries no name."
+      ],
+      "signIn": "Sign in to delete your account →",
+      "cannotSignIn": "Cannot sign in? Write to us and we will do it for you:"
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "A person reads this address. For anything at all — a question, a problem, a report, a request about your data:"
+    }
   }
 }

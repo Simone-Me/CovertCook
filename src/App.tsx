@@ -8,6 +8,7 @@ import { SchemaMismatch } from './components/SchemaMismatch'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { AppFooter } from './components/AppFooter'
 import { LegalPage } from './features/legal/LegalPage'
+import { HelpPage } from './features/legal/HelpPage'
 import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
@@ -66,6 +67,10 @@ function AppRoutes() {
         {/* Required by both stores the day free-text chat ships, and published
             before it rather than after (DISTRIBUTION §1). */}
         <Route path="/legal/moderation" element={<LegalPage page="moderation" />} />
+        {/* Outside the guard on purpose: the whole point is that somebody who
+            cannot sign in — or has not installed the app — can still read how
+            to have their account deleted. */}
+        <Route path="/help" element={<HelpPage />} />
         <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
         <Route
           path="/signup"

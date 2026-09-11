@@ -702,6 +702,12 @@
     "gate": {
       "RESULTS_NOT_READY": "Les résultats n’existent pas encore — le dîner n’en est pas là.",
       "RESULTS_NOT_PUBLISHED": "Le Chef exécutif a les résultats et ne les a pas encore annoncés. Patience."
+    },
+    "share": {
+      "button": "Partager le menu",
+      "note": "Une image du menu du soir — les plats seulement, jamais le nom de quelqu'un.",
+      "winner": "Plat de la soirée : {{dish}}",
+      "downloaded": "Enregistrée. Publiez-la où vous voulez."
     }
   },
   "chain": {
@@ -1092,7 +1098,8 @@
           ]
         }
       ]
-    }
+    },
+    "help": "Aide et contact"
   },
   "push": {
     "title": "Notifications",
@@ -1522,5 +1529,74 @@
     "nextWeek": "Dimanche : {{items}}",
     "saved": "Le fil rouge est enregistré. Il reste modifiable jusqu'au tirage.",
     "someDishes": "Quelques plats de là-bas : {{items}}. Des pistes, pas un menu."
+  },
+  "help": {
+    "title": "Questions, et comment nous joindre",
+    "intro": "Tout ce qui est ici se lit sans compte. Si ce que vous cherchez n'y est pas, l'adresse en bas est lue par quelqu'un.",
+    "faq": [
+      {
+        "q": "Qu'est-ce que CovertCook ?",
+        "a": [
+          "Un dîner entre amis où personne ne cuisine sa propre idée. Chacun se voit attribuer en secret un autre convive et lui écrit une recette que l'autre devra préparer. Chacun apporte son plat, on sert en buffet partagé, puis la table classe les plats et découvre qui a écrit pour qui.",
+          "La tension est tout le sujet : vous choisissez ce qu'un autre devra cuisiner, vous ignorez qui a choisi le vôtre, et tout le monde l'apprend à la fin."
+        ]
+      },
+      {
+        "q": "Est-ce que c'est payant ?",
+        "a": [
+          "Non. Dîners illimités, autant de convives que vous voulez, et tout ce qui change la façon de jouer est gratuit et le restera.",
+          "Crème est la partie payante et ne vend que l'allure d'une soirée : nappes, listes de pseudonymes, soirées à thème, plus d'une recette par brief. Rien là-dedans ne donne à quelqu'un une meilleure partie qu'à son voisin, et c'est l'organisateur qui l'achète pour un dîner — une table n'est donc jamais coupée en deux. Rien n'est encore réellement achetable."
+        ]
+      },
+      {
+        "q": "Quelqu'un à table est allergique. Comment ça se passe ?",
+        "a": [
+          "Comme c'est un buffet partagé, allergies et régimes sont vérifiés contre toute la table, pas seulement contre la personne qui mangera ce plat.",
+          "L'application prévient, elle ne refuse pas. Pendant l'écriture d'une recette, tout ce qui correspond à une déclaration faite à cette table est signalé à celui qui écrit, pour qu'il puisse changer. Si la recette part quand même, le plat est servi, le Chef Exécutif est prévenu de l'allergène présent pour pouvoir l'annoncer à voix haute, et un carton est posé à côté du plat.",
+          "Refuser au moment de l'envoi arriverait chez la seule personne qui ne peut plus rien y faire, et ne dirait rien du tout au convive allergique."
+        ]
+      },
+      {
+        "q": "Que se passe-t-il si quelqu'un se désiste ?",
+        "a": [
+          "Le Chef Exécutif décide, parce que c'est un choix et non une réparation. Refermer la chaîne permet à chacun d'avoir encore un plat à faire, au prix d'une recette différente pour un cuisinier. Laisser tel quel ne dérange personne et le buffet compte un plat de moins.",
+          "Un plat dont le cuisinier est parti n'est pas proposé au vote."
+        ]
+      },
+      {
+        "q": "Puis-je changer de nom ?",
+        "a": [
+          "Votre nom public est un identifiant unique : en changer libère l'ancien pour quelqu'un d'autre. Votre pseudonyme à l'intérieur d'un dîner — Chef Basilic et les autres — est attribué pour ce dîner-là et ne signifie rien en dehors."
+        ]
+      },
+      {
+        "q": "Qui peut voir ce que j'ai écrit ?",
+        "a": [
+          "Votre cuisinier, une fois la recette envoyée, et personne d'autre avant la fin du dîner. Les recettes, les attributions et les messages privés ne sont pas lisibles par les autres joueurs — ni par une requête, ni par erreur, ni après coup.",
+          "Une fois les résultats publiés, tous les convives de cette table peuvent lire les recettes et garder celles qui leur ont plu."
+        ]
+      },
+      {
+        "q": "Mes données sont-elles en sécurité ?",
+        "a": [
+          "Les règles du jeu vivent dans la base et non dans le navigateur : rien de sensible n'est envoyé à un écran qui ne devrait pas l'afficher. Les informations alimentaires sont traitées comme des données de santé, ce qu'elles sont.",
+          "La politique de confidentialité dit ce qui est collecté et pourquoi, et la politique de modération dit ce qui se passe quand quelqu'un signale quelque chose."
+        ]
+      }
+    ],
+    "delete": {
+      "title": "Supprimer votre compte",
+      "body": [
+        "Vous pouvez supprimer votre compte vous-même, depuis l'application : connectez-vous, ouvrez votre profil et choisissez de le supprimer. Il n'y a volontairement aucun bouton sur cette page — si supprimer un compte ne demandait pas de se connecter, n'importe qui pourrait supprimer celui de n'importe qui.",
+        "Ce que fait la suppression : votre identifiant de connexion est supprimé et votre profil est vidé de tout ce qui vous identifie. Elle prend effet au bout de trente jours et vous pouvez l'annuler à tout moment avant en vous reconnectant.",
+        "Ce qu'elle ne fait pas : elle n'efface pas les dîners auxquels vous avez participé. Une soirée appartient à tous ceux qui étaient à cette table, et supprimer le compte d'une personne effacerait la soirée de sept autres. Ce qui reste ne porte aucun nom."
+      ],
+      "signIn": "Se connecter pour supprimer son compte →",
+      "cannotSignIn": "Impossible de vous connecter ? Écrivez-nous et nous le ferons :"
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "Une personne lit cette adresse. Pour n'importe quoi — une question, un problème, un signalement, une demande concernant vos données :"
+    }
   }
 }
