@@ -1,8 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
-import { useRoundMembers } from '../rounds/hooks'
-import { listRoundPhotos, photoUrl, type Course, type RoundResult } from '../../lib/rpc'
+import {
+  listRoundPhotos,
+  photoUrl,
+  type Course,
+  type RoundRecipe,
+  type RoundResult,
+} from '../../lib/rpc'
 
 /**
  * The evening, as one image somebody can put in a group chat.
@@ -65,6 +70,7 @@ export function ShareMenuCard({
   roundName,
   dinnerAt,
   dishes,
+  recipes,
   filRouge,
   courseLabel,
 }: {
@@ -72,6 +78,9 @@ export function ShareMenuCard({
   roundName: string
   dinnerAt: string | null
   dishes: RoundResult[]
+  /** The evening's recipes, which are where the names live: a result row knows
+   *  the dish and the score, and only the recipe knows who wrote it. */
+  recipes: RoundRecipe[]
   /** The evening's thread, already in words, or null. */
   filRouge: string | null
   courseLabel: (c: Course) => string
@@ -91,20 +100,63 @@ export function ShareMenuCard({
   const [withPhoto, setWithPhoto] = useState(true)
   const [withVote, setWithVote] = useState(true)
 
-  // Both already fetched by this screen, so these are cache hits rather than
-  // second requests.
-  const { data: members } = useRoundMembers(roundId)
+  // Already fetched by this screen, so this is the cache rather than a second
+  // request.
   const { data: photos } = useQuery({
     queryKey: ['rounds', roundId, 'photos'],
     queryFn: () => listRoundPhotos(roundId),
   })
 
   const photo = photos?.find((p) => !p.hidden) ?? null
-  const seats = (members ?? []).filter((m) => m.status === 'ACTIVE' && m.approved)
-  // Never more than the server handed over: before the reveal these columns are
-  // null, so a tick cannot conjure a name that was withheld.
-  const realNames = seats.map((m) => m.display_name).filter((n): n is string => !!n)
-  const secretNames = seats.map((m) => m.secret_name).filter((n): n is string => !!n)
+  const { data: shot } = useQuery({
+    queryKey: ['photo-url', photo?.storage_path],
+    enabled: !!photo,
+    queryFn: () => photoUrl(photo?.storage_path as string),
+    // Comfortably inside the hour the signature lasts.
+    staleTime: 45 * 60 * 1000,
+  })
+
+  // The names, per dish rather than as a list at the foot: a menu attributes
+  // each line to somebody, and a roll-call at the bottom is a guest list.
+  const byBrief = new Map(recipes.map((r) => [r.brief_id, r]))
+  const anySecret = recipes.some((r) => r.author_secret_name)
+  const anyReal = recipes.some((r) => r.author_display_name)
+
+  /** The line above a dish: the pseudonym, the real name, or both. */
+  function attribution(briefId: string): string | null {
+    const r = byBrief.get(briefId)
+    if (!r) return null
+    const secret = withPseudonyms && r.author_secret_name ? `“${r.author_secret_name}”` : ''
+    const real = withNames && r.author_display_name ? `(${r.author_display_name})` : ''
+    const both = [secret, real].filter(Boolean).join(' ')
+    return both || null
+  }
+
+  // THE PHOTOGRAPH IS DRAWN INTO THE SHEET, which means it has to be an
+  // <img> before the canvas can use it, and it has to be fetched with CORS
+  // allowed or the export throws SecurityError on a tainted canvas. Held in a
+  // ref rather than in state: it is an input to drawing, not something the
+  // page renders, and setting state on load would redraw twice.
+  const table = useRef<HTMLImageElement | null>(null)
+  const [photoReady, setPhotoReady] = useState(false)
+  useEffect(() => {
+    table.current = null
+    setPhotoReady(false)
+    if (!shot) return
+    const img = new Image()
+    img.crossOrigin = 'anonymous'
+    img.onload = () => {
+      table.current = img
+      setPhotoReady(true)
+    }
+    img.onerror = () => {
+      // The card still goes out, without it. A picture that will not load is
+      // not a reason to send nothing.
+      table.current = null
+      setPhotoReady(false)
+    }
+    img.src = shot
+  }, [shot])
 
   async function draw(): Promise<Blob | null> {
     const canvas = document.createElement('canvas')
@@ -182,48 +234,152 @@ export function ShareMenuCard({
     // that explains it, and a picture cannot carry one.
     const served = dishes.filter((d) => d.served)
     const winner = served.find((d) => d.final_rank === 1)
-    // How much room the feet of the card need: the signature always, the
-    // winner when the vote is on, and a line of names for each list ticked.
-    const foot = 90 + (withVote && winner ? 60 : 0) + (withNames ? 46 : 0) + (withPseudonyms ? 46 : 0)
+    // What the foot of the card keeps for itself: the signature, and the
+    // winner's line when the vote is on.
+    const foot = 90 + (withVote && winner ? 56 : 0)
+    const floor = H - pad - foot - 40
 
+    /**
+     * One entry, written the way a printed menu writes one:
+     *
+     *     “Chef Courgette” (Simone)
+     *     Hachis Parmentier ····················· 13.2 pt
+     *     entrée
+     *
+     * The leader dots are what make a name at one end and a number at the
+     * other read as ONE line rather than as two columns — the same trick the
+     * carte on screen uses, and the reason the score can sit at the edge of
+     * the sheet without looking detached from the dish it belongs to.
+     */
     for (const d of served) {
+      if (y > floor) break
+
+      const who = attribution(d.brief_id)
+      if (who) {
+        ctx.fillStyle = 'rgba(46, 58, 64, 0.62)'
+        ctx.font = 'italic 24px Georgia, serif'
+        ctx.fillText(who, left, y)
+        y += 32
+      }
+
+      // The score first, because the room it needs decides where the dish name
+      // has to stop. The winner's is the one number on the card that is said
+      // twice, so it is set apart: bold and italic, in the table's red.
+      let scoreWidth = 0
+      let score = ''
+      if (withVote) {
+        score = t('results.points', { points: d.borda_points.toFixed(1) })
+        ctx.font = d === winner ? 'italic 600 30px Georgia, serif' : '28px Georgia, serif'
+        scoreWidth = ctx.measureText(score).width
+      }
+
       ctx.fillStyle = '#2e3a40'
-      ctx.font = `${withVote && d === winner ? '600 ' : ''}36px Georgia, serif`
-      const before = y
-      y = line(ctx, d.dish_name, left, y, max - 40)
+      ctx.font = `600 36px Georgia, serif`
+      const room = max - (scoreWidth ? scoreWidth + 40 : 0)
+      let name = d.dish_name
+      // Cut rather than wrap: a wrapped name breaks the line the dots are
+      // holding together, and the dish is one line on a printed menu.
+      while (ctx.measureText(name).width > room && name.length > 4) {
+        name = name.slice(0, -2)
+      }
+      if (name !== d.dish_name) name = `${name}…`
+      ctx.fillText(name, left, y)
+
+      if (score) {
+        const nameWidth = ctx.measureText(name).width
+        // The dots, drawn as a dashed rule on the baseline rather than as a
+        // row of full stops: a screen reader is never handed forty periods,
+        // and the spacing does not drift with the font.
+        ctx.save()
+        ctx.strokeStyle = 'rgba(46, 58, 64, 0.35)'
+        ctx.lineWidth = 3
+        ctx.setLineDash([2, 10])
+        ctx.beginPath()
+        ctx.moveTo(left + nameWidth + 16, y - 8)
+        ctx.lineTo(left + max - scoreWidth - 16, y - 8)
+        ctx.stroke()
+        ctx.restore()
+
+        ctx.fillStyle = d === winner ? '#b23a3e' : 'rgba(46, 58, 64, 0.75)'
+        ctx.font = d === winner ? 'italic 600 30px Georgia, serif' : '28px Georgia, serif'
+        ctx.fillText(score, left + max - scoreWidth, y)
+      }
+      y += 40
+
       ctx.fillStyle = 'rgba(46, 58, 64, 0.55)'
-      ctx.font = '22px Georgia, serif'
-      ctx.fillText(courseLabel(d.course), left, before + 30)
-      y += 22
-      if (y > H - pad - foot - 120) break
+      ctx.font = 'italic 24px Georgia, serif'
+      ctx.fillText(courseLabel(d.course), left, y)
+      y += 40
     }
 
-    // The feet, from the bottom up, so nothing can collide with the menu.
-    let footY = H - pad - 90
-    if (withPseudonyms && secretNames.length > 0) {
-      ctx.fillStyle = 'rgba(46, 58, 64, 0.65)'
-      ctx.font = '24px Georgia, serif'
-      line(ctx, `${t('share.underTheNames')}: ${secretNames.join(' · ')}`, left, footY, max)
-      footY -= 46
+    // THE PHOTOGRAPH GOES ON THE SHEET, not beside it: one image is what a
+    // group chat shows, and a second file is something people scroll past. It
+    // takes the room the menu left; where the menu filled the sheet it comes
+    // back at half width and sits ON the last lines, which is what a
+    // photograph laid on a menu actually does.
+    if (withPhoto && table.current) {
+      const img = table.current
+      const room = floor - y - 10
+      // Half a sheet of room is enough for a picture worth looking at; below
+      // that it comes back at half width and lies on the last lines instead.
+      const full = room >= 200
+      const w = full ? max : max / 2
+      const h = Math.min(full ? room : 320, (w * img.height) / img.width)
+      const x = full ? left : left + max - w
+      // Full width, it sits at the foot of the menu rather than immediately
+      // under it: a photograph floating mid-sheet with white under it reads as
+      // a gap somebody forgot to fill.
+      const top = full ? floor - h : floor - h
+
+      ctx.save()
+      // A white edge and a shadow: it is a print laid on the menu, and without
+      // one it reads as a hole cut in the paper.
+      ctx.shadowColor = 'rgba(60, 40, 30, 0.35)'
+      ctx.shadowBlur = 24
+      ctx.shadowOffsetY = 8
+      ctx.fillStyle = '#fffcf4'
+      ctx.fillRect(x - 10, top - 10, w + 20, h + 20)
+      ctx.restore()
+      // Cropped to fill rather than squashed: the aspect ratio of somebody's
+      // kitchen is not the aspect ratio of the space left on a menu.
+      const scale = Math.max(w / img.width, h / img.height)
+      const sw = w / scale
+      const sh = h / scale
+      ctx.drawImage(
+        img,
+        (img.width - sw) / 2,
+        (img.height - sh) / 2,
+        sw,
+        sh,
+        x,
+        top,
+        w,
+        h,
+      )
     }
-    if (withNames && realNames.length > 0) {
-      ctx.fillStyle = 'rgba(46, 58, 64, 0.65)'
-      ctx.font = '24px Georgia, serif'
-      line(ctx, `${t('share.atTheTable')}: ${realNames.join(' · ')}`, left, footY, max)
-      footY -= 46
-    }
+
+    // The winner, named in words under everything else, and the signature.
     if (withVote && winner) {
       ctx.fillStyle = '#b23a3e'
-      ctx.font = 'italic 28px Georgia, serif'
-      ctx.fillText(t('results.share.winner', { dish: winner.dish_name }), left, footY)
+      ctx.font = 'italic 600 28px Georgia, serif'
+      ctx.fillText(t('results.share.winner', { dish: winner.dish_name }), left, H - pad - 90)
     }
 
-    // The signature. Small, and the only thing on the card that is an advert.
+    // Small, and the only thing on the card that is an advert.
     ctx.fillStyle = 'rgba(46, 58, 64, 0.5)'
     ctx.font = '26px Georgia, serif'
     ctx.fillText('CovertCook · opus35.fr', left, H - pad - 30)
 
-    return new Promise((resolve) => canvas.toBlob(resolve, 'image/png'))
+    // A canvas the photograph tainted cannot be exported at all, which would
+    // turn the whole button into a no-op. Answered by drawing again without
+    // it: a card without the picture is a card, and silence here would be a
+    // button that does nothing.
+    try {
+      return await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, 'image/png'))
+    } catch {
+      table.current = null
+      return null
+    }
   }
 
   // The preview, redrawn whenever a box changes. It is the whole point of the
@@ -245,41 +401,24 @@ export function ShareMenuCard({
       if (url) URL.revokeObjectURL(url)
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, withNames, withPseudonyms, withVote, dishes, filRouge, members])
+  }, [open, withNames, withPseudonyms, withPhoto, withVote, photoReady, dishes, recipes, filRouge])
 
   async function onShare() {
     setBusy(true)
     setFallback(false)
     try {
-      const blob = await draw()
+      // ONE FILE, ALWAYS. The photograph is on the sheet now, so there is
+      // nothing to send beside it — and one image is what a group chat shows
+      // whole, where a second attachment is something people scroll past.
+      const blob = (await draw()) ?? (await draw())
       if (!blob) return
       const files = [new File([blob], 'covertcook.png', { type: 'image/png' })]
-
-      // The photograph of the table, beside the card rather than on it.
-      if (withPhoto && photo) {
-        try {
-          const url = await photoUrl(photo.storage_path)
-          if (url) {
-            const shot = await (await fetch(url)).blob()
-            files.push(new File([shot], 'table.jpg', { type: shot.type || 'image/jpeg' }))
-          }
-        } catch {
-          // The card still goes. A picture that could not be fetched is not a
-          // reason to send nothing.
-        }
-      }
 
       // canShare with the files, not just navigator.share: several browsers
       // expose share and then reject files, and finding out after drawing is
       // how you get a button that does nothing.
       if (navigator.canShare?.({ files })) {
         await navigator.share({ files, title: roundName })
-        return
-      }
-      // One file at a time is all some sheets take; the card is the one that
-      // matters, so it is the one that falls back.
-      if (files.length > 1 && navigator.canShare?.({ files: [files[0]] })) {
-        await navigator.share({ files: [files[0]], title: roundName })
         return
       }
       const url = URL.createObjectURL(blob)
@@ -306,7 +445,7 @@ export function ShareMenuCard({
       set: setWithNames,
       label: t('share.realNames'),
       hint: t('share.realNamesHint'),
-      off: realNames.length === 0,
+      off: !anyReal,
     },
     {
       key: 'pseudonyms',
@@ -314,7 +453,7 @@ export function ShareMenuCard({
       set: setWithPseudonyms,
       label: t('share.pseudonyms'),
       hint: t('share.pseudonymsHint'),
-      off: secretNames.length === 0,
+      off: !anySecret,
     },
     {
       key: 'photo',

@@ -41,6 +41,15 @@ export function FilRougeLine({
 
   if (!data?.category) return null
 
+  // SEALED, AND SAID SO RATHER THAN HIDDEN (0089). The compass drew this
+  // dinner a country and the server is withholding it from everybody until the
+  // roulette has run — so the line that would name it says what is happening
+  // instead. Printing nothing would read as a dinner with no thread at all,
+  // which is the one thing it is not.
+  if (data.sealed) {
+    return <p className={className}>{t('filRouge.sealedLine')}</p>
+  }
+
   // On a shared dinner every reader gets the same answer, so the three roles
   // collapse into one. They only diverge once the roulette has dealt one each.
   const code =

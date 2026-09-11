@@ -94,6 +94,23 @@
     "whoSeesIt": "Ce que vous déclarez est visible par tous les convives, et rappelé à la personne qui écrit votre recette pendant qu’elle l’écrit. Si quelque chose est faux ou que vous préférez le retirer, l’adresse de contact est en pied de page."
   },
   "rounds": {
+    "group": {
+      "chefs": "Chefs",
+      "chefsHint": "Qui est à cette table, et ce qu’ils ont le droit de savoir.",
+      "invitation": "Invitation",
+      "covert": "Couverture",
+      "theme": "Thème",
+      "themeHint": "De quoi parle la soirée, et à quoi elle ressemble.",
+      "topic": "Sujet",
+      "pseudonym": "Pseudonymes",
+      "design": "Décor",
+      "recipe": "Recette",
+      "recipeHint": "Ce qui s’écrit, ce que ça coûte, et comment on juge.",
+      "multiple": "Multiple",
+      "budget": "Budget",
+      "courses": "Services",
+      "vote": "Vote"
+    },
     "myRounds": "Mes dîners",
     "create": "Créer un dîner",
     "join": "Rejoindre avec un code",
@@ -432,10 +449,8 @@
     "copyCode": "Copier le code",
     "copyLink": "Copier le lien",
     "rules": {
-      "fixedTitle": "Fixé pour tout le dîner",
-      "fixedWarn": "Non modifiables ensuite — ni par vous, ni par personne.",
-      "liveTitle": "Modifiable pendant le dîner",
-      "liveNote": "Choisissez maintenant, changez d'avis plus tard : la flèche tournante ↺ de la passe revient sur chacun de ces réglages."
+      "settled": "Tout ici est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Les trois réglages qui peuvent encore bouger en cours de route le disent sous le choix.",
+      "liveMark": "Modifiable pendant le dîner : la flèche qui tourne ↺ sur la passe revient sur celui-ci."
     },
     "tableTheme": {
       "label": "Thème de la table",
@@ -686,15 +701,13 @@
   "share": {
     "what": "Choisissez ce qui figure sur la carte. Rien n’est envoyé avant que vous appuyiez sur envoyer, et l’image ci-dessous est exactement ce qui quitte ce téléphone.",
     "realNames": "Les noms",
-    "realNamesHint": "qui était vraiment à table",
+    "realNamesHint": "le vrai nom de qui a écrit chaque plat, au-dessus",
     "pseudonyms": "Les pseudonymes",
-    "pseudonymsHint": "les noms sous lesquels ils ont cuisiné",
+    "pseudonymsHint": "le nom de chef sous lequel il a écrit, au-dessus de chaque plat",
     "photo": "La photo",
-    "photoHint": "la photo de la table, envoyée à côté de la carte",
+    "photoHint": "la photo de la table, imprimée sur le menu",
     "results": "Le vote",
-    "resultsHint": "le plat de la soirée, marqué sur le menu",
-    "atTheTable": "À table",
-    "underTheNames": "Sous les noms",
+    "resultsHint": "les points à côté de chaque plat, et le plat de la soirée",
     "send": "Envoyer"
   },
   "results": {
@@ -1404,6 +1417,16 @@
     "pausedTag": "À l’atelier"
   },
   "filRouge": {
+    "searchCountry": "Chercher un pays",
+    "compass": "En tirer un au hasard, scellé",
+    "sealedChosen": "🧭 Scellé. Un pays a été tiré pour ce dîner et personne ne sait lequel — vous non plus — jusqu’à ce que la roulette tourne et que les recettes s’écrivent.",
+    "sealedLine": "Le fil rouge du soir : scellé jusqu’au tirage 🧭",
+    "noCountry": "Aucun pays de ce nom.",
+    "oneEach": "Un chacun",
+    "pickOne": "Rien de choisi",
+    "useThisKind": "Distribuer ce type, un par cuisinier",
+    "kindChosen": "Distribué, un par cuisinier",
+    "hardLetters": "Avertissement : {{items}} ne sont pas difficiles, elles sont quasi impossibles — et le bulletin demande si le plat a bien suivi le fil rouge.",
     "label": "Le fil rouge",
     "none": "Sans fil rouge",
     "noneHint": "Le dîner est libre — chacun cuisine ce qu'il veut.",

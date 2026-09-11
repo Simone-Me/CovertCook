@@ -351,9 +351,13 @@ export function RoundSettingsPage() {
           title={t('filRouge.label')}
           aside={
             currentThread?.category
-              ? currentThread.scope === 'PER_COOK' || !currentThread.code
-                ? t(`filRouge.category.${currentThread.category}`)
-                : filRougeLabel(currentThread.category, currentThread.code)
+              ? // A sealed one has no name to print — the server is withholding
+                // it from the host too, until the roulette runs (0089).
+                currentThread.sealed
+                ? t('filRouge.compass')
+                : currentThread.scope === 'PER_COOK' || !currentThread.code
+                  ? t(`filRouge.category.${currentThread.category}`)
+                  : filRougeLabel(currentThread.category, currentThread.code)
               : t('filRouge.none')
           }
         >

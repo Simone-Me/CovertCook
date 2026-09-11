@@ -2201,15 +2201,25 @@ export async function filRougeClash(roundId: string, category: FilRougeCategory,
   return unwrap<string[]>(res)
 }
 
+/** What `set_fil_rouge` and `create_round` take instead of a code to have one
+ *  drawn on the server and kept from everybody until the dinner is dealt
+ *  (0089). Not a code: every real one is a letter, an ISO pair or an
+ *  upper-case word. */
+export const FIL_ROUGE_SEALED = '?'
+
 export interface RoundFilRouge {
   category: FilRougeCategory | null
   scope: FilRougeScope | null
-  /** The table's own thread. Null when every cook has their own. */
+  /** The table's own thread. Null when every cook has their own — and null
+   *  while a sealed one is still sealed. */
   code: string | null
   /** PER_COOK: the one I have to cook. */
   my_code: string | null
   /** PER_COOK: the one the person I am writing for has to cook. */
   my_cook_code: string | null
+  /** Drawn by the compass and not yet readable by anybody, the host included.
+   *  It opens by itself the moment the dinner is dealt (0089). */
+  sealed: boolean
 }
 
 export async function getFilRouge(roundId: string) {

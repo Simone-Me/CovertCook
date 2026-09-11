@@ -236,6 +236,7 @@ export function ResultsPage() {
           roundName={round?.name ?? t('results.title')}
           dinnerAt={round?.dinner_at ?? null}
           dishes={dishes}
+          recipes={recipes ?? []}
           filRouge={
             filRouge?.category && filRouge.scope === 'SHARED' && filRouge.code
               ? filRougeLabel(filRouge.category, filRouge.code)

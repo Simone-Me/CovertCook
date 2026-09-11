@@ -25,6 +25,7 @@ import {
   type VotingMode,
   type NameTheme,
   type TableTheme,
+  FIL_ROUGE_SEALED,
   type FilRougeCategory,
   type FilRougeScope,
 } from '../../lib/rpc'
@@ -219,25 +220,33 @@ export function CreateRoundPage() {
 
         {custom && (
           <>
-            {/* TWO CONTAINERS, AND THE DIVIDING LINE IS THE ONLY THING THAT
-                MATTERS ON THIS SCREEN.
-                Seven settings in one folded stack said nothing about which of
-                them a host was committing to. Some of these can be revisited
-                over dinner with the turning arrow; the rest cannot be
-                revisited at all, because changing them would rewrite an
-                evening under the people living it — renaming everybody
-                mid-game, or telling a table that has already shopped that
-                costs are being split after all.
-                So the two kinds are two boxes, in different colours, and the
-                one you cannot undo says so in its own heading rather than in a
-                footnote under each control. */}
-            <section className="rules rules--fixed">
+            {/* THREE GROUPS, BY SUBJECT, AND NOT BY WHETHER A SETTING CAN BE
+                UNDONE.
+                The two boxes this replaces — "settled for the whole dinner" and
+                "changeable during it" — drew the one line that mattered when
+                there were seven settings and no evening to describe. With the
+                fil rouge on the form there are ten, and the line stopped
+                helping: a host looking for what the dinner is ABOUT had to
+                know, first, whether that was a thing they could change later.
+                Nobody thinks that way. They think about the people, the
+                evening, and the food.
+                So: the chefs, the theme, the recipe. What cannot be undone is
+                still said — once, at the top — and the three settings that CAN
+                be revisited say so in their own words, under the control, where
+                somebody choosing is actually looking. */}
+            <p className="muted rules__warn">{t('rounds.rules.settled')}</p>
+
+            <section className="rules rules--group">
               <header className="rules__head">
-                <h2 className="rules__title">{t('rounds.rules.fixedTitle')}</h2>
-                <p className="rules__warn">{t('rounds.rules.fixedWarn')}</p>
+                <h2 className="rules__title">{t('rounds.group.chefs')}</h2>
+                <p className="rules__note">{t('rounds.group.chefsHint')}</p>
               </header>
 
-              <Fold title={t('rounds.access.label')} aside={t(`rounds.access.${access}`)}>
+              <Fold
+                title={t('rounds.group.invitation')}
+                hint={t('rounds.access.label')}
+                aside={t(`rounds.access.${access}`)}
+              >
                 <ChoiceList
                   name="access"
                   value={access}
@@ -250,7 +259,21 @@ export function CreateRoundPage() {
                 />
               </Fold>
 
-              <Fold title={t('rounds.anonymity.label')} aside={t(`rounds.anonymity.${anonymity}`)}>
+              {/* How many, and whether you wave them in. Both settled here
+                  and nowhere else: there is no RPC that moves either on a live
+                  round. */}
+              <DoorRules
+                seats={seats}
+                onSeats={setSeats}
+                requiresApproval={requiresApproval}
+                onRequiresApproval={setRequiresApproval}
+              />
+
+              <Fold
+                title={t('rounds.group.covert')}
+                hint={t('rounds.anonymity.label')}
+                aside={t(`rounds.anonymity.${anonymity}`)}
+              >
                 <ChoiceList
                   name="anonymity"
                   value={anonymity}
@@ -262,21 +285,33 @@ export function CreateRoundPage() {
                   }))}
                 />
               </Fold>
+            </section>
+
+            <section className="rules rules--group">
+              <header className="rules__head">
+                <h2 className="rules__title">{t('rounds.group.theme')}</h2>
+                <p className="rules__note">{t('rounds.group.themeHint')}</p>
+              </header>
 
               {/* Le fil rouge: the one thing on this form that tells a host
                   what the evening will be ABOUT rather than how it will run.
-                  Above the looks because it is not a look — it changes what
-                  gets cooked, which is why it is free. */}
+                  First in this group because it is not a look — it changes
+                  what gets cooked, which is why it is free. */}
               <Fold
-                title={t('filRouge.label')}
+                title={t('rounds.group.topic')}
+                hint={t('filRouge.label')}
                 aside={
                   filRouge.category === null
                     ? t('filRouge.none')
                     : filRouge.scope === 'PER_COOK'
                       ? t(`filRouge.category.${filRouge.category}`)
-                      : filRouge.code
-                        ? filRougeLabel(filRouge.category, filRouge.code)
-                        : t(`filRouge.category.${filRouge.category}`)
+                      : // A sealed draw has no name to print, which is the
+                        // whole of what it is (0089).
+                        filRouge.code === FIL_ROUGE_SEALED
+                        ? t('filRouge.compass')
+                        : filRouge.code
+                          ? filRougeLabel(filRouge.category, filRouge.code)
+                          : t(`filRouge.category.${filRouge.category}`)
                 }
               >
                 <p className="muted">{t('filRouge.explain')}</p>
@@ -293,7 +328,8 @@ export function CreateRoundPage() {
                   fridge, so choosing a list is choosing a look as well as a
                   vocabulary. */}
               <Fold
-                title={t('rounds.nameTheme.label')}
+                title={t('rounds.group.pseudonym')}
+                hint={t('rounds.nameTheme.label')}
                 aside={t(`rounds.nameTheme.${nameTheme}`, { defaultValue: nameTheme })}
               >
                 <ThemePicker
@@ -308,7 +344,8 @@ export function CreateRoundPage() {
               </Fold>
 
               <Fold
-                title={t('rounds.tableTheme.label')}
+                title={t('rounds.group.design')}
+                hint={t('rounds.tableTheme.label')}
                 aside={t(`rounds.tableTheme.${tableTheme}`, { defaultValue: tableTheme })}
               >
                 <ThemePicker
@@ -321,44 +358,26 @@ export function CreateRoundPage() {
                   freeUntil={freeUntil}
                 />
               </Fold>
+            </section>
 
-              {/* Shared costs. Labelled Pro because that is where it is headed,
-                  and open today because there is nothing to buy yet: the day
-                  there is, this is the switch that moves. Its home is this box
-                  and not the other one — the *number* moves all evening, but
-                  whether the table splits at all is agreed before anybody
-                  shops (0074). */}
-              {/* Three answers, not a tick and a hidden field. "Split it, no
-                  ceiling" was reachable before — tick the box, leave the
-                  budget empty — but only by discovering that an empty field
-                  meant something, which is a rule you can only learn by
-                  guessing right. Written out, it is a choice among three. */}
-              <Fold title={t('costs.label')} aside={t(`costs.mode.${costMode}`)}>
-                <ChoiceList
-                  name="cost-mode"
-                  value={costMode}
-                  onChange={(v) => setCostMode(v as CostChoice)}
-                  options={COST_MODES.map((code) => ({
-                    value: code,
-                    label: t(`costs.mode.${code}`),
-                    hint: t(`costs.mode.${code}Hint`),
-                  }))}
-                />
-                <p className="muted">{t('costs.shareFixed')}</p>
-              </Fold>
+            <section className="rules rules--group">
+              <header className="rules__head">
+                <h2 className="rules__title">{t('rounds.group.recipe')}</h2>
+                <p className="rules__note">{t('rounds.group.recipeHint')}</p>
+              </header>
 
-              {/* HOW MANY IDEAS EACH SENDER MAY OFFER, and it belongs in this
-                  box rather than the other one: raising it later would ask
-                  people who have already finished writing to go back and write
-                  again, and lowering it would throw away a recipe somebody
-                  wrote for somebody.
-                  What PRO buys here is more work for the sender and more room
-                  for the cook — never an advantage over anybody at the table,
-                  which is the line README draws around anything sellable. And
-                  because the dinner carries its host's PRO (0075), every guest
-                  writes three whether or not they have paid for anything. */}
+              {/* HOW MANY IDEAS EACH SENDER MAY OFFER. Raising it later would
+                  ask people who have already finished writing to go back and
+                  write again, and lowering it would throw away a recipe
+                  somebody wrote for somebody — so it is settled here.
+                  What Crème buys is more work for the sender and more room for
+                  the cook — never an advantage over anybody at the table, which
+                  is the line README draws around anything sellable. And because
+                  the dinner carries its host's Crème (0075), every guest writes
+                  three whether or not they have paid for anything. */}
               <Fold
-                title={t('rounds.recipesPerBrief.label')}
+                title={t('rounds.group.multiple')}
+                hint={t('rounds.recipesPerBrief.label')}
                 aside={t('rounds.recipesPerBrief.count', { count: recipesPerBrief })}
               >
                 <ChoiceList
@@ -371,7 +390,7 @@ export function CreateRoundPage() {
                     hint: t(`rounds.recipesPerBrief.hint${n}`),
                     locked: n > 1 && !isPro,
                     lockedReason: t('pro.lockedHere'),
-                    // PRO, said whether or not it is currently locked. Same
+                    // Crème, said whether or not it is currently locked. Same
                     // reason as the theme shelves: during the free-for-all
                     // these are usable, and a host who is never told they are
                     // a paid feature finds out by losing them.
@@ -400,48 +419,56 @@ export function CreateRoundPage() {
                     everything. One way in, at the bottom, for the whole form. */}
               </Fold>
 
-              {/* How many, and whether you wave them in. Both settled here
-                  and nowhere else: there is no RPC that moves either on a live
-                  round, which is exactly why they belong in this box. */}
-              <DoorRules
-                seats={seats}
-                onSeats={setSeats}
-                requiresApproval={requiresApproval}
-                onRequiresApproval={setRequiresApproval}
-              />
-            </section>
-
-            <section className="rules rules--live">
-              <header className="rules__head">
-                <h2 className="rules__title">{t('rounds.rules.liveTitle')}</h2>
-                <p className="rules__note">{t('rounds.rules.liveNote')}</p>
-              </header>
-
+              {/* WHETHER THE TABLE SPLITS, AND FOR HOW MUCH, IN ONE PLACE.
+                  They were two folds in two different boxes, because they obey
+                  two different rules — whether costs are shared is agreed
+                  before anybody shops and never moves (0074), while the number
+                  moves all evening. True, and unhelpful: a host setting a
+                  budget had to find the second half of their own decision
+                  under a different heading. One fold, and the half that can
+                  still move says so in the line under it. */}
               <Fold
-                title={t('rounds.voting.label')}
-                aside={t(`rounds.voting.${votingMode}`)}
+                title={t('rounds.group.budget')}
+                hint={t('costs.label')}
+                aside={
+                  costMode === 'BUDGET' && budget
+                    ? budget
+                    : t(`costs.mode.${costMode}`)
+                }
               >
-                {/* "No voting" no longer carries a red warning about being
-                    irreversible. It was true — set_voting_mode refuses to turn
-                    voting back on (0045) — and it was the only option on the
-                    form that shouted, which made choosing a perfectly ordinary
-                    kind of dinner feel like disarming something. A table that
-                    does not want to rank its friends' cooking is not making a
-                    mistake. The sentence under the option still says voting
-                    stays off; it no longer says it in red. */}
                 <ChoiceList
-                  name="voting"
-                  value={votingMode}
-                  onChange={(v) => setVotingMode(v as VotingMode)}
-                  options={VOTING_ORDER.map((mode) => ({
-                    value: mode,
-                    label: t(`rounds.voting.${mode}`),
-                    hint: t(`rounds.voting.${mode}Hint`),
+                  name="cost-mode"
+                  value={costMode}
+                  onChange={(v) => setCostMode(v as CostChoice)}
+                  options={COST_MODES.map((code) => ({
+                    value: code,
+                    label: t(`costs.mode.${code}`),
+                    hint: t(`costs.mode.${code}Hint`),
                   }))}
                 />
+                <p className="muted">{t('costs.shareFixed')}</p>
+
+                {costMode === 'BUDGET' && (
+                  <div className="stack">
+                    <label htmlFor="budget">{t('costs.budgetPerHead')}</label>
+                    <input
+                      id="budget"
+                      inputMode="decimal"
+                      placeholder="0.00"
+                      value={budget}
+                      onChange={(e) => setBudget(e.target.value)}
+                    />
+                    <p className="muted">{t('costs.budgetHint')}</p>
+                    <p className="muted small-italic">{t('rounds.rules.liveMark')}</p>
+                  </div>
+                )}
               </Fold>
 
-              <Fold title={t('rounds.slotMode.label')} aside={t(`rounds.slotMode.${slotMode}`)}>
+              <Fold
+                title={t('rounds.group.courses')}
+                hint={t('rounds.slotMode.label')}
+                aside={t(`rounds.slotMode.${slotMode}`)}
+              >
                 <ChoiceList
                   name="slot-mode"
                   value={slotMode}
@@ -462,25 +489,34 @@ export function CreateRoundPage() {
                 {slotMode === 'CATEGORIES' && (
                   <p className="muted">{t('rounds.slotMode.composedLater')}</p>
                 )}
+                <p className="muted small-italic">{t('rounds.rules.liveMark')}</p>
               </Fold>
 
-              {/* The number, in the box of things that move — beside the
-                  courses and the voting, and deliberately not beside the
-                  switch that turned sharing on. */}
-              {costMode === 'BUDGET' && (
-                <Fold title={t('costs.budgetPerHead')} aside={budget || t('costs.noCeiling')}>
-                  <label htmlFor="budget">{t('costs.budgetPerHead')}</label>
-                  <input
-                    id="budget"
-                    inputMode="decimal"
-                    placeholder="0.00"
-                    value={budget}
-                    onChange={(e) => setBudget(e.target.value)}
-                  />
-                  <p className="muted">{t('costs.budgetHint')}</p>
-                </Fold>
-              )}
-
+              <Fold
+                title={t('rounds.group.vote')}
+                hint={t('rounds.voting.label')}
+                aside={t(`rounds.voting.${votingMode}`)}
+              >
+                {/* "No voting" no longer carries a red warning about being
+                    irreversible. It was true — set_voting_mode refuses to turn
+                    voting back on (0045) — and it was the only option on the
+                    form that shouted, which made choosing a perfectly ordinary
+                    kind of dinner feel like disarming something. A table that
+                    does not want to rank its friends' cooking is not making a
+                    mistake. The sentence under the option still says voting
+                    stays off; it no longer says it in red. */}
+                <ChoiceList
+                  name="voting"
+                  value={votingMode}
+                  onChange={(v) => setVotingMode(v as VotingMode)}
+                  options={VOTING_ORDER.map((mode) => ({
+                    value: mode,
+                    label: t(`rounds.voting.${mode}`),
+                    hint: t(`rounds.voting.${mode}Hint`),
+                  }))}
+                />
+                <p className="muted small-italic">{t('rounds.rules.liveMark')}</p>
+              </Fold>
             </section>
 
             <div className="profree">

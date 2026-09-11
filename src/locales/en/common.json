@@ -94,6 +94,23 @@
     "whoSeesIt": "What you declare is shown to everybody at the dinner, and again to the person writing your recipe, as a reminder while they write it. If something is wrong or you would rather it were not there, the contact address is in the footer."
   },
   "rounds": {
+    "group": {
+      "chefs": "Chefs",
+      "chefsHint": "Who is at this table, and how much they are allowed to know.",
+      "invitation": "Invitation",
+      "covert": "Covert",
+      "theme": "Theme",
+      "themeHint": "What the evening is about, and what it looks like.",
+      "topic": "Topic",
+      "pseudonym": "Pseudonyms",
+      "design": "Design",
+      "recipe": "Recipe",
+      "recipeHint": "What gets written, what it costs, and how it is judged.",
+      "multiple": "Multiple",
+      "budget": "Budget",
+      "courses": "Courses",
+      "vote": "Vote"
+    },
     "myRounds": "My rounds",
     "create": "Create a round",
     "join": "Join with a code",
@@ -432,10 +449,8 @@
     "copyCode": "Copy the code",
     "copyLink": "Copy the link",
     "rules": {
-      "fixedTitle": "Settled for the whole dinner",
-      "fixedWarn": "These cannot be changed afterwards — not by you, not by anyone.",
-      "liveTitle": "Changeable during the dinner",
-      "liveNote": "Pick something now and think again later: the turning arrow ↺ on the pass comes back to any of these."
+      "settled": "Everything here is settled for the whole dinner — by you, now, and by nobody afterwards. The three that can still be changed while it runs say so under the choice.",
+      "liveMark": "Changeable during the dinner: the turning arrow ↺ on the pass comes back to this one."
     },
     "tableTheme": {
       "label": "Table theme",
@@ -686,15 +701,13 @@
   "share": {
     "what": "Choose what goes on the card. Nothing is sent until you press send, and the picture below is exactly what leaves this phone.",
     "realNames": "The names",
-    "realNamesHint": "who was actually at the table",
+    "realNamesHint": "the real name of whoever wrote each dish, above it",
     "pseudonyms": "The pseudonyms",
-    "pseudonymsHint": "the names they cooked under",
+    "pseudonymsHint": "the chef name they wrote under, above each dish",
     "photo": "The photograph",
-    "photoHint": "the photograph of the table, sent beside the card",
+    "photoHint": "the photograph of the table, printed on the menu",
     "results": "The vote",
-    "resultsHint": "the dish of the evening, marked on the menu",
-    "atTheTable": "At the table",
-    "underTheNames": "Under the names",
+    "resultsHint": "the points beside each dish, and the dish of the evening",
     "send": "Send it"
   },
   "results": {
@@ -1404,6 +1417,16 @@
     "pausedTag": "In the workshop"
   },
   "filRouge": {
+    "searchCountry": "Search for a country",
+    "compass": "Draw one at random, sealed",
+    "sealedChosen": "🧭 Sealed. A country has been drawn for this dinner and nobody is told which — not even you — until the roulette has run and the recipes are being written.",
+    "sealedLine": "Tonight's thread: sealed until the dinner is dealt 🧭",
+    "noCountry": "No country by that name.",
+    "oneEach": "One each",
+    "pickOne": "Nothing chosen yet",
+    "useThisKind": "Deal this kind, one per cook",
+    "kindChosen": "Being dealt, one per cook",
+    "hardLetters": "Fair warning: {{items}} are not hard, they are close to unbuildable — and the ballot asks how well each dish followed the thread.",
     "label": "Tonight's thread",
     "none": "No thread",
     "noneHint": "The dinner is open — everyone cooks whatever they like.",

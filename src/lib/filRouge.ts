@@ -34,3 +34,43 @@ export function useFilRougeLabel() {
     return t(`filRouge.value.${code}`, { defaultValue: code })
   }
 }
+
+/**
+ * One glyph per fil rouge value, so a grid can be read at a glance.
+ *
+ * WHY A MAP IN THE CLIENT AND NOT A COLUMN. A mark is a rendering decision —
+ * the same value wants a different glyph the day the grid is drawn differently
+ * — and a column would make every change a migration. The codes are permanent
+ * (0083), so this map is stable in the only way that matters.
+ *
+ * The world is not in here on purpose: 194 flags would read as a geopolitical
+ * statement in a picker, and several of them are contested. Countries are
+ * chosen by name, through the atlas.
+ */
+export const FIL_ROUGE_MARK: Record<string, string> = {
+  // Colours, as the colour itself. Nothing else is as legible.
+  RED: '🔴', ORANGE: '🟠', YELLOW: '🟡', GREEN: '🟢', BLUE: '🔵',
+  PURPLE: '🟣', PINK: '🌸', WHITE: '⚪', BLACK: '⚫', BROWN: '🟤',
+
+  // Ways of cooking, said by the thing you would reach for.
+  NO_OVEN: '🔌', RAW_ONLY: '🍣', GRILLED: '🔥', FRIED: '🍳',
+  STEAMED: '♨️', ONE_PAN: '🥘', SERVED_COLD: '❄️', ALL_LIQUID: '🥣',
+  NO_KNIFE: '🥄', ONE_BITE: '🍢', UNDER_A_CRUST: '🥧', ROLLED: '🌯',
+
+  // Ingredients.
+  EGG: '🥚', POTATO: '🥔', TOMATO: '🍅', RICE: '🍚', BREAD: '🍞',
+  CHEESE: '🧀', CHOCOLATE: '🍫', LEMON: '🍋', MUSHROOM: '🍄', PULSES: '🫘',
+  FISH: '🐟', HONEY: '🍯', APPLE: '🍎', PUMPKIN: '🎃', GARLIC: '🧄',
+  ONION: '🧅', BUTTER: '🧈', ALMOND: '🌰', CREAM: '🥛', CHILLI: '🌶️',
+
+  // Times, and the half of them that are memories rather than periods.
+  ANCIENT_ROME: '🏛️', MEDIEVAL: '🏰', VERSAILLES: '👑', TWENTIES: '🥂',
+  FIFTIES_AMERICA: '🍔', SEVENTIES: '🕺', EIGHTIES: '📼', THE_FUTURE: '🚀',
+  SCHOOL_CANTEEN: '🎒', FAMILY_PICNIC: '🧺', SUNDAY_AT_GRANDMAS: '🍲',
+  CAMPING: '🏕️',
+}
+
+/** The six letters that are a bad evening rather than a hard one: they used to
+ *  cost Crème, which read as a recommendation (0089). Named here so the picker
+ *  can say so in words. */
+export const HARD_LETTERS = ['K', 'Q', 'W', 'X', 'Y', 'Z']
