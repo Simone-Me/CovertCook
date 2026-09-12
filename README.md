@@ -793,15 +793,23 @@ names, migration numbers, bugs found and fixed) see
   nobody and the buffet is simply one dish shorter. A dish whose cook has
   gone is excluded from voting rather than listed for a rank nobody can
   give it.
-- **Setting a dinner up**: one click for a classic dinner, or open the
-  custom panel to choose how people get in (a code, or in-app invitations
+- **Setting a dinner up**: a grid of evenings somebody might actually want —
+  the game as designed, a party, a quiet one with no secrets, a no-stress one,
+  a dice that rolls every answer, and the long form for the host who wants to
+  decide all fifteen. A card opens in place and says what it sets before it
+  makes anything. Whatever a host settles in the long form can be **saved under
+  a name** (`0090`) and lands on the same grid as a card of their own, with a ×
+  to take it off again.
+  The decisions themselves: how people get in (a code, or in-app invitations
   by account address), who knows whom (undercover / spy / open), how you
-  vote (during dinner, after dinner on a timer, or not at all), and
+  vote (during dinner, after dinner on a timer, or not at all),
   whether the menu is free-for-all or composed course by course, and
   whether the evening has a **fil rouge** — one direction every recipe is
   written against, the same for the whole table or one dealt to each cook.
   The seven countries on the shelf change every Sunday; everything else
-  (colours, letters, ways of cooking) is shown whole and is free.
+  (colours, letters, ways of cooking) is shown whole and is free, and the
+  compass draws a country the server tells nobody — the host included — until
+  the dinner is dealt (`0089`).
 - **The round page**: a table seen from above, with each section drawn as
   a sealed envelope laid on the cloth. The Executive Chef's actions all go
   through one panel — the pass — which shows only what's up right now and

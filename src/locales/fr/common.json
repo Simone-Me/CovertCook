@@ -94,6 +94,32 @@
     "whoSeesIt": "Ce que vous déclarez est visible par tous les convives, et rappelé à la personne qui écrit votre recette pendant qu’elle l’écrit. Si quelque chose est faux ou que vous préférez le retirer, l’adresse de contact est en pied de page."
   },
   "rounds": {
+    "createIt": "Créer",
+    "presets": {
+      "lead": "Choisissez la soirée que vous avez en tête. Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit.",
+      "CLASSIC": "Classique",
+      "CLASSICHint": "Le jeu tel qu’il est pensé : couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
+      "PARTY": "Ambiance fête",
+      "PARTYHint": "Pas de limite de couverts, le menu lisible pendant qu’il s’écrit, nappe et liste de pseudonymes tirées au sort, des services, frais partagés.",
+      "NO_SURPRISES": "Sans surprises",
+      "NO_SURPRISESHint": "Tout le monde se connaît, le menu est visible, la porte est une liste d’invités et les frais sont partagés.",
+      "NO_STRESS": "Sans stress",
+      "NO_STRESSHint": "Couvert, un code à partager, pas de limite, pas de fil rouge, rien à composer et pas d’argent à évoquer.",
+      "RANDOM": "Tout au hasard",
+      "RANDOMHint": "Chaque réponse tirée au sort, cette table comprise — et le fil rouge est scellé, donc vous le découvrez avec les autres.",
+      "MANUAL": "Je configure moi-même",
+      "MANUALHint": "Le formulaire complet : chaque décision, une par une.",
+      "mine": "Enregistrée par vous",
+      "tweak": "Ouvrir dans le formulaire",
+      "nameFirst": "Donnez d’abord un nom au dîner.",
+      "removeAsk": "Supprimer « {{name}} » ?",
+      "saveTitle": "Garder ces réglages",
+      "saveWhat": "Ils arrivent sur la grille comme une carte à vous, prête pour le prochain dîner. Enregistrer un nom déjà utilisé le remplace.",
+      "namePlaceholder": "Le dimanche chez nous",
+      "save": "Enregistrer",
+      "saved": "Enregistré. C’est sur la grille.",
+      "tooMany": "Cela fait douze tables enregistrées — supprimez-en une avant d’en garder une autre."
+    },
     "group": {
       "chefs": "Chefs",
       "chefsHint": "Qui est à cette table, et ce qu’ils ont le droit de savoir.",
@@ -118,9 +144,7 @@
     "name": "Nom du dîner",
     "setup": {
       "classic": "Classique",
-      "classicHint": "dîner couvert, une recette chacun, vote activé. Rien à décider.",
-      "custom": "Personnaliser",
-      "customHint": "choisissez qui entre, qui connaît qui, et comment on vote."
+      "custom": "Personnaliser"
     },
     "comingSoon": "Bientôt disponible",
     "access": {
@@ -449,7 +473,9 @@
     "copyCode": "Copier le code",
     "copyLink": "Copier le lien",
     "rules": {
-      "settled": "Tout ici est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Les trois réglages qui peuvent encore bouger en cours de route le disent sous le choix.",
+      "liveTitle": "Modifiable pendant le dîner",
+      "liveNote": "Choisissez maintenant et changez d’avis plus tard : la flèche qui tourne ↺ sur la passe revient sur ces deux-là.",
+      "settled": "Tout ce qui est dans ces trois groupes est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Ce qui peut encore bouger en cours de route est dans l’encadré vert, en bas.",
       "liveMark": "Modifiable pendant le dîner : la flèche qui tourne ↺ sur la passe revient sur celui-ci."
     },
     "tableTheme": {

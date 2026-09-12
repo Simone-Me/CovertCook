@@ -110,7 +110,14 @@ export function FilRougePicker({
   })
 
   const countdown = useCountdown(turnsAt)
-  const rule: Rule = category === null ? 'NONE' : scope
+
+  // THE RULE IS HELD HERE, NOT DERIVED FROM THE CATEGORY, and that was a real
+  // bug rather than a tidiness question: derived, "no thread" meant "no kind
+  // chosen", so pressing "the same for everybody" on a fresh form set a scope
+  // on a null category, the derivation read null again, and the radio sprang
+  // back to "no thread" with nothing opening underneath it. Answering the
+  // first question has to be possible before answering the second.
+  const [rule, setRule] = useState<Rule>(category === null ? 'NONE' : scope)
 
   const byCategory = useMemo(() => {
     const by = new Map<FilRougeCategory, FilRougeOption[]>()
@@ -158,14 +165,18 @@ export function FilRougePicker({
   const nextCountries = (next ?? []).filter((n) => n.category === 'COUNTRY')
 
   function pickRule(value: string) {
+    setRule(value as Rule)
     if (value === 'NONE') return onChange({ category: null, code: null, scope: 'SHARED' })
     // The kind survives a change of rule; the value cannot, because on a
-    // per-cook dinner there is no single value to hold.
+    // per-cook dinner there is no single value to hold, and a shared one that
+    // kept a value dealt per cook would be a value nobody chose.
     onChange({ category, code: null, scope: value as FilRougeScope })
   }
 
   function pick(next: FilRougeCategory, value: string | null) {
-    onChange({ category: next, code: value, scope: rule === 'NONE' ? 'SHARED' : rule })
+    const scopeNow: FilRougeScope = rule === 'NONE' ? 'SHARED' : rule
+    if (rule === 'NONE') setRule('SHARED')
+    onChange({ category: next, code: value, scope: scopeNow })
   }
 
   /** One value, as a tile in a grid: its mark, its name, and whether this

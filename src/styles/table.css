@@ -1848,8 +1848,12 @@
   text-decoration: none;
 }
 
+/* :active as well as :hover, and that is a phone decision rather than a
+   decorative one — a finger never hovers, so without it the line is the one
+   control on the page that does not answer when it is touched. */
 .pass__link:hover,
-.pass__link:focus-visible {
+.pass__link:focus-visible,
+.pass__link:active {
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -2443,6 +2447,23 @@
   font-size: 12.5px;
 }
 
+/* The two settings that can still be moved while the dinner runs. Green
+   against the three red-edged groups, because "can I change my mind later?" is
+   the first question somebody has about a setting they are unsure of, and a
+   box answers it before they have read a word. */
+.rules--live {
+  border-color: var(--diet-bg);
+  border-left-color: var(--ok);
+}
+
+.rules--live .rules__title {
+  color: var(--ok);
+}
+
+.rules--live .rules__note {
+  color: var(--text-muted);
+}
+
 /* THE THREE GROUPS: the chefs, the theme, the recipe.
    They replace the two boxes that sorted the form by whether a setting could
    be undone — a true division that stopped being the useful one once the
@@ -2961,4 +2982,123 @@
 
 .frletter.is-hard.is-chosen {
   color: var(--accent-contrast);
+}
+
+/* ---------------------------------------------------------------------------
+ * The grid of ready-made dinners (0090).
+ *
+ * A card is a whole evening rather than a setting, so it is bigger than
+ * anything else on the form, says what it is in a sentence, and opens IN PLACE
+ * to show what it would actually do. Nothing here creates a dinner by being
+ * pressed once: the second press, on a button that says Create, is the one
+ * that commits.
+ * ------------------------------------------------------------------------- */
+
+.setups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 460px) {
+  .setups {
+    grid-template-columns: 1fr;
+  }
+}
+
+.setup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--env-edge);
+  border-left-width: 4px;
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+  box-shadow: var(--paper-shadow);
+  overflow: hidden;
+}
+
+/* Open, it stops being a card in a row and becomes the thing being read, so it
+   takes the whole width — the summary is a sentence, not a caption. */
+.setup.is-open {
+  grid-column: 1 / -1;
+  border-left-color: var(--accent);
+}
+
+.setup__face {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  width: 100%;
+  padding: 12px 13px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.setup__face:hover,
+.setup__face:focus-visible,
+.setup__face:active {
+  background: var(--bg-elevated);
+}
+
+.setup__mark {
+  font-size: 22px;
+  line-height: 1;
+}
+
+.setup__name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.setup__what {
+  font-size: 12.5px;
+  line-height: 1.35;
+  color: var(--text-muted);
+}
+
+.setup__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 13px 13px;
+}
+
+.setup__summary {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* A card of the host's own, and the one difference that matters: it can be
+   taken off the shelf again. */
+.setup--mine {
+  border-left-color: var(--ok);
+}
+
+.setup__remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: auto;
+  padding: 2px 8px;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.setup__remove:hover,
+.setup__remove:focus-visible,
+.setup__remove:active {
+  color: var(--accent);
+  border-color: var(--accent);
 }

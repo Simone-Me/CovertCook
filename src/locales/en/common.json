@@ -94,6 +94,32 @@
     "whoSeesIt": "What you declare is shown to everybody at the dinner, and again to the person writing your recipe, as a reminder while they write it. If something is wrong or you would rather it were not there, the contact address is in the footer."
   },
   "rounds": {
+    "createIt": "Create",
+    "presets": {
+      "lead": "Pick the evening you have in mind. Every card says what it sets before it makes anything.",
+      "CLASSIC": "Classic",
+      "CLASSICHint": "The game as designed: covered, approved at the door, one course each, costs split, vote at the end.",
+      "PARTY": "Party vibe",
+      "PARTYHint": "No cap on the seats, the menu readable while it is written, a cloth and a word list drawn at random, courses, costs split.",
+      "NO_SURPRISES": "No surprises",
+      "NO_SURPRISESHint": "Everybody knows everybody, the menu is visible, the door is a guest list and the costs are split.",
+      "NO_STRESS": "No stress",
+      "NO_STRESSHint": "Covered, a code to share, no cap, no thread, nothing to compose and no money to talk about.",
+      "RANDOM": "Total roll",
+      "RANDOMHint": "Every answer drawn, this table included — and the thread is sealed, so even you find out with everybody else.",
+      "MANUAL": "Configure it myself",
+      "MANUALHint": "The long form: every decision, one at a time.",
+      "mine": "Saved by you",
+      "tweak": "Open it in the form",
+      "nameFirst": "Give the dinner a name first.",
+      "removeAsk": "Delete “{{name}}”?",
+      "saveTitle": "Keep these settings",
+      "saveWhat": "They land on the grid as a card of your own, ready for the next dinner. Saving a name you have used before replaces it.",
+      "namePlaceholder": "Sunday at ours",
+      "save": "Save",
+      "saved": "Saved. It is on the grid.",
+      "tooMany": "That is twelve saved tables — delete one before saving another."
+    },
     "group": {
       "chefs": "Chefs",
       "chefsHint": "Who is at this table, and how much they are allowed to know.",
@@ -118,9 +144,7 @@
     "name": "Round name",
     "setup": {
       "classic": "Classic",
-      "classicHint": "covered dinner, one recipe each, voting on. Nothing to decide.",
-      "custom": "Customise",
-      "customHint": "choose who gets in, who knows whom, and how you vote."
+      "custom": "Customise"
     },
     "comingSoon": "Coming soon",
     "access": {
@@ -449,7 +473,9 @@
     "copyCode": "Copy the code",
     "copyLink": "Copy the link",
     "rules": {
-      "settled": "Everything here is settled for the whole dinner — by you, now, and by nobody afterwards. The three that can still be changed while it runs say so under the choice.",
+      "liveTitle": "Changeable during the dinner",
+      "liveNote": "Pick something now and think again later: the turning arrow ↺ on the pass comes back to either of these.",
+      "settled": "Everything in these three is settled for the whole dinner — by you, now, and by nobody afterwards. What can still be changed while it runs is in the green box at the foot.",
       "liveMark": "Changeable during the dinner: the turning arrow ↺ on the pass comes back to this one."
     },
     "tableTheme": {

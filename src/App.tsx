@@ -15,6 +15,7 @@ import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { MyRoundsPage } from './features/rounds/MyRoundsPage'
 import { ProfilePage } from './features/profile/ProfilePage'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
+import { CustomRoundPage } from './features/rounds/CustomRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
 import { RoundHomePage } from './features/rounds/RoundHomePage'
 import { RoundSettingsPage } from './features/rounds/RoundSettingsPage'
@@ -98,6 +99,18 @@ function AppRoutes() {
           element={
             <RequireAuth>
               <CreateRoundPage />
+            </RequireAuth>
+          }
+        />
+        {/* The long form is its own place rather than a panel under the grid:
+            deciding fifteen things and choosing between six ready-made tables
+            are two different jobs, and a route is what makes the difference
+            visible — including in the back button. */}
+        <Route
+          path="/rounds/new/custom"
+          element={
+            <RequireAuth>
+              <CustomRoundPage />
             </RequireAuth>
           }
         />

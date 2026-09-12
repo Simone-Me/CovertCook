@@ -2227,3 +2227,45 @@ export async function getFilRouge(roundId: string) {
   const rows = unwrap<RoundFilRouge[]>(res)
   return rows?.[0] ?? null
 }
+
+// ---------------------------------------------------------------------------
+// Saved creation settings (0090). An ordinary table with an ordinary policy —
+// `profile_id = auth.uid()` is the whole rule, so there is nothing here for a
+// SECURITY DEFINER function to strip on the way out.
+// ---------------------------------------------------------------------------
+
+export const TOO_MANY_PRESETS = 'TOO_MANY_PRESETS'
+
+export interface SavedSetup {
+  id: string
+  name: string
+  /** Whatever the form was the day it was saved. Validated by the reader, not
+   *  by the column: an old document is the normal case, not the exception. */
+  setup: unknown
+}
+
+export async function listSavedSetups() {
+  const { data, error } = await supabase
+    .from('round_presets')
+    .select('id,name,setup')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as SavedSetup[]
+}
+
+/** Saving the same name twice replaces it, which is what somebody pressing
+ *  "save" with a name they have used before means by it. */
+export async function saveSetup(profileId: string, name: string, setup: unknown) {
+  const { error } = await supabase
+    .from('round_presets')
+    .upsert(
+      { profile_id: profileId, name: name.trim(), setup },
+      { onConflict: 'profile_id,name' },
+    )
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteSavedSetup(id: string) {
+  const { error } = await supabase.from('round_presets').delete().eq('id', id)
+  if (error) throw error
+}
