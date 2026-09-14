@@ -3,7 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Fold } from '../../components/Fold'
 import { ChoiceList } from '../../components/ChoiceList'
-import { countryName, useFilRougeLabel, FIL_ROUGE_MARK, HARD_LETTERS } from '../../lib/filRouge'
+import {
+  countryName,
+  useFilRougeLabel,
+  FIL_ROUGE_MARK,
+  HARD_LETTERS,
+  MACRO_PHOTO,
+} from '../../lib/filRouge'
 import { FilRougeDishes } from './FilRougeDishes'
 import {
   myProStatus,
@@ -485,16 +491,21 @@ export function FilRougePicker({
 
                               THE PHOTOGRAPH IS THE ROW'S BACKGROUND, cropped
                               to its middle by `cover` — the seven pictures are
-                              of a part of the world, and a part of the world
-                              is the one thing on this form that is worth
-                              looking at rather than reading. Missing files
-                              simply leave the row as it was. */}
+                              of the staple each group is built on, and a sack
+                              of millet is the one thing on this form worth
+                              looking at rather than reading. The map from
+                              group to file is in lib/filRouge.ts; a group with
+                              no picture keeps the plain row. */}
                           <button
                             type="button"
                             className={`frrow frrow--macro${macro === m ? ' is-open' : ''}${
                               openKind('COUNTRY') ? '' : ' is-locked'
                             }`}
-                            style={{ backgroundImage: `url(/topic/macro-${m}.webp)` }}
+                            style={
+                              MACRO_PHOTO[m]
+                                ? { backgroundImage: `url(${MACRO_PHOTO[m]})` }
+                                : undefined
+                            }
                             disabled={!openKind('COUNTRY')}
                             aria-expanded={macro === m}
                             title={openKind('COUNTRY') ? undefined : t('filRouge.lockedHint')}

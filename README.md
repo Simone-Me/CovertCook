@@ -819,9 +819,10 @@ names, migration numbers, bugs found and fixed) see
   person chose is two marks meaning two things under one word.
   The picks and their reasons live in `fil_rouge_pick` and `fil_rouge_note` and
   are edited with an UPDATE from the SQL editor — see the header of `0093`.
-  The seven parts of the world carry a photograph each, read from
-  `public/topic/macro-1.webp` to `macro-7.webp` in the numbering of
-  `filRouge.macro.*`; a missing file leaves the row plain. The compass draws a country the server tells
+  The seven parts of the world carry a photograph each — of the staple the
+  group is built on, never of a landscape or a flag — mapped from group code to
+  file in `MACRO_PHOTO` (`src/lib/filRouge.ts`); a group with no entry keeps a
+  plain row. The compass draws a country the server tells
   nobody — the host included — until the dinner is dealt (`0089`).
 - **The round page**: a table seen from above, with each section drawn as
   a sealed envelope laid on the cloth. The Executive Chef's actions all go

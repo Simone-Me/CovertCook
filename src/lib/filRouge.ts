@@ -74,3 +74,26 @@ export const FIL_ROUGE_MARK: Record<string, string> = {
  *  cost Crème, which read as a recommendation (0089). Named here so the picker
  *  can say so in words. */
 export const HARD_LETTERS = ['K', 'Q', 'W', 'X', 'Y', 'Z']
+
+/**
+ * A photograph for each of the seven parts of the world.
+ *
+ * The macro groups are staples — wheat, rice, maize — so the pictures are of
+ * the grain itself rather than of a landscape or a flag: a country is not a
+ * postcard, and a region of the world drawn as one is the kind of thing that
+ * gets screenshotted. A sack of millet is what the seven groups actually have
+ * in common.
+ *
+ * KEYED BY FILE NAME AND NOT BY CONVENTION, so replacing one is dropping a file
+ * in `public/` and changing the line below — no renaming, no build step. A code
+ * with no entry simply gets no photograph, and the row stays as it was.
+ */
+export const MACRO_PHOTO: Record<string, string> = {
+  '1': '/milk-wheat.webp', // Wheat and dairy
+  '2': '/wheat_rice.jpg', // Wheat and rice
+  '3': '/rice.avif', // Rice
+  '4': '/root.jpg', // Roots and tubers
+  '5': '/millet.avif', // Millet and sorghum
+  '6': '/mais.avif', // Maize
+  '7': '/breadfruit.jpg', // Taro and breadfruit
+}
