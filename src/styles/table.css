@@ -2146,12 +2146,22 @@
 /* Language, on the pages that come before an account exists. The only switch
    used to be in the profile — behind the sign-in form somebody might not be
    able to read. */
+/* The language in force, and the arrow that revisits it. A column rather than
+   a row, because what the arrow opens — a search, a list, a confirm — belongs
+   under the thing it is about and not beside it. */
 .langswitch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: flex-end;
+  align-items: flex-end;
+  font-size: 12px;
+}
+
+.langswitch__head {
   display: flex;
   align-items: center;
   gap: 6px;
-  align-self: flex-end;
-  font-size: 12px;
 }
 
 .langswitch__label {
@@ -2175,6 +2185,41 @@
   border-color: var(--accent);
   color: var(--accent-contrast);
   font-weight: 700;
+}
+
+/* Aimed at, not applied. The confirm below is the act, so this is a ring
+   rather than a filled button — a second filled button would look like a
+   second answer already in force. */
+.langswitch__opt.is-aimed {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.langswitch__opt.is-aimed.is-on {
+  color: var(--accent-contrast);
+}
+
+.langswitch__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+  max-width: 260px;
+  padding: 10px 11px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+}
+
+.langswitch__body input {
+  font-size: 13px;
+}
+
+.langswitch__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* The mark beside the name. It rides the same lift as the word — they are one
@@ -2828,11 +2873,6 @@
   gap: 6px;
 }
 
-/* The world needs room for a name, so it takes half the columns. */
-.frgrid--wide {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
 .frgrid--letters {
   grid-template-columns: repeat(7, minmax(0, 1fr));
   gap: 5px;
@@ -2841,9 +2881,6 @@
 @media (max-width: 420px) {
   .frgrid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-  .frgrid--wide {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
   .frgrid--letters {
     grid-template-columns: repeat(6, minmax(0, 1fr));
@@ -2912,6 +2949,246 @@
   cursor: not-allowed;
 }
 
+/* ---------------------------------------------------------------------------
+ * The atlas, walked down in place.
+ *
+ * A branch is a wide row with the name filling it — picking a part of the
+ * world is a real choice and it should look like one — and what is inside a
+ * branch opens directly under it, indented, so the path back up is the row you
+ * came through rather than a scroll.
+ * ------------------------------------------------------------------------- */
+
+.atlas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atlas__branch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.frrow {
+  width: 100%;
+  padding: 14px 14px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.frrow--region {
+  padding: 11px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.frrow:hover,
+.frrow:focus-visible,
+.frrow:active {
+  border-color: var(--accent);
+}
+
+.frrow.is-open {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+/* What is inside the row above, indented under it. */
+.atlas__sub {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 2px solid var(--paper-edge);
+}
+
+/* ---------------------------------------------------------------------------
+ * The countries: little notes pinned to a board.
+ *
+ * Small, because choosing Portugal out of the Mediterranean is reading a list
+ * rather than making a decision twice — and pinned, because the wall of a
+ * kitchen is where a note like this actually lives. The pin is the dot at the
+ * top; the slight rotation is what stops eleven of them reading as a table.
+ * ------------------------------------------------------------------------- */
+
+.pinboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: 10px;
+  padding: 8px 0 2px;
+}
+
+.pin {
+  position: relative;
+  /* A note keeps its own size: flex would otherwise shrink eleven of them into
+     one clipped row, which is the one thing a pinned note must never look
+     like. */
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+  white-space: nowrap;
+  padding: 11px 10px 7px;
+  border: 1px solid var(--env-edge);
+  border-radius: 2px;
+  background: var(--env);
+  color: var(--env-ink);
+  font-size: 12.5px;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(120, 60, 30, 0.18);
+  transform: rotate(-1deg);
+}
+
+.pin:nth-child(even) {
+  transform: rotate(1.2deg);
+}
+
+/* The pin itself. */
+.pin::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: var(--wax);
+  box-shadow: 0 1px 1px rgba(60, 30, 20, 0.4);
+}
+
+.pin:hover,
+.pin:focus-visible,
+.pin:active {
+  border-color: var(--accent);
+  transform: rotate(0deg) translateY(-1px);
+}
+
+.pin.is-chosen {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  transform: rotate(0deg);
+}
+
+/* In this week's selection: the same mark the folds use, drawn as the pin
+   rather than written beside the name — there is no room on a note for a
+   sentence. */
+.pin.is-week::before {
+  background: var(--ok);
+}
+
+.pin.is-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * The author's week, above the six kinds.
+ * ------------------------------------------------------------------------- */
+
+.weekpick {
+  padding: 12px 13px;
+  border: 1px solid var(--paper-edge);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+}
+
+.weekpick__head {
+  margin: 0 0 4px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.weekpick__why {
+  margin: 0 0 4px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.weekpick__body {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.weekpick__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.frpick {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: auto;
+  padding: 8px 12px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.frpick__kind {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.frpick__name {
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.frpick:hover,
+.frpick:focus-visible,
+.frpick:active {
+  border-color: var(--accent);
+}
+
+.frpick.is-chosen {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.frpick.is-chosen .frpick__kind {
+  color: var(--accent-contrast);
+  opacity: 0.8;
+}
+
+/* A kind that is free in full. Green, like everything in this app that says
+   "this one you keep". */
+.filfree {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--ok);
+}
+
 /* The search and the compass, on one line above the atlas. */
 .atlas__top {
   gap: 6px;
@@ -2936,14 +3213,6 @@
 .atlas__compass:hover,
 .atlas__compass:focus-visible {
   border-color: var(--accent);
-}
-
-/* A step further down the atlas, marked in the margin so the path back up is
-   visible: the regions sit under their staple, the countries under their
-   region. */
-.atlas__deeper {
-  padding-left: 10px;
-  border-left: 2px solid var(--paper-edge);
 }
 
 /* The alphabet. Big, because a letter is the whole of the choice and there is
@@ -3029,9 +3298,11 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  justify-content: center;
   gap: 4px;
   width: 100%;
-  padding: 12px 13px;
+  min-height: 84px;
+  padding: 16px 14px;
   border: none;
   border-radius: 0;
   background: none;
@@ -3046,19 +3317,20 @@
   background: var(--bg-elevated);
 }
 
-.setup__mark {
-  font-size: 22px;
-  line-height: 1;
-}
-
+/* THE NAME IS THE CARD. No mark and no description on the face: six cards
+   each carrying an emoji and three lines of prose was a wall with nothing to
+   catch the eye, and what somebody scanning a grid reads is the name. It is
+   set at the size a name deserves and given the whole tile. */
 .setup__name {
-  font-size: 15px;
+  font-size: 20px;
   font-weight: 700;
+  line-height: 1.15;
 }
 
 .setup__what {
-  font-size: 12.5px;
-  line-height: 1.35;
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
   color: var(--text-muted);
 }
 

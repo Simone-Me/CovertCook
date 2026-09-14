@@ -1,5 +1,9 @@
 {
   "app": {
+    "languageChange": "Change the language",
+    "languageSearch": "Search for a language",
+    "languageConfirm": "Switch to {{lang}}",
+    "languageNone": "No language by that name — this app is written in two so far.",
     "name": "CovertCook",
     "tagline": "One dinner, one secret recipe, one chain.",
     "language": "Language"
@@ -1443,6 +1447,11 @@
     "pausedTag": "In the workshop"
   },
   "filRouge": {
+    "freeKind": "Free, all of it, for ever — this kind is never Crème.",
+    "week": {
+      "title": "This week's selection",
+      "noNote": "A few threads chosen for this week, free for everybody. They change on Sunday."
+    },
     "searchCountry": "Search for a country",
     "compass": "Draw one at random, sealed",
     "sealedChosen": "🧭 Sealed. A country has been drawn for this dinner and nobody is told which — not even you — until the roulette has run and the recipes are being written.",
@@ -1462,7 +1471,7 @@
     "turnsAt": "The selection changes Sunday at midday.",
     "thisWeek": "This week",
     "drawn": "This week's pick",
-    "lockedHint": "Part of Crème — it opens the whole group this week's country came from.",
+    "lockedHint": "Crème opens this one — or take one of this week's selection, above.",
     "scope": {
       "label": "Who does it apply to?",
       "SHARED": "The same for everybody",

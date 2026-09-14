@@ -179,13 +179,18 @@ export function CreateRoundPage() {
                   setChosen((cur) => (cur === preset.key ? null : preset.key))
                 }}
               >
-                <span className="setup__mark" aria-hidden="true">{preset.mark}</span>
                 <span className="setup__name">{t(`rounds.presets.${preset.key}`)}</span>
-                <span className="setup__what">{t(`rounds.presets.${preset.key}Hint`)}</span>
               </button>
 
               {open && !manual && (
                 <div className="setup__body">
+                  {/* WHAT IT IS, ONLY ONCE IT IS OPEN. The face of a card is
+                      the name at the size a name deserves — six cards each
+                      carrying a three-line description was a wall of prose
+                      with nothing to catch the eye, and the description is not
+                      what somebody scanning the grid is reading. It is what
+                      they read when one of them has caught it. */}
+                  <p className="setup__what">{t(`rounds.presets.${preset.key}Hint`)}</p>
                   {/* The dice is rolled when it is pressed, so what it says
                       here is what it will make — press it again for another. */}
                   <p className="muted setup__summary">{summary(setupFor(preset))}</p>
@@ -227,9 +232,7 @@ export function CreateRoundPage() {
                 aria-expanded={open}
                 onClick={() => setChosen((cur) => (cur === row.id ? null : row.id))}
               >
-                <span className="setup__mark" aria-hidden="true">📋</span>
                 <span className="setup__name">{row.name}</span>
-                <span className="setup__what">{t('rounds.presets.mine')}</span>
               </button>
 
               {/* On the card, because that is where somebody looks for it —
@@ -258,6 +261,7 @@ export function CreateRoundPage() {
 
               {open && removing !== row.id && (
                 <div className="setup__body">
+                  <p className="setup__what">{t('rounds.presets.mine')}</p>
                   <p className="muted setup__summary">{summary(savedSetup(row))}</p>
                   <div className="row">
                     <button

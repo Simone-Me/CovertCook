@@ -6,6 +6,7 @@ import { ChoiceList } from '../../components/ChoiceList'
 import { countryName, useFilRougeLabel, FIL_ROUGE_MARK, HARD_LETTERS } from '../../lib/filRouge'
 import { FilRougeDishes } from './FilRougeDishes'
 import {
+  filRougeEditorial,
   filRougeTurnsAt,
   filRougeUpcoming,
   listFilRouge,
@@ -15,10 +16,17 @@ import {
   type FilRougeScope,
 } from '../../lib/rpc'
 
-// The order the categories are offered in, easiest first. The world is at the
-// top because it is the one that rotates, and therefore the one worth coming
-// back for; the letter is next because it needs no explanation at all.
-const CATEGORIES: FilRougeCategory[] = ['COUNTRY', 'COLOUR', 'LETTER', 'TECHNIQUE', 'STAPLE', 'ERA']
+// THE TWO FREE KINDS FIRST, and that is the whole of the reasoning: since 0091
+// an ingredient and a way of cooking are free in full, for everybody, for ever,
+// and the four below them open through the week's selection or through Crème.
+// A host on the free app should meet what is theirs before what is not.
+const CATEGORIES: FilRougeCategory[] = ['STAPLE', 'TECHNIQUE', 'COUNTRY', 'COLOUR', 'LETTER', 'ERA']
+
+// The two kinds that are free in full, for ever (0091). The server is the
+// authority — `fil_rouge_category.free` is what `offered` is computed from —
+// and this list exists only so the picker can SAY so: with Crème every row is
+// offered, so "everything here is unlocked" cannot be read back off the shelf.
+const FREE_KINDS: FilRougeCategory[] = ['STAPLE', 'TECHNIQUE']
 
 /** What the top of the picker asks, before anything else: nothing, one for the
  *  table, or one each. */
@@ -100,6 +108,13 @@ export function FilRougePicker({
     queryFn: filRougeTurnsAt,
     staleTime: 5 * 60 * 1000,
   })
+  // Why these, this week. Written by the author rather than by the app, so it
+  // is prose from the database rather than a string from the translations.
+  const { data: editorial } = useQuery({
+    queryKey: ['fil-rouge', 'editorial'],
+    queryFn: filRougeEditorial,
+    staleTime: 5 * 60 * 1000,
+  })
   const { data: next } = useQuery({
     queryKey: ['fil-rouge', 'upcoming'],
     queryFn: filRougeUpcoming,
@@ -163,6 +178,15 @@ export function FilRougePicker({
   }, [countries, query, i18n.language])
 
   const nextCountries = (next ?? []).filter((n) => n.category === 'COUNTRY')
+
+  // THIS WEEK'S SELECTION, ACROSS THE KINDS. The shelf already says which rows
+  // are in it; the panel only has to gather them. Shown above the six folds
+  // because it is the answer to the question somebody actually has — "what
+  // should tonight be?" — and the folds are the answer to a narrower one.
+  const week = useMemo(
+    () => (shelf ?? []).filter((o) => o.drawn && o.offered && o.category !== 'STAPLE' && o.category !== 'TECHNIQUE'),
+    [shelf],
+  )
 
   function pickRule(value: string) {
     setRule(value as Rule)
@@ -243,9 +267,46 @@ export function FilRougePicker({
 
       {rule !== 'NONE' && (
         <>
-          {countdown && <p className="muted">{countdown}</p>}
+          {/* 2. THE AUTHOR'S WEEK, above the kinds.
+                 The free part of this feature used to be a lottery — whatever
+                 the shuffle reached — which is generous and unplannable. It is
+                 a person's selection now (0091), and a selection is only worth
+                 anything with the reason beside it: a season, a holiday, an
+                 anniversary. Two kinds are free whatever happens, so nobody is
+                 ever left with nothing; these are the four that open here for
+                 the week, and stay open with Crème. */}
+          {week.length > 0 && (
+            <div className="weekpick">
+              <p className="weekpick__head">{t('filRouge.week.title')}</p>
+              {editorial?.title && <p className="weekpick__why">{editorial.title}</p>}
+              <p className="muted weekpick__body">
+                {editorial?.body ?? t('filRouge.week.noNote')}
+              </p>
 
-          {/* 2. SIX FOLDS, closed, one per kind. The chosen one carries its
+              {rule === 'SHARED' && (
+                <div className="weekpick__row">
+                  {week.map((o) => (
+                    <button
+                      key={`${o.category}-${o.code}`}
+                      type="button"
+                      className={`frpick${category === o.category && code === o.code ? ' is-chosen' : ''}`}
+                      aria-pressed={category === o.category && code === o.code}
+                      onClick={() => pick(o.category, o.code)}
+                    >
+                      <span className="frpick__kind">{t(`filRouge.category.${o.category}`)}</span>
+                      <span className="frpick__name">{label(o.category, o.code)}</span>
+                    </button>
+                  ))}
+                </div>
+              )}
+
+              {countdown && <p className="muted weekpick__body">{countdown}</p>}
+            </div>
+          )}
+
+          {week.length === 0 && countdown && <p className="muted">{countdown}</p>}
+
+          {/* 3. SIX FOLDS, closed, one per kind. The chosen one carries its
                  answer on the closed row, so the whole decision is readable
                  without opening anything. */}
           {CATEGORIES.map((kind) => (
@@ -263,6 +324,10 @@ export function FilRougePicker({
                       : t('filRouge.pickOne')
               }
             >
+              {FREE_KINDS.includes(kind) && (
+                <p className="muted filfree">{t('filRouge.freeKind')}</p>
+              )}
+
               {rule === 'PER_COOK' ? (
                 <PerCook kind={kind} />
               ) : kind === 'COUNTRY' ? (
@@ -296,89 +361,107 @@ export function FilRougePicker({
                   )}
 
                   {query.trim() ? (
-                    <div className="frgrid frgrid--wide">
+                    <div className="pinboard">
                       {found.map(({ o, name }) => (
                         <button
                           key={o.code}
                           type="button"
-                          className={`frtile${code === o.code ? ' is-chosen' : ''}${
+                          className={`pin${code === o.code ? ' is-chosen' : ''}${
                             o.offered ? '' : ' is-locked'
-                          }`}
+                          }${o.drawn ? ' is-week' : ''}`}
                           disabled={!o.offered}
                           aria-pressed={code === o.code}
-                          title={o.offered ? undefined : t('filRouge.lockedHint')}
+                          title={
+                            o.offered ? (o.drawn ? t('filRouge.drawn') : undefined) : t('filRouge.lockedHint')
+                          }
                           onClick={() => pick('COUNTRY', o.code)}
                         >
-                          <span className="frtile__name">{name}</span>
-                          {o.drawn && <span className="frtile__tag">{t('filRouge.drawn')}</span>}
+                          {name}
                         </button>
                       ))}
                       {found.length === 0 && <p className="muted">{t('filRouge.noCountry')}</p>}
                     </div>
                   ) : (
-                    /* THE ATLAS, WALKED DOWN. Seven staples, then the regions
-                       built on one of them, then the countries in one region —
-                       each list opening in the place the one above it left,
-                       so the path back up is always visible. */
-                    <div className="stack">
-                      <div className="frgrid frgrid--wide">
-                        {[...atlas.keys()].sort().map((m) => (
+                    /* THE ATLAS, WALKED DOWN IN PLACE.
+                       The three lists used to be stacked: seven staples, then
+                       — underneath all seven — the regions of the open one,
+                       then underneath those the countries. Which is a path,
+                       drawn as three separate shelves, so the answer to "what
+                       is inside this one?" appeared a screen away from the
+                       thing you pressed. Now each list opens directly under its
+                       own row, indented, and the way back up is the row you
+                       came through.
+
+                       THE COUNTRIES ARE SMALL AND THE REGIONS ARE LARGE, which
+                       is the shape of the decision rather than of the data:
+                       picking a part of the world is a real choice made twice,
+                       and picking Portugal out of the Mediterranean is reading
+                       a list. So the branches are wide rows with the name
+                       filling them, and the countries are little notes pinned
+                       to a board — which is also what a kitchen wall looks
+                       like. */
+                    <div className="atlas">
+                      {[...atlas.keys()].sort().map((m) => (
+                        <div key={m} className="atlas__branch">
                           <button
-                            key={m}
                             type="button"
-                            className={`frtile${macro === m ? ' is-open' : ''}`}
+                            className={`frrow${macro === m ? ' is-open' : ''}`}
                             aria-expanded={macro === m}
                             onClick={() => {
                               setGroup(null)
                               setMacro((cur) => (cur === m ? null : m))
                             }}
                           >
-                            <span className="frtile__name">{t(`filRouge.macro.${m}`)}</span>
+                            {t(`filRouge.macro.${m}`)}
                           </button>
-                        ))}
-                      </div>
 
-                      {macro && (
-                        <div className="frgrid frgrid--wide atlas__deeper">
-                          {[...(atlas.get(macro)?.keys() ?? [])].sort().map((g) => (
-                            <button
-                              key={g}
-                              type="button"
-                              className={`frtile${group === g ? ' is-open' : ''}`}
-                              aria-expanded={group === g}
-                              onClick={() => setGroup((cur) => (cur === g ? null : g))}
-                            >
-                              <span className="frtile__name">{t(`filRouge.group.${g}`)}</span>
-                            </button>
-                          ))}
-                        </div>
-                      )}
+                          {macro === m && (
+                            <div className="atlas__sub">
+                              {[...(atlas.get(m)?.keys() ?? [])].sort().map((g) => (
+                                <div key={g} className="atlas__branch">
+                                  <button
+                                    type="button"
+                                    className={`frrow frrow--region${group === g ? ' is-open' : ''}`}
+                                    aria-expanded={group === g}
+                                    onClick={() => setGroup((cur) => (cur === g ? null : g))}
+                                  >
+                                    {t(`filRouge.group.${g}`)}
+                                  </button>
 
-                      {macro && group && (
-                        <div className="frgrid frgrid--wide atlas__deeper">
-                          {(atlas.get(macro)?.get(group) ?? [])
-                            .map((o) => ({ o, name: countryName(o.code, i18n.language) }))
-                            .sort((a, b) => a.name.localeCompare(b.name, i18n.language))
-                            .map(({ o, name }) => (
-                              <button
-                                key={o.code}
-                                type="button"
-                                className={`frtile${code === o.code ? ' is-chosen' : ''}${
-                                  o.offered ? '' : ' is-locked'
-                                }`}
-                                disabled={!o.offered}
-                                aria-pressed={code === o.code}
-                                title={o.offered ? undefined : t('filRouge.lockedHint')}
-                                onClick={() => pick('COUNTRY', o.code)}
-                              >
-                                <span className="frtile__name">{name}</span>
-                                {o.drawn && (
-                                  <span className="frtile__tag">{t('filRouge.drawn')}</span>
-                                )}
-                              </button>
-                            ))}
+                                  {group === g && (
+                                    <div className="pinboard">
+                                      {(atlas.get(m)?.get(g) ?? [])
+                                        .map((o) => ({ o, name: countryName(o.code, i18n.language) }))
+                                        .sort((a, b) => a.name.localeCompare(b.name, i18n.language))
+                                        .map(({ o, name }) => (
+                                          <button
+                                            key={o.code}
+                                            type="button"
+                                            className={`pin${code === o.code ? ' is-chosen' : ''}${
+                                              o.offered ? '' : ' is-locked'
+                                            }${o.drawn ? ' is-week' : ''}`}
+                                            disabled={!o.offered}
+                                            aria-pressed={code === o.code}
+                                            title={
+                                              o.offered
+                                                ? o.drawn
+                                                  ? t('filRouge.drawn')
+                                                  : undefined
+                                                : t('filRouge.lockedHint')
+                                            }
+                                            onClick={() => pick('COUNTRY', o.code)}
+                                          >
+                                            {name}
+                                          </button>
+                                        ))}
+                                    </div>
+                                  )}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
-                      )}
+                      ))}
                     </div>
                   )}
 

@@ -806,10 +806,15 @@ names, migration numbers, bugs found and fixed) see
   whether the menu is free-for-all or composed course by course, and
   whether the evening has a **fil rouge** — one direction every recipe is
   written against, the same for the whole table or one dealt to each cook.
-  The seven countries on the shelf change every Sunday; everything else
-  (colours, letters, ways of cooking) is shown whole and is free, and the
-  compass draws a country the server tells nobody — the host included — until
-  the dinner is dealt (`0089`).
+  Two kinds are free in full, for ever — **one ingredient** and **one way of
+  cooking** — so every dinner in the free app can have a thread. The other four
+  (the world, colours, letters, eras) open through **the author's week**
+  (`0091`): a handful of values chosen by hand each week, free for everybody,
+  with a note saying why those ones — a season, a holiday, an anniversary. Where
+  no week has been written the computed draw still answers, per kind, so the
+  shelf is never empty. Everything else in those four kinds is Crème, shown and
+  locked rather than hidden. The compass draws a country the server tells
+  nobody — the host included — until the dinner is dealt (`0089`).
 - **The round page**: a table seen from above, with each section drawn as
   a sealed envelope laid on the cloth. The Executive Chef's actions all go
   through one panel — the pass — which shows only what's up right now and

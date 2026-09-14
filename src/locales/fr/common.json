@@ -1,5 +1,9 @@
 {
   "app": {
+    "languageChange": "Changer de langue",
+    "languageSearch": "Chercher une langue",
+    "languageConfirm": "Passer en {{lang}}",
+    "languageNone": "Aucune langue de ce nom — l’application en parle deux pour l’instant.",
     "name": "CovertCook",
     "tagline": "Un dîner, une recette secrète, une seule chaîne.",
     "language": "Langue"
@@ -1443,6 +1447,11 @@
     "pausedTag": "À l’atelier"
   },
   "filRouge": {
+    "freeKind": "Gratuit, en entier, pour toujours — ce type n’est jamais Crème.",
+    "week": {
+      "title": "La sélection de la semaine",
+      "noNote": "Quelques fils rouges choisis pour cette semaine, gratuits pour tout le monde. Ils changent le dimanche."
+    },
     "searchCountry": "Chercher un pays",
     "compass": "En tirer un au hasard, scellé",
     "sealedChosen": "🧭 Scellé. Un pays a été tiré pour ce dîner et personne ne sait lequel — vous non plus — jusqu’à ce que la roulette tourne et que les recettes s’écrivent.",
@@ -1462,7 +1471,7 @@
     "turnsAt": "La sélection change le dimanche à midi.",
     "thisWeek": "Cette semaine",
     "drawn": "Le tirage de la semaine",
-    "lockedHint": "Fait partie de Crème — ouvre tout le groupe dont vient le pays de la semaine.",
+    "lockedHint": "Crème ouvre celui-ci — ou prenez-en un dans la sélection de la semaine, plus haut.",
     "scope": {
       "label": "Pour qui vaut-il ?",
       "SHARED": "Le même pour tout le monde",

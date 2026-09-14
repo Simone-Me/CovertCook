@@ -76,7 +76,6 @@ export type PresetKey = 'CLASSIC' | 'PARTY' | 'NO_SURPRISES' | 'NO_STRESS' | 'RA
 
 export interface Preset {
   key: PresetKey
-  mark: string
   /** Absent for the two cards that are not a fixed set of answers. */
   setup?: RoundSetup
 }
@@ -107,7 +106,6 @@ export interface Preset {
 export const PRESETS: Preset[] = [
   {
     key: 'CLASSIC',
-    mark: '🍷',
     setup: {
       ...DEFAULT_SETUP,
       access: 'CODE_AND_INVITE',
@@ -120,7 +118,6 @@ export const PRESETS: Preset[] = [
   },
   {
     key: 'PARTY',
-    mark: '🎉',
     setup: {
       ...DEFAULT_SETUP,
       seats: null,
@@ -134,7 +131,6 @@ export const PRESETS: Preset[] = [
   },
   {
     key: 'NO_SURPRISES',
-    mark: '🕯️',
     setup: {
       ...DEFAULT_SETUP,
       access: 'INVITE',
@@ -146,7 +142,6 @@ export const PRESETS: Preset[] = [
   },
   {
     key: 'NO_STRESS',
-    mark: '🛋️',
     setup: {
       ...DEFAULT_SETUP,
       access: 'CODE',
@@ -157,8 +152,8 @@ export const PRESETS: Preset[] = [
       costMode: 'NONE',
     },
   },
-  { key: 'RANDOM', mark: '🎲' },
-  { key: 'MANUAL', mark: '🛠️' },
+  { key: 'RANDOM' },
+  { key: 'MANUAL' },
 ]
 
 function one<T>(list: readonly T[]): T {
