@@ -1480,8 +1480,8 @@
     "freeKind": "Gratuit, en entier, pour toujours — ce type n’est jamais Crème.",
     "week": {
       "title": "La sélection de la semaine",
-      "hint": "Quatre fils rouges, un par type, choisis à la main — gratuits pour tout le monde jusqu’à dimanche. La raison de chacun est écrite dessous.",
-      "hintPerCook": "Quatre fils rouges choisis à la main, gratuits jusqu’à dimanche. C’est une seule valeur chacun : ils se prennent pour toute une table, pas un par cuisinier.",
+      "hint": "Un fil rouge de chaque type, choisi à la main — gratuit pour tout le monde jusqu’à dimanche, avec ou sans Crème. La raison de chacun est écrite dessous.",
+      "hintPerCook": "Un fil rouge de chaque type, choisi à la main et gratuit jusqu’à dimanche. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
       "take": "Prendre celui-là",
       "taken": "Pris — c’est le fil rouge du dîner"
     },

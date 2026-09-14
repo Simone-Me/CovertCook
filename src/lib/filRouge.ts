@@ -89,7 +89,7 @@ export const HARD_LETTERS = ['K', 'Q', 'W', 'X', 'Y', 'Z']
  * with no entry simply gets no photograph, and the row stays as it was.
  */
 export const MACRO_PHOTO: Record<string, string> = {
-  '1': '/milk-wheat.webp', // Wheat and dairy
+  '1': '/wheat_diary.avif', // Wheat and dairy
   '2': '/wheat_rice.jpg', // Wheat and rice
   '3': '/rice.avif', // Rice
   '4': '/root.jpg', // Roots and tubers
