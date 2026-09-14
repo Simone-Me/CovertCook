@@ -1450,7 +1450,10 @@
     "freeKind": "Gratuit, en entier, pour toujours — ce type n’est jamais Crème.",
     "week": {
       "title": "La sélection de la semaine",
-      "noNote": "Quelques fils rouges choisis pour cette semaine, gratuits pour tout le monde. Ils changent le dimanche."
+      "hint": "Quatre fils rouges, un par type, choisis à la main — gratuits pour tout le monde jusqu’à dimanche. La raison de chacun est écrite dessous.",
+      "hintPerCook": "Quatre fils rouges choisis à la main, gratuits jusqu’à dimanche. C’est une seule valeur chacun : ils se prennent pour toute une table, pas un par cuisinier.",
+      "take": "Prendre celui-là",
+      "taken": "Pris — c’est le fil rouge du dîner"
     },
     "searchCountry": "Chercher un pays",
     "compass": "En tirer un au hasard, scellé",
@@ -1596,7 +1599,10 @@
     "hours_other": "{{count}} heures",
     "nextWeek": "Dimanche : {{items}}",
     "saved": "Le fil rouge est enregistré. Il reste modifiable jusqu'au tirage.",
-    "someDishes": "Quelques plats de là-bas : {{items}}. Des pistes, pas un menu."
+    "someDishes": "Quelques plats de là-bas : {{items}}. Des pistes, pas un menu.",
+    "shut": "Ce type fait partie de Crème. Tout y est montré, et rien n’y est encore choisissable.",
+    "shutButWeek": "Ce type fait partie de Crème. Un seul y est gratuit cette semaine — {{value}} — et il se prend dans la sélection plus haut, là où se trouve la raison.",
+    "perCookShut": "Distribuer un fil rouge par cuisinier dans ce type demande Crème : sans lui la seule valeur ici est celle de la semaine, et six cuisiniers recevraient tous la même."
   },
   "help": {
     "title": "Questions, et comment nous joindre",

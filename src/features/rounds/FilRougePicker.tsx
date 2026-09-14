@@ -6,6 +6,7 @@ import { ChoiceList } from '../../components/ChoiceList'
 import { countryName, useFilRougeLabel, FIL_ROUGE_MARK, HARD_LETTERS } from '../../lib/filRouge'
 import { FilRougeDishes } from './FilRougeDishes'
 import {
+  myProStatus,
   filRougeEditorial,
   filRougeTurnsAt,
   filRougeUpcoming,
@@ -115,6 +116,17 @@ export function FilRougePicker({
     queryFn: filRougeEditorial,
     staleTime: 5 * 60 * 1000,
   })
+  // Whether this account holds Crème, which is not the same question as
+  // whether a row is `offered`: this week's four are offered to everybody, and
+  // they are takeable in the drawer above rather than inside their own kind.
+  // Cached and shared with every other screen that asks.
+  const { data: pro } = useQuery({
+    queryKey: ['pro', 'status'],
+    queryFn: myProStatus,
+    staleTime: 60 * 1000,
+  })
+  const isPro = pro?.pro ?? false
+
   const { data: next } = useQuery({
     queryKey: ['fil-rouge', 'upcoming'],
     queryFn: filRougeUpcoming,
@@ -179,14 +191,10 @@ export function FilRougePicker({
 
   const nextCountries = (next ?? []).filter((n) => n.category === 'COUNTRY')
 
-  // THIS WEEK'S SELECTION, ACROSS THE KINDS. The shelf already says which rows
-  // are in it; the panel only has to gather them. Shown above the six folds
-  // because it is the answer to the question somebody actually has — "what
-  // should tonight be?" — and the folds are the answer to a narrower one.
-  const week = useMemo(
-    () => (shelf ?? []).filter((o) => o.drawn && o.offered && o.category !== 'STAPLE' && o.category !== 'TECHNIQUE'),
-    [shelf],
-  )
+  // THIS WEEK'S SELECTION: one thread per kind, with the reason written for
+  // each (0092). It comes from the editorial call rather than from the shelf,
+  // because the shelf knows which rows are free this week and not why.
+  const picks = (editorial ?? []).filter((p) => !FREE_KINDS.includes(p.category))
 
   function pickRule(value: string) {
     setRule(value as Rule)
@@ -195,6 +203,20 @@ export function FilRougePicker({
     // per-cook dinner there is no single value to hold, and a shared one that
     // kept a value dealt per cook would be a value nobody chose.
     onChange({ category, code: null, scope: value as FilRougeScope })
+  }
+
+  /**
+   * WHICH KINDS ARE OPEN INSIDE THEIR OWN DRAWER.
+   *
+   * The two free ones, and everything once Crème is held. The four paid kinds
+   * stay shut even in a week where one of their values is free to take,
+   * because the free thing that week is ONE VALUE recommended with a reason —
+   * not the kind, and not the run of the catalogue behind it. Taking it
+   * happens in the selection drawer, where the reason is; the kind itself
+   * shows what is inside and says what opens it.
+   */
+  function openKind(kind: FilRougeCategory) {
+    return isPro || FREE_KINDS.includes(kind)
   }
 
   function pick(next: FilRougeCategory, value: string | null) {
@@ -207,7 +229,8 @@ export function FilRougePicker({
    *  account may take it. */
   function Tile({ option, kind }: { option: FilRougeOption; kind: FilRougeCategory }) {
     const chosen = category === kind && code === option.code
-    const locked = !option.offered
+    // Not `offered`: this week's four are offered and still not takeable here.
+    const locked = !openKind(kind)
     return (
       <button
         type="button"
@@ -231,6 +254,13 @@ export function FilRougePicker({
    *  the roulette will deal from is this week's shelf. */
   function PerCook({ kind }: { kind: FilRougeCategory }) {
     const chosen = category === kind
+    // DEALING ONE EACH OUT OF A SHUT KIND WOULD DEAL THE SAME VALUE SIX TIMES:
+    // the pool the roulette is given is what this account may choose, and for
+    // a shut kind that is this week's one thread. So it is offered where it
+    // means something — the two free kinds, and everything with Crème.
+    if (!openKind(kind)) {
+      return <p className="notice">{t('filRouge.perCookShut')}</p>
+    }
     return (
       <div className="stack">
         <p className="muted">{t('filRouge.scope.PER_COOKHint')}</p>
@@ -267,44 +297,58 @@ export function FilRougePicker({
 
       {rule !== 'NONE' && (
         <>
-          {/* 2. THE AUTHOR'S WEEK, above the kinds.
-                 The free part of this feature used to be a lottery — whatever
-                 the shuffle reached — which is generous and unplannable. It is
-                 a person's selection now (0091), and a selection is only worth
-                 anything with the reason beside it: a season, a holiday, an
-                 anniversary. Two kinds are free whatever happens, so nobody is
-                 ever left with nothing; these are the four that open here for
-                 the week, and stay open with Crème. */}
-          {week.length > 0 && (
-            <div className="weekpick">
-              <p className="weekpick__head">{t('filRouge.week.title')}</p>
-              {editorial?.title && <p className="weekpick__why">{editorial.title}</p>}
-              <p className="muted weekpick__body">
-                {editorial?.body ?? t('filRouge.week.noNote')}
-              </p>
-
-              {rule === 'SHARED' && (
-                <div className="weekpick__row">
-                  {week.map((o) => (
-                    <button
-                      key={`${o.category}-${o.code}`}
-                      type="button"
-                      className={`frpick${category === o.category && code === o.code ? ' is-chosen' : ''}`}
-                      aria-pressed={category === o.category && code === o.code}
-                      onClick={() => pick(o.category, o.code)}
+          {/* 2. THE AUTHOR'S WEEK, in a drawer of its own above the kinds.
+                 ONE THREAD PER KIND, AND A REASON FOR EACH (0092). Four values
+                 a week, each with a sentence saying why that one — which is
+                 what a recommendation is, and what a shelf of six countries
+                 was not. The drawer opens like every other one on this form,
+                 and its heading is the one line in the picker set in italic
+                 capitals: it is the only part of this screen that changes
+                 between one Sunday and the next, and it is the part a free
+                 account can actually take. */}
+          {picks.length > 0 && (
+            <div className="weekfold">
+            <Fold
+              title={t('filRouge.week.title')}
+              hint={rule === 'SHARED' ? t('filRouge.week.hint') : t('filRouge.week.hintPerCook')}
+              defaultOpen
+              aside={countdown ?? undefined}
+            >
+              <div className="weekpick">
+                {picks.map((p) => {
+                  const chosen = category === p.category && code === p.code
+                  return (
+                    <div
+                      key={p.category}
+                      className={`weekline${chosen ? ' is-chosen' : ''}`}
                     >
-                      <span className="frpick__kind">{t(`filRouge.category.${o.category}`)}</span>
-                      <span className="frpick__name">{label(o.category, o.code)}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
+                      <p className="weekline__kind">{t(`filRouge.category.${p.category}`)}</p>
+                      <p className="weekline__name">{label(p.category, p.code)}</p>
+                      {p.title && <p className="weekline__why">{p.title}</p>}
+                      {p.body && <p className="muted weekline__body">{p.body}</p>}
 
-              {countdown && <p className="muted weekpick__body">{countdown}</p>}
+                      {/* THE ONE PLACE THESE FOUR CAN BE TAKEN without Crème.
+                          Their own kind stays shut — see the folds below — so
+                          the offer is here, where the reason for it is. */}
+                      {rule === 'SHARED' && (
+                        <button
+                          type="button"
+                          className={chosen ? '' : 'secondary'}
+                          aria-pressed={chosen}
+                          onClick={() => pick(p.category, p.code)}
+                        >
+                          {t(chosen ? 'filRouge.week.taken' : 'filRouge.week.take')}
+                        </button>
+                      )}
+                    </div>
+                  )
+                })}
+              </div>
+            </Fold>
             </div>
           )}
 
-          {week.length === 0 && countdown && <p className="muted">{countdown}</p>}
+          {picks.length === 0 && countdown && <p className="muted">{countdown}</p>}
 
           {/* 3. SIX FOLDS, closed, one per kind. The chosen one carries its
                  answer on the closed row, so the whole decision is readable
@@ -315,17 +359,30 @@ export function FilRougePicker({
               title={t(`filRouge.category.${kind}`)}
               hint={t(`filRouge.categoryHint.${kind}`)}
               aside={
-                category !== kind
-                  ? undefined
-                  : rule === 'PER_COOK'
-                    ? t('filRouge.oneEach')
-                    : code
-                      ? label(kind, code)
-                      : t('filRouge.pickOne')
+                // A shut kind says so on the closed row, with the chip the
+                // rest of the app uses: the point of showing a locked shelf is
+                // that somebody can see what is on it and what opens it.
+                !openKind(kind) ? (
+                  <span className="pro-chip">{t('pro.badge')}</span>
+                ) : category !== kind ? undefined : rule === 'PER_COOK' ? (
+                  t('filRouge.oneEach')
+                ) : code ? (
+                  label(kind, code)
+                ) : (
+                  t('filRouge.pickOne')
+                )
               }
             >
               {FREE_KINDS.includes(kind) && (
                 <p className="muted filfree">{t('filRouge.freeKind')}</p>
+              )}
+
+              {!openKind(kind) && (
+                <p className="notice">
+                  {picks.some((p) => p.category === kind)
+                    ? t('filRouge.shutButWeek', { value: label(kind, picks.find((p) => p.category === kind)?.code ?? '') })
+                    : t('filRouge.shut')}
+                </p>
               )}
 
               {rule === 'PER_COOK' ? (
@@ -367,12 +424,16 @@ export function FilRougePicker({
                           key={o.code}
                           type="button"
                           className={`pin${code === o.code ? ' is-chosen' : ''}${
-                            o.offered ? '' : ' is-locked'
+                            openKind('COUNTRY') ? '' : ' is-locked'
                           }${o.drawn ? ' is-week' : ''}`}
-                          disabled={!o.offered}
+                          disabled={!openKind('COUNTRY')}
                           aria-pressed={code === o.code}
                           title={
-                            o.offered ? (o.drawn ? t('filRouge.drawn') : undefined) : t('filRouge.lockedHint')
+                            openKind('COUNTRY')
+                              ? o.drawn
+                                ? t('filRouge.drawn')
+                                : undefined
+                              : t('filRouge.lockedHint')
                           }
                           onClick={() => pick('COUNTRY', o.code)}
                         >
@@ -438,12 +499,12 @@ export function FilRougePicker({
                                             key={o.code}
                                             type="button"
                                             className={`pin${code === o.code ? ' is-chosen' : ''}${
-                                              o.offered ? '' : ' is-locked'
+                                              openKind('COUNTRY') ? '' : ' is-locked'
                                             }${o.drawn ? ' is-week' : ''}`}
-                                            disabled={!o.offered}
+                                            disabled={!openKind('COUNTRY')}
                                             aria-pressed={code === o.code}
                                             title={
-                                              o.offered
+                                              openKind('COUNTRY')
                                                 ? o.drawn
                                                   ? t('filRouge.drawn')
                                                   : undefined

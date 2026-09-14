@@ -22,8 +22,10 @@ export function Fold({
   hint?: string
   /** Current answer, shown on the closed row. Folding hides the choices;
    *  without this it would also hide the choice already made, and you'd
-   *  have to open all of them again just to read your own settings back. */
-  aside?: string
+   *  have to open all of them again just to read your own settings back.
+   *  A node rather than a string since 0092: a row that is locked says so with
+   *  the same chip the rest of the app uses for Crème, and a chip is markup. */
+  aside?: ReactNode
   defaultOpen?: boolean
   children: ReactNode
 }) {

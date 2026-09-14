@@ -2203,17 +2203,33 @@
 .langswitch__body {
   display: flex;
   flex-direction: column;
+  align-items: flex-end;
   gap: 8px;
   width: 100%;
-  max-width: 260px;
+  max-width: 240px;
   padding: 10px 11px;
   border: 1px solid var(--env-edge);
   border-radius: var(--radius-paper);
   background: var(--bg-elevated);
 }
 
+/* Small, because it is a box for one word — and because a full-width field
+   over two pills reads as the important half of the control, which it is not. */
 .langswitch__body input {
-  font-size: 13px;
+  width: 100%;
+  max-width: 170px;
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+.langswitch__body .row {
+  justify-content: flex-end;
+}
+
+.langswitch__body .row button {
+  width: auto;
+  padding: 5px 12px;
+  font-size: 12px;
 }
 
 .langswitch__list {
@@ -3098,87 +3114,81 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The author's week, above the six kinds.
+ * The author's week: a drawer, and one line per kind inside it.
+ *
+ * ITS HEADING IS THE ONLY ITALIC CAPITAL ON THIS FORM, deliberately. Everything
+ * else in the picker is the same every week; this is the part that changes on a
+ * Sunday and the part a free account can actually take, so it is the one row
+ * that is allowed to ask for the eye.
  * ------------------------------------------------------------------------- */
 
+.weekfold .fold__title {
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
 .weekpick {
-  padding: 12px 13px;
-  border: 1px solid var(--paper-edge);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* One pick: the kind it answers, the thread itself, the reason, and the one
+   place it can be taken without Crème. */
+.weekline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 11px 12px;
+  border: 1px solid var(--env-edge);
   border-left: 4px solid var(--accent);
   border-radius: var(--radius-paper);
   background: var(--paper-solid);
 }
 
-.weekpick__head {
-  margin: 0 0 4px;
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.16em;
-  text-transform: uppercase;
-  color: var(--accent);
+.weekline.is-chosen {
+  border-color: var(--ok);
+  border-left-color: var(--ok);
+  background: var(--diet-bg);
 }
 
-.weekpick__why {
-  margin: 0 0 4px;
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.weekpick__body {
+.weekline__kind {
   margin: 0;
-  font-size: 12.5px;
-  line-height: 1.45;
-}
-
-.weekpick__row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 10px;
-}
-
-.frpick {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  width: auto;
-  padding: 8px 12px;
-  border: 1px solid var(--env-edge);
-  border-radius: var(--radius-paper);
-  background: var(--bg-elevated);
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-}
-
-.frpick__kind {
   font-size: 10px;
-  letter-spacing: 0.1em;
+  font-weight: 700;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-muted);
 }
 
-.frpick__name {
-  font-size: 15px;
+.weekline__name {
+  margin: 0;
+  font-size: 20px;
   font-weight: 700;
+  line-height: 1.15;
 }
 
-.frpick:hover,
-.frpick:focus-visible,
-.frpick:active {
-  border-color: var(--accent);
+.weekline__why {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  font-style: italic;
 }
 
-.frpick.is-chosen {
-  border-color: var(--accent);
-  background: var(--accent);
-  color: var(--accent-contrast);
+.weekline__body {
+  margin: 0 0 4px;
+  font-size: 12.5px;
+  line-height: 1.45;
 }
 
-.frpick.is-chosen .frpick__kind {
-  color: var(--accent-contrast);
-  opacity: 0.8;
+.weekline button {
+  width: auto;
+  padding: 6px 14px;
+  font-size: 13px;
 }
 
 /* A kind that is free in full. Green, like everything in this app that says

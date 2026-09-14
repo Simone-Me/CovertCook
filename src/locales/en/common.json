@@ -1450,7 +1450,10 @@
     "freeKind": "Free, all of it, for ever — this kind is never Crème.",
     "week": {
       "title": "This week's selection",
-      "noNote": "A few threads chosen for this week, free for everybody. They change on Sunday."
+      "hint": "Four threads, one of each kind, chosen by hand — free for everybody until Sunday. The reason for each is written under it.",
+      "hintPerCook": "Four threads chosen by hand, free until Sunday. They are one value each, so they are taken by a whole table — not dealt one per cook.",
+      "take": "Take this one",
+      "taken": "Taken — this is the dinner's thread"
     },
     "searchCountry": "Search for a country",
     "compass": "Draw one at random, sealed",
@@ -1596,7 +1599,10 @@
     "hours_other": "{{count}} hours",
     "nextWeek": "On Sunday: {{items}}",
     "saved": "The thread is set. It stays changeable until the roulette deals.",
-    "someDishes": "Some dishes from there: {{items}}. Ideas, not a menu."
+    "someDishes": "Some dishes from there: {{items}}. Ideas, not a menu.",
+    "shut": "This kind is part of Crème. Everything in it is shown, and nothing in it can be chosen yet.",
+    "shutButWeek": "This kind is part of Crème. One of it is free this week — {{value}} — and it is taken in the selection above, where the reason for it is.",
+    "perCookShut": "Dealing one each out of this kind needs Crème: without it the only value here is this week's one, and six cooks would all be dealt the same thread."
   },
   "help": {
     "title": "Questions, and how to reach us",

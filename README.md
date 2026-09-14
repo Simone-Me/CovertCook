@@ -809,11 +809,14 @@ names, migration numbers, bugs found and fixed) see
   Two kinds are free in full, for ever — **one ingredient** and **one way of
   cooking** — so every dinner in the free app can have a thread. The other four
   (the world, colours, letters, eras) open through **the author's week**
-  (`0091`): a handful of values chosen by hand each week, free for everybody,
-  with a note saying why those ones — a season, a holiday, an anniversary. Where
-  no week has been written the computed draw still answers, per kind, so the
-  shelf is never empty. Everything else in those four kinds is Crème, shown and
-  locked rather than hidden. The compass draws a country the server tells
+  (`0091`, `0092`): exactly one value per kind, chosen by hand, free for
+  everybody until Sunday, each with a written reason — a season, a holiday, an
+  anniversary. They are taken in the selection drawer, where the reason is; the
+  four kinds themselves stay shut without Crème, shown and locked rather than
+  hidden, with the chip saying what opens them. Where no week has been written
+  the computed draw still answers, per kind, so the shelf is never empty.
+  The picks and their reasons live in `fil_rouge_pick` and `fil_rouge_note` and
+  are edited with an UPDATE from the SQL editor — see the header of `0092`. The compass draws a country the server tells
   nobody — the host included — until the dinner is dealt (`0089`).
 - **The round page**: a table seen from above, with each section drawn as
   a sealed envelope laid on the cloth. The Executive Chef's actions all go

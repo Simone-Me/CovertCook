@@ -2174,12 +2174,19 @@ export async function filRougeTurnsAt() {
   return unwrap<string>(res)
 }
 
-/** Why these values, this week — the author's note above the kinds (0091).
- *  Null on a week nobody wrote one for, which is most of them. */
+/** One thread per kind for this week, with the reason written for each (0092).
+ *  Empty on a week nobody wrote, in which case the computed draw is still what
+ *  the shelf offers — it simply has nothing to say about itself. */
+export interface FilRougePickOfTheWeek {
+  category: FilRougeCategory
+  code: string
+  title: string | null
+  body: string | null
+}
+
 export async function filRougeEditorial() {
   const res = await supabase.rpc('fil_rouge_editorial', {})
-  const rows = unwrap<{ title: string | null; body: string }[]>(res)
-  return rows?.[0] ?? null
+  return unwrap<FilRougePickOfTheWeek[]>(res) ?? []
 }
 
 export async function setFilRouge(
