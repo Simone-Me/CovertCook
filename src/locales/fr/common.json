@@ -1077,8 +1077,7 @@
           "heading": "Ce qui nous autorise à les détenir",
           "body": [
             "Votre compte, vos dîners et ce que vous y écrivez sont conservés parce que vous nous avez demandé d'organiser un dîner pour vous. C'est un contrat, et c'est la base de l'article 6(1)(b) du RGPD.",
-            "Les données alimentaires et allergiques reposent sur votre consentement explicite et sur rien d'autre — article 9(2)(a). C'est la seule chose ici que vous pouvez retirer sans perdre le compte.",
-            "Turnstile, et le minimum de journalisation de sécurité qui l'accompagne, relèvent de notre intérêt légitime à ne pas voir l'application envahie par des robots — article 6(1)(f)."
+            "Les données alimentaires et allergiques reposent sur votre consentement explicite et sur rien d'autre — article 9(2)(a). C'est la seule chose ici que vous pouvez retirer sans perdre le compte."
           ]
         },
         {
@@ -1102,8 +1101,8 @@
         {
           "heading": "Qui d'autre y touche",
           "body": [
-            "Supabase héberge la base, les comptes et les photographies, dans un centre de données situé en Allemagne. Netlify sert l'application, Cloudflare Turnstile vérifie qu'une inscription vient bien d'une personne et ne voit que ce qu'il faut pour cela, et Resend envoie les e-mails.",
-            "Les données restent donc dans l'Union européenne — mais ces sociétés sont américaines, et une maison mère américaine peut en principe être sollicitée par les autorités américaines, où que soient les disques. Chacune est liée à nous par un accord de sous-traitance fondé sur les clauses contractuelles types de la Commission européenne, qui est le mécanisme qui couvre cela.",
+            "Supabase héberge la base, les comptes et les photographies, dans un centre de données situé en Allemagne. Netlify sert l'application, et Resend envoie les e-mails que l'application doit vous adresser.",
+            "Les données restent donc dans l'Union européenne — mais ces trois sociétés sont américaines, et une maison mère américaine peut en principe être sollicitée par les autorités américaines, où que soient les disques. Chacune est liée à nous par un accord de sous-traitance fondé sur les clauses contractuelles types de la Commission européenne, qui est le mécanisme qui couvre cela.",
             "Chacun est sous-traitant et agit sur nos instructions. Rien n'est vendu, rien n'est partagé avec quiconque n'est pas nécessaire au fonctionnement."
           ]
         },

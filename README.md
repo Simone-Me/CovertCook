@@ -149,13 +149,20 @@ under 2026-08-24 (4).
 ## Stack
 
 React 18 + TypeScript + Vite → Netlify (PWA, builds directly from Git —
-see below) · Supabase (Postgres + Auth + Edge Functions + pg_cron) · Brevo
-(transactional email) · Cloudflare Turnstile (bot protection) · GitHub
-Actions (keep-alive, backup only — Netlify owns the frontend build/deploy).
+see below) · Supabase (Postgres + Auth + Edge Functions + pg_cron) · Resend
+(transactional email) · GitHub Actions (keep-alive, backup only — Netlify owns
+the frontend build/deploy).
+
+Cloudflare Turnstile is **wired but not in use**: `app_settings.captcha_required`
+is false (`0063`), no site key is set, and with the flag off the frontend never
+calls the verify function and `join_round` asks for no ticket. So no third party
+sees a sign-up today. Everything needed to switch it on is still here — see
+"Bot protection" below — and until somebody does, this list is what actually
+runs, which is also what `/legal/privacy` has to say.
 
 See `.env.example` for the public frontend config and
 `supabase/functions/*` for where secrets (service role key, Turnstile
-secret, Brevo key) actually live — never in the frontend bundle.
+secret, Resend key) actually live — never in the frontend bundle.
 
 ---
 
@@ -176,7 +183,7 @@ env vars — not GitHub's. Site configuration → Environment variables:
 | `VITE_SUPABASE_URL` | Supabase → Project Settings → API | Public |
 | `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | The anon/publishable key — intentionally public, same as it is in the frontend bundle |
 | `VITE_APP_BASE_URL` | `https://covertcook.netlify.app` | The deployed origin, until a real domain is bought. **Not** `localhost` — that's the local-dev-only value in `.env.local` |
-| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile dashboard | Until this is set, `Turnstile.tsx` falls back to a dev placeholder token that bypasses bot protection entirely (see "Known simplifications") — do not ship without a real key |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile dashboard | **Optional, and unset today.** Bot protection is off by default since `0063`: `app_settings.captcha_required` is false, so the frontend never renders a widget and nothing is verified. Setting this key alone changes nothing — set it, set `TURNSTILE_SECRET_KEY` on the function, and flip the flag, in that order and in one sitting. A site key with the flag off collects tokens nothing checks, and the privacy policy would then name a processor that is not processing anything |
 | `VITE_VAPID_PUBLIC_KEY` | `npx web-push generate-vapid-keys` | Public by design. Empty is a valid state: the notifications switch reports itself unavailable instead of failing when pressed |
 
 `public/_redirects` (`/*  /index.html  200`) is what makes client-side
