@@ -3297,6 +3297,19 @@
   color: var(--accent-contrast);
 }
 
+/* Shut, like every other row in a kind that needs Crème. */
+.frletter.is-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* This week's letter: the one that is free in a shut kind, marked the way the
+   pinned notes mark theirs. */
+.frletter.is-week {
+  border-color: var(--ok);
+  box-shadow: inset 0 -3px 0 var(--ok);
+}
+
 /* The six that are nearly unbuildable. They used to cost Crème, which read as
    a recommendation; a dotted edge reads as what it is — a caution, on a choice
    that is yours to make (0089). */

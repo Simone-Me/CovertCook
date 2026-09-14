@@ -321,7 +321,11 @@ export function FilRougePicker({
             <Fold
               title={t('filRouge.week.title')}
               hint={rule === 'SHARED' ? t('filRouge.week.hint') : t('filRouge.week.hintPerCook')}
-              defaultOpen
+              // CLOSED, like every other drawer here. It opened itself because
+              // it is the part that changes weekly and the part a free account
+              // can take — but a drawer that is already open when you arrive
+              // buries the six kinds under it, and choosing the kind is what
+              // somebody came to do.
               aside={countdown ?? undefined}
             >
               <div className="weekpick">
@@ -581,10 +585,17 @@ export function FilRougePicker({
 
                 </div>
               ) : kind === 'LETTER' ? (
-                /* THE ALPHABET, BIG, AND ALL OF IT FREE (0089). Six of these
-                   are a bad evening rather than a hard one, so the line under
-                   the grid says which — a warning, where there used to be a
-                   price. */
+                /* THE ALPHABET, BIG, AND NONE OF IT FREE OF THE SAME RULE.
+                   Every letter stopped costing Crème in 0089 — that was about
+                   the six nobody can build a dinner on, not about the kind —
+                   and this grid went on being clickable when the four paid
+                   kinds were shut in 0092, because it is its own render path
+                   and the guard was added to the other three. A letter is
+                   taken the way a country is: this week's one, from the
+                   selection above, or the lot with Crème.
+
+                   The six that are a bad evening rather than a hard one keep
+                   their dashed edge and the line under the grid. */
                 <div className="stack">
                   <div className="frgrid frgrid--letters">
                     {(byCategory.get('LETTER') ?? []).map((o) => (
@@ -593,8 +604,16 @@ export function FilRougePicker({
                         type="button"
                         className={`frletter${category === 'LETTER' && code === o.code ? ' is-chosen' : ''}${
                           HARD_LETTERS.includes(o.code) ? ' is-hard' : ''
-                        }`}
+                        }${openKind('LETTER') ? '' : ' is-locked'}${o.drawn ? ' is-week' : ''}`}
                         aria-pressed={category === 'LETTER' && code === o.code}
+                        disabled={!openKind('LETTER')}
+                        title={
+                          openKind('LETTER')
+                            ? o.drawn
+                              ? t('filRouge.drawn')
+                              : undefined
+                            : t('filRouge.lockedHint')
+                        }
                         onClick={() => pick('LETTER', o.code)}
                       >
                         {o.code}
