@@ -21,7 +21,15 @@ Palette identica a quella attuale: glifo `#FFFCF6` su fondo `#C6202C`
 | `3-toque-mask.svg` | Cappello da chef con la mascherina — *covert cook*, letterale |
 | `4-envelope-fork.svg` | Busta chiusa da un sigillo con le posate — il brief che arriva |
 | `5-pot-lid-ajar.svg` | Pentola col coperchio scostato — qualcosa sotto che non si vede |
-| `toque/` | Sette varianti del terzo concetto. `f-sbircia` è la più diversa: non un simbolo ma una scena — la testa spunta da dietro il bancone, gli occhi appena sopra il bordo, le mani appoggiate sopra. Costa in leggibilità a 48 px quello che guadagna in carattere a 512 |
+| `toque/` | Sette varianti del terzo concetto. `f-sbircia` è la più diversa: non un simbolo ma una scena — la faccia di `b`, il bancone bianco che arriva ai bordi e al fondo della tela, le mani aggrappate al bordo con le dita che lo scavalcano |
+
+**Una cosa da sapere su `f-sbircia`**: il bancone bianco a tutta pagina le dà
+caratterie e le toglie un bordo. Su una superficie chiara — e la scheda di
+un'app su Play è bianca — il fondo dell'icona si confonde con la pagina e
+resta in vista un cappello che galleggia. Sul launcher non succede, perché
+dietro c'è uno sfondo. Se la scelta cade su questa, la correzione è di due
+righe: fermare il bancone qualche pixel prima del bordo inferiore, e
+riprendersi quel margine di rosso.
 
 `PROPOSTE.png` e `toque/VARIANTI.png` sono i provini: ogni proposta a 196 px
 con la maschera arrotondata, e sotto a 48 e 72 px. **La riga piccola è la prova
