@@ -131,9 +131,6 @@ export function FilRougePicker({
     queryKey: ['fil-rouge', 'upcoming'],
     queryFn: filRougeUpcoming,
     staleTime: 5 * 60 * 1000,
-    // Only worth a request once a kind is chosen, and only to answer the one
-    // question a bad week raises: is it worth waiting?
-    enabled: category !== null,
   })
 
   const countdown = useCountdown(turnsAt)
@@ -189,12 +186,19 @@ export function FilRougePicker({
       .slice(0, 40)
   }, [countries, query, i18n.language])
 
-  const nextCountries = (next ?? []).filter((n) => n.category === 'COUNTRY')
+  // NEXT SUNDAY, READ TODAY, and now for every kind rather than for the world
+  // alone (0093): a week whose six threads do not suit a table is answered by
+  // showing the next six rather than by widening this one.
+  const upcoming = next ?? []
 
   // THIS WEEK'S SELECTION: one thread per kind, with the reason written for
   // each (0092). It comes from the editorial call rather than from the shelf,
   // because the shelf knows which rows are free this week and not why.
-  const picks = (editorial ?? []).filter((p) => !FREE_KINDS.includes(p.category))
+  //
+  // ALL SIX KINDS, the two free ones included (0093). In those two a pick is
+  // not a door — everything there is already open — it is a recommendation,
+  // which is what the whole drawer has been since the shuffle was retired.
+  const picks = editorial ?? []
 
   function pickRule(value: string) {
     setRule(value as Rule)
@@ -344,6 +348,14 @@ export function FilRougePicker({
                   )
                 })}
               </div>
+
+              {upcoming.length > 0 && (
+                <p className="muted weekline__body">
+                  {t('filRouge.nextWeek', {
+                    items: upcoming.map((n) => label(n.category, n.code)).join(' · '),
+                  })}
+                </p>
+              )}
             </Fold>
             </div>
           )}
@@ -464,16 +476,34 @@ export function FilRougePicker({
                     <div className="atlas">
                       {[...atlas.keys()].sort().map((m) => (
                         <div key={m} className="atlas__branch">
+                          {/* SHUT MEANS SHUT, INCLUDING THE DOOR. A macro
+                              group that opens on a kind nobody can choose from
+                              is an illusion of having it: three taps down a
+                              path that ends in twenty greyed-out notes. So
+                              without Crème the row shows what is there and
+                              does not open.
+
+                              THE PHOTOGRAPH IS THE ROW'S BACKGROUND, cropped
+                              to its middle by `cover` — the seven pictures are
+                              of a part of the world, and a part of the world
+                              is the one thing on this form that is worth
+                              looking at rather than reading. Missing files
+                              simply leave the row as it was. */}
                           <button
                             type="button"
-                            className={`frrow${macro === m ? ' is-open' : ''}`}
+                            className={`frrow frrow--macro${macro === m ? ' is-open' : ''}${
+                              openKind('COUNTRY') ? '' : ' is-locked'
+                            }`}
+                            style={{ backgroundImage: `url(/topic/macro-${m}.webp)` }}
+                            disabled={!openKind('COUNTRY')}
                             aria-expanded={macro === m}
+                            title={openKind('COUNTRY') ? undefined : t('filRouge.lockedHint')}
                             onClick={() => {
                               setGroup(null)
                               setMacro((cur) => (cur === m ? null : m))
                             }}
                           >
-                            {t(`filRouge.macro.${m}`)}
+                            <span className="frrow__name">{t(`filRouge.macro.${m}`)}</span>
                           </button>
 
                           {macro === m && (
@@ -537,13 +567,7 @@ export function FilRougePicker({
                   {/* A hard week is answered by showing the next one rather
                       than by widening this one. Sunday is three days away; the
                       dinner is usually further off than that. */}
-                  {nextCountries.length > 0 && (
-                    <p className="muted">
-                      {t('filRouge.nextWeek', {
-                        items: nextCountries.map((n) => label('COUNTRY', n.code)).join(' · '),
-                      })}
-                    </p>
-                  )}
+
                 </div>
               ) : kind === 'LETTER' ? (
                 /* THE ALPHABET, BIG, AND ALL OF IT FREE (0089). Six of these

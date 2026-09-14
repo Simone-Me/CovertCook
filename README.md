@@ -807,16 +807,21 @@ names, migration numbers, bugs found and fixed) see
   whether the evening has a **fil rouge** — one direction every recipe is
   written against, the same for the whole table or one dealt to each cook.
   Two kinds are free in full, for ever — **one ingredient** and **one way of
-  cooking** — so every dinner in the free app can have a thread. The other four
-  (the world, colours, letters, eras) open through **the author's week**
-  (`0091`, `0092`): exactly one value per kind, chosen by hand, free for
-  everybody until Sunday, each with a written reason — a season, a holiday, an
-  anniversary. They are taken in the selection drawer, where the reason is; the
-  four kinds themselves stay shut without Crème, shown and locked rather than
-  hidden, with the chip saying what opens them. Where no week has been written
-  the computed draw still answers, per kind, so the shelf is never empty.
+  cooking** — so every dinner in the free app can have a thread. Everything
+  else runs off **the author's week** (`0091`-`0093`): exactly one value per
+  kind, for all six kinds, chosen by hand and free for everybody until Sunday,
+  each with a written reason — a season, a holiday, an anniversary. In the four
+  paid kinds the week's value is taken in the selection drawer, where the
+  reason is; the kinds themselves stay shut without Crème, shown and locked
+  rather than hidden, with the chip saying what opens them and no door that
+  opens onto nothing. There is no longer any computed draw: `0093` retired the
+  shuffle, because a machine marking six rows "this week" beside the one a
+  person chose is two marks meaning two things under one word.
   The picks and their reasons live in `fil_rouge_pick` and `fil_rouge_note` and
-  are edited with an UPDATE from the SQL editor — see the header of `0092`. The compass draws a country the server tells
+  are edited with an UPDATE from the SQL editor — see the header of `0093`.
+  The seven parts of the world carry a photograph each, read from
+  `public/topic/macro-1.webp` to `macro-7.webp` in the numbering of
+  `filRouge.macro.*`; a missing file leaves the row plain. The compass draws a country the server tells
   nobody — the host included — until the dinner is dealt (`0089`).
 - **The round page**: a table seen from above, with each section drawn as
   a sealed envelope laid on the cloth. The Executive Chef's actions all go

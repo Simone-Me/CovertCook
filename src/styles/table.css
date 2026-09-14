@@ -3006,6 +3006,52 @@
   font-weight: 600;
 }
 
+/* ---------------------------------------------------------------------------
+ * A part of the world, wearing its photograph.
+ *
+ * `cover` + `center` is the whole of "use the middle two-thirds": the picture
+ * is cropped to the row rather than squashed into it, and what survives the
+ * crop is the middle. The row keeps a real height so there is something to
+ * crop TO — a 44px strip of a photograph is a texture, not a place.
+ *
+ * The name sits on a dark wash rather than directly on the picture: seven
+ * photographs have seven different brightnesses, and text that is legible on
+ * the Sahel is invisible on the Pacific.
+ * ------------------------------------------------------------------------- */
+.frrow--macro {
+  min-height: 92px;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--bg-elevated);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.frrow--macro .frrow__name {
+  width: 100%;
+  padding: 10px 14px;
+  background: linear-gradient(to top, rgba(28, 20, 16, 0.78), rgba(28, 20, 16, 0.28) 70%, transparent);
+  color: #fffcf6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+/* Shut: the picture stays — what is behind the door is the reason to want it —
+   and everything that says "press me" goes. */
+.frrow--macro.is-locked,
+.frrow.is-locked {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+  cursor: not-allowed;
+}
+
+.frrow--macro.is-open .frrow__name {
+  background: linear-gradient(to top, rgba(198, 32, 44, 0.9), rgba(198, 32, 44, 0.35) 70%, transparent);
+  color: var(--accent-contrast);
+}
+
 .frrow:hover,
 .frrow:focus-visible,
 .frrow:active {
