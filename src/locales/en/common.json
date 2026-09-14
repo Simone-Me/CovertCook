@@ -1077,8 +1077,7 @@
           "heading": "Why we are allowed to hold it",
           "body": [
             "Your account, your dinners and what you write in them are held because you asked us to run a dinner for you. That is a contract, and it is the basis in Article 6(1)(b) of the GDPR.",
-            "Dietary and allergy data rests on your explicit consent and on nothing else — Article 9(2)(a). It is the one thing here you can withdraw without losing the account.",
-            "Turnstile, and the minimal security logging around sign-up, are our legitimate interest in an app that is not overrun by bots — Article 6(1)(f)."
+            "Dietary and allergy data rests on your explicit consent and on nothing else — Article 9(2)(a). It is the one thing here you can withdraw without losing the account."
           ]
         },
         {
@@ -1102,8 +1101,8 @@
         {
           "heading": "Who else touches it",
           "body": [
-            "Supabase hosts the database, the accounts and the photographs, in a data centre in Germany. Netlify serves the app, Cloudflare Turnstile checks that a sign-up comes from a person and sees only what it needs to answer that, and Resend sends email.",
-            "So the data sits in the European Union — but those companies are American, and an American parent can in principle be reached by American authorities wherever the disks are. Each is bound to us by a processing agreement on the European Commission's standard contractual clauses, which is the mechanism that covers it.",
+            "Supabase hosts the database, the accounts and the photographs, in a data centre in Germany. Netlify serves the app, and Resend sends the email the app has to send you.",
+            "So the data sits in the European Union — but all three are American companies, and an American parent can in principle be reached by American authorities wherever the disks are. Each is bound to us by a processing agreement on the European Commission's standard contractual clauses, which is the mechanism that covers it.",
             "Each is a processor acting on our instructions. Nothing is sold, and nothing is shared with anybody not needed to make the app work."
           ]
         },
