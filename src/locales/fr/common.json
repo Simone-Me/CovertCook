@@ -989,7 +989,7 @@
     "updated": "Dernière mise à jour",
     "termsDoc": {
       "title": "Conditions d'utilisation",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Avec qui vous vous engagez",
@@ -1014,9 +1014,17 @@
           ]
         },
         {
+          "heading": "Les photographies d'un dîner",
+          "body": [
+            "Vous pouvez ajouter des photographies à un dîner auquel vous participez, regarder celles des autres et les enregistrer sur votre appareil. Seules les personnes de ce dîner peuvent les voir.",
+            "N'y déposez que ce qui vous appartient. La photographie de quelqu'un qui n'a pas accepté de figurer dans cet album n'en fait pas partie, et l'y mettre quand même est le genre de chose pour laquelle un compte est suspendu.",
+            "Le Chef exécutif peut retirer n'importe quelle photographie de son dîner, vous pouvez retirer les vôtres, et n'importe qui à cette table peut en signaler une. L'album reste accessible à ceux qui y étaient une fois le dîner supprimé."
+          ]
+        },
+        {
           "heading": "Vos contenus",
           "body": [
-            "Vos recettes, messages et noms de dîner restent les vôtres. Vous ne nous accordez que ce qui est nécessaire au fonctionnement : les stocker, les montrer aux personnes de votre dîner, et les sauvegarder.",
+            "Vos recettes, photographies, messages et noms de dîner restent les vôtres. Vous ne nous accordez que ce qui est nécessaire au fonctionnement : les stocker, les montrer aux personnes de votre dîner, et les sauvegarder.",
             "Supprimez votre compte et ces contenus partent avec, sauf lorsque leur retrait casserait un dîner organisé par quelqu'un d'autre. Ce qui subsiste est alors dépouillé de tout ce qui vous identifie."
           ]
         },
@@ -1045,7 +1053,7 @@
     },
     "privacyDoc": {
       "title": "Confidentialité",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Qui détient vos données",
@@ -1060,7 +1068,17 @@
             "Un nom d'affichage, celui que voient les personnes qui vous invitent.",
             "Vos restrictions alimentaires, pour qu'un dîner ne vous serve pas ce que vous ne pouvez pas manger.",
             "Ce que vous écrivez dans l'application : recettes, messages prédéfinis, phrases postées dans le frigo, et vos votes.",
+            "Les photographies que vous ajoutez à l'album d'un dîner, et les légendes que vous leur donnez.",
+            "Si vous activez les notifications, l'adresse que votre navigateur nous donne pour joindre cet appareil. C'est une adresse de livraison, pas un nom, et les désactiver la supprime.",
             "Rien n'est collecté à des fins publicitaires. Il n'y a ni publicité, ni suivi sur d'autres sites, ni profil analytique vous concernant."
+          ]
+        },
+        {
+          "heading": "Ce qui nous autorise à les détenir",
+          "body": [
+            "Votre compte, vos dîners et ce que vous y écrivez sont conservés parce que vous nous avez demandé d'organiser un dîner pour vous. C'est un contrat, et c'est la base de l'article 6(1)(b) du RGPD.",
+            "Les données alimentaires et allergiques reposent sur votre consentement explicite et sur rien d'autre — article 9(2)(a). C'est la seule chose ici que vous pouvez retirer sans perdre le compte.",
+            "Turnstile, et le minimum de journalisation de sécurité qui l'accompagne, relèvent de notre intérêt légitime à ne pas voir l'application envahie par des robots — article 6(1)(f)."
           ]
         },
         {
@@ -1072,9 +1090,20 @@
           ]
         },
         {
+          "heading": "Les photographies",
+          "body": [
+            "Toute personne présente à un dîner peut ajouter des photographies à l'album de ce dîner, voir celles des autres et les enregistrer sur son propre appareil. Personne en dehors de ce dîner ne le peut.",
+            "Le lieu de la prise de vue est retiré avant que la photographie ne quitte votre téléphone. Une photo prise au téléphone porte les coordonnées de l'appartement où elle a été prise ; l'application redessine l'image et n'envoie que les pixels, si bien que l'appareil, l'horodatage et la position n'arrivent jamais jusqu'ici.",
+            "L'album est stocké fermé et montré via des liens qui cessent de fonctionner au bout d'une heure : un lien transféré hors de l'application meurt de lui-même.",
+            "Le Chef exécutif d'un dîner peut retirer n'importe quelle photographie pour tout le monde, la personne qui l'a ajoutée peut retirer la sienne, et n'importe qui à cette table peut la signaler. L'album survit au dîner à dessein : il reste accessible à ceux qui y étaient une fois la soirée effacée.",
+            "Les photographies de personnes qui n'ont pas accepté de figurer dans cet album n'ont pas à y être déposées. Cette part-là revient à qui appuie sur le bouton."
+          ]
+        },
+        {
           "heading": "Qui d'autre y touche",
           "body": [
-            "Supabase héberge la base et les comptes. Netlify sert l'application. Cloudflare Turnstile vérifie qu'une inscription vient bien d'une personne, et ne voit que ce qu'il faut pour cela. Resend envoie les e-mails.",
+            "Supabase héberge la base, les comptes et les photographies, dans un centre de données situé en Allemagne. Netlify sert l'application, Cloudflare Turnstile vérifie qu'une inscription vient bien d'une personne et ne voit que ce qu'il faut pour cela, et Resend envoie les e-mails.",
+            "Les données restent donc dans l'Union européenne — mais ces sociétés sont américaines, et une maison mère américaine peut en principe être sollicitée par les autorités américaines, où que soient les disques. Chacune est liée à nous par un accord de sous-traitance fondé sur les clauses contractuelles types de la Commission européenne, qui est le mécanisme qui couvre cela.",
             "Chacun est sous-traitant et agit sur nos instructions. Rien n'est vendu, rien n'est partagé avec quiconque n'est pas nécessaire au fonctionnement."
           ]
         },
@@ -1083,7 +1112,8 @@
           "body": [
             "Votre compte et son contenu sont conservés tant que le compte existe.",
             "Les messages du frigo sont supprimés au bout de 24 heures : ce sont des banalités d'un soir, sans valeur ensuite.",
-            "Supprimez votre compte et le reste part avec, sauf lorsque son retrait casserait un dîner organisé par quelqu'un d'autre ; ce qui subsiste est dépouillé de tout ce qui vous identifie."
+            "Demandez la suppression de votre compte et le compte lui-même part aussitôt : l'adresse e-mail, le mot de passe et les sessions ouvertes disparaissent immédiatement, et ce qui subsiste dans les dîners organisés par d'autres est dépouillé de tout ce qui vous identifie.",
+            "Cette demande peut être annulée pendant trente jours en vous reconnectant. Passé trente jours, elle est exécutée définitivement et il n'y a plus rien à annuler."
           ]
         },
         {

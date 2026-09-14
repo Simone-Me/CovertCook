@@ -989,7 +989,7 @@
     "updated": "Last updated",
     "termsDoc": {
       "title": "Terms of use",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Who you are agreeing with",
@@ -1014,9 +1014,17 @@
           ]
         },
         {
+          "heading": "Photographs at a dinner",
+          "body": [
+            "You can add photographs to a dinner you are in, look at the ones the others added, and save them to your own device. Only the people at that dinner can see them.",
+            "Upload only what is yours to upload. A photograph of somebody who has not agreed to be in that album is not, and posting one anyway is the kind of thing an account gets suspended for.",
+            "The Executive Chef can remove any photograph from their dinner, you can remove your own, and anybody at that table can report one. The album stays reachable to the people who were there after the dinner itself is deleted."
+          ]
+        },
+        {
           "heading": "Your content",
           "body": [
-            "Your recipes, messages and dinner names stay yours. You give us only what is needed to run the app: storing them, showing them to the people in your dinner, and backing them up.",
+            "Your recipes, photographs, messages and dinner names stay yours. You give us only what is needed to run the app: storing them, showing them to the people in your dinner, and backing them up.",
             "Delete your account and that content goes with it, except where removing it would break a dinner somebody else organised. What remains is then stripped of anything identifying you."
           ]
         },
@@ -1045,7 +1053,7 @@
     },
     "privacyDoc": {
       "title": "Privacy",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Who holds your data",
@@ -1060,7 +1068,17 @@
             "A display name, which is what people who invite you see.",
             "Your dietary restrictions, so that a dinner does not serve you something you cannot eat.",
             "What you write in the app: recipes, the canned messages you send, the phrases you post to the fridge, and how you voted.",
+            "The photographs you add to a dinner's album, and the captions you put on them.",
+            "If you turn notifications on, the address your browser hands us to reach that device. It is a delivery address, not a name, and turning them off again removes it.",
             "Nothing is collected for advertising. There is no advertising, no tracking across other sites, and no analytics profile of you."
+          ]
+        },
+        {
+          "heading": "Why we are allowed to hold it",
+          "body": [
+            "Your account, your dinners and what you write in them are held because you asked us to run a dinner for you. That is a contract, and it is the basis in Article 6(1)(b) of the GDPR.",
+            "Dietary and allergy data rests on your explicit consent and on nothing else — Article 9(2)(a). It is the one thing here you can withdraw without losing the account.",
+            "Turnstile, and the minimal security logging around sign-up, are our legitimate interest in an app that is not overrun by bots — Article 6(1)(f)."
           ]
         },
         {
@@ -1072,9 +1090,20 @@
           ]
         },
         {
+          "heading": "Photographs",
+          "body": [
+            "Anybody at a dinner can add photographs to that dinner's album, see the ones everybody else added, and save them to their own device. Nobody outside that dinner can.",
+            "Where the photograph was taken is removed before it leaves your phone. A picture from a phone carries the coordinates of the flat it was taken in; the app re-draws the image and uploads the pixels alone, so the camera, the timestamp and the location never arrive here at all.",
+            "The album is stored closed, and shown through links that stop working after an hour — a link forwarded outside the app dies on its own.",
+            "The Executive Chef of a dinner can take any photograph in it down for everybody, the person who added it can take their own down, and anybody at that table can report one. The album outlives the dinner on purpose: it stays reachable to the people who were there after the evening itself is gone.",
+            "Photographs of people who have not agreed to be in that album should not be uploaded. That part is on whoever presses the button."
+          ]
+        },
+        {
           "heading": "Who else touches it",
           "body": [
-            "Supabase hosts the database and the accounts. Netlify serves the app. Cloudflare Turnstile checks that a sign-up comes from a person, and sees only what it needs to answer that. Resend sends email.",
+            "Supabase hosts the database, the accounts and the photographs, in a data centre in Germany. Netlify serves the app, Cloudflare Turnstile checks that a sign-up comes from a person and sees only what it needs to answer that, and Resend sends email.",
+            "So the data sits in the European Union — but those companies are American, and an American parent can in principle be reached by American authorities wherever the disks are. Each is bound to us by a processing agreement on the European Commission's standard contractual clauses, which is the mechanism that covers it.",
             "Each is a processor acting on our instructions. Nothing is sold, and nothing is shared with anybody not needed to make the app work."
           ]
         },
@@ -1083,7 +1112,8 @@
           "body": [
             "Your account and its content are kept while the account exists.",
             "Fridge messages are deleted after 24 hours — they are small talk for one evening and worth nothing after it.",
-            "Delete your account and the rest goes with it, except where removing it would break a dinner somebody else organised; what stays is stripped of anything identifying you."
+            "Ask for your account to be deleted and the account itself goes at once: the email address, the password and the open sessions are gone immediately, and what remains inside dinners other people organised is stripped of anything identifying you.",
+            "That request can be cancelled for thirty days by signing in again. After thirty days it is carried out for good and there is nothing left to cancel."
           ]
         },
         {
