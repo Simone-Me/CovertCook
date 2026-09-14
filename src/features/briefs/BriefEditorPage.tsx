@@ -6,6 +6,10 @@ import { useRound } from '../rounds/hooks'
 import { DietaryPanelGrid } from '../rounds/DietaryPanelGrid'
 import { ChatThread } from '../chat/ChatThread'
 import { BackToTable } from '../../components/BackToTable'
+import { FilRougeLine } from '../rounds/FilRougeLine'
+import { FilRougeDishes } from '../rounds/FilRougeDishes'
+import { SharedMenu } from '../rounds/SharedMenu'
+import { getFilRouge } from '../../lib/rpc'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
   discardBriefDraft,
@@ -63,6 +67,16 @@ export function BriefEditorPage() {
   const { roundId } = useParams()
 
   const { data: round, isLoading: roundLoading } = useRound(roundId)
+  // The thread this writer owes — read here as well as inside FilRougeLine so
+  // the dish suggestions below know which country was drawn. One query key,
+  // so react-query serves both from the same fetch.
+  const { data: filRouge } = useQuery({
+    queryKey: ['rounds', roundId, 'fil-rouge'],
+    enabled: !!roundId,
+    queryFn: () => getFilRouge(roundId as string),
+    staleTime: 60 * 1000,
+  })
+
   const { data: assignment } = useQuery({
     queryKey: ['rounds', roundId, 'my-assignment'],
     enabled: !!roundId,
@@ -405,14 +419,31 @@ export function BriefEditorPage() {
           <p className="menucard__note">
             {t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })}
           </p>
+          {/* The thread, printed on the menu card rather than beside it: it is
+              the same kind of instruction as the course, and a direction in a
+              grey sentence somewhere else is a direction people write past. */}
+          <FilRougeLine roundId={roundId} as="sender" className="menucard__note" />
+          <FilRougeDishes
+            category={filRouge?.category}
+            code={filRouge?.scope === 'SHARED' ? filRouge?.code : filRouge?.my_cook_code}
+          />
         </div>
       ) : (
         <p className="muted">
+          <FilRougeLine roundId={roundId} as="sender" />
+          <FilRougeDishes
+            category={filRouge?.category}
+            code={filRouge?.scope === 'SHARED' ? filRouge?.code : filRouge?.my_cook_code}
+          />
           {assignment && round.slot_mode === 'CATEGORIES'
             ? t('briefs.assignedCourse', { course: t(`briefs.courseOption.${assignment.course}`) })
             : t('briefs.freeChoice')}
         </p>
       )}
+
+      {/* What is already on the menu, so nobody writes the second tiramisù.
+          Renders nothing at all unless the dinner turned this on (0087). */}
+      <SharedMenu roundId={roundId} />
 
       {/* THE IDEAS, AS TABS, and only on a dinner that asked for more than one.
           A free dinner never sees this row at all — the feature has to be

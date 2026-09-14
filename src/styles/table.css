@@ -808,17 +808,144 @@
   margin-top: 1px;
 }
 
-.chat-bubble__day {
-  font-size: 9px;
-  line-height: 1;
-  opacity: 0.45;
-}
-
 .chat-bubble--food .chef-remove {
   padding: 0 2px;
   font-size: 10px;
   line-height: 1;
   opacity: 0.55;
+}
+
+/* ---------------------------------------------------------------------------
+ * The marks on a phrase: answer it, flag it, never sit with them again.
+ *
+ * They used to be bare glyphs at half opacity, over a photograph of a fridge
+ * full of groceries — which is to say they were not there. Nobody found the
+ * flag, and nobody found the answer at all. A small plate in the table's own
+ * red is the whole fix: the marks sit ON something, so they read as controls
+ * rather than as punctuation left in the phrase.
+ *
+ * The plate is a tint of --accent rather than a colour of its own, so a table
+ * dressed in another cloth one day carries it without a second decision.
+ * ------------------------------------------------------------------------- */
+
+.chat-acts {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  padding: 1px 3px;
+  border: 1px solid rgba(198, 32, 44, 0.28);
+  border-radius: 999px;
+  background: rgba(198, 32, 44, 0.12);
+}
+
+.chat-act {
+  flex: none;
+  width: auto;
+  padding: 1px 4px;
+  font-size: 11px;
+  line-height: 1.25;
+  color: var(--accent);
+  background: none;
+  border: none;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.chat-act:hover,
+.chat-act:focus-visible {
+  background: rgba(198, 32, 44, 0.18);
+}
+
+/* YOUR OWN PHRASE IS THE RED BUBBLE, so the red plate vanished into it: red on
+   red is the same problem the marks had on the fridge photograph, one shade
+   further on. On your own line the plate is drawn in the paper colour instead
+   — the same relationship, inverted, so it reads as the same control. */
+.chat-bubble--food.mine .chat-acts {
+  border-color: rgba(255, 249, 240, 0.55);
+  background: rgba(255, 249, 240, 0.2);
+}
+
+.chat-bubble--food.mine .chat-act {
+  color: var(--accent-contrast);
+}
+
+.chat-bubble--food.mine .chat-act:hover,
+.chat-bubble--food.mine .chat-act:focus-visible {
+  background: rgba(255, 249, 240, 0.34);
+}
+
+/* ---------------------------------------------------------------------------
+ * The wire between a phrase and its answer.
+ *
+ * An elbow, not a curve and not a rail down the whole column: it leaves the
+ * bubble above through the gap, turns once at a right angle, and ends in a
+ * knot where it meets the answer. The indent said a reply was a reply; one
+ * right angle says WHICH line it answers, which is what a fridge with three
+ * conversations in it actually needs.
+ *
+ * Drawn in the gutter the indent already opens, so it costs no width.
+ * ------------------------------------------------------------------------- */
+
+.chat-tie {
+  position: absolute;
+  top: -12px;
+  left: -15px;
+  width: 9px;
+  height: 22px;
+  border-left: 2px solid rgba(198, 32, 44, 0.45);
+  border-bottom: 2px solid rgba(198, 32, 44, 0.45);
+  border-bottom-left-radius: 7px;
+  pointer-events: none;
+}
+
+/* The knot: the small weight at the end of the wire that says it arrived
+   here, at this phrase, rather than passing by on its way down the column. */
+.chat-tie::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  bottom: -3px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: rgba(198, 32, 44, 0.55);
+}
+
+.chat-bubble--reply.mine .chat-tie {
+  left: auto;
+  right: -15px;
+  border-left: none;
+  border-right: 2px solid rgba(198, 32, 44, 0.45);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 7px;
+}
+
+.chat-bubble--reply.mine .chat-tie::after {
+  right: auto;
+  left: -4px;
+}
+
+/* Which opener the roller is answering, said between the fridge and the pin
+   that sends — the last thing read before the tap that posts, and wearing the
+   same plate as the mark that armed it. */
+.chat-answering {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 6px;
+  padding: 4px 8px;
+  border: 1px solid rgba(198, 32, 44, 0.28);
+  border-radius: 999px;
+  background: rgba(198, 32, 44, 0.1);
+  font-size: 12px;
+}
+
+.chat-answering__what {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 /* ---------------------------------------------------------------------------
@@ -1114,6 +1241,62 @@
 
 .menucard__row + .menucard__row .menucard__course {
   border-top: 1px dashed var(--env-edge);
+}
+
+/* ---------------------------------------------------------------------------
+ * The private conversation, laid out as a menu.
+ *
+ * Same card, same rules, different content: one column of lines, the speaker
+ * in small caps, the day at the end. The alternative — two columns of pale
+ * bubbles inside an already-folded panel — was the least readable surface in
+ * the app, because alternating alignment means no two lines start in the same
+ * place and the eye has to find the beginning of every one of them.
+ * ------------------------------------------------------------------------- */
+
+.menucard--thread .menucard__head {
+  text-align: left;
+}
+
+.thread-line {
+  align-items: baseline;
+  gap: 6px;
+}
+
+.thread-line .menucard__name {
+  flex: 1;
+  min-width: 0;
+}
+
+.thread-line__who {
+  margin-right: 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.thread-line__said {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.thread-line__day {
+  flex: none;
+  font-size: 10px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Your own line, marked in the margin. Moving it to the other side of the page
+   is what a chat does; a menu says whose course it is without reflowing. */
+.thread-line.is-mine {
+  padding-left: 8px;
+  border-left: 3px solid var(--accent);
+}
+
+.thread-line.is-mine .thread-line__who {
+  color: var(--accent);
 }
 
 /* A confirmation that stays on the page, shown where the decision was taken.
@@ -1665,8 +1848,12 @@
   text-decoration: none;
 }
 
+/* :active as well as :hover, and that is a phone decision rather than a
+   decorative one — a finger never hovers, so without it the line is the one
+   control on the page that does not answer when it is touched. */
 .pass__link:hover,
-.pass__link:focus-visible {
+.pass__link:focus-visible,
+.pass__link:active {
   border-color: var(--accent);
   color: var(--accent);
 }
@@ -1959,12 +2146,22 @@
 /* Language, on the pages that come before an account exists. The only switch
    used to be in the profile — behind the sign-in form somebody might not be
    able to read. */
+/* The language in force, and the arrow that revisits it. A column rather than
+   a row, because what the arrow opens — a search, a list, a confirm — belongs
+   under the thing it is about and not beside it. */
 .langswitch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-self: flex-end;
+  align-items: flex-end;
+  font-size: 12px;
+}
+
+.langswitch__head {
   display: flex;
   align-items: center;
   gap: 6px;
-  align-self: flex-end;
-  font-size: 12px;
 }
 
 .langswitch__label {
@@ -1988,6 +2185,57 @@
   border-color: var(--accent);
   color: var(--accent-contrast);
   font-weight: 700;
+}
+
+/* Aimed at, not applied. The confirm below is the act, so this is a ring
+   rather than a filled button — a second filled button would look like a
+   second answer already in force. */
+.langswitch__opt.is-aimed {
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.langswitch__opt.is-aimed.is-on {
+  color: var(--accent-contrast);
+}
+
+.langswitch__body {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+  width: 100%;
+  max-width: 240px;
+  padding: 10px 11px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+}
+
+/* Small, because it is a box for one word — and because a full-width field
+   over two pills reads as the important half of the control, which it is not. */
+.langswitch__body input {
+  width: 100%;
+  max-width: 170px;
+  padding: 5px 9px;
+  font-size: 12px;
+}
+
+.langswitch__body .row {
+  justify-content: flex-end;
+}
+
+.langswitch__body .row button {
+  width: auto;
+  padding: 5px 12px;
+  font-size: 12px;
+}
+
+.langswitch__list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
 }
 
 /* The mark beside the name. It rides the same lift as the word — they are one
@@ -2205,13 +2453,6 @@
   vertical-align: 1px;
 }
 
-.shelf__tag--price {
-  border-color: var(--paper-edge);
-  color: var(--accent);
-  text-transform: none;
-  letter-spacing: 0;
-}
-
 .shelf__locked {
   font-size: 11.5px;
   color: var(--text-muted);
@@ -2267,20 +2508,10 @@
   font-size: 12.5px;
 }
 
-.rules--fixed {
-  border-color: var(--paper-edge);
-  border-left-color: var(--accent);
-}
-
-.rules--fixed .rules__title {
-  color: var(--accent);
-}
-
-.rules--fixed .rules__warn {
-  color: var(--accent);
-  font-weight: 600;
-}
-
+/* The two settings that can still be moved while the dinner runs. Green
+   against the three red-edged groups, because "can I change my mind later?" is
+   the first question somebody has about a setting they are unsure of, and a
+   box answers it before they have read a word. */
 .rules--live {
   border-color: var(--diet-bg);
   border-left-color: var(--ok);
@@ -2291,6 +2522,25 @@
 }
 
 .rules--live .rules__note {
+  color: var(--text-muted);
+}
+
+/* THE THREE GROUPS: the chefs, the theme, the recipe.
+   They replace the two boxes that sorted the form by whether a setting could
+   be undone — a true division that stopped being the useful one once the
+   evening had a subject of its own. All three look alike on purpose: none of
+   them is a warning, and the one line about what cannot be changed is said
+   once, above all three, rather than coloured into a box. */
+.rules--group {
+  border-color: var(--paper-edge);
+  border-left-color: var(--accent);
+}
+
+.rules--group .rules__title {
+  color: var(--accent);
+}
+
+.rules--group .rules__note {
   color: var(--text-muted);
 }
 
@@ -2465,6 +2715,14 @@
   font-size: 13px;
 }
 
+/* A door, not a footnote. The line at the foot of the creation form is the
+   only way into Crème from there, and nobody presses a sentence. */
+.profree__button {
+  width: auto;
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
 /* The two PRO warnings, and the hold. A month out is a note; a week out is the
    same note leaning on the accent; on hold uses the error card, because the
    dinner has actually stopped. */
@@ -2544,4 +2802,644 @@
   font-size: 10.5px;
   font-weight: 400;
   color: var(--text-muted);
+}
+
+/* A reply sits under the phrase it answers rather than beside it (0088). The
+   indent says it is an answer; the elbow drawn in the gutter it opens says
+   which line it answers — see .chat-tie above. The flat rail that used to run
+   down the left is gone: it connected a reply to the whole column rather than
+   to one phrase, which is the question a reader actually has. */
+.chat-bubble--reply {
+  position: relative;
+  margin-top: 8px;
+  margin-left: 26px;
+  max-width: calc(96% - 26px);
+}
+
+.chat-bubble--reply.mine {
+  margin-left: 0;
+  margin-right: 26px;
+}
+
+/* The opener currently being answered, so the roller full of replies has a
+   visible subject. Outline rather than a background: the bubbles already carry
+   a background and a second one underneath them muddies both. */
+.chat-bubble.is-answering {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* ---------------------------------------------------------------------------
+ * Sending the evening on, and choosing what goes with it.
+ *
+ * Four boxes and a preview. The preview is not a nicety: it is the only way
+ * somebody can see that ticking "the names" puts eight real names on a card
+ * that is about to be posted publicly — and it is the card itself, redrawn on
+ * every tick, because a description of an image is not a preview of one.
+ * ------------------------------------------------------------------------- */
+
+.sharebox__opt {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.sharebox__opt input {
+  width: auto;
+  margin-top: 2px;
+  flex: none;
+}
+
+/* Something the evening does not have — no photograph, no pseudonyms on an
+   open table. Shown rather than hidden: a box that disappears is a feature
+   somebody goes looking for. */
+.sharebox__opt.is-off {
+  opacity: 0.5;
+}
+
+/* The card itself, as it will be posted. Capped in height so the boxes above
+   it stay on the same screen — the point is to see the choice take effect, not
+   to admire the picture. */
+.sharebox__card {
+  display: block;
+  width: 100%;
+  max-width: 260px;
+  margin: 0 auto;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  box-shadow: var(--paper-shadow);
+}
+
+/* ---------------------------------------------------------------------------
+ * The fil rouge picker: grids of marks, an atlas, and the alphabet.
+ *
+ * WHY GRIDS AND NOT THE LIST EVERY OTHER CHOICE ON THIS FORM USES. A list is
+ * right when the options need a sentence each — who gets in, who knows whom.
+ * These do not: a colour IS its colour, an ingredient is a picture of itself,
+ * and the alphabet is twenty-six single characters. Four to a row, they can be
+ * read at a glance instead of scrolled; as a list they were the longest thing
+ * on the form by a factor of five.
+ * ------------------------------------------------------------------------- */
+
+.frgrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.frgrid--letters {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 5px;
+}
+
+@media (max-width: 420px) {
+  .frgrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .frgrid--letters {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+  }
+}
+
+.frtile {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 3px;
+  width: 100%;
+  min-height: 66px;
+  padding: 8px 6px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 12px;
+  line-height: 1.25;
+  text-align: center;
+  cursor: pointer;
+}
+
+.frtile__mark {
+  font-size: 20px;
+  line-height: 1.1;
+}
+
+.frtile__name {
+  overflow-wrap: anywhere;
+}
+
+.frtile__tag {
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.frtile:hover,
+.frtile:focus-visible {
+  border-color: var(--accent);
+}
+
+/* Chosen, and open, are two different states and they must not look alike:
+   one is the answer, the other is only a door standing ajar. */
+.frtile.is-chosen {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.frtile.is-chosen .frtile__tag {
+  color: var(--accent-contrast);
+}
+
+.frtile.is-open {
+  border-color: var(--accent);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+.frtile.is-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------------------------------------------------------------------------
+ * The atlas, walked down in place.
+ *
+ * A branch is a wide row with the name filling it — picking a part of the
+ * world is a real choice and it should look like one — and what is inside a
+ * branch opens directly under it, indented, so the path back up is the row you
+ * came through rather than a scroll.
+ * ------------------------------------------------------------------------- */
+
+.atlas {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.atlas__branch {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.frrow {
+  width: 100%;
+  padding: 14px 14px;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 17px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-align: left;
+  cursor: pointer;
+}
+
+.frrow--region {
+  padding: 11px 12px;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+/* ---------------------------------------------------------------------------
+ * A part of the world, wearing its photograph.
+ *
+ * `cover` + `center` is the whole of "use the middle two-thirds": the picture
+ * is cropped to the row rather than squashed into it, and what survives the
+ * crop is the middle. The row keeps a real height so there is something to
+ * crop TO — a 44px strip of a photograph is a texture, not a place.
+ *
+ * The name sits on a dark wash rather than directly on the picture: seven
+ * photographs have seven different brightnesses, and text that is legible on
+ * the Sahel is invisible on the Pacific.
+ * ------------------------------------------------------------------------- */
+.frrow--macro {
+  min-height: 92px;
+  display: flex;
+  align-items: flex-end;
+  padding: 0;
+  overflow: hidden;
+  background-color: var(--bg-elevated);
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+.frrow--macro .frrow__name {
+  width: 100%;
+  padding: 10px 14px;
+  background: linear-gradient(to top, rgba(28, 20, 16, 0.78), rgba(28, 20, 16, 0.28) 70%, transparent);
+  color: #fffcf6;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+}
+
+/* Shut: the picture stays — what is behind the door is the reason to want it —
+   and everything that says "press me" goes. */
+.frrow--macro.is-locked,
+.frrow.is-locked {
+  opacity: 0.55;
+  filter: grayscale(0.5);
+  cursor: not-allowed;
+}
+
+.frrow--macro.is-open .frrow__name {
+  background: linear-gradient(to top, rgba(198, 32, 44, 0.9), rgba(198, 32, 44, 0.35) 70%, transparent);
+  color: var(--accent-contrast);
+}
+
+.frrow:hover,
+.frrow:focus-visible,
+.frrow:active {
+  border-color: var(--accent);
+}
+
+.frrow.is-open {
+  border-color: var(--accent);
+  color: var(--accent);
+  box-shadow: inset 0 -3px 0 var(--accent);
+}
+
+/* What is inside the row above, indented under it. */
+.atlas__sub {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 10px;
+  padding-left: 10px;
+  border-left: 2px solid var(--paper-edge);
+}
+
+/* ---------------------------------------------------------------------------
+ * The countries: little notes pinned to a board.
+ *
+ * Small, because choosing Portugal out of the Mediterranean is reading a list
+ * rather than making a decision twice — and pinned, because the wall of a
+ * kitchen is where a note like this actually lives. The pin is the dot at the
+ * top; the slight rotation is what stops eleven of them reading as a table.
+ * ------------------------------------------------------------------------- */
+
+.pinboard {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-left: 10px;
+  padding: 8px 0 2px;
+}
+
+.pin {
+  position: relative;
+  /* A note keeps its own size: flex would otherwise shrink eleven of them into
+     one clipped row, which is the one thing a pinned note must never look
+     like. */
+  flex: 0 0 auto;
+  width: auto;
+  max-width: 100%;
+  white-space: nowrap;
+  padding: 11px 10px 7px;
+  border: 1px solid var(--env-edge);
+  border-radius: 2px;
+  background: var(--env);
+  color: var(--env-ink);
+  font-size: 12.5px;
+  line-height: 1.2;
+  text-align: center;
+  cursor: pointer;
+  box-shadow: 0 1px 2px rgba(120, 60, 30, 0.18);
+  transform: rotate(-1deg);
+}
+
+.pin:nth-child(even) {
+  transform: rotate(1.2deg);
+}
+
+/* The pin itself. */
+.pin::before {
+  content: '';
+  position: absolute;
+  top: 2px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  margin-left: -2.5px;
+  border-radius: 50%;
+  background: var(--wax);
+  box-shadow: 0 1px 1px rgba(60, 30, 20, 0.4);
+}
+
+.pin:hover,
+.pin:focus-visible,
+.pin:active {
+  border-color: var(--accent);
+  transform: rotate(0deg) translateY(-1px);
+}
+
+.pin.is-chosen {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+  transform: rotate(0deg);
+}
+
+/* In this week's selection: the same mark the folds use, drawn as the pin
+   rather than written beside the name — there is no room on a note for a
+   sentence. */
+.pin.is-week::before {
+  background: var(--ok);
+}
+
+.pin.is-locked {
+  opacity: 0.4;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* ---------------------------------------------------------------------------
+ * The author's week: a drawer, and one line per kind inside it.
+ *
+ * ITS HEADING IS THE ONLY ITALIC CAPITAL ON THIS FORM, deliberately. Everything
+ * else in the picker is the same every week; this is the part that changes on a
+ * Sunday and the part a free account can actually take, so it is the one row
+ * that is allowed to ask for the eye.
+ * ------------------------------------------------------------------------- */
+
+.weekfold .fold__title {
+  font-style: italic;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.weekpick {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* One pick: the kind it answers, the thread itself, the reason, and the one
+   place it can be taken without Crème. */
+.weekline {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  padding: 11px 12px;
+  border: 1px solid var(--env-edge);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+}
+
+.weekline.is-chosen {
+  border-color: var(--ok);
+  border-left-color: var(--ok);
+  background: var(--diet-bg);
+}
+
+.weekline__kind {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.weekline__name {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.weekline__why {
+  margin: 2px 0 0;
+  font-size: 14px;
+  font-weight: 700;
+  font-style: italic;
+}
+
+.weekline__body {
+  margin: 0 0 4px;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+.weekline button {
+  width: auto;
+  padding: 6px 14px;
+  font-size: 13px;
+}
+
+/* A kind that is free in full. Green, like everything in this app that says
+   "this one you keep". */
+.filfree {
+  margin: 0 0 6px;
+  font-size: 12px;
+  color: var(--ok);
+}
+
+/* The search and the compass, on one line above the atlas. */
+.atlas__top {
+  gap: 6px;
+}
+
+.atlas__top input {
+  flex: 1;
+  min-width: 0;
+}
+
+.atlas__compass {
+  flex: none;
+  width: auto;
+  padding: 8px 12px;
+  font-size: 20px;
+  line-height: 1;
+  background: var(--bg-elevated);
+  border: 1px solid var(--env-edge);
+  color: var(--text);
+}
+
+.atlas__compass:hover,
+.atlas__compass:focus-visible {
+  border-color: var(--accent);
+}
+
+/* The alphabet. Big, because a letter is the whole of the choice and there is
+   nothing else on the tile to read. */
+.frletter {
+  width: 100%;
+  padding: 10px 0;
+  border: 1px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  background: var(--bg-elevated);
+  color: var(--text);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.frletter:hover,
+.frletter:focus-visible {
+  border-color: var(--accent);
+}
+
+.frletter.is-chosen {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+/* Shut, like every other row in a kind that needs Crème. */
+.frletter.is-locked {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* This week's letter: the one that is free in a shut kind, marked the way the
+   pinned notes mark theirs. */
+.frletter.is-week {
+  border-color: var(--ok);
+  box-shadow: inset 0 -3px 0 var(--ok);
+}
+
+/* The six that are nearly unbuildable. They used to cost Crème, which read as
+   a recommendation; a dotted edge reads as what it is — a caution, on a choice
+   that is yours to make (0089). */
+.frletter.is-hard {
+  border-style: dashed;
+  color: var(--text-muted);
+}
+
+.frletter.is-hard.is-chosen {
+  color: var(--accent-contrast);
+}
+
+/* ---------------------------------------------------------------------------
+ * The grid of ready-made dinners (0090).
+ *
+ * A card is a whole evening rather than a setting, so it is bigger than
+ * anything else on the form, says what it is in a sentence, and opens IN PLACE
+ * to show what it would actually do. Nothing here creates a dinner by being
+ * pressed once: the second press, on a button that says Create, is the one
+ * that commits.
+ * ------------------------------------------------------------------------- */
+
+.setups {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+@media (max-width: 460px) {
+  .setups {
+    grid-template-columns: 1fr;
+  }
+}
+
+.setup {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--env-edge);
+  border-left-width: 4px;
+  border-radius: var(--radius-paper);
+  background: var(--paper-solid);
+  box-shadow: var(--paper-shadow);
+  overflow: hidden;
+}
+
+/* Open, it stops being a card in a row and becomes the thing being read, so it
+   takes the whole width — the summary is a sentence, not a caption. */
+.setup.is-open {
+  grid-column: 1 / -1;
+  border-left-color: var(--accent);
+}
+
+.setup__face {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 4px;
+  width: 100%;
+  min-height: 84px;
+  padding: 16px 14px;
+  border: none;
+  border-radius: 0;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.setup__face:hover,
+.setup__face:focus-visible,
+.setup__face:active {
+  background: var(--bg-elevated);
+}
+
+/* THE NAME IS THE CARD. No mark and no description on the face: six cards
+   each carrying an emoji and three lines of prose was a wall with nothing to
+   catch the eye, and what somebody scanning a grid reads is the name. It is
+   set at the size a name deserves and given the whole tile. */
+.setup__name {
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.15;
+}
+
+.setup__what {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+.setup__body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 13px 13px;
+}
+
+.setup__summary {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.45;
+}
+
+/* A card of the host's own, and the one difference that matters: it can be
+   taken off the shelf again. */
+.setup--mine {
+  border-left-color: var(--ok);
+}
+
+.setup__remove {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  width: auto;
+  padding: 2px 8px;
+  font-size: 15px;
+  line-height: 1;
+  color: var(--text-muted);
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.setup__remove:hover,
+.setup__remove:focus-visible,
+.setup__remove:active {
+  color: var(--accent);
+  border-color: var(--accent);
 }

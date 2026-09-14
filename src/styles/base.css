@@ -962,14 +962,6 @@ button.tone-diet.secondary {
   font-style: italic;
 }
 
-/* The headings inside the explanation: smaller than the page title, larger
-   than the text they introduce. */
-.welcome__h {
-  margin: 12px 0 4px;
-  font-size: 16px;
-  font-weight: 600;
-}
-
 /* The author's paragraph, set apart from the app's own voice by measure and
    colour rather than by a label saying "a note from the author". */
 .welcome__why {

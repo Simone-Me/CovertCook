@@ -28,6 +28,7 @@ cook, you don't know who chose yours, and you all find out at the end.
 | **Sender** | The Player who writes a Brief. |
 | **Cook** | The Player who receives it and must prepare it. |
 | **Slot** | A course to fill: aperitif / nibbles / starter / first course / main / side / cheese / dessert / drink / other (`0066`, in the order a meal is eaten). |
+| **Fil rouge** | A direction the whole dinner cooks against — a country, a colour, a letter, a technique, an ingredient, an era (`0083`). Optional, unchecked, and free. |
 | **Pairing** | The Sender → Cook link. |
 | **Chain** | The full cycle of pairings: A→B→C→…→A. |
 
@@ -75,6 +76,14 @@ question gets answered once instead of re-argued.
   `SECURITY DEFINER` SQL functions. The frontend calls RPCs; it never writes
   game tables directly. The browser is assumed hostile — it can read every
   byte it receives, so nothing sensitive is ever sent that isn't displayed.
+- **The fil rouge is copied onto the dinner, never referenced.** The shelf it
+  is chosen from rotates every Sunday at midday in Paris, and a dinner is often
+  set up three weeks ahead — so the round stores the code itself and the draw
+  is asked one question, once, at the moment of choosing. The rotation can
+  never take back a thread a dinner already holds. The draw itself is
+  *computed* from the week number rather than written by a scheduled job:
+  every list has a stable shuffled order, the week walks it, and nothing
+  repeats until the list is exhausted.
 - **Assignment is a single Sattolo cycle**, always. Every player is exactly
   one Sender's Cook and exactly one Cook's Sender — that's what makes the
   chain reveal work as "one long chain." `sum(slots)` must equal the active
@@ -140,13 +149,20 @@ under 2026-08-24 (4).
 ## Stack
 
 React 18 + TypeScript + Vite → Netlify (PWA, builds directly from Git —
-see below) · Supabase (Postgres + Auth + Edge Functions + pg_cron) · Brevo
-(transactional email) · Cloudflare Turnstile (bot protection) · GitHub
-Actions (keep-alive, backup only — Netlify owns the frontend build/deploy).
+see below) · Supabase (Postgres + Auth + Edge Functions + pg_cron) · Resend
+(transactional email) · GitHub Actions (keep-alive, backup only — Netlify owns
+the frontend build/deploy).
+
+Cloudflare Turnstile is **wired but not in use**: `app_settings.captcha_required`
+is false (`0063`), no site key is set, and with the flag off the frontend never
+calls the verify function and `join_round` asks for no ticket. So no third party
+sees a sign-up today. Everything needed to switch it on is still here — see
+"Bot protection" below — and until somebody does, this list is what actually
+runs, which is also what `/legal/privacy` has to say.
 
 See `.env.example` for the public frontend config and
 `supabase/functions/*` for where secrets (service role key, Turnstile
-secret, Brevo key) actually live — never in the frontend bundle.
+secret, Resend key) actually live — never in the frontend bundle.
 
 ---
 
@@ -167,7 +183,7 @@ env vars — not GitHub's. Site configuration → Environment variables:
 | `VITE_SUPABASE_URL` | Supabase → Project Settings → API | Public |
 | `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | The anon/publishable key — intentionally public, same as it is in the frontend bundle |
 | `VITE_APP_BASE_URL` | `https://covertcook.netlify.app` | The deployed origin, until a real domain is bought. **Not** `localhost` — that's the local-dev-only value in `.env.local` |
-| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile dashboard | Until this is set, `Turnstile.tsx` falls back to a dev placeholder token that bypasses bot protection entirely (see "Known simplifications") — do not ship without a real key |
+| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile dashboard | **Optional, and unset today.** Bot protection is off by default since `0063`: `app_settings.captcha_required` is false, so the frontend never renders a widget and nothing is verified. Setting this key alone changes nothing — set it, set `TURNSTILE_SECRET_KEY` on the function, and flip the flag, in that order and in one sitting. A site key with the flag off collects tokens nothing checks, and the privacy policy would then name a processor that is not processing anything |
 | `VITE_VAPID_PUBLIC_KEY` | `npx web-push generate-vapid-keys` | Public by design. Empty is a valid state: the notifications switch reports itself unavailable instead of failing when pressed |
 
 `public/_redirects` (`/*  /index.html  200`) is what makes client-side
@@ -784,15 +800,47 @@ names, migration numbers, bugs found and fixed) see
   nobody and the buffet is simply one dish shorter. A dish whose cook has
   gone is excluded from voting rather than listed for a rank nobody can
   give it.
-- **Setting a dinner up**: one click for a classic dinner, or open the
-  custom panel to choose how people get in (a code, or in-app invitations
+- **Setting a dinner up**: a grid of evenings somebody might actually want —
+  the game as designed, a party, a quiet one with no secrets, a no-stress one,
+  a dice that rolls every answer, and the long form for the host who wants to
+  decide all fifteen. A card opens in place and says what it sets before it
+  makes anything. Whatever a host settles in the long form can be **saved under
+  a name** (`0090`) and lands on the same grid as a card of their own, with a ×
+  to take it off again.
+  The decisions themselves: how people get in (a code, or in-app invitations
   by account address), who knows whom (undercover / spy / open), how you
-  vote (during dinner, after dinner on a timer, or not at all), and
-  whether the menu is free-for-all or composed course by course.
+  vote (during dinner, after dinner on a timer, or not at all),
+  whether the menu is free-for-all or composed course by course, and
+  whether the evening has a **fil rouge** — one direction every recipe is
+  written against, the same for the whole table or one dealt to each cook.
+  Two kinds are free in full, for ever — **one ingredient** and **one way of
+  cooking** — so every dinner in the free app can have a thread. Everything
+  else runs off **the author's week** (`0091`-`0093`): exactly one value per
+  kind, for all six kinds, chosen by hand and free for everybody until Sunday,
+  each with a written reason — a season, a holiday, an anniversary. In the four
+  paid kinds the week's value is taken in the selection drawer, where the
+  reason is; the kinds themselves stay shut without Crème, shown and locked
+  rather than hidden, with the chip saying what opens them and no door that
+  opens onto nothing. There is no longer any computed draw: `0093` retired the
+  shuffle, because a machine marking six rows "this week" beside the one a
+  person chose is two marks meaning two things under one word.
+  The picks and their reasons live in `fil_rouge_pick` and `fil_rouge_note` and
+  are edited with an UPDATE from the SQL editor — see the header of `0093`.
+  The seven parts of the world carry a photograph each — of the staple the
+  group is built on, never of a landscape or a flag — mapped from group code to
+  file in `MACRO_PHOTO` (`src/lib/filRouge.ts`); a group with no entry keeps a
+  plain row. The compass draws a country the server tells
+  nobody — the host included — until the dinner is dealt (`0089`).
 - **The round page**: a table seen from above, with each section drawn as
   a sealed envelope laid on the cloth. The Executive Chef's actions all go
   through one panel — the pass — which shows only what's up right now and
   opens itself when the round is blocked on them.
+- **Help, contact and account deletion** live at a public `/help`, reachable
+  without an account and without the app — which is what a store asks for and
+  what somebody locked out of their own account needs. It explains the in-app
+  path and gives an address for people who cannot sign in; it carries no
+  delete button, because one that worked without signing in would let anybody
+  delete anybody.
 - **Platform**: French/English with a working switcher, installable as a
   PWA, deployed on Netlify (frontend) + Supabase (backend), with automated
   keep-alive pings and nightly database backups
@@ -800,14 +848,36 @@ names, migration numbers, bugs found and fixed) see
   deployed on 2026-08-24, closing the schema/client mismatch that had every
   RPC added since `0015` failing against the live database.
 
+### Authorship and licence
+
+**Simone Melotti** is the sole author and sole rights holder: the concept, the
+product decisions, the design and the validation of every change here are his.
+The code was written with AI assistance under that direction, which is recorded
+where it belongs — in `CHANGELOG.md`, `DESIGN.md` and `PRESENTATION.md`, which
+between them hold the reasoning behind each decision and the alternatives that
+were rejected.
+
+Stated in the README rather than in the app: it is what a reader of the
+repository wants to know and what a diner does not. Nothing here is an
+obligation under the EU AI Act — its transparency rules (Article 50, applicable
+from 2 August 2026) cover systems that interact with people, synthetic content,
+deepfakes and AI-generated text published to inform the public, and this app
+ships none of those. It is stated because a human creative contribution is what
+makes a work protectable in the first place.
+
+`LICENSE` is **all rights reserved**: the source is published for reading, and
+no permission is granted to use, copy, modify, deploy or operate it. Third-party
+dependencies keep their own licences.
+
 ### Not built yet
 
 Ordered roughly by how much the product misses them.
 
-- **Free-text chat** — the chat is still canned templates only. Agreed to
-  open it up (with the anonymity trade-off accepted knowingly), then
-  narrow back toward templates once there's real usage data.
-  `PRESENTATION.md` drawer 4.
+- **Free-text chat** — still canned templates only, and less urgent than it
+  was: `0088` gave the fridge directed phrases and replies, which is most of
+  what "the chat is dead" actually meant. If it ships, the compromise worth
+  taking first is free text only *after* the reveal, where writing style can no
+  longer out anybody. `PRESENTATION.md` drawer 4.
 - **Telling people the round moved** — half done. Push now exists (`0047`,
   `src/sw.ts`, `send-push`) and fires when the Executive Chef advances the
   dinner, for whoever has switched it on. What is still missing is the
@@ -816,21 +886,19 @@ Ordered roughly by how much the product misses them.
 - **Outbound email** — invitations already work in-app without it, so this
   is now only for reaching people who aren't looking at the app. Blocked
   on a provider key.
-- **A public deletion request URL** — the in-app path exists (`0049`), but
-  Google Play also wants a page a person can reach *without* installing the
-  app. It is a form and an inbox, not a schema change.
 - **Real table props** — the plate, glass, bowl, napkin, cutlery and bread
   board on the cloth are drawings, not renders. They move correctly between
   the three states; what's missing is the artwork. The three rules the real
   ones must follow (one camera angle, one light source, shadow baked in) are
   in `DESIGN.md` §4 and `TableProps.tsx`.
-- **Taking money** — this is the one thing PRO is missing. `0075` builds the
+- **Taking money** — this is the one thing Crème is missing. `0075` builds the
   entitlements (a subscription, a redeemed code, an open test window, and the
   per-item unlocks from `0072`), `is_pro()` is the single question every gate
   asks, and `pro_subscriptions` has no insert path for a signed-in client at
   all: a row gets there by redeeming a code, or by whatever server-side thing
-  eventually handles a purchase. The PRO page describes both offers and says
-  plainly that neither can be bought yet. See "The paid tier" below.
+  eventually handles a purchase. The Crème page describes the one offer there
+  now is — everything, for a year — and says plainly that it cannot be bought
+  yet. See "The paid tier" below.
 - **An admin surface** — deliberately absent. `create_redeem_code` is granted
   to nobody and is run from the Supabase SQL editor; adding an in-app panel
   would add a third privilege level to an app that has two (a member, and the
@@ -841,6 +909,11 @@ Ordered roughly by how much the product misses them.
 - **An in-app help layer** and a first-run tour. (Terms and Privacy now exist
   as drafts at `/legal/*`, accepted at sign-up — but they have not been read by
   a lawyer, and they must be before any money changes hands.)
+- **The country dish suggestions want a second pair of eyes.** All 194 are
+  written (`src/lib/countryDishes.ts`) and the interface calls them *some*
+  dishes rather than national ones, but the small island states and the
+  Pacific are the entries most likely to be thin or wrong, and nobody has
+  checked them against somebody who eats there.
 - **Final allergen and app icons** — current ones are functional
   placeholders.
 - **A manual pen-test** and an automated test suite — today's coverage is
@@ -871,15 +944,21 @@ one place the rule is written, `create_round` asks it, and the pickers render
 what it answers.
 
 **Nothing sells anything yet, and the shelf says so.** There is no payment
-provider wired to this app, so a `PAID` row is shown, priced, and refused —
-with no "buy" button leading to a checkout that does not exist. The entitlement
-table (`profile_theme_unlocks`) is already the thing the check reads, so the day
-a purchase lands it is a row insert and the shelf unlocks itself.
+provider wired to this app, so a `PAID` row is shown, marked Crème, and refused
+— with no "buy" button leading to a checkout that does not exist. The
+entitlement table (`profile_theme_unlocks`) is already the thing the check
+reads, so the day a purchase lands it is a row insert and the shelf unlocks
+itself.
 
-Prices today: 50 cents a pseudonym list, €1 a table cloth, €5 a year for
-everything. The first two are rows in the catalogue — one `UPDATE`, not a
-deploy. The yearly one is a constant in `ProPage.tsx` and stays there until
-there is a store to be the authority on it.
+**One price, for everything, for a year: €5.** Buying a cloth or a word list on
+its own is withdrawn, and so is every price printed beside a row. It split one
+small decision into six, and somebody who spent fifty cents on the pâtisserie
+still found the third recipe tab shut. The per-item machinery underneath is
+untouched — `price_cents` is still on both catalogues and
+`profile_theme_unlocks` still grants one thing at a time, which is what a
+redeem code writes — but nothing in the interface offers or quotes it. The
+yearly price is a constant in `ProPage.tsx` and stays there until there is a
+store to be the authority on it.
 
 **What PRO opens, in full:** the three paid pseudonym lists, the five paid
 table cloths, and two or three recipes per cook instead of one (`0077`). That

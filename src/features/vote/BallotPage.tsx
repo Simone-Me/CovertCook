@@ -19,19 +19,27 @@ import {
 import { CSS } from '@dnd-kit/utilities'
 import { getBallotOptions, submitBallot, withdrawBallot, type BallotOption } from '../../lib/rpc'
 import { BackToTable } from '../../components/BackToTable'
+import { useFilRougeLabel } from '../../lib/filRouge'
+import { getFilRouge } from '../../lib/rpc'
 
 function RankedRow({
   option,
   rank,
   originality,
   briefRespect,
+  theme,
+  threadLabel,
   onScoreChange,
 }: {
   option: BallotOption
   rank: number
   originality: number | null
   briefRespect: number | null
-  onScoreChange: (kind: 'originality' | 'briefRespect', value: number | null) => void
+  theme: number | null
+  /** The thread this dish owed, already in words — absent when the dinner has
+   *  none, which is what keeps the third dropdown off most ballots. */
+  threadLabel: string | null
+  onScoreChange: (kind: 'originality' | 'briefRespect' | 'theme', value: number | null) => void
 }) {
   const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: option.brief_id })
@@ -47,6 +55,10 @@ function RankedRow({
         <div className="ballotrow__dish">
           <div className="ballotrow__name">{option.dish_name}</div>
           <div className="muted">{t(`briefs.courseOption.${option.course}`)}</div>
+          {/* Named on the row rather than once at the top: on a per-cook
+              dinner every dish owed a different thread, so "did it honour it"
+              cannot be answered without saying which. */}
+          {threadLabel && <div className="muted">{threadLabel}</div>}
         </div>
       </div>
 
@@ -79,6 +91,22 @@ function RankedRow({
           </option>
         ))}
       </select>
+      {threadLabel && (
+        <select
+          aria-label={t('vote.themeRespect')}
+          value={theme ?? ''}
+          onClick={(e) => e.stopPropagation()}
+          onPointerDown={(e) => e.stopPropagation()}
+          onChange={(e) => onScoreChange('theme', e.target.value ? Number(e.target.value) : null)}
+        >
+          <option value="">{t('vote.themeRespect')}</option>
+          {[1, 2, 3, 4, 5].map((n) => (
+            <option key={n} value={n}>
+              {n}
+            </option>
+          ))}
+        </select>
+      )}
       </div>
     </div>
   )
@@ -95,7 +123,28 @@ export function BallotPage() {
   })
 
   const [order, setOrder] = useState<string[]>([])
-  const [scores, setScores] = useState<Record<string, { originality: number | null; briefRespect: number | null }>>({})
+  const [scores, setScores] = useState<
+    Record<string, { originality: number | null; briefRespect: number | null; theme: number | null }>
+  >({})
+  const filRougeLabel = useFilRougeLabel()
+  // Asked once for the round: it decides whether the third dropdown exists at
+  // all, and on a shared dinner it is also the answer for every dish.
+  const { data: filRouge } = useQuery({
+    queryKey: ['rounds', roundId, 'fil-rouge'],
+    enabled: !!roundId,
+    queryFn: () => getFilRouge(roundId as string),
+    staleTime: 60 * 1000,
+  })
+
+  /** The thread a given dish owed, in words, or null when there is none to
+   *  honour — which is what hides the third score rather than showing an
+   *  unanswerable question. */
+  function threadFor(option: BallotOption): string | null {
+    if (!filRouge?.category) return null
+    const code = filRouge.scope === 'SHARED' ? filRouge.code : option.fil_rouge_code
+    if (!code) return null
+    return t('filRouge.onTheMenu', { value: filRougeLabel(filRouge.category, code) })
+  }
   const [error, setError] = useState<string | null>(null)
   const [submitted, setSubmitted] = useState(false)
   const [busy, setBusy] = useState(false)
@@ -132,6 +181,7 @@ export function BallotPage() {
           rank: i + 1,
           originality_score: scores[briefId]?.originality ?? null,
           brief_respect_score: scores[briefId]?.briefRespect ?? null,
+          theme_score: scores[briefId]?.theme ?? null,
         })),
       )
       setSubmitted(true)
@@ -224,10 +274,17 @@ export function BallotPage() {
                   rank={i + 1}
                   originality={scores[id]?.originality ?? null}
                   briefRespect={scores[id]?.briefRespect ?? null}
+                  theme={scores[id]?.theme ?? null}
+                  threadLabel={threadFor(option)}
                   onScoreChange={(kind, value) =>
                     setScores((prev) => ({
                       ...prev,
-                      [id]: { originality: prev[id]?.originality ?? null, briefRespect: prev[id]?.briefRespect ?? null, [kind]: value },
+                      [id]: {
+                        originality: prev[id]?.originality ?? null,
+                        briefRespect: prev[id]?.briefRespect ?? null,
+                        theme: prev[id]?.theme ?? null,
+                        [kind]: value,
+                      },
                     }))
                   }
                 />

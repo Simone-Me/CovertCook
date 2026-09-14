@@ -8,18 +8,28 @@ there.
 
 ## Where to pick up
 
-Production is **up to date**: `0015` → `0045` were deployed on 2026-08-24
-and the client and the database agree again. The schema/client mismatch
-that made every RPC added since `0015` fail is closed.
+Production carried `0015` → `0045` on 2026-08-24, closing the schema/client
+mismatch that made every RPC added since `0015` fail.
+
+**`0083`–`0088` are written, tested and NOT deployed.** They
+replay clean from an empty database and were exercised end to end against a
+local Postgres 16; nothing has run against production. Deploy them together —
+`0085` drops and recreates `create_round`, `0086` drops and recreates
+`get_ballot_options`, and `0088` drops both `post_to_board` and `get_board`, so
+a partial apply leaves the client calling a signature that is not there.
 
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 **Next, in order:**
 
 1. **Free-text chat** alongside the templates — the length cap (280) and
-   the rate limit (the existing 10/hour) are already decided.
-2. **Notifications** (`PRESENTATION.md` phase 5) — email, not push, and
-   the reasoning is written down. Needs the Resend key below.
+   the rate limit (the existing 10/hour) are already decided. Less urgent since
+   `0088`: directed phrases and replies were most of what "the fridge is dead"
+   actually meant.
+2. **Notifications** — superseded: push shipped (`0047`, `0048`) and covers
+   the four moments worth interrupting for. What is left is the asynchronous
+   half — the invitation, and reaching people who never switch push on — which
+   is item 4 below and still needs the Resend key.
 3. **Real table props** — drawings today, not renders. `DESIGN.md` §4 has
    the three constraints any render has to meet, and the three questions
    still open (which objects, how many variants, single objects or one
@@ -28,9 +38,8 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
    moments are covered (`0048`), but only for people who opted in. An invited
    player who has never opened the app cannot be pushed to at all. That is the
    mail that still has to be written, and `send-email` is the natural home.
-5. **A public deletion request URL** — the in-app path is built (`0049`);
-   Google Play also wants a page reachable without installing the app. A form
-   and an inbox, not a schema change.
+5. **Done** — `/help` is public, explains deletion without offering a button
+   that would work without signing in, and carries the contact address.
 6. **A guided demo dinner** on the first-run panel — pre-filled players,
    pop-up arrows pointing at the next control, running through to the vote and
    the results, so the app can be understood without an evening being spent.
@@ -56,6 +65,239 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-09-11
+
+**The fridge answers, the menu stops the second tiramisù, the evening leaves as
+a picture, and there is a page for people who cannot sign in.** Migrations
+`0087`–`0088`.
+
+### The fridge learns to answer
+
+It has been a wall of notices since `0030`: four people produce four unrelated
+cards. What was missing was never more phrases — it was that a phrase could not
+be **aimed** at anybody and could not be **answered**.
+
+Three pieces, and no free text anywhere. The blank the pairing threads have had
+since `0001` reaches the board. A **chef-shaped blank is filled from the
+roster** and the server refuses anything that is not a chef at this table,
+which buys directed phrases without buying the moderation burden and the
+writing-style leak that free text brings. And a **reply set**, one level deep,
+offered only under something already said — a fridge door is not a forum.
+
+Pressing ↩ sends nothing: it turns the rolling pin over to the replies, the
+same control doing a second job. The window moves from 24 to 48 hours, which is
+editorial rather than technical — 24 cut the eve of the dinner off from the day
+of it, and 48 covers both under one rule, so a reply never needs a special case
+to keep its opener alive.
+
+**Two bugs, one ours and one older.** The aimed phrases read "Chef Chef
+Basilic", because a pseudonym already carries the title. And `0080`, rewriting
+`get_board` for host notices, had quietly dropped the open-table naming `0073`
+built — an OPEN dinner, where every other screen prints real names, had gone
+back to pseudonyms in the fridge alone. Restored.
+
+### The menu, while it is being written
+
+In FREE mode nothing stopped three people writing a tiramisù and the table
+finding out at the buffet. `get_round_dishes` returns **course and dish name**
+for the recipes already sent, and nothing else — no author, no cook, no
+ingredients. `briefs` and `pairings` keep having no player-facing SELECT policy.
+
+It leaks nothing, and that is checked rather than assumed: a reader who sees
+"dessert: tiramisù" learns a dish exists; their own they knew, the one they
+wrote they wrote, and nobody can be worked out from names with no people
+attached. Shown where the duplicate would be written — on the recipe editor —
+and nowhere else.
+
+Unlike anonymity or the fil rouge this is **not** a creation-time decision: it
+is reversible, it reveals names that are public by the end of the evening
+anyway, and taking it back costs nothing anybody wrote against. So it is a
+switch in the settings, and `create_round` was left alone rather than rewritten
+a third time before it has ever been deployed.
+
+### The evening, as one picture
+
+The only thing in this app that brings new people in. A guest who has just
+eaten well is the most likely future host there will ever be, and the way to
+reach them is not an email campaign — the one kind of outbound mail that
+carries real legal weight — but a picture they want to post anyway.
+
+Drawn on a canvas at 4:5 rather than screenshotted, so it carries content and
+not controls. Dinner name, date, the fil rouge, the menu, the dish of the
+evening, and `CovertCook · opus35.fr` small at the bottom.
+
+**No names on it. Not real ones, not pseudonyms, not the winner's.** Posting a
+menu card publishes the fact that your friends were at a dinner, and they did
+not agree to that when they agreed to come. A dish name belongs to the evening;
+a person's name belongs to them.
+
+It leaves through `navigator.share` with a file, which opens the native sheet
+where WhatsApp and Instagram already are — Instagram cannot be posted to from a
+web page by any other route, and the sheet handing the image over is the normal
+path rather than a limitation to work around. `canShare` is asked about the
+file specifically, because several browsers expose `share` and then reject
+files, and finding that out after drawing is how you get a button that does
+nothing. Where there is no sheet the image downloads instead.
+
+### /help, and the thing that had to be reachable without an account
+
+Deleting an account has worked since `0049`, behind a login — which is correct,
+because otherwise anybody could delete anybody. A store asks for something
+else as well: a page reachable **without installing the app and without being
+able to sign in**. Those are two different needs, and `/help` serves the second
+without weakening the first.
+
+So there is **no delete button on it, and there must never be one**. It explains
+the path, links to the sign-in that leads there, says exactly what deletion does
+— anonymised in place, thirty days, cancellable, and the dinners stay because
+they belong to seven other people too — and gives an address for somebody who
+cannot sign in at all. That last route is the one the requirement actually
+names, and it is an inbox rather than code.
+
+Seven questions alongside it, in both languages, all answerable without an
+account: what the game is, what costs money and what never will, how allergies
+are handled and why the app informs instead of refusing, what happens when
+somebody drops out, who can read what you wrote.
+
+---
+
+## 2026-09-09
+
+**Le fil rouge: a dinner can be given a direction, and the world turns over
+every Sunday.** Migrations `0083`–`0086`, and a `LICENSE`.
+
+### What it is
+
+Everything the app did until now told you WHO to write for. Nothing told you
+WHAT to write, and a blank page addressed to a stranger is the hardest form a
+recipe brief can take. A dinner can now carry one direction that every recipe
+is written against: a country, a colour, a letter, a way of cooking, one
+ingredient, or a time. Nothing checks it — the table is the judge — and a
+dinner without one is unchanged, which is most dinners.
+
+It is **free**, and that follows the line already drawn: Crème sells how an
+evening looks, never how the game is played, and this changes what gets cooked.
+
+### What is free is no longer a tier on every row
+
+`0072` could answer "what is free" with a column, because a cloth is yours for
+ever. Here it changes with the week, so `rotates` and `draw_size` sit on the
+CATEGORY and are data: whether a list rotates, and how much of it shows, is an
+`UPDATE` and not a deploy.
+
+**Short lists are never rationed.** Ten colours and twelve techniques are shown
+whole and free, all of them, always. Putting seven locks on a list of ten does
+not create desire, it reads as meanness. Only the world — 194 countries — is
+long enough to rotate, and there Crème opens the whole group the week's country
+came from rather than all 194, because the constraint is the fun.
+
+### The draw has no job and no table
+
+The obvious build is a Sunday cron writing "this week's selection" into a
+table. Four scheduled workflows already exist and each is a thing that can fail
+at four in the morning; a fifth that fails leaves the shelf empty.
+
+So the selection is **computed** from the week number. Every list has a stable
+shuffled order, the week walks it, nothing repeats until the list is exhausted
+— the bag-of-names behaviour a plain random pick does not give, where Italy can
+come three weeks running while Peru never arrives — and the seed carries the
+tour number, so the second pass is not the first again.
+
+**A programmed skip was asked for and rejected.** It would do the opposite of
+what it was wanted for: skipping ahead skips countries, and a skipped country
+does not return before the repeats start. The order is already unreadable from
+outside; there was no pattern on the shelf to break.
+
+The week turns **Sunday at midday in Paris**, converted to Paris wall-clock
+before subtracting, so the changeover does not move by an hour twice a year.
+
+### The world, grouped by what it cooks with
+
+7 macro groups, 23 micro groups, 194 countries, from
+objectivelists.com/the-23-food-regions-of-the-world. Not geography — countries
+grouped by the staple their cuisine is built on, which is the only
+classification that makes a dinner theme mean anything. One country per macro
+group every week, so no part of the world is ever the one left out.
+
+Three things the source needed: hybrid codes resolve to the first (a country in
+two bags is drawn twice while another never arrives); Slovenia and Albania were
+listed twice and are filed once; and eighteen UN members it omits — **Germany
+among them** — are added in a separate, marked block so they stay separable.
+
+**The full tour takes about twenty months, not six.** The groups are very
+uneven (1-C holds 29 countries, 4-A holds 2) and a group is only visited every
+third week, so the largest takes 87 weeks to exhaust. Kept knowingly: every
+region every week reads better than every country once.
+
+**A hard week is answered by showing the next one.** The draw is a pure
+function of the week number, so next Sunday is already knowable: the week that
+offers Liechtenstein and the Marshall Islands can say that France, Thailand,
+Mali and Honduras arrive on Sunday. Widening this week instead would dissolve
+the shared week everybody cooks to.
+
+### Two shapes, and the leak that turned out not to exist
+
+SHARED is one thread for the table — six blue dishes are a spectacle, and it is
+what makes the menu worth photographing. PER_COOK deals one each, which reads
+badly on colours and beautifully on countries: six countries on one table is a
+world tour in an evening.
+
+The objection raised against PER_COOK was that a menu labelled "blue: tiramisu"
+would identify its cook. It does not. A per-cook value is known to exactly two
+people — the cook, who must know what they are cooking, and their sender, who
+must know it to write for them — and to everybody else a colour beside a dish
+names nobody.
+
+**The value is copied, never referenced.** The shelf rotates every Sunday and a
+dinner is often set up three weeks ahead, so a round storing "whatever the draw
+offers" would lose its thread mid-week with recipes already written against it.
+The draw is asked one question, once. Same split `ROADMAP.md` §5 made for the
+recipe book. The POOL is frozen too, because the roulette runs at LOCKED,
+possibly weeks after the choice, and must deal from the shelf the host was
+shown.
+
+### The rest of it
+
+- **The allergen check informs and does not refuse** (`0069`'s rule): a fil
+  rouge of cheese on a table with a vegan is told to the host while they
+  choose, because they are the one person who can still change it.
+- **Frozen once the roulette deals**, not once the dinner starts — people write
+  against it, so it cannot move under them.
+- **A third ballot line**, optional like the other two and absent entirely on a
+  dinner with no thread, plus a **best interpretation** award. On a per-cook
+  dinner the ballot carries each dish's own thread, because "did it honour it"
+  cannot be answered against the round.
+- **Country names come from the browser.** `Intl.DisplayNames` turns `JP` into
+  Japan or Japon, correctly accented, in any locale — so the catalogue stores
+  ISO codes, the app carries no country strings at all, and a third language
+  costs nothing. 388 translation strings that do not exist.
+
+### Three dishes from each of the 194
+
+The draw is honest, so some weeks are Tuvalu and Liechtenstein rather than
+Italy and Mexico — and a country nobody at the table has cooked from is not a
+constraint, it is a dead end. Three names turn one into the other, and they are
+shown to the two people who can act on them: the host choosing, and the sender
+writing. Not to the cook, for whom the recipe has already been written.
+
+**Never "the national dish".** Naming one is a claim, and a wrong or reductive
+one is what gets screenshotted; the interface says *some dishes from there*,
+and adds that they are ideas rather than a menu — three is deliberately few, so
+that six people cooking the three named dishes is not the likely outcome.
+
+**Not translated, and that is not an omission.** A dish name is a proper noun:
+paella is paella in every language and so is phở. One list, no locale, no 582
+strings to keep in step. Where a dish is genuinely known in French by a French
+name, that is the one used.
+
+### LICENSE
+
+All rights reserved, no permission granted, sole rights holder named. The
+repository is source-available for reading and nothing else. Third-party
+dependencies keep their own licences, and the file says so.
 
 ---
 

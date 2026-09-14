@@ -15,6 +15,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { useRound } from '../rounds/hooks'
 import { useAuth } from '../../lib/auth'
 import { BackToTable } from '../../components/BackToTable'
+import { FilRougeLine } from '../rounds/FilRougeLine'
 
 /**
  * The recipe you were dealt, and — before it exists — the page it will arrive
@@ -145,6 +146,8 @@ export function CookViewPage() {
       <BackToTable />
       <h1>{waiting ? t('briefs.waiting.title') : brief.dish_name}</h1>
       <span className="badge">{t(`briefs.courseOption.${brief.course}`)}</span>
+      {/* Why this dish is blue, said where the dish is. */}
+      <FilRougeLine roundId={roundId} as="cook" />
       {error && <div className="error">{error}</div>}
 
       {/* MORE THAN ONE IDEA, AND THE CHOICE IS YOURS.

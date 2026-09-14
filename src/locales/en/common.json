@@ -1,5 +1,9 @@
 {
   "app": {
+    "languageChange": "Change the language",
+    "languageSearch": "Search for a language",
+    "languageConfirm": "Switch to {{lang}}",
+    "languageNone": "No language by that name — this app is written in two so far.",
     "name": "CovertCook",
     "tagline": "One dinner, one secret recipe, one chain.",
     "language": "Language"
@@ -94,6 +98,49 @@
     "whoSeesIt": "What you declare is shown to everybody at the dinner, and again to the person writing your recipe, as a reminder while they write it. If something is wrong or you would rather it were not there, the contact address is in the footer."
   },
   "rounds": {
+    "createIt": "Create",
+    "presets": {
+      "lead": "Pick the evening you have in mind. Every card says what it sets before it makes anything.",
+      "CLASSIC": "Classic",
+      "CLASSICHint": "The game as designed: covered, approved at the door, one course each, costs split, vote at the end.",
+      "PARTY": "Party vibe",
+      "PARTYHint": "No cap on the seats, the menu readable while it is written, a cloth and a word list drawn at random, courses, costs split.",
+      "NO_SURPRISES": "No surprises",
+      "NO_SURPRISESHint": "Everybody knows everybody, the menu is visible, the door is a guest list and the costs are split.",
+      "NO_STRESS": "No stress",
+      "NO_STRESSHint": "Covered, a code to share, no cap, no thread, nothing to compose and no money to talk about.",
+      "RANDOM": "Total roll",
+      "RANDOMHint": "Every answer drawn, this table included — and the thread is sealed, so even you find out with everybody else.",
+      "MANUAL": "Configure it myself",
+      "MANUALHint": "The long form: every decision, one at a time.",
+      "mine": "Saved by you",
+      "tweak": "Open it in the form",
+      "nameFirst": "Give the dinner a name first.",
+      "removeAsk": "Delete “{{name}}”?",
+      "saveTitle": "Keep these settings",
+      "saveWhat": "They land on the grid as a card of your own, ready for the next dinner. Saving a name you have used before replaces it.",
+      "namePlaceholder": "Sunday at ours",
+      "save": "Save",
+      "saved": "Saved. It is on the grid.",
+      "tooMany": "That is twelve saved tables — delete one before saving another."
+    },
+    "group": {
+      "chefs": "Chefs",
+      "chefsHint": "Who is at this table, and how much they are allowed to know.",
+      "invitation": "Invitation",
+      "covert": "Covert",
+      "theme": "Theme",
+      "themeHint": "What the evening is about, and what it looks like.",
+      "topic": "Topic",
+      "pseudonym": "Pseudonyms",
+      "design": "Design",
+      "recipe": "Recipe",
+      "recipeHint": "What gets written, what it costs, and how it is judged.",
+      "multiple": "Multiple",
+      "budget": "Budget",
+      "courses": "Courses",
+      "vote": "Vote"
+    },
     "myRounds": "My rounds",
     "create": "Create a round",
     "join": "Join with a code",
@@ -101,9 +148,7 @@
     "name": "Round name",
     "setup": {
       "classic": "Classic",
-      "classicHint": "covered dinner, one recipe each, voting on. Nothing to decide.",
-      "custom": "Customise",
-      "customHint": "choose who gets in, who knows whom, and how you vote."
+      "custom": "Customise"
     },
     "comingSoon": "Coming soon",
     "access": {
@@ -432,10 +477,10 @@
     "copyCode": "Copy the code",
     "copyLink": "Copy the link",
     "rules": {
-      "fixedTitle": "Settled for the whole dinner",
-      "fixedWarn": "These cannot be changed afterwards — not by you, not by anyone.",
       "liveTitle": "Changeable during the dinner",
-      "liveNote": "Pick something now and think again later: the turning arrow ↺ on the pass comes back to any of these."
+      "liveNote": "Pick something now and think again later: the turning arrow ↺ on the pass comes back to either of these.",
+      "settled": "Everything in these three is settled for the whole dinner — by you, now, and by nobody afterwards. What can still be changed while it runs is in the green box at the foot.",
+      "liveMark": "Changeable during the dinner: the turning arrow ↺ on the pass comes back to this one."
     },
     "tableTheme": {
       "label": "Table theme",
@@ -465,6 +510,16 @@
       "APPROVEHint": "Anyone who asks for a seat waits until you say yes. You see their real name before you decide.",
       "FREE": "Anyone with the way in takes a seat",
       "FREEHint": "No waiting and nothing for you to do. Whoever holds the code, or accepts an invitation, is at the table."
+    },
+    "sharedMenu": {
+      "title": "Already on the menu",
+      "nothingYet": "Nothing has been sent yet.",
+      "why": "Dish names only — never who wrote them or who is cooking them. It is here so the table does not end up with three tiramisùs.",
+      "label": "Show the menu while recipes are being written",
+      "HIDDEN": "Keep it a surprise",
+      "HIDDENHint": "Nobody sees a dish before the dinner.",
+      "NAMES": "Show the dish names",
+      "NAMESHint": "Members see what has been sent — the names only, never who. Stops two people writing the same dish."
     }
   },
   "briefs": {
@@ -597,6 +652,7 @@
     "send": "Send",
     "report": "Report",
     "reported": "Reported",
+    "you": "You",
     "category": {
       "CLARIFICATION": "Ask for clarification",
       "SUBSTITUTION": "Ask about a substitution",
@@ -669,7 +725,20 @@
     "turnout": "{{voted}} of {{eligible}} have voted ({{percent}}%)",
     "allVoted": "Everybody has voted. Closing the vote…",
     "deadlineSetAlready": "This vote already has a closing time, and it does not move. Remove it first if it has to change.",
-    "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else."
+    "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else.",
+    "themeRespect": "Thread"
+  },
+  "share": {
+    "what": "Choose what goes on the card. Nothing is sent until you press send, and the picture below is exactly what leaves this phone.",
+    "realNames": "The names",
+    "realNamesHint": "the real name of whoever wrote each dish, above it",
+    "pseudonyms": "The pseudonyms",
+    "pseudonymsHint": "the chef name they wrote under, above each dish",
+    "photo": "The photograph",
+    "photoHint": "the photograph of the table, printed on the menu",
+    "results": "The vote",
+    "resultsHint": "the points beside each dish, and the dish of the evening",
+    "send": "Send it"
   },
   "results": {
     "title": "Results",
@@ -682,7 +751,8 @@
       "BEST_DESSERT": "Best dessert",
       "BEST_DRINK": "Best drink",
       "MOST_ORIGINAL": "Most original",
-      "BEST_BRIEF_RESPECT": "Best brief respect"
+      "BEST_BRIEF_RESPECT": "Best brief respect",
+      "BEST_FIL_ROUGE": "Best interpretation of the thread"
     },
     "nothingServed": "No dishes were recorded for this dinner.",
     "notServed": "not served",
@@ -690,6 +760,12 @@
     "gate": {
       "RESULTS_NOT_READY": "The results are not in yet — the dinner has not reached that point.",
       "RESULTS_NOT_PUBLISHED": "The Executive Chef has the results and has not announced them yet. Sit tight."
+    },
+    "share": {
+      "button": "Share the menu",
+      "note": "Dish names only unless you tick a list above. The names of the people at a table belong to them.",
+      "winner": "Dish of the evening: {{dish}}",
+      "downloaded": "Saved. Post it wherever you like."
     }
   },
   "chain": {
@@ -822,16 +898,28 @@
     "toYourSender": "With the chef who writes for you",
     "myOrder": "My order",
     "myDish": "My dish",
-    "fromExecutiveChef": "The Executive Chef"
+    "fromExecutiveChef": "The Executive Chef",
+    "answer": "Answer",
+    "answeringOne": "Answering this one.",
+    "whichChef": "Which chef?",
+    "errors": {
+      "RATE_LIMIT": "That is enough for one hour. The fridge will still be here.",
+      "NOT_A_CHEF_HERE": "Nobody by that name is cooking at this table.",
+      "REPLY_NEEDS_PARENT": "Pick something to answer first.",
+      "REPLY_PARENT_NOT_FOUND": "That one has gone, or it was itself an answer — the fridge only goes one deep.",
+      "OPENER_HAS_NO_PARENT": "That phrase starts something; it does not answer anything.",
+      "PHRASE_NEEDS_VALUE": "That phrase has a blank in it. Fill it in.",
+      "PHRASE_TAKES_NO_VALUE": "That phrase has no blank to fill.",
+      "VALUE_TOO_LONG": "That is too long for a fridge door."
+    }
   },
   "pro": {
     "badge": "Crème",
     "title": "About Crème",
-    "freeForever": "Everything a dinner needs is free, and stays free: any dinner, any number of guests, every rule of the game. Nobody at a table is playing a smaller version of it.",
-    "what": "Crème adds no powers. It makes the evening run smoother and look better: thematic environments (a Christmas one, a midsummer one), more room to be kind to your cook, and others ideas still being worked out. Crème allows the Excutive Chef to share Crème with every guests at the dinner.",
+    "freeForever": "Everything a dinner needs is free, and stays free for any dinner.",
+    "what": "Crème unlocks special features.",
     "needed": "That setting is part of Crème.",
     "lockedHere": "Part of Crème.",
-    "whatIsIt": "What is Crème?",
     "seeWhatItOpens": "See what Crème opens →",
     "status": {
       "on": "You have Crème.",
@@ -859,11 +947,7 @@
     },
     "ways": {
       "title": "How you would get it",
-      "oneByOne": "Buy one thing, keep it forever",
-      "oneByOneWhat": "A word list or a cloth, bought once and yours on every dinner you ever organise.",
-      "yearly": "Everything, for a year — {{price}}",
-      "yearlyWhat": "Every list, every cloth, and three recipes per cook, on every dinner you organise for a year.",
-      "yearlyRefund": "Bought through the store, so the store handles refunds under its own rules.",
+      "yearly": "Everything, all the features for a year — {{price}}",
       "freeWhileTesting": "Free while CovertCook is being tested: switch Crème on above and all of this is yours until {{date}}, without paying for anything. After that date this is where it is bought — here, in the app.",
       "notYet": "Not yet: there is no way to pay inside the app at the moment. Nothing here can be bought, and nothing is being held back from you."
     },
@@ -905,7 +989,7 @@
     "updated": "Last updated",
     "termsDoc": {
       "title": "Terms of use",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Who you are agreeing with",
@@ -930,9 +1014,17 @@
           ]
         },
         {
+          "heading": "Photographs at a dinner",
+          "body": [
+            "You can add photographs to a dinner you are in, look at the ones the others added, and save them to your own device. Only the people at that dinner can see them.",
+            "Upload only what is yours to upload. A photograph of somebody who has not agreed to be in that album is not, and posting one anyway is the kind of thing an account gets suspended for.",
+            "The Executive Chef can remove any photograph from their dinner, you can remove your own, and anybody at that table can report one. The album stays reachable to the people who were there after the dinner itself is deleted."
+          ]
+        },
+        {
           "heading": "Your content",
           "body": [
-            "Your recipes, messages and dinner names stay yours. You give us only what is needed to run the app: storing them, showing them to the people in your dinner, and backing them up.",
+            "Your recipes, photographs, messages and dinner names stay yours. You give us only what is needed to run the app: storing them, showing them to the people in your dinner, and backing them up.",
             "Delete your account and that content goes with it, except where removing it would break a dinner somebody else organised. What remains is then stripped of anything identifying you."
           ]
         },
@@ -961,7 +1053,7 @@
     },
     "privacyDoc": {
       "title": "Privacy",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Who holds your data",
@@ -976,7 +1068,16 @@
             "A display name, which is what people who invite you see.",
             "Your dietary restrictions, so that a dinner does not serve you something you cannot eat.",
             "What you write in the app: recipes, the canned messages you send, the phrases you post to the fridge, and how you voted.",
+            "The photographs you add to a dinner's album, and the captions you put on them.",
+            "If you turn notifications on, the address your browser hands us to reach that device. It is a delivery address, not a name, and turning them off again removes it.",
             "Nothing is collected for advertising. There is no advertising, no tracking across other sites, and no analytics profile of you."
+          ]
+        },
+        {
+          "heading": "Why we are allowed to hold it",
+          "body": [
+            "Your account, your dinners and what you write in them are held because you asked us to run a dinner for you. That is a contract, and it is the basis in Article 6(1)(b) of the GDPR.",
+            "Dietary and allergy data rests on your explicit consent and on nothing else — Article 9(2)(a). It is the one thing here you can withdraw without losing the account."
           ]
         },
         {
@@ -988,9 +1089,20 @@
           ]
         },
         {
+          "heading": "Photographs",
+          "body": [
+            "Anybody at a dinner can add photographs to that dinner's album, see the ones everybody else added, and save them to their own device. Nobody outside that dinner can.",
+            "Where the photograph was taken is removed before it leaves your phone. A picture from a phone carries the coordinates of the flat it was taken in; the app re-draws the image and uploads the pixels alone, so the camera, the timestamp and the location never arrive here at all.",
+            "The album is stored closed, and shown through links that stop working after an hour — a link forwarded outside the app dies on its own.",
+            "The Executive Chef of a dinner can take any photograph in it down for everybody, the person who added it can take their own down, and anybody at that table can report one. The album outlives the dinner on purpose: it stays reachable to the people who were there after the evening itself is gone.",
+            "Photographs of people who have not agreed to be in that album should not be uploaded. That part is on whoever presses the button."
+          ]
+        },
+        {
           "heading": "Who else touches it",
           "body": [
-            "Supabase hosts the database and the accounts. Netlify serves the app. Cloudflare Turnstile checks that a sign-up comes from a person, and sees only what it needs to answer that. Resend sends email.",
+            "Supabase hosts the database, the accounts and the photographs, in a data centre in Germany. Netlify serves the app, and Resend sends the email the app has to send you.",
+            "So the data sits in the European Union — but all three are American companies, and an American parent can in principle be reached by American authorities wherever the disks are. Each is bound to us by a processing agreement on the European Commission's standard contractual clauses, which is the mechanism that covers it.",
             "Each is a processor acting on our instructions. Nothing is sold, and nothing is shared with anybody not needed to make the app work."
           ]
         },
@@ -999,7 +1111,8 @@
           "body": [
             "Your account and its content are kept while the account exists.",
             "Fridge messages are deleted after 24 hours — they are small talk for one evening and worth nothing after it.",
-            "Delete your account and the rest goes with it, except where removing it would break a dinner somebody else organised; what stays is stripped of anything identifying you."
+            "Ask for your account to be deleted and the account itself goes at once: the email address, the password and the open sessions are gone immediately, and what remains inside dinners other people organised is stripped of anything identifying you.",
+            "That request can be cancelled for thirty days by signing in again. After thirty days it is carried out for good and there is nothing left to cancel."
           ]
         },
         {
@@ -1067,7 +1180,8 @@
           ]
         }
       ]
-    }
+    },
+    "help": "Help & contact"
   },
   "push": {
     "title": "Notifications",
@@ -1360,5 +1474,232 @@
     "locked": "That theme is not unlocked on this account.",
     "paused": "Back in the workshop. It is being redrawn, so nobody can lay a table with it yet — not even with Crème. It will come back on this shelf when it is finished.",
     "pausedTag": "In the workshop"
+  },
+  "filRouge": {
+    "freeKind": "Free, all of it, for ever — this kind is never Crème.",
+    "week": {
+      "title": "This week's selection",
+      "hint": "One thread of every kind, chosen by hand — free for everybody until Sunday, whether or not you have Crème. The reason for each is written under it.",
+      "hintPerCook": "One thread of every kind, chosen by hand and free until Sunday. They are a single value each, so a table takes one between them — they are not dealt one per cook.",
+      "take": "Take this one",
+      "taken": "Taken — this is the dinner's thread"
+    },
+    "searchCountry": "Search for a country",
+    "compass": "Draw one at random, sealed",
+    "sealedChosen": "🧭 Sealed. A country has been drawn for this dinner and nobody is told which — not even you — until the roulette has run and the recipes are being written.",
+    "sealedLine": "Tonight's thread: sealed until the dinner is dealt 🧭",
+    "noCountry": "No country by that name.",
+    "oneEach": "One each",
+    "pickOne": "Nothing chosen yet",
+    "useThisKind": "Deal this kind, one per cook",
+    "kindChosen": "Being dealt, one per cook",
+    "hardLetters": "Fair warning: {{items}} are not hard, they are close to unbuildable — and the ballot asks how well each dish followed the thread.",
+    "label": "Tonight's thread",
+    "none": "No thread",
+    "noneHint": "The dinner is open — everyone cooks whatever they like.",
+    "pick": "Give the dinner a thread",
+    "explain": "One direction every recipe is written against. Nothing checks it: the table is the judge.",
+    "turnsIn": "New selection in {{time}}",
+    "turnsAt": "The selection changes Sunday at midday.",
+    "thisWeek": "This week",
+    "drawn": "This week's pick",
+    "lockedHint": "Crème opens this one — or take one of this week's selection, above.",
+    "scope": {
+      "label": "Who does it apply to?",
+      "SHARED": "The same for everybody",
+      "SHAREDHint": "One thread for the whole table. Six dishes that belong together.",
+      "PER_COOK": "A different one for each cook",
+      "PER_COOKHint": "The draw hands every cook their own. Six countries on one table is a world tour in an evening."
+    },
+    "mine": "Yours: {{value}}",
+    "forMyCook": "Your cook has: {{value}}",
+    "onTheMenu": "Tonight's thread: {{value}}",
+    "clash": "This thread puts {{items}} on the table, and somebody here has said that matters to them. It is still yours to choose — the dinner is shared, so they will need to be told.",
+    "frozen": "The thread is settled: the roulette has already dealt it, and people are writing against it.",
+    "category": {
+      "COUNTRY": "A country",
+      "COLOUR": "A colour",
+      "LETTER": "A letter",
+      "TECHNIQUE": "A way of cooking",
+      "STAPLE": "One ingredient",
+      "ERA": "A time"
+    },
+    "categoryHint": {
+      "COUNTRY": "Seven of the world's kitchens, and they change every week.",
+      "COLOUR": "Every dish the same colour. Blue is the hard one, and the funny one.",
+      "LETTER": "Every dish starting with the same letter.",
+      "TECHNIQUE": "One constraint on how it is made — and every one of them works for a dessert too.",
+      "STAPLE": "One ingredient in every dish, from the aperitif to the pudding.",
+      "ERA": "A period, or a memory. Some of these are not history."
+    },
+    "macro": {
+      "1": "Wheat and dairy",
+      "2": "Wheat and rice",
+      "3": "Rice",
+      "4": "Roots and tubers",
+      "5": "Millet and sorghum",
+      "6": "Maize",
+      "7": "Taro and breadfruit"
+    },
+    "group": {
+      "1-A": "The Mediterranean",
+      "1-B": "Eastern Europe and the Caucasus",
+      "1-C": "Northern Europe and the New World",
+      "2-A": "The Arabian Peninsula",
+      "2-B": "The Maghreb and the Levant",
+      "2-C": "The Central Asian Steppe",
+      "3-A": "East Asia",
+      "3-B": "Maritime Southeast Asia",
+      "3-C": "Mainland Southeast Asia",
+      "3-D": "The Indian Subcontinent",
+      "4-A": "The Zambezi",
+      "4-B": "The Great Lakes",
+      "4-C": "The Congo Basin",
+      "4-D": "West Africa",
+      "4-E": "The Rice Coast",
+      "5-A": "Nilo-Saharan",
+      "5-B": "The African Sahel",
+      "5-C": "The Ethiopian Highlands",
+      "6-A": "Southern Africa",
+      "6-B": "Latin America",
+      "6-C": "The Islands",
+      "7-A": "The Pacific Islands",
+      "7-B": "Equatorial Africa"
+    },
+    "value": {
+      "RED": "Red",
+      "ORANGE": "Orange",
+      "YELLOW": "Yellow",
+      "GREEN": "Green",
+      "BLUE": "Blue",
+      "PURPLE": "Purple",
+      "PINK": "Pink",
+      "WHITE": "White",
+      "BLACK": "Black",
+      "BROWN": "Brown",
+      "NO_OVEN": "No oven",
+      "RAW_ONLY": "Nothing cooked",
+      "GRILLED": "On the grill",
+      "FRIED": "Fried",
+      "STEAMED": "Steamed",
+      "ONE_PAN": "One pan only",
+      "SERVED_COLD": "Served cold",
+      "ALL_LIQUID": "Liquid",
+      "NO_KNIFE": "No knife needed",
+      "ONE_BITE": "One mouthful",
+      "UNDER_A_CRUST": "Under a crust",
+      "ROLLED": "Rolled up",
+      "EGG": "Egg",
+      "POTATO": "Potato",
+      "TOMATO": "Tomato",
+      "RICE": "Rice",
+      "BREAD": "Bread",
+      "CHEESE": "Cheese",
+      "CHOCOLATE": "Chocolate",
+      "LEMON": "Lemon",
+      "MUSHROOM": "Mushroom",
+      "PULSES": "Pulses",
+      "FISH": "Fish",
+      "HONEY": "Honey",
+      "APPLE": "Apple",
+      "PUMPKIN": "Pumpkin",
+      "GARLIC": "Garlic",
+      "ONION": "Onion",
+      "BUTTER": "Butter",
+      "ALMOND": "Almond",
+      "CREAM": "Cream",
+      "CHILLI": "Chilli",
+      "ANCIENT_ROME": "Ancient Rome",
+      "MEDIEVAL": "The Middle Ages",
+      "VERSAILLES": "Versailles",
+      "TWENTIES": "The 1920s",
+      "FIFTIES_AMERICA": "1950s America",
+      "SEVENTIES": "The 1970s",
+      "EIGHTIES": "The 1980s",
+      "THE_FUTURE": "The future",
+      "SCHOOL_CANTEEN": "The school canteen",
+      "FAMILY_PICNIC": "A family picnic",
+      "SUNDAY_AT_GRANDMAS": "Sunday at your grandmother's",
+      "CAMPING": "Camping"
+    },
+    "days": "{{count}} day",
+    "days_other": "{{count}} days",
+    "hours": "{{count}} hour",
+    "hours_other": "{{count}} hours",
+    "nextWeek": "On Sunday: {{items}}",
+    "saved": "The thread is set. It stays changeable until the roulette deals.",
+    "someDishes": "Some dishes from there: {{items}}. Ideas, not a menu.",
+    "shut": "This kind is part of Crème. Everything in it is shown, and nothing in it can be chosen yet.",
+    "shutButWeek": "This kind is part of Crème. One of it is free this week — {{value}} — and it is taken in the selection above, where the reason for it is.",
+    "perCookShut": "Dealing one each out of this kind needs Crème: without it the only value here is this week's one, and six cooks would all be dealt the same thread."
+  },
+  "help": {
+    "title": "Questions, and how to reach us",
+    "intro": "Everything here is answerable without an account. If what you need is not on this page, the address at the bottom is read by a person.",
+    "faq": [
+      {
+        "q": "What is CovertCook?",
+        "a": [
+          "A dinner among friends where nobody cooks their own idea. Each person is secretly given another guest, and writes them a recipe that the other has to cook. Everyone brings their dish, it is served as a shared buffet, and afterwards the table ranks the dishes and finds out who wrote for whom.",
+          "The tension is the whole point: you choose what somebody else has to cook, you do not know who chose yours, and you all find out at the end."
+        ]
+      },
+      {
+        "q": "Does it cost anything?",
+        "a": [
+          "No. Unlimited dinners, any number of guests, and every feature that changes how the game is played is free and stays free.",
+          "Crème is the paid side and it sells only how an evening looks and feels — tablecloths, pseudonym sets, themed evenings, more than one recipe per brief. Nothing in it makes anybody's game better than their neighbour's. It is one price for everything, €5 for a year, and a dinner carries its host's Crème, so a table is never split into paying and non-paying guests. Nothing can actually be bought yet."
+        ]
+      },
+      {
+        "q": "Someone at the table has an allergy. How does that work?",
+        "a": [
+          "Because it is a shared buffet, allergies and diets are checked against the whole table, not only against the person who will eat that dish.",
+          "The app tells, it does not refuse. While a recipe is being written, anything on it that somebody at the table has declared is named back to the writer so they can change it. If it is sent anyway the dish is served, the Executive Chef is told which allergen is on the table so it can be announced out loud, and a card goes beside the dish.",
+          "Refusing at the moment of sending would arrive at the one person who can do nothing about it, and would tell the allergic guest nothing at all."
+        ]
+      },
+      {
+        "q": "What happens if a guest drops out?",
+        "a": [
+          "The Executive Chef decides, because it is a choice rather than a repair. Closing the chain means everybody still has a dish to make, at the cost of handing one cook a different recipe than the one they already had. Leaving it disturbs nobody and the buffet is one dish shorter.",
+          "A dish whose cook has gone is not listed for a rank nobody can give it."
+        ]
+      },
+      {
+        "q": "Can I change my name?",
+        "a": [
+          "Your public name is a unique handle, so changing it releases the old one for somebody else to take. Your pseudonym inside a dinner — Chef Basilic and the rest — is assigned per dinner and means nothing outside it."
+        ]
+      },
+      {
+        "q": "Who can see what I wrote?",
+        "a": [
+          "Your cook, once you send it, and nobody else until the dinner is over. Recipes, the pairings and the private messages are not readable by other players at all — not by a query, not by a mistake, not afterwards.",
+          "After the results are published, everybody at that table can read the recipes and save the ones they liked."
+        ]
+      },
+      {
+        "q": "Is my data safe?",
+        "a": [
+          "The game rules live in the database rather than in the browser, so nothing sensitive is ever sent to a screen that should not show it. Dietary information is treated as health data, which is what it is.",
+          "The privacy policy says what is collected and why, and the moderation policy says what happens when somebody reports something."
+        ]
+      }
+    ],
+    "delete": {
+      "title": "Deleting your account",
+      "body": [
+        "You can delete your account yourself, from inside the app: sign in, open your profile, and choose to delete it. There is no button on this page on purpose — if deleting an account did not require signing in, anybody could delete anybody's.",
+        "What deletion does: your login is removed and your profile is emptied of anything that identifies you. It takes effect after thirty days and you can cancel it at any point before that by signing in again.",
+        "What it does not do: it does not erase the dinners you took part in. An evening belongs to everybody who was at that table, and deleting one person's account would delete seven other people's evening. What remains carries no name."
+      ],
+      "signIn": "Sign in to delete your account →",
+      "cannotSignIn": "Cannot sign in? Write to us and we will do it for you:"
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "A person reads this address. For anything at all — a question, a problem, a report, a request about your data:"
+    }
   }
 }

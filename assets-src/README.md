@@ -27,6 +27,14 @@ the footer ever loses it, the app is no longer allowed to use them.
 `jar_money.png` came in from outside this repo; whatever its licence requires is
 not recorded here, so check it before shipping the app anywhere new.
 
+`icon-proposals/` is the exception to all of the above: those are drawn from
+scratch, and the point of drawing them was that the Flaticon free licence does
+not stretch to a store listing. The credit in the footer covers the tiles
+inside the app, which is the use it was written for; it does not travel to a
+512×512 icon sitting in a Play listing, and that icon is the app's mark rather
+than an illustration in it. Recolouring the Flaticon one does not change the
+answer — a modification stays a derivative. See `icon-proposals/README.md`.
+
 To regenerate the icons after editing a master:
 
 ```

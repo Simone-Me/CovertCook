@@ -27,19 +27,24 @@ import {
 const YEARLY_CENTS = 500
 
 /**
- * What PRO is, what it opens, and the three ways in.
+ * What Crème is, what it opens, and the two ways in.
+ *
+ * ONE PRICE, FOR EVERYTHING, FOR A YEAR. Buying a cloth or a word list on its
+ * own is gone: it split one small decision into six, and somebody who spent
+ * fifty cents on the pâtisserie still found the third recipe tab shut. What is
+ * sold is Crème, once, and everything on this page opens with it.
  *
  * THE HARDEST THING ON THIS PAGE IS BEING HONEST ABOUT THE MIDDLE OF IT.
  * Nothing can be bought — there is no payment provider wired to this app — and
- * during the test period everybody has everything anyway. A page with two big
- * buy buttons would be a shopfront with no till behind it, and the first
- * person to press one would find that out the hard way.
+ * during the test period everybody has everything anyway. A page with a big
+ * buy button would be a shopfront with no till behind it, and the first
+ * person to press it would find that out the hard way.
  *
  * So the shape is: what it opens (real, and browsable), then how you would get
  * it (described, and labelled as not yet), then the one route that does work
  * today (a code). The order is deliberate — somebody who leaves after the
  * first section has learned the true thing, which is that the free app is a
- * whole app and PRO is a look and a kindness.
+ * whole app and Crème is a look and a kindness.
  */
 export function ProPage() {
   const { t, i18n } = useTranslation()
@@ -120,33 +125,36 @@ export function ProPage() {
   /**
    * What to print in the corner of a card on the shelf.
    *
-   * "Yours" is the wrong word during the free-for-all and it is wrong in the
+   * NO PRICE, BECAUSE NOTHING ON THIS SHELF IS SOLD ON ITS OWN ANY MORE. Crème
+   * is one thing bought once a year, so fifty cents in the corner of a cloth
+   * was an offer nobody could take and a second, smaller shop next to the only
+   * one that exists. What the corner is for now is the reader's own standing:
+   * free until the date while the window is open, "yours" after it, and the
+   * word Crème on everything they have not got.
+   *
+   * "Yours" is still the wrong word during the free-for-all, and wrong in the
    * way that costs trust later: everything is unlocked, so every card would
-   * claim to be owned, and in January five of them would appear to have been
-   * taken away from somebody who was told they had them. While the window is
-   * open the card shows what it will cost and how long it is free for.
+   * claim to be owned, and in January they would appear to have been taken
+   * away from somebody who was told they had them.
    */
-  function priceLabel(item: { owned: boolean; price_cents: number | null; paused?: boolean }) {
-    // Nothing about money on a card for something that is back in the
+  function shelfLabel(item: { owned: boolean; paused?: boolean }) {
+    // Nothing about having it on a card for something that is back in the
     // workshop: it is not for sale and it is not free either, it is simply not
     // finished, and that is the only fact worth the corner.
     if (item.paused) return <em className="procard__freenow">{t('themes.pausedTag')}</em>
     if (pro?.window_open && pro.window_until) {
       return (
-        <>
-          {fromCents(item.price_cents ?? 0, locale)}
-          <em className="procard__freenow">
-            {t('pro.freeForNow', {
-              date: new Date(pro.window_until).toLocaleDateString(locale, {
-                day: 'numeric',
-                month: 'numeric',
-              }),
-            })}
-          </em>
-        </>
+        <em className="procard__freenow">
+          {t('pro.freeForNow', {
+            date: new Date(pro.window_until).toLocaleDateString(locale, {
+              day: 'numeric',
+              month: 'numeric',
+            }),
+          })}
+        </em>
       )
     }
-    return item.owned ? t('pro.opens.yours') : fromCents(item.price_cents ?? 0, locale)
+    return item.owned ? t('pro.opens.yours') : t('pro.badge')
   }
 
   return (
@@ -258,7 +266,7 @@ export function ProPage() {
                 <span className="muted procard__eg">
                   {t(`rounds.nameTheme.${x.code}Hint`, { defaultValue: '' })}
                 </span>
-                <span className="procard__price">{priceLabel(x)}</span>
+                <span className="procard__price">{shelfLabel(x)}</span>
               </div>
             ))}
           </div>
@@ -282,7 +290,7 @@ export function ProPage() {
                 <span className="muted procard__eg">
                   {t(`rounds.tableTheme.${x.code}Hint`, { defaultValue: '' })}
                 </span>
-                <span className="procard__price">{priceLabel(x)}</span>
+                <span className="procard__price">{shelfLabel(x)}</span>
               </div>
             ))}
           </div>
@@ -292,16 +300,14 @@ export function ProPage() {
       {/* ---- 2 and 3. How you would get it ---- */}
       <h2>{t('pro.ways.title')}</h2>
 
-      <div className="card stack">
-        <strong>{t('pro.ways.oneByOne')}</strong>
-        <p className="muted" style={{ margin: 0 }}>{t('pro.ways.oneByOneWhat')}</p>
-        <p className="notice">{buyingNote}</p>
-      </div>
-
+      {/* ONE OFFER, AND ONLY ONE. There used to be two — a cloth or a word list
+          bought on its own, and everything for a year — and the small one was
+          doing the app harm: it invited somebody to spend fifty cents, find
+          that three recipes were still shut, and spend again. One price, once a
+          year, everything open, is both the shorter sentence and the honest
+          one. */}
       <div className="card stack">
         <strong>{t('pro.ways.yearly', { price: fromCents(YEARLY_CENTS, locale) })}</strong>
-        <p className="muted" style={{ margin: 0 }}>{t('pro.ways.yearlyWhat')}</p>
-        <p className="muted" style={{ margin: 0 }}>{t('pro.ways.yearlyRefund')}</p>
         <p className="notice">{buyingNote}</p>
       </div>
 

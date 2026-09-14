@@ -1,5 +1,9 @@
 {
   "app": {
+    "languageChange": "Changer de langue",
+    "languageSearch": "Chercher une langue",
+    "languageConfirm": "Passer en {{lang}}",
+    "languageNone": "Aucune langue de ce nom — l’application en parle deux pour l’instant.",
     "name": "CovertCook",
     "tagline": "Un dîner, une recette secrète, une seule chaîne.",
     "language": "Langue"
@@ -94,6 +98,49 @@
     "whoSeesIt": "Ce que vous déclarez est visible par tous les convives, et rappelé à la personne qui écrit votre recette pendant qu’elle l’écrit. Si quelque chose est faux ou que vous préférez le retirer, l’adresse de contact est en pied de page."
   },
   "rounds": {
+    "createIt": "Créer",
+    "presets": {
+      "lead": "Choisissez la soirée que vous avez en tête. Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit.",
+      "CLASSIC": "Classique",
+      "CLASSICHint": "Le jeu tel qu’il est pensé : couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
+      "PARTY": "Ambiance fête",
+      "PARTYHint": "Pas de limite de couverts, le menu lisible pendant qu’il s’écrit, nappe et liste de pseudonymes tirées au sort, des services, frais partagés.",
+      "NO_SURPRISES": "Sans surprises",
+      "NO_SURPRISESHint": "Tout le monde se connaît, le menu est visible, la porte est une liste d’invités et les frais sont partagés.",
+      "NO_STRESS": "Sans stress",
+      "NO_STRESSHint": "Couvert, un code à partager, pas de limite, pas de fil rouge, rien à composer et pas d’argent à évoquer.",
+      "RANDOM": "Tout au hasard",
+      "RANDOMHint": "Chaque réponse tirée au sort, cette table comprise — et le fil rouge est scellé, donc vous le découvrez avec les autres.",
+      "MANUAL": "Je configure moi-même",
+      "MANUALHint": "Le formulaire complet : chaque décision, une par une.",
+      "mine": "Enregistrée par vous",
+      "tweak": "Ouvrir dans le formulaire",
+      "nameFirst": "Donnez d’abord un nom au dîner.",
+      "removeAsk": "Supprimer « {{name}} » ?",
+      "saveTitle": "Garder ces réglages",
+      "saveWhat": "Ils arrivent sur la grille comme une carte à vous, prête pour le prochain dîner. Enregistrer un nom déjà utilisé le remplace.",
+      "namePlaceholder": "Le dimanche chez nous",
+      "save": "Enregistrer",
+      "saved": "Enregistré. C’est sur la grille.",
+      "tooMany": "Cela fait douze tables enregistrées — supprimez-en une avant d’en garder une autre."
+    },
+    "group": {
+      "chefs": "Chefs",
+      "chefsHint": "Qui est à cette table, et ce qu’ils ont le droit de savoir.",
+      "invitation": "Invitation",
+      "covert": "Couverture",
+      "theme": "Thème",
+      "themeHint": "De quoi parle la soirée, et à quoi elle ressemble.",
+      "topic": "Sujet",
+      "pseudonym": "Pseudonymes",
+      "design": "Décor",
+      "recipe": "Recette",
+      "recipeHint": "Ce qui s’écrit, ce que ça coûte, et comment on juge.",
+      "multiple": "Multiple",
+      "budget": "Budget",
+      "courses": "Services",
+      "vote": "Vote"
+    },
     "myRounds": "Mes dîners",
     "create": "Créer un dîner",
     "join": "Rejoindre avec un code",
@@ -101,9 +148,7 @@
     "name": "Nom du dîner",
     "setup": {
       "classic": "Classique",
-      "classicHint": "dîner couvert, une recette chacun, vote activé. Rien à décider.",
-      "custom": "Personnaliser",
-      "customHint": "choisissez qui entre, qui connaît qui, et comment on vote."
+      "custom": "Personnaliser"
     },
     "comingSoon": "Bientôt disponible",
     "access": {
@@ -432,10 +477,10 @@
     "copyCode": "Copier le code",
     "copyLink": "Copier le lien",
     "rules": {
-      "fixedTitle": "Fixé pour tout le dîner",
-      "fixedWarn": "Non modifiables ensuite — ni par vous, ni par personne.",
       "liveTitle": "Modifiable pendant le dîner",
-      "liveNote": "Choisissez maintenant, changez d'avis plus tard : la flèche tournante ↺ de la passe revient sur chacun de ces réglages."
+      "liveNote": "Choisissez maintenant et changez d’avis plus tard : la flèche qui tourne ↺ sur la passe revient sur ces deux-là.",
+      "settled": "Tout ce qui est dans ces trois groupes est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Ce qui peut encore bouger en cours de route est dans l’encadré vert, en bas.",
+      "liveMark": "Modifiable pendant le dîner : la flèche qui tourne ↺ sur la passe revient sur celui-ci."
     },
     "tableTheme": {
       "label": "Thème de la table",
@@ -465,6 +510,16 @@
       "APPROVEHint": "Qui demande une place attend votre oui. Vous voyez son vrai nom avant de décider.",
       "FREE": "Qui a de quoi entrer prend sa place",
       "FREEHint": "Aucune attente et rien à faire pour vous. Qui détient le code, ou accepte une invitation, est à table."
+    },
+    "sharedMenu": {
+      "title": "Déjà au menu",
+      "nothingYet": "Rien n'a encore été envoyé.",
+      "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisùs à la même table.",
+      "label": "Montrer le menu pendant l'écriture des recettes",
+      "HIDDEN": "Garder la surprise",
+      "HIDDENHint": "Personne ne voit un plat avant le dîner.",
+      "NAMES": "Montrer les noms des plats",
+      "NAMESHint": "Les convives voient ce qui a été envoyé — les noms seuls, jamais qui. Évite que deux personnes écrivent le même plat."
     }
   },
   "briefs": {
@@ -597,6 +652,7 @@
     "send": "Envoyer",
     "report": "Signaler",
     "reported": "Signalé",
+    "you": "Vous",
     "category": {
       "CLARIFICATION": "Demander une précision",
       "SUBSTITUTION": "Demander une substitution",
@@ -669,7 +725,20 @@
     "turnout": "{{voted}} sur {{eligible}} ont voté ({{percent}} %)",
     "allVoted": "Tout le monde a voté. Fermeture du vote…",
     "deadlineSetAlready": "Ce vote a déjà une heure de fermeture, et elle ne bouge pas. Retirez-la d'abord si elle doit changer.",
-    "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde."
+    "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde.",
+    "themeRespect": "Fil rouge"
+  },
+  "share": {
+    "what": "Choisissez ce qui figure sur la carte. Rien n’est envoyé avant que vous appuyiez sur envoyer, et l’image ci-dessous est exactement ce qui quitte ce téléphone.",
+    "realNames": "Les noms",
+    "realNamesHint": "le vrai nom de qui a écrit chaque plat, au-dessus",
+    "pseudonyms": "Les pseudonymes",
+    "pseudonymsHint": "le nom de chef sous lequel il a écrit, au-dessus de chaque plat",
+    "photo": "La photo",
+    "photoHint": "la photo de la table, imprimée sur le menu",
+    "results": "Le vote",
+    "resultsHint": "les points à côté de chaque plat, et le plat de la soirée",
+    "send": "Envoyer"
   },
   "results": {
     "title": "Résultats",
@@ -682,7 +751,8 @@
       "BEST_DESSERT": "Meilleur dessert",
       "BEST_DRINK": "Meilleure boisson",
       "MOST_ORIGINAL": "Plus original",
-      "BEST_BRIEF_RESPECT": "Meilleur respect de la recette"
+      "BEST_BRIEF_RESPECT": "Meilleur respect de la recette",
+      "BEST_FIL_ROUGE": "Meilleure interprétation du fil rouge"
     },
     "nothingServed": "Aucun plat n’a été enregistré pour ce dîner.",
     "notServed": "non servi",
@@ -690,6 +760,12 @@
     "gate": {
       "RESULTS_NOT_READY": "Les résultats n’existent pas encore — le dîner n’en est pas là.",
       "RESULTS_NOT_PUBLISHED": "Le Chef exécutif a les résultats et ne les a pas encore annoncés. Patience."
+    },
+    "share": {
+      "button": "Partager le menu",
+      "note": "Les plats seulement, sauf si vous cochez une liste ci-dessus. Les noms des gens à table leur appartiennent.",
+      "winner": "Plat de la soirée : {{dish}}",
+      "downloaded": "Enregistrée. Publiez-la où vous voulez."
     }
   },
   "chain": {
@@ -822,16 +898,28 @@
     "toYourSender": "Avec le chef qui écrit pour vous",
     "myOrder": "Ma commande",
     "myDish": "Mon plat",
-    "fromExecutiveChef": "Le Executive Chef"
+    "fromExecutiveChef": "Le Executive Chef",
+    "answer": "Répondre",
+    "answeringOne": "Vous répondez à celui-ci.",
+    "whichChef": "Quel chef ?",
+    "errors": {
+      "RATE_LIMIT": "Ça suffit pour cette heure-ci. Le frigo sera toujours là.",
+      "NOT_A_CHEF_HERE": "Personne de ce nom ne cuisine à cette table.",
+      "REPLY_NEEDS_PARENT": "Choisissez d'abord à quoi répondre.",
+      "REPLY_PARENT_NOT_FOUND": "Celui-là a disparu, ou c'était déjà une réponse — le frigo ne descend que d'un cran.",
+      "OPENER_HAS_NO_PARENT": "Cette phrase lance quelque chose ; elle ne répond à rien.",
+      "PHRASE_NEEDS_VALUE": "Cette phrase a un blanc. Remplissez-le.",
+      "PHRASE_TAKES_NO_VALUE": "Cette phrase n'a pas de blanc à remplir.",
+      "VALUE_TOO_LONG": "C'est trop long pour une porte de frigo."
+    }
   },
   "pro": {
     "badge": "Crème",
     "title": "À propos de Crème",
-    "freeForever": "Tout ce qu’il faut pour un dîner est gratuit, et le restera : n’importe quel dîner, n’importe quel nombre d’invités, toutes les règles du jeu. Personne à table ne joue à une version réduite.",
-    "what": "Crème n’ajoute aucun pouvoir. Elle rend la soirée plus fluide et mieux mise : des thématiques (Noël, un solstice d’été), plus de place pour être gentil avec votre cuisinier, et d’autres idées encore à préciser. Crème permet de partager les expériences et les créations avec les autres pendans le dîner.",
+    "freeForever": "Tout ce qu’il faut pour un dîner est gratuit, et le restera, pour n’importe quel dîner.",
+    "what": "Crème débloque des fonctions spéciales.",
     "needed": "Ce réglage fait partie de Crème.",
     "lockedHere": "Fait partie de Crème.",
-    "whatIsIt": "C’est quoi, Crème ?",
     "seeWhatItOpens": "Voir ce que Crème ouvre →",
     "status": {
       "on": "Vous avez Crème.",
@@ -859,11 +947,7 @@
     },
     "ways": {
       "title": "Comment l’obtenir",
-      "oneByOne": "Acheter une chose, la garder pour toujours",
-      "oneByOneWhat": "Une liste de mots ou une nappe, achetée une fois et à vous sur tous les dîners que vous organiserez.",
-      "yearly": "Tout, pour un an — {{price}}",
-      "yearlyWhat": "Toutes les listes, toutes les nappes, et trois recettes par cuisinier, sur tous les dîners que vous organisez pendant un an.",
-      "yearlyRefund": "Acheté via le store, donc c’est le store qui gère les remboursements selon ses propres règles.",
+      "yearly": "Tout, toutes les fonctions, pour un an — {{price}}",
       "freeWhileTesting": "Gratuit pendant la phase de test de CovertCook : activez Crème plus haut et tout ceci est à vous jusqu’au {{date}}, sans rien payer. Après cette date, c’est ici que cela s’achètera — dans l’application.",
       "notYet": "Pas encore : il n’y a aucun moyen de payer dans l’application pour l’instant. Rien ici ne s’achète, et rien ne vous est retiré."
     },
@@ -905,7 +989,7 @@
     "updated": "Dernière mise à jour",
     "termsDoc": {
       "title": "Conditions d'utilisation",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Avec qui vous vous engagez",
@@ -930,9 +1014,17 @@
           ]
         },
         {
+          "heading": "Les photographies d'un dîner",
+          "body": [
+            "Vous pouvez ajouter des photographies à un dîner auquel vous participez, regarder celles des autres et les enregistrer sur votre appareil. Seules les personnes de ce dîner peuvent les voir.",
+            "N'y déposez que ce qui vous appartient. La photographie de quelqu'un qui n'a pas accepté de figurer dans cet album n'en fait pas partie, et l'y mettre quand même est le genre de chose pour laquelle un compte est suspendu.",
+            "Le Chef exécutif peut retirer n'importe quelle photographie de son dîner, vous pouvez retirer les vôtres, et n'importe qui à cette table peut en signaler une. L'album reste accessible à ceux qui y étaient une fois le dîner supprimé."
+          ]
+        },
+        {
           "heading": "Vos contenus",
           "body": [
-            "Vos recettes, messages et noms de dîner restent les vôtres. Vous ne nous accordez que ce qui est nécessaire au fonctionnement : les stocker, les montrer aux personnes de votre dîner, et les sauvegarder.",
+            "Vos recettes, photographies, messages et noms de dîner restent les vôtres. Vous ne nous accordez que ce qui est nécessaire au fonctionnement : les stocker, les montrer aux personnes de votre dîner, et les sauvegarder.",
             "Supprimez votre compte et ces contenus partent avec, sauf lorsque leur retrait casserait un dîner organisé par quelqu'un d'autre. Ce qui subsiste est alors dépouillé de tout ce qui vous identifie."
           ]
         },
@@ -961,7 +1053,7 @@
     },
     "privacyDoc": {
       "title": "Confidentialité",
-      "updated": "2026-08-24",
+      "updated": "2026-09-14",
       "sections": [
         {
           "heading": "Qui détient vos données",
@@ -976,7 +1068,16 @@
             "Un nom d'affichage, celui que voient les personnes qui vous invitent.",
             "Vos restrictions alimentaires, pour qu'un dîner ne vous serve pas ce que vous ne pouvez pas manger.",
             "Ce que vous écrivez dans l'application : recettes, messages prédéfinis, phrases postées dans le frigo, et vos votes.",
+            "Les photographies que vous ajoutez à l'album d'un dîner, et les légendes que vous leur donnez.",
+            "Si vous activez les notifications, l'adresse que votre navigateur nous donne pour joindre cet appareil. C'est une adresse de livraison, pas un nom, et les désactiver la supprime.",
             "Rien n'est collecté à des fins publicitaires. Il n'y a ni publicité, ni suivi sur d'autres sites, ni profil analytique vous concernant."
+          ]
+        },
+        {
+          "heading": "Ce qui nous autorise à les détenir",
+          "body": [
+            "Votre compte, vos dîners et ce que vous y écrivez sont conservés parce que vous nous avez demandé d'organiser un dîner pour vous. C'est un contrat, et c'est la base de l'article 6(1)(b) du RGPD.",
+            "Les données alimentaires et allergiques reposent sur votre consentement explicite et sur rien d'autre — article 9(2)(a). C'est la seule chose ici que vous pouvez retirer sans perdre le compte."
           ]
         },
         {
@@ -988,9 +1089,20 @@
           ]
         },
         {
+          "heading": "Les photographies",
+          "body": [
+            "Toute personne présente à un dîner peut ajouter des photographies à l'album de ce dîner, voir celles des autres et les enregistrer sur son propre appareil. Personne en dehors de ce dîner ne le peut.",
+            "Le lieu de la prise de vue est retiré avant que la photographie ne quitte votre téléphone. Une photo prise au téléphone porte les coordonnées de l'appartement où elle a été prise ; l'application redessine l'image et n'envoie que les pixels, si bien que l'appareil, l'horodatage et la position n'arrivent jamais jusqu'ici.",
+            "L'album est stocké fermé et montré via des liens qui cessent de fonctionner au bout d'une heure : un lien transféré hors de l'application meurt de lui-même.",
+            "Le Chef exécutif d'un dîner peut retirer n'importe quelle photographie pour tout le monde, la personne qui l'a ajoutée peut retirer la sienne, et n'importe qui à cette table peut la signaler. L'album survit au dîner à dessein : il reste accessible à ceux qui y étaient une fois la soirée effacée.",
+            "Les photographies de personnes qui n'ont pas accepté de figurer dans cet album n'ont pas à y être déposées. Cette part-là revient à qui appuie sur le bouton."
+          ]
+        },
+        {
           "heading": "Qui d'autre y touche",
           "body": [
-            "Supabase héberge la base et les comptes. Netlify sert l'application. Cloudflare Turnstile vérifie qu'une inscription vient bien d'une personne, et ne voit que ce qu'il faut pour cela. Resend envoie les e-mails.",
+            "Supabase héberge la base, les comptes et les photographies, dans un centre de données situé en Allemagne. Netlify sert l'application, et Resend envoie les e-mails que l'application doit vous adresser.",
+            "Les données restent donc dans l'Union européenne — mais ces trois sociétés sont américaines, et une maison mère américaine peut en principe être sollicitée par les autorités américaines, où que soient les disques. Chacune est liée à nous par un accord de sous-traitance fondé sur les clauses contractuelles types de la Commission européenne, qui est le mécanisme qui couvre cela.",
             "Chacun est sous-traitant et agit sur nos instructions. Rien n'est vendu, rien n'est partagé avec quiconque n'est pas nécessaire au fonctionnement."
           ]
         },
@@ -999,7 +1111,8 @@
           "body": [
             "Votre compte et son contenu sont conservés tant que le compte existe.",
             "Les messages du frigo sont supprimés au bout de 24 heures : ce sont des banalités d'un soir, sans valeur ensuite.",
-            "Supprimez votre compte et le reste part avec, sauf lorsque son retrait casserait un dîner organisé par quelqu'un d'autre ; ce qui subsiste est dépouillé de tout ce qui vous identifie."
+            "Demandez la suppression de votre compte et le compte lui-même part aussitôt : l'adresse e-mail, le mot de passe et les sessions ouvertes disparaissent immédiatement, et ce qui subsiste dans les dîners organisés par d'autres est dépouillé de tout ce qui vous identifie.",
+            "Cette demande peut être annulée pendant trente jours en vous reconnectant. Passé trente jours, elle est exécutée définitivement et il n'y a plus rien à annuler."
           ]
         },
         {
@@ -1067,7 +1180,8 @@
           ]
         }
       ]
-    }
+    },
+    "help": "Aide et contact"
   },
   "push": {
     "title": "Notifications",
@@ -1360,5 +1474,232 @@
     "locked": "Ce thème n'est pas débloqué sur ce compte.",
     "paused": "De retour à l’atelier. Elle est en train d’être redessinée : personne ne peut encore dresser une table avec — même avec Crème. Elle reviendra sur cette étagère une fois finie.",
     "pausedTag": "À l’atelier"
+  },
+  "filRouge": {
+    "freeKind": "Gratuit, en entier, pour toujours — ce type n’est jamais Crème.",
+    "week": {
+      "title": "La sélection de la semaine",
+      "hint": "Un fil rouge de chaque type, choisi à la main — gratuit pour tout le monde jusqu’à dimanche, avec ou sans Crème. La raison de chacun est écrite dessous.",
+      "hintPerCook": "Un fil rouge de chaque type, choisi à la main et gratuit jusqu’à dimanche. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
+      "take": "Prendre celui-là",
+      "taken": "Pris — c’est le fil rouge du dîner"
+    },
+    "searchCountry": "Chercher un pays",
+    "compass": "En tirer un au hasard, scellé",
+    "sealedChosen": "🧭 Scellé. Un pays a été tiré pour ce dîner et personne ne sait lequel — vous non plus — jusqu’à ce que la roulette tourne et que les recettes s’écrivent.",
+    "sealedLine": "Le fil rouge du soir : scellé jusqu’au tirage 🧭",
+    "noCountry": "Aucun pays de ce nom.",
+    "oneEach": "Un chacun",
+    "pickOne": "Rien de choisi",
+    "useThisKind": "Distribuer ce type, un par cuisinier",
+    "kindChosen": "Distribué, un par cuisinier",
+    "hardLetters": "Avertissement : {{items}} ne sont pas difficiles, elles sont quasi impossibles — et le bulletin demande si le plat a bien suivi le fil rouge.",
+    "label": "Le fil rouge",
+    "none": "Sans fil rouge",
+    "noneHint": "Le dîner est libre — chacun cuisine ce qu'il veut.",
+    "pick": "Donner un fil rouge au dîner",
+    "explain": "Une direction que chaque recette suit. Rien ne le vérifie : c'est la table qui juge.",
+    "turnsIn": "Nouvelle sélection dans {{time}}",
+    "turnsAt": "La sélection change le dimanche à midi.",
+    "thisWeek": "Cette semaine",
+    "drawn": "Le tirage de la semaine",
+    "lockedHint": "Crème ouvre celui-ci — ou prenez-en un dans la sélection de la semaine, plus haut.",
+    "scope": {
+      "label": "Pour qui vaut-il ?",
+      "SHARED": "Le même pour tout le monde",
+      "SHAREDHint": "Un seul fil pour toute la table. Six plats qui vont ensemble.",
+      "PER_COOK": "Un différent pour chaque cuisinier",
+      "PER_COOKHint": "Le tirage en donne un à chacun. Six pays sur une table, c'est un tour du monde en une soirée."
+    },
+    "mine": "Le vôtre : {{value}}",
+    "forMyCook": "Votre cuisinier a : {{value}}",
+    "onTheMenu": "Le fil rouge du soir : {{value}}",
+    "clash": "Ce fil rouge met {{items}} sur la table, et quelqu'un ici a dit que cela comptait pour lui. Le choix reste le vôtre — le dîner est partagé, il faudra donc le dire.",
+    "frozen": "Le fil rouge est arrêté : la roulette a déjà distribué, et on écrit déjà avec.",
+    "category": {
+      "COUNTRY": "Un pays",
+      "COLOUR": "Une couleur",
+      "LETTER": "Une lettre",
+      "TECHNIQUE": "Une façon de cuisiner",
+      "STAPLE": "Un ingrédient",
+      "ERA": "Une époque"
+    },
+    "categoryHint": {
+      "COUNTRY": "Sept cuisines du monde, et elles changent chaque semaine.",
+      "COLOUR": "Tous les plats de la même couleur. Le bleu est le plus difficile, et le plus drôle.",
+      "LETTER": "Tous les plats commençant par la même lettre.",
+      "TECHNIQUE": "Une contrainte sur la façon de faire — et chacune marche aussi pour un dessert.",
+      "STAPLE": "Un ingrédient dans chaque plat, de l'apéritif au dessert.",
+      "ERA": "Une période, ou un souvenir. Certaines ne sont pas de l'histoire."
+    },
+    "macro": {
+      "1": "Le blé et le lait",
+      "2": "Le blé et le riz",
+      "3": "Le riz",
+      "4": "Les racines et les tubercules",
+      "5": "Le mil et le sorgho",
+      "6": "Le maïs",
+      "7": "Le taro et le fruit à pain"
+    },
+    "group": {
+      "1-A": "La Méditerranée",
+      "1-B": "L'Europe de l'Est et le Caucase",
+      "1-C": "L'Europe du Nord et le Nouveau Monde",
+      "2-A": "La péninsule Arabique",
+      "2-B": "Le Maghreb et le Levant",
+      "2-C": "La steppe d'Asie centrale",
+      "3-A": "L'Asie de l'Est",
+      "3-B": "L'Asie du Sud-Est insulaire",
+      "3-C": "L'Asie du Sud-Est continentale",
+      "3-D": "Le sous-continent indien",
+      "4-A": "Le Zambèze",
+      "4-B": "Les Grands Lacs",
+      "4-C": "Le bassin du Congo",
+      "4-D": "L'Afrique de l'Ouest",
+      "4-E": "La côte du riz",
+      "5-A": "Nilo-saharien",
+      "5-B": "Le Sahel africain",
+      "5-C": "Les hauts plateaux éthiopiens",
+      "6-A": "L'Afrique australe",
+      "6-B": "L'Amérique latine",
+      "6-C": "Les îles",
+      "7-A": "Les îles du Pacifique",
+      "7-B": "L'Afrique équatoriale"
+    },
+    "value": {
+      "RED": "Rouge",
+      "ORANGE": "Orange",
+      "YELLOW": "Jaune",
+      "GREEN": "Vert",
+      "BLUE": "Bleu",
+      "PURPLE": "Violet",
+      "PINK": "Rose",
+      "WHITE": "Blanc",
+      "BLACK": "Noir",
+      "BROWN": "Brun",
+      "NO_OVEN": "Sans four",
+      "RAW_ONLY": "Rien de cuit",
+      "GRILLED": "Au gril",
+      "FRIED": "Frit",
+      "STEAMED": "À la vapeur",
+      "ONE_PAN": "Une seule casserole",
+      "SERVED_COLD": "Servi froid",
+      "ALL_LIQUID": "Liquide",
+      "NO_KNIFE": "Sans couteau",
+      "ONE_BITE": "En une bouchée",
+      "UNDER_A_CRUST": "Sous une croûte",
+      "ROLLED": "Roulé",
+      "EGG": "Œuf",
+      "POTATO": "Pomme de terre",
+      "TOMATO": "Tomate",
+      "RICE": "Riz",
+      "BREAD": "Pain",
+      "CHEESE": "Fromage",
+      "CHOCOLATE": "Chocolat",
+      "LEMON": "Citron",
+      "MUSHROOM": "Champignon",
+      "PULSES": "Légumineuses",
+      "FISH": "Poisson",
+      "HONEY": "Miel",
+      "APPLE": "Pomme",
+      "PUMPKIN": "Courge",
+      "GARLIC": "Ail",
+      "ONION": "Oignon",
+      "BUTTER": "Beurre",
+      "ALMOND": "Amande",
+      "CREAM": "Crème",
+      "CHILLI": "Piment",
+      "ANCIENT_ROME": "La Rome antique",
+      "MEDIEVAL": "Le Moyen Âge",
+      "VERSAILLES": "Versailles",
+      "TWENTIES": "Les années 20",
+      "FIFTIES_AMERICA": "L'Amérique des années 50",
+      "SEVENTIES": "Les années 70",
+      "EIGHTIES": "Les années 80",
+      "THE_FUTURE": "Le futur",
+      "SCHOOL_CANTEEN": "La cantine scolaire",
+      "FAMILY_PICNIC": "Un pique-nique en famille",
+      "SUNDAY_AT_GRANDMAS": "Le dimanche chez mamie",
+      "CAMPING": "Le camping"
+    },
+    "days": "{{count}} jour",
+    "days_other": "{{count}} jours",
+    "hours": "{{count}} heure",
+    "hours_other": "{{count}} heures",
+    "nextWeek": "Dimanche : {{items}}",
+    "saved": "Le fil rouge est enregistré. Il reste modifiable jusqu'au tirage.",
+    "someDishes": "Quelques plats de là-bas : {{items}}. Des pistes, pas un menu.",
+    "shut": "Ce type fait partie de Crème. Tout y est montré, et rien n’y est encore choisissable.",
+    "shutButWeek": "Ce type fait partie de Crème. Un seul y est gratuit cette semaine — {{value}} — et il se prend dans la sélection plus haut, là où se trouve la raison.",
+    "perCookShut": "Distribuer un fil rouge par cuisinier dans ce type demande Crème : sans lui la seule valeur ici est celle de la semaine, et six cuisiniers recevraient tous la même."
+  },
+  "help": {
+    "title": "Questions, et comment nous joindre",
+    "intro": "Tout ce qui est ici se lit sans compte. Si ce que vous cherchez n'y est pas, l'adresse en bas est lue par quelqu'un.",
+    "faq": [
+      {
+        "q": "Qu'est-ce que CovertCook ?",
+        "a": [
+          "Un dîner entre amis où personne ne cuisine sa propre idée. Chacun se voit attribuer en secret un autre convive et lui écrit une recette que l'autre devra préparer. Chacun apporte son plat, on sert en buffet partagé, puis la table classe les plats et découvre qui a écrit pour qui.",
+          "La tension est tout le sujet : vous choisissez ce qu'un autre devra cuisiner, vous ignorez qui a choisi le vôtre, et tout le monde l'apprend à la fin."
+        ]
+      },
+      {
+        "q": "Est-ce que c'est payant ?",
+        "a": [
+          "Non. Dîners illimités, autant de convives que vous voulez, et tout ce qui change la façon de jouer est gratuit et le restera.",
+          "Crème est la partie payante et ne vend que l'allure d'une soirée : nappes, listes de pseudonymes, soirées à thème, plus d'une recette par brief. Rien là-dedans ne donne à quelqu'un une meilleure partie qu'à son voisin. C'est un seul prix pour tout, 5 € par an, et un dîner porte le Crème de son organisateur — une table n'est donc jamais coupée en deux. Rien n'est encore réellement achetable."
+        ]
+      },
+      {
+        "q": "Quelqu'un à table est allergique. Comment ça se passe ?",
+        "a": [
+          "Comme c'est un buffet partagé, allergies et régimes sont vérifiés contre toute la table, pas seulement contre la personne qui mangera ce plat.",
+          "L'application prévient, elle ne refuse pas. Pendant l'écriture d'une recette, tout ce qui correspond à une déclaration faite à cette table est signalé à celui qui écrit, pour qu'il puisse changer. Si la recette part quand même, le plat est servi, le Chef Exécutif est prévenu de l'allergène présent pour pouvoir l'annoncer à voix haute, et un carton est posé à côté du plat.",
+          "Refuser au moment de l'envoi arriverait chez la seule personne qui ne peut plus rien y faire, et ne dirait rien du tout au convive allergique."
+        ]
+      },
+      {
+        "q": "Que se passe-t-il si quelqu'un se désiste ?",
+        "a": [
+          "Le Chef Exécutif décide, parce que c'est un choix et non une réparation. Refermer la chaîne permet à chacun d'avoir encore un plat à faire, au prix d'une recette différente pour un cuisinier. Laisser tel quel ne dérange personne et le buffet compte un plat de moins.",
+          "Un plat dont le cuisinier est parti n'est pas proposé au vote."
+        ]
+      },
+      {
+        "q": "Puis-je changer de nom ?",
+        "a": [
+          "Votre nom public est un identifiant unique : en changer libère l'ancien pour quelqu'un d'autre. Votre pseudonyme à l'intérieur d'un dîner — Chef Basilic et les autres — est attribué pour ce dîner-là et ne signifie rien en dehors."
+        ]
+      },
+      {
+        "q": "Qui peut voir ce que j'ai écrit ?",
+        "a": [
+          "Votre cuisinier, une fois la recette envoyée, et personne d'autre avant la fin du dîner. Les recettes, les attributions et les messages privés ne sont pas lisibles par les autres joueurs — ni par une requête, ni par erreur, ni après coup.",
+          "Une fois les résultats publiés, tous les convives de cette table peuvent lire les recettes et garder celles qui leur ont plu."
+        ]
+      },
+      {
+        "q": "Mes données sont-elles en sécurité ?",
+        "a": [
+          "Les règles du jeu vivent dans la base et non dans le navigateur : rien de sensible n'est envoyé à un écran qui ne devrait pas l'afficher. Les informations alimentaires sont traitées comme des données de santé, ce qu'elles sont.",
+          "La politique de confidentialité dit ce qui est collecté et pourquoi, et la politique de modération dit ce qui se passe quand quelqu'un signale quelque chose."
+        ]
+      }
+    ],
+    "delete": {
+      "title": "Supprimer votre compte",
+      "body": [
+        "Vous pouvez supprimer votre compte vous-même, depuis l'application : connectez-vous, ouvrez votre profil et choisissez de le supprimer. Il n'y a volontairement aucun bouton sur cette page — si supprimer un compte ne demandait pas de se connecter, n'importe qui pourrait supprimer celui de n'importe qui.",
+        "Ce que fait la suppression : votre identifiant de connexion est supprimé et votre profil est vidé de tout ce qui vous identifie. Elle prend effet au bout de trente jours et vous pouvez l'annuler à tout moment avant en vous reconnectant.",
+        "Ce qu'elle ne fait pas : elle n'efface pas les dîners auxquels vous avez participé. Une soirée appartient à tous ceux qui étaient à cette table, et supprimer le compte d'une personne effacerait la soirée de sept autres. Ce qui reste ne porte aucun nom."
+      ],
+      "signIn": "Se connecter pour supprimer son compte →",
+      "cannotSignIn": "Impossible de vous connecter ? Écrivez-nous et nous le ferons :"
+    },
+    "contact": {
+      "title": "Contact",
+      "body": "Une personne lit cette adresse. Pour n'importe quoi — une question, un problème, un signalement, une demande concernant vos données :"
+    }
   }
 }

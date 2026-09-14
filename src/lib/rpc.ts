@@ -67,6 +67,11 @@ export const THEME_LOCKED = 'THEME_LOCKED'
 /** Raised by create_round when a free dinner asks for a PRO-only setting. */
 export const PRO_REQUIRED = 'PRO_REQUIRED'
 
+/** The chosen fil rouge is not on this week's shelf for this account (0085). */
+export const FIL_ROUGE_LOCKED = 'FIL_ROUGE_LOCKED'
+/** The roulette has dealt, so the thread can no longer move (0085). */
+export const FIL_ROUGE_FROZEN = 'FIL_ROUGE_FROZEN'
+
 /**
  * Raised by the triggers in 0079 when a dinner built on something PRO has run
  * past its cover and its three days of grace. The dinner is on hold, not gone:
@@ -483,6 +488,9 @@ export async function createRound(input: {
   nameTheme?: NameTheme
   tableTheme?: TableTheme
   recipesPerBrief?: number
+  filRougeCategory?: FilRougeCategory | null
+  filRougeCode?: string | null
+  filRougeScope?: FilRougeScope
 }) {
   const res = await supabase.rpc('create_round', {
     p_name: input.name,
@@ -499,6 +507,9 @@ export async function createRound(input: {
     p_name_theme: input.nameTheme ?? 'FOOD',
     p_table_theme: input.tableTheme ?? 'CHECKS',
     p_recipes_per_brief: input.recipesPerBrief ?? 1,
+    p_fil_rouge_category: input.filRougeCategory ?? null,
+    p_fil_rouge_code: input.filRougeCode ?? null,
+    p_fil_rouge_scope: input.filRougeScope ?? 'SHARED',
   })
   return unwrap<string>(res) // round id
 }
@@ -968,6 +979,10 @@ export type MessageSlotType = 'NONE' | 'INGREDIENT' | 'SHORT_TEXT'
 export type MessageDirection = 'SENDER_TO_COOK' | 'COOK_TO_SENDER'
 
 export interface MessageTemplate {
+  /** BOARD only: whether this phrase starts a thread or answers one (0088). */
+  board_role?: BoardRole | null
+  /** MEMBER: the blank is filled from the roster, not typed (0088). */
+  slot_source?: 'MEMBER' | null
   id: string
   category: MessageCategory
   locale: string
@@ -981,7 +996,7 @@ export interface MessageTemplate {
 export async function getMessageTemplates(locale: string) {
   const { data, error } = await supabase
     .from('message_templates')
-    .select('id,category,locale,body,slot_type,day_of')
+    .select('id,category,locale,body,slot_type,day_of,board_role,slot_source')
     .eq('locale', locale)
     .eq('active', true)
     // The Executive Chef's notices are BOARD phrases like any other and must
@@ -1065,6 +1080,9 @@ export interface BallotOption {
   difficulty: number | null
   est_cost: string | null
   prep_minutes: number | null
+  /** The thread THIS dish had to honour (0086). Null on a shared dinner, where
+   *  the round carries one for the whole table, and null when there is none. */
+  fil_rouge_code: string | null
 }
 
 export async function getBallotOptions(roundId: string) {
@@ -1077,6 +1095,9 @@ export interface BallotItemInput {
   rank: number
   originality_score?: number | null
   brief_respect_score?: number | null
+  /** How well it followed the fil rouge. Optional like the other two, and
+   *  never asked on a dinner that has none. */
+  theme_score?: number | null
 }
 
 export async function submitBallot(roundId: string, items: BallotItemInput[]) {
@@ -2011,6 +2032,8 @@ export async function removeCourse(roundId: string, slotId: string) {
 
 export interface BoardMessage {
   message_id: string
+  /** The phrase this one answers, or null when it starts something (0088). */
+  parent_id: string | null
   body: string
   // The author's secret name (0037). A deliberate reversal of the board's
   // original unattributability: you can see who said what and pick the
@@ -2034,9 +2057,43 @@ export async function getBoard(roundId: string) {
   return unwrap<BoardMessage[]>(res)
 }
 
-export async function postToBoard(roundId: string, templateId: string) {
-  const res = await supabase.rpc('post_to_board', { p_round_id: roundId, p_template_id: templateId })
+export async function postToBoard(
+  roundId: string,
+  templateId: string,
+  /** The blank filled in. For a chef-shaped blank this must be a name from
+   *  this dinner's roster — the server refuses anything else (0088). */
+  slotValue: string | null = null,
+  /** The opener being answered. Required for a reply, refused for anything
+   *  else, and never a reply's own id: the fridge is one level deep. */
+  parentId: string | null = null,
+) {
+  const res = await supabase.rpc('post_to_board', {
+    p_round_id: roundId,
+    p_template_id: templateId,
+    p_slot_value: slotValue,
+    p_parent_id: parentId,
+  })
   return unwrap(res)
+}
+
+/** OPEN starts something, REPLY answers one (0088). */
+export type BoardRole = 'OPEN' | 'REPLY'
+
+/** The menu while it is still being written (0087). HIDDEN keeps the
+ *  surprise; NAMES lets the table avoid three tiramisùs. */
+export type MenuVisibility = 'HIDDEN' | 'NAMES'
+
+export const MENU_NOT_SHARED = 'MENU_NOT_SHARED'
+
+export async function setMenuVisibility(roundId: string, value: MenuVisibility) {
+  const res = await supabase.rpc('set_menu_visibility', { p_round_id: roundId, p_value: value })
+  return unwrap(res)
+}
+
+/** Course and dish name for what has already been sent. No author, no cook. */
+export async function getRoundDishes(roundId: string) {
+  const res = await supabase.rpc('get_round_dishes', { p_round_id: roundId })
+  return unwrap<{ course: Course; dish_name: string }[]>(res)
 }
 
 // How many board lines have appeared since you last opened the fridge. Your
@@ -2067,4 +2124,163 @@ export interface AllergenDish {
 export async function getAllergenDishes(roundId: string) {
   const res = await supabase.rpc('get_allergen_dishes', { p_round_id: roundId })
   return unwrap<AllergenDish[]>(res)
+}
+
+
+// ---------------------------------------------------------------------------
+// Le fil rouge (0083, 0084, 0085)
+//
+// The direction a whole dinner cooks against. Six kinds; only the world is long
+// enough to rotate, and it rotates on Sunday at midday in Paris.
+// ---------------------------------------------------------------------------
+
+export type FilRougeCategory = 'COUNTRY' | 'COLOUR' | 'LETTER' | 'TECHNIQUE' | 'STAPLE' | 'ERA'
+
+/** SHARED: one thread for the table. PER_COOK: the roulette deals one each. */
+export type FilRougeScope = 'SHARED' | 'PER_COOK'
+
+export interface FilRougeOption {
+  category: FilRougeCategory
+  code: string
+  /** COUNTRY only: the micro-group ('1-A' … '7-B'). Null elsewhere. */
+  group_code: string | null
+  macro_code: string | null
+  /** On this week's shelf for everybody. */
+  drawn: boolean
+  /** This account may choose it right now — the only question a picker asks. */
+  offered: boolean
+  /** Never in a free draw; Crème or nothing. */
+  premium: boolean
+  /** What it puts on the table, in the vocabulary of foodTags.ts. */
+  contains_tags: string[]
+}
+
+export async function listFilRouge() {
+  const res = await supabase.rpc('list_fil_rouge', {})
+  return unwrap<FilRougeOption[]>(res)
+}
+
+/** Next Sunday's selection, readable today — a hard week becomes a reason to
+ *  come back rather than a disappointment. */
+export async function filRougeUpcoming() {
+  const res = await supabase.rpc('fil_rouge_upcoming', {})
+  return unwrap<{ category: FilRougeCategory; code: string; group_code: string | null }[]>(res)
+}
+
+/** When the shelf turns over. Asked of the server rather than worked out here:
+ *  the rule is midday in Paris, which is not a fixed offset from UTC. */
+export async function filRougeTurnsAt() {
+  const res = await supabase.rpc('fil_rouge_turns_at', { p_at: new Date().toISOString() })
+  return unwrap<string>(res)
+}
+
+/** One thread per kind for this week, with the reason written for each (0092).
+ *  Empty on a week nobody wrote, in which case the computed draw is still what
+ *  the shelf offers — it simply has nothing to say about itself. */
+export interface FilRougePickOfTheWeek {
+  category: FilRougeCategory
+  code: string
+  title: string | null
+  body: string | null
+}
+
+export async function filRougeEditorial() {
+  const res = await supabase.rpc('fil_rouge_editorial', {})
+  return unwrap<FilRougePickOfTheWeek[]>(res) ?? []
+}
+
+export async function setFilRouge(
+  roundId: string,
+  category: FilRougeCategory | null,
+  code: string | null,
+  scope: FilRougeScope = 'SHARED',
+) {
+  const res = await supabase.rpc('set_fil_rouge', {
+    p_round_id: roundId,
+    p_category: category,
+    p_code: code,
+    p_scope: scope,
+  })
+  return unwrap(res)
+}
+
+/** What this thread would put on the table that somebody here cannot eat.
+ *  Informs, never refuses (0069) — the host is the only person who can still
+ *  change it, so they are the person to tell. */
+export async function filRougeClash(roundId: string, category: FilRougeCategory, codes: string[]) {
+  const res = await supabase.rpc('fil_rouge_clash', {
+    p_round_id: roundId,
+    p_category: category,
+    p_codes: codes,
+  })
+  return unwrap<string[]>(res)
+}
+
+/** What `set_fil_rouge` and `create_round` take instead of a code to have one
+ *  drawn on the server and kept from everybody until the dinner is dealt
+ *  (0089). Not a code: every real one is a letter, an ISO pair or an
+ *  upper-case word. */
+export const FIL_ROUGE_SEALED = '?'
+
+export interface RoundFilRouge {
+  category: FilRougeCategory | null
+  scope: FilRougeScope | null
+  /** The table's own thread. Null when every cook has their own — and null
+   *  while a sealed one is still sealed. */
+  code: string | null
+  /** PER_COOK: the one I have to cook. */
+  my_code: string | null
+  /** PER_COOK: the one the person I am writing for has to cook. */
+  my_cook_code: string | null
+  /** Drawn by the compass and not yet readable by anybody, the host included.
+   *  It opens by itself the moment the dinner is dealt (0089). */
+  sealed: boolean
+}
+
+export async function getFilRouge(roundId: string) {
+  const res = await supabase.rpc('get_fil_rouge', { p_round_id: roundId })
+  const rows = unwrap<RoundFilRouge[]>(res)
+  return rows?.[0] ?? null
+}
+
+// ---------------------------------------------------------------------------
+// Saved creation settings (0090). An ordinary table with an ordinary policy —
+// `profile_id = auth.uid()` is the whole rule, so there is nothing here for a
+// SECURITY DEFINER function to strip on the way out.
+// ---------------------------------------------------------------------------
+
+export const TOO_MANY_PRESETS = 'TOO_MANY_PRESETS'
+
+export interface SavedSetup {
+  id: string
+  name: string
+  /** Whatever the form was the day it was saved. Validated by the reader, not
+   *  by the column: an old document is the normal case, not the exception. */
+  setup: unknown
+}
+
+export async function listSavedSetups() {
+  const { data, error } = await supabase
+    .from('round_presets')
+    .select('id,name,setup')
+    .order('created_at', { ascending: false })
+  if (error) throw error
+  return (data ?? []) as SavedSetup[]
+}
+
+/** Saving the same name twice replaces it, which is what somebody pressing
+ *  "save" with a name they have used before means by it. */
+export async function saveSetup(profileId: string, name: string, setup: unknown) {
+  const { error } = await supabase
+    .from('round_presets')
+    .upsert(
+      { profile_id: profileId, name: name.trim(), setup },
+      { onConflict: 'profile_id,name' },
+    )
+  if (error) throw new Error(error.message)
+}
+
+export async function deleteSavedSetup(id: string) {
+  const { error } = await supabase.from('round_presets').delete().eq('id', id)
+  if (error) throw error
 }

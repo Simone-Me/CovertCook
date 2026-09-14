@@ -24,3 +24,11 @@ command_line_usefull.md
 *.njsproj
 *.sln
 *.sw?
+
+# The Android signing keystore. Never, under any circumstance, in git.
+android/*.jks
+android/*.keystore
+android/app/
+android/*.aab
+android/*.apk
+android/*.idsig

@@ -1,0 +1,24 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" fill="#C6202C"/>
+
+  <!-- Testa e toque: la faccia della variante B, mascherina incastrata sotto la falda. -->
+  <g fill="#FFFCF6">
+    <path d="M 162 324 v -52 a 74 74 0 0 1 24 -142 a 76 76 0 0 1 140 0 a 74 74 0 0 1 24 142 v 52 Z"/>
+    <path d="M 150 312 h 212 a 16 16 0 0 1 16 16 v 30 a 50 50 0 0 1 -50 50 h -14 a 44 44 0 0 1 -38 -22 l -8 -14 h -24 l -8 14 a 44 44 0 0 1 -38 22 h -14 a 50 50 0 0 1 -50 -50 v -30 a 16 16 0 0 1 16 -16 Z"/>
+  </g>
+  <g fill="#C6202C">
+    <path d="M 150 312 h 212 v 8 h -212 Z"/>
+    <ellipse cx="200" cy="356" rx="23" ry="19"/>
+    <ellipse cx="312" cy="356" rx="23" ry="19"/>
+  </g>
+
+  <!-- Il bancone: pieno, fino ai bordi e al fondo della tela. -->
+  <rect x="0" y="392" width="512" height="120" fill="#FFFCF6"/>
+
+  <!-- Le mani. Le dita scavalcano il bordo e stanno sul rosso; il palmo sta sul
+       bianco del bancone, ed è il contorno rosso a farlo vedere. -->
+  <g fill="#FFFCF6" stroke="#C6202C" stroke-width="16" stroke-linejoin="round" paint-order="stroke fill">
+    <path d="M 32 428 v -36 h 8 v -25 a 13 13 0 0 1 26 0 v 25 h 8 v -25 a 13 13 0 0 1 26 0 v 25 h 8 v -25 a 13 13 0 0 1 26 0 v 25 h 8 v 36 a 20 20 0 0 1 -20 20 h -70 a 20 20 0 0 1 -20 -20 Z"/>
+    <path d="M 32 428 v -36 h 8 v -25 a 13 13 0 0 1 26 0 v 25 h 8 v -25 a 13 13 0 0 1 26 0 v 25 h 8 v -25 a 13 13 0 0 1 26 0 v 25 h 8 v 36 a 20 20 0 0 1 -20 20 h -70 a 20 20 0 0 1 -20 -20 Z" transform="translate(512 0) scale(-1 1)"/>
+  </g>
+</svg>

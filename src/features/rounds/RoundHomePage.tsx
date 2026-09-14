@@ -12,6 +12,7 @@ import { fromCents, roundDeletesAt } from '../../lib/rpc'
 import { tableThemeClass, themeMark } from '../../lib/themes'
 import { Envelope } from './Envelope'
 import { CutleryLink } from '../../components/CutleryLink'
+import { FilRougeLine } from './FilRougeLine'
 import { CopyButton } from '../../components/CopyButton'
 import { Icon } from '../../components/Icon'
 import { InlineConfirm } from '../../components/InlineConfirm'
@@ -588,6 +589,7 @@ export function RoundHomePage() {
             </h1>
             {isHost && <CutleryLink to={`/rounds/${roundId}/settings`} />}
           </div>
+          <FilRougeLine roundId={roundId} />
           <p className="muted" style={{ margin: '2px 0 0' }}>
             {t('rounds.seatCount', { count: activeApprovedCount })}
           </p>

@@ -53,6 +53,15 @@ export default defineConfig({
       registerType: 'autoUpdate',
       includeAssets: ['favicon-32.png', 'favicon-192.png', 'apple-touch-icon.png'],
       manifest: {
+        // THE IDENTITY OF THE INSTALLED APP, and the one field here that is
+        // expensive to add late. Without `id`, a browser derives the app's
+        // identity from `start_url` — so the day `start_url` changes, every
+        // phone that installed this treats the new manifest as a *different*
+        // app: a second icon, an empty storage, and no way to migrate the
+        // first. Pinned to '/' now, while it costs nothing, and never touched
+        // again. It is deliberately not the same string as `start_url`
+        // conceptually: `start_url` is where to open, `id` is who this is.
+        id: '/',
         name: 'CovertCook',
         short_name: 'CovertCook',
         description: 'Secret recipe briefs for your next dinner.',
@@ -62,6 +71,22 @@ export default defineConfig({
         background_color: '#FFFCF6',
         display: 'standalone',
         start_url: '/',
+        // Everything on this origin belongs to the app. The SPA has no
+        // external area to hand back to the browser, and `/legal/*` and
+        // `/help` are pages a store reviewer opens *from inside the app*.
+        scope: '/',
+        // The default language of the listing, not of the user: i18next still
+        // detects the browser and switches to French on its own.
+        lang: 'en',
+        dir: 'ltr',
+        // Not 'portrait'. The album is photographs of a table, and the shared
+        // menu is an image people turn the phone sideways to read — locking
+        // the shell to portrait would fight the two screens most likely to be
+        // passed around at the dinner itself.
+        orientation: 'any',
+        // From the W3C-registered set, not free text: anything outside it is
+        // ignored rather than shown.
+        categories: ['food', 'lifestyle', 'social'],
         icons: [
           { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },

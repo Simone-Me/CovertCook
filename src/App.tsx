@@ -8,12 +8,14 @@ import { SchemaMismatch } from './components/SchemaMismatch'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { AppFooter } from './components/AppFooter'
 import { LegalPage } from './features/legal/LegalPage'
+import { HelpPage } from './features/legal/HelpPage'
 import { SignInPage } from './features/auth/SignInPage'
 import { SignUpPage } from './features/auth/SignUpPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { MyRoundsPage } from './features/rounds/MyRoundsPage'
 import { ProfilePage } from './features/profile/ProfilePage'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
+import { CustomRoundPage } from './features/rounds/CustomRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
 import { RoundHomePage } from './features/rounds/RoundHomePage'
 import { RoundSettingsPage } from './features/rounds/RoundSettingsPage'
@@ -66,6 +68,10 @@ function AppRoutes() {
         {/* Required by both stores the day free-text chat ships, and published
             before it rather than after (DISTRIBUTION §1). */}
         <Route path="/legal/moderation" element={<LegalPage page="moderation" />} />
+        {/* Outside the guard on purpose: the whole point is that somebody who
+            cannot sign in — or has not installed the app — can still read how
+            to have their account deleted. */}
+        <Route path="/help" element={<HelpPage />} />
         <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
         <Route
           path="/signup"
@@ -93,6 +99,18 @@ function AppRoutes() {
           element={
             <RequireAuth>
               <CreateRoundPage />
+            </RequireAuth>
+          }
+        />
+        {/* The long form is its own place rather than a panel under the grid:
+            deciding fifteen things and choosing between six ready-made tables
+            are two different jobs, and a route is what makes the difference
+            visible — including in the back button. */}
+        <Route
+          path="/rounds/new/custom"
+          element={
+            <RequireAuth>
+              <CustomRoundPage />
             </RequireAuth>
           }
         />
