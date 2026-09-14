@@ -11,6 +11,7 @@ const labels = {
   'c-mascherina-stretta.svg': 'C · mascherina stretta',
   'd-toque-larga.svg': 'D · toque larga',
   'e-con-lacci.svg': 'E · con i lacci',
+  'f-sbircia.svg': 'F · sbircia dal bancone',
 }
 const cells = files
   .map((f) => {
@@ -33,12 +34,12 @@ const html = `<style>
   h1{font-size:17px;margin:0 0 22px}
   p.note{font-size:12px;color:#6b635c;margin:20px 0 0}
 </style>
-<h1>CovertCook — toque + mascherina, sei varianti · glifo #FFFCF6 su fondo #C6202C</h1>
+<h1>CovertCook — toque + mascherina, sette varianti · glifo #FFFCF6 su fondo #C6202C</h1>
 <div class="grid">${cells}</div>
 <p class="note">Sotto ogni variante: 48 px e 72 px. A 48 px la mascherina è il primo dettaglio che si perde.</p>`
 
 const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' })
-const page = await browser.newPage({ viewport: { width: 1400, height: 440 }, deviceScaleFactor: 2 })
+const page = await browser.newPage({ viewport: { width: 1620, height: 440 }, deviceScaleFactor: 2 })
 await page.setContent(html)
 await page.screenshot({ path: 'VARIANTI.png', fullPage: true })
 await browser.close()

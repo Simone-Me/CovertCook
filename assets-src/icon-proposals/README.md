@@ -21,7 +21,7 @@ Palette identica a quella attuale: glifo `#FFFCF6` su fondo `#C6202C`
 | `3-toque-mask.svg` | Cappello da chef con la mascherina — *covert cook*, letterale |
 | `4-envelope-fork.svg` | Busta chiusa da un sigillo con le posate — il brief che arriva |
 | `5-pot-lid-ajar.svg` | Pentola col coperchio scostato — qualcosa sotto che non si vede |
-| `toque/` | Sei varianti del terzo concetto |
+| `toque/` | Sette varianti del terzo concetto. `f-sbircia` è la più diversa: non un simbolo ma una scena — la testa spunta da dietro il bancone, gli occhi appena sopra il bordo, le mani appoggiate sopra. Costa in leggibilità a 48 px quello che guadagna in carattere a 512 |
 
 `PROPOSTE.png` e `toque/VARIANTI.png` sono i provini: ogni proposta a 196 px
 con la maschera arrotondata, e sotto a 48 e 72 px. **La riga piccola è la prova
