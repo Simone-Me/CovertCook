@@ -28,7 +28,7 @@ cook, you don't know who chose yours, and you all find out at the end.
 | **Sender** | The Player who writes a Brief. |
 | **Cook** | The Player who receives it and must prepare it. |
 | **Slot** | A course to fill: aperitif / nibbles / starter / first course / main / side / cheese / dessert / drink / other (`0066`, in the order a meal is eaten). |
-| **Fil rouge** | A direction the whole dinner cooks against — a country, a colour, a letter, a technique, an ingredient, an era (`0083`). Optional, unchecked, and free. |
+| **Fil rouge** | Shown in the app as *Dinner theme* / *Thème du dîner*. A direction the whole dinner cooks against — a country, a colour, a letter, a technique, an ingredient, an era (`0083`). Optional, unchecked, and free. |
 | **Pairing** | The Sender → Cook link. |
 | **Chain** | The full cycle of pairings: A→B→C→…→A. |
 

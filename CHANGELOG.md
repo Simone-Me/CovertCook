@@ -73,6 +73,16 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Changed: the fil rouge is called the dinner theme on screen.** "Fil rouge" and
+"thread" asked people to learn a word before they could use the setting; *Thème
+du dîner* / *Dinner theme* says what it is. Every string a person reads says it
+now — the label, the line on the table and the recipe, the ballot's column, the
+award, the weekly selection, the tutorial. The code, the i18n keys and the
+schema keep `filRouge`: it is still the product's internal word (README). In the
+setup form the fold is *Sujet du dîner* / *Dinner topic*, and the group that
+held it, the pseudonyms and the cloth becomes *Ambiance*, so the page does not
+read "Theme › Topic › theme".
+
 **Changed: one free cloth, the red checks (`0094`).** Elegant leaves the shelf
 for good — deleted from `table_theme_catalogue` rather than paused, because a
 paused row says it is coming back. Dinners already laid on it keep their cloth
