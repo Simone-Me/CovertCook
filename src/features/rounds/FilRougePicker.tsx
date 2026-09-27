@@ -6,7 +6,9 @@ import { ChoiceList } from '../../components/ChoiceList'
 import {
   countryName,
   useFilRougeLabel,
+  FIL_ROUGE_KINDS as CATEGORIES,
   FIL_ROUGE_MARK,
+  FREE_KINDS,
   HARD_LETTERS,
   MACRO_PHOTO,
 } from '../../lib/filRouge'
@@ -23,17 +25,6 @@ import {
   type FilRougeScope,
 } from '../../lib/rpc'
 
-// THE TWO FREE KINDS FIRST, and that is the whole of the reasoning: since 0091
-// an ingredient and a way of cooking are free in full, for everybody, for ever,
-// and the four below them open through the week's selection or through Crème.
-// A host on the free app should meet what is theirs before what is not.
-const CATEGORIES: FilRougeCategory[] = ['STAPLE', 'TECHNIQUE', 'COUNTRY', 'COLOUR', 'LETTER', 'ERA']
-
-// The two kinds that are free in full, for ever (0091). The server is the
-// authority — `fil_rouge_category.free` is what `offered` is computed from —
-// and this list exists only so the picker can SAY so: with Crème every row is
-// offered, so "everything here is unlocked" cannot be read back off the shelf.
-const FREE_KINDS: FilRougeCategory[] = ['STAPLE', 'TECHNIQUE']
 
 /** What the top of the picker asks, before anything else: nothing, one for the
  *  table, or one each. */

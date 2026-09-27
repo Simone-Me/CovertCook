@@ -73,6 +73,16 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Changed: the Crème page says what it opens in the dinner theme.** It listed the
+extra recipe ideas, the word lists and the cloths, and nothing about the theme —
+which since `0091`–`0093` is the largest thing Crème opens. A new fold, second
+after the recipes, shows the six kinds as cards: an ingredient and a way of
+cooking marked free, the countries, colours, letters and eras marked Crème, each
+with how many values it holds. Under them, the two sentences that keep it
+honest: without Crème the four are not shut (a pick a week in each is free), and
+Crème also deals a different theme to every cook. The kind lists moved from
+`FilRougePicker` to `lib/filRouge.ts` so both screens read the same ones.
+
 **Changed: the fil rouge is called the dinner theme on screen.** "Fil rouge" and
 "thread" asked people to learn a word before they could use the setting; *Thème
 du dîner* / *Dinner theme* says what it is. Every string a person reads says it

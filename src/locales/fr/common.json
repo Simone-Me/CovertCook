@@ -944,7 +944,12 @@
       "recipesEg3": "Idée 3",
       "recipesWhy": "Plus d’écriture pour vous, plus de marge pour lui. Personne à table n’est désavantagé — et comme un dîner porte le Crème de son organisateur, chaque invité en écrit trois quand le Executive Chef l’a.",
       "names": "La liste de mots dont sortent les pseudonymes de votre table. Elle donne aussi sa marque au dîner et son visage à chaque chef dans le frigo.",
-      "tables": "La nappe sur laquelle la soirée est mise. Uniquement l’apparence — rien ici ne change une règle du jeu."
+      "tables": "La nappe sur laquelle la soirée est mise. Uniquement l’apparence — rien ici ne change une règle du jeu.",
+      "theme": "Ce vers quoi toute la table cuisine. Un ingrédient et une façon de cuisiner sont gratuits, en entier, pour toujours. Crème ouvre les quatre autres en entier : les pays du monde, les couleurs, les lettres et les époques.",
+      "themeSize_one": "{{count}} choix",
+      "themeSize_other": "{{count}} choix",
+      "themeWeek": "Sans Crème, ces quatre-là ne sont pas fermés pour autant : chaque semaine, un choix dans chacun est offert à tout le monde, avec la raison de ce choix.",
+      "themePerCook": "Et un thème différent pour chaque cuisinier, tiré par la roulette : six pays sur une table, c'est un tour du monde en une soirée."
     },
     "ways": {
       "title": "Comment l’obtenir",

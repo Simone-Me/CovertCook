@@ -944,7 +944,12 @@
       "recipesEg3": "Idea 3",
       "recipesWhy": "It is more writing for you and more room for them. Nobody at the table is at a disadvantage — and because a dinner carries its host’s Crème, every guest writes three when the Executive Chef has it.",
       "names": "The word list your table’s pseudonyms are drawn from. It also gives the dinner its mark and every chef their face in the fridge.",
-      "tables": "The cloth the evening is laid on. Look only — nothing here changes a rule of the game."
+      "tables": "The cloth the evening is laid on. Look only — nothing here changes a rule of the game.",
+      "theme": "What the whole table cooks towards. An ingredient and a way of cooking are free, in full, for ever. Crème opens the other four in full: the countries of the world, the colours, the letters and the eras.",
+      "themeSize_one": "{{count}} to choose from",
+      "themeSize_other": "{{count}} to choose from",
+      "themeWeek": "Without Crème those four are not shut: every week one pick in each is free for everybody, with the reason it was picked.",
+      "themePerCook": "And a different theme for every cook, dealt by the roulette: six countries on one table is a world tour in an evening."
     },
     "ways": {
       "title": "How you would get it",
