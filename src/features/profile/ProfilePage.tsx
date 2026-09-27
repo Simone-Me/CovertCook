@@ -309,6 +309,13 @@ export function ProfilePage() {
         </span>
       </Link>
 
+      <Link to="/tutorial" className="pass__link">
+        <img src="/logo_face.webp" alt="" width={22} height={22} style={{ borderRadius: 4 }} />
+        <span>
+          <strong>{t('tutorial.profileLink')}</strong> — {t('tutorial.profileWhat')}
+        </span>
+      </Link>
+
       {/* Folded, all three of them. The page had become one long scroll where
           every setting shouted at once; they arrive closed and you open the
           one you came for. The closed row still says what the current answer

@@ -1280,7 +1280,6 @@
       "Que vous aimiez cuisiner ou que vous mangiez toujours les trois mêmes plats tout prêts, j’espère que vous prendrez plaisir à préparer la recette que quelqu’un a eu envie de partager avec vous."
     ],
     "start": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé.",
-    "next": "Un dîner d’exemple guidé arrivera bientôt ici.",
     "readAgain": "Comment fonctionne CovertCook"
   },
   "food": {
@@ -1701,6 +1700,94 @@
     "contact": {
       "title": "Contact",
       "body": "Une personne lit cette adresse. Pour n'importe quoi — une question, un problème, un signalement, une demande concernant vos données :"
+    }
+  },
+  "tutorial": {
+    "title": "Visite guidée",
+    "cta": "Faire la visite guidée — deux minutes",
+    "profileLink": "Refaire la visite guidée",
+    "profileWhat": "Un dîner pour de faux, de l’invitation à la révélation.",
+    "skip": "Passer cette étape",
+    "exit": "Quitter la visite",
+    "endTitle": "À vous de jouer",
+    "endBody": "C’est toute la soirée : vous choisissez ce qu’un autre cuisine, quelqu’un choisit le vôtre, et tout le monde le découvre à la fin. La visite reste disponible sous « Comment fonctionne CovertCook » et dans votre profil.",
+    "createFirst": "Créer mon premier dîner",
+    "home": "Retour à mes dîners",
+    "dinnerName": "Soirée mexicaine",
+    "filRouge": "Le fil rouge du soir : Mexique 🇲🇽",
+    "code": "TACO42",
+    "you": "Vous",
+    "friendsIn": "Giulia, Marco et Inès sont arrivés.",
+    "writingFor": "Vous écrivez pour {{name}}.",
+    "ballotHint": "Le meilleur en premier. Votre propre plat n’est pas dans la liste.",
+    "cookedBy": "cuisiné par {{cook}}, écrit par {{sender}}",
+    "dishes": {
+      "tacos": "Tacos al pastor",
+      "guacamole": "Guacamole",
+      "elote": "Elote",
+      "churros": "Churros con chocolate"
+    },
+    "written": {
+      "dish": "Tacos al pastor",
+      "ingredients": [
+        "600 g d’échine de porc",
+        "3 piments guajillo séchés",
+        "1/4 d’ananas",
+        "1 oignon",
+        "Tortillas de maïs",
+        "Coriandre et citron vert"
+      ],
+      "procedure": "Faites tremper les piments, mixez-les avec un peu de vinaigre et laissez mariner le porc toute une nuit.\nGrillez-le en fines tranches avec l’ananas.\nServez sur des tortillas chaudes avec oignon, coriandre et un filet de citron vert."
+    },
+    "received": {
+      "dish": "Churros con chocolate",
+      "ingredients": [
+        "25 cl d’eau",
+        "150 g de farine",
+        "1 pincée de sel",
+        "Huile de friture",
+        "Sucre et cannelle",
+        "150 g de chocolat noir",
+        "20 cl de lait"
+      ],
+      "procedure": "Portez l’eau salée à ébullition, versez la farine d’un coup et mélangez jusqu’à obtenir une pâte lisse.\nPochez-la dans l’huile chaude et faites frire jusqu’à ce qu’elle soit dorée.\nRoulez dans le sucre à la cannelle. Faites fondre le chocolat dans le lait chaud pour tremper.",
+      "note": "Trempez-les tant qu’ils sont chauds. Faites-moi confiance."
+    },
+    "messages": {
+      "first": "Pas d’ananas chez mon épicier — je peux m’en passer ?",
+      "choices": {
+        "sure": "Bien sûr, allez-y !",
+        "mango": "Essayez avec de la mangue.",
+        "hunt": "L’ananas, c’est l’âme du plat — trouvez-en !"
+      },
+      "reply": "Parfait, merci chef !",
+      "withCook": "Votre conversation avec {{name}}, qui cuisine la recette que vous avez écrite. Il ne sait pas que c’est vous.",
+      "localOnly": "Rien n’est envoyé pendant la visite : tout reste sur cet écran."
+    },
+    "say": {
+      "createPick": "Bonjour, je suis le chef ! Organisons une soirée : un dîner mexicain. Touchez « Cuisiner la recette d’un proche » — c’est le jeu tel qu’il est pensé.",
+      "createGo": "Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit. Le nom est rempli et le fil rouge du soir, c’est le Mexique. Touchez Créer.",
+      "tableHello": "Voici votre table. Chaque enveloppe est un tiroir. La rouge, c’est le pass : il dit ce que le dîner attend de vous en ce moment. Vous seul le voyez — vous êtes l’Executive Chef.",
+      "tablePass": "Ouvrez le pass.",
+      "tableInvite": "C’est ici qu’on donne une place : un code à partager, ou une invitation par nom d’utilisateur. Pour l’instant, j’amène mes amis.",
+      "tableClose": "Giulia, Marco et Inès sont là — nous voilà quatre. Fermez les inscriptions.",
+      "tableRoulette": "Maintenant la roulette. Elle décide en secret qui écrit une recette pour qui. Lancez-la.",
+      "tableAssigned": "C’est fait. Chacun écrit une recette pour quelqu’un d’autre, et personne ne sait qui écrit la sienne. Ouvrez « Ma commande ».",
+      "briefWrite": "Vous écrivez pour Jalapeño — un nom de code, vous ne savez pas qui c’est. Je vous ai préparé une recette mexicaine : envoyez-la.",
+      "tableMessages": "Envoyée ! Votre cuisinier vous a déjà écrit. Ouvrez les messages.",
+      "messagesSend": "Jalapeño cuisine votre recette et a une question — sans savoir que c’est vous. Choisissez une réponse.",
+      "messagesReply": "Toute la soirée se parle comme ça : par noms de code, jusqu’à la fin. Retour à la table.",
+      "tableDish": "La recette que vous devez cuisiner est arrivée aussi, écrite par quelqu’un de cette table. Ouvrez « Mon plat ».",
+      "recipeRead": "Voilà ce que vous cuisinerez et apporterez. Qui l’a écrite ? Vous le saurez à la fin. Retour à la table.",
+      "tableDinner": "Tout le monde a écrit. Le soir venu, faites avancer le dîner.",
+      "tableVote": "Les plats sont sur la table et tout le monde a goûté. Ouvrez le vote.",
+      "tableBallot": "À vous de voter.",
+      "ballotSend": "Classez les plats, le préféré en premier. Je les ai déjà rangés : envoyez.",
+      "tableResults": "Tout le monde a voté. Affichez les résultats.",
+      "tableOpenResults": "Ouvrez les résultats.",
+      "resultsWinner": "Le gagnant : les tacos — la recette que VOUS avez écrite pour Jalapeño. Il l’a cuisinée sans savoir qu’elle venait de vous.",
+      "resultsReveal": "Et maintenant le meilleur : qui écrivait pour qui. Révélez la chaîne.",
+      "resultsKeep": "Jalapeño, c’était Marco, et vos churros venaient de Giulia. Les photos de la soirée vont dans l’album et chaque recette dans votre carnet — les deux dans votre profil."
     }
   }
 }

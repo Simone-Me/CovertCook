@@ -28,6 +28,7 @@ import { BallotPage } from './features/vote/BallotPage'
 import { ManualTallyPage } from './features/vote/ManualTallyPage'
 import { ResultsPage } from './features/vote/ResultsPage'
 import { ProPage } from './features/pro/ProPage'
+import { TutorialPage } from './features/tutorial/TutorialPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, profile, loading, needsSignupCompletion } = useAuth()
@@ -83,6 +84,15 @@ function AppRoutes() {
           element={
             <RequireAuth>
               <MyRoundsPage />
+            </RequireAuth>
+          }
+        />
+        {/* A dinner with nobody else at it, and nothing sent to the server. */}
+        <Route
+          path="/tutorial"
+          element={
+            <RequireAuth>
+              <TutorialPage />
             </RequireAuth>
           }
         />

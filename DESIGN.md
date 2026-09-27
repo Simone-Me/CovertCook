@@ -544,6 +544,23 @@ del design) e *chef de garde* (è un turno, non una postazione).
 
 ---
 
+## 19 · La cena guidata
+
+Alla prima apertura, senza nessuna cena, parte da sola una cena finta
+(`/tutorial`): il cappello del logo (`logo_face`) parla in un fumetto in basso
+e indica l'unico pulsante che si può premere. Gli altri clic vengono ignorati e
+il cappello "scuote la testa". Sempre visibili: **Salta questo passo** (arriva
+esattamente dove sarebbe arrivato il clic) ed **Esci**.
+
+Le schermate sono **copie** di quelle vere fatte con gli stessi pezzi (busta,
+pass, barra, anello, carta del menu), non le pagine vere con dati finti. Quindi:
+**se cambi un passaggio del round, controlla `src/features/tutorial/`** — i
+pezzi condivisi seguono da soli, l'impaginazione intorno no.
+
+Parte una sola volta per dispositivo (segnata all'avvio, non alla fine), mai
+sopra un invito in corso, e resta sempre riapribile da "Come funziona
+CovertCook" e dal profilo. Non scrive niente sul server.
+
 ## Gli asset veri (e il loro peso)
 
 Le prime immagini vere sono arrivate. La regola del §4 vale da subito: è una PWA
@@ -591,6 +608,7 @@ La direzione è ferma. Restano tre scelte che cambiano il lavoro, non il mondo.
 
 | Data | Cosa è cambiato |
 |---|---|
+| 2026-09-27 | Aggiunta §19 "La cena guidata". Nuovo marchio: il cappello che sbircia sostituisce il wok. Nella creazione restano aperte solo "Cucina la ricetta di un amico" e "Configura da te"; le altre carte sono tratteggiate e "in sviluppo". |
 | 2026-08-23 | Trascrizione iniziale dall'artefatto. Aggiunte le sezioni "La lista dei chef" e "Quando si scoprono i chef", che fissano la regola della barratura durante le iscrizioni. |
 | 2026-08-23 | Aggiunta "Gli oggetti si spostano" (§3) con la tabella delle tre posizioni per oggetto, e "Il Frigo" (§3b) con il rullo e l'uovo. Piatto, bicchiere, scodella, tovagliolo, forchetta, coltello e tagliere adesso cambiano posizione fra le fasi invece di restare fermi. |
 | 2026-08-23 | Aggiunte §17 "Il frigo adesso è firmato" (marcia indietro voluta sull'anonimato della bacheca) e §18 "I due insiemi di pseudonimi". La catena si vede dal pass; `Verrouillé`→Attribuzione e `Attribué`→Preparazione. |

@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router-dom'
 import { Fold } from '../../components/Fold'
 
 /**
@@ -49,11 +50,15 @@ export function HowItWorks({ compact = false }: { compact?: boolean }) {
         ))}
       </Fold>
 
-      {!compact && (
-        <p className="muted small-italic">
-          {t('welcome.start')} {t('welcome.next')}
-        </p>
-      )}
+      {/* Under both the first-run panel and the folded one: somebody who has
+          been to a dinner may still want to see the whole evening once. */}
+      <Link to="/tutorial">
+        <button type="button" className={compact ? 'secondary' : undefined}>
+          {t('tutorial.cta')}
+        </button>
+      </Link>
+
+      {!compact && <p className="muted small-italic">{t('welcome.start')}</p>}
     </div>
   )
 }

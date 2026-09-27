@@ -3467,3 +3467,157 @@
   color: var(--accent);
   border-color: var(--accent);
 }
+
+/* ---------------------------------------------------------------------------
+ * The guided dinner.
+ *
+ * The chef sits at the foot of the screen and the page leaves room for it, so
+ * the thing being pointed at is always scrolled into the space above rather
+ * than under the bubble. What can be pressed is ringed in the accent; nothing
+ * else is dimmed, because the screen is meant to look like the real one.
+ * ------------------------------------------------------------------------- */
+
+.tour--coached {
+  padding-bottom: 220px;
+}
+
+.tour-target {
+  position: relative;
+  z-index: 3;
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+  animation: tour-ring 1.6s ease-in-out infinite;
+}
+
+@keyframes tour-ring {
+  0%,
+  100% {
+    outline-color: var(--accent);
+  }
+  50% {
+    outline-color: rgba(198, 32, 44, 0.3);
+  }
+}
+
+.coach {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  width: min(560px, calc(100% - 24px));
+  transform: translateX(-50%);
+}
+
+.coach__face {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  box-shadow: var(--paper-shadow);
+}
+
+.coach__bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--paper-solid);
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: var(--paper-shadow);
+}
+
+/* The tail, pointing at the face that is speaking. */
+.coach__bubble::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  bottom: 18px;
+  width: 14px;
+  height: 14px;
+  background: var(--paper-solid);
+  border-left: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(45deg);
+}
+
+.coach__say {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.coach__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.coach__row button {
+  width: auto;
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
+.coach__row .coach__exit {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+.coach__count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A press somewhere else: the chef shakes its head once. */
+.coach--nudge .coach__bubble {
+  animation: coach-nudge 0.45s;
+}
+
+@keyframes coach-nudge {
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-target {
+    animation: none;
+  }
+
+  .coach--nudge .coach__bubble {
+    animation: none;
+    border-color: var(--danger);
+  }
+}
+
+.tour__end {
+  align-items: center;
+  text-align: center;
+}
+
+.tour__end-face {
+  border-radius: 20px;
+  box-shadow: var(--paper-shadow);
+}

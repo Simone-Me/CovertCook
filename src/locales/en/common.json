@@ -1280,7 +1280,6 @@
       "Whether you love cooking or you eat the same three ready meals every week, I hope you enjoy making the recipe somebody wanted to share with you."
     ],
     "start": "Start by creating a dinner, or join one with a code somebody sent you.",
-    "next": "A guided example dinner is coming here soon.",
     "readAgain": "How CovertCook works"
   },
   "food": {
@@ -1701,6 +1700,94 @@
     "contact": {
       "title": "Contact",
       "body": "A person reads this address. For anything at all — a question, a problem, a report, a request about your data:"
+    }
+  },
+  "tutorial": {
+    "title": "Guided tour",
+    "cta": "Take the guided tour — two minutes",
+    "profileLink": "Take the guided tour again",
+    "profileWhat": "A pretend dinner, from the invitation to the reveal.",
+    "skip": "Skip this step",
+    "exit": "Leave the tour",
+    "endTitle": "Now it's your turn",
+    "endBody": "That is the whole evening: you choose what someone else cooks, somebody chooses yours, and everyone finds out at the end. The tour is always there under “How CovertCook works” and in your profile.",
+    "createFirst": "Create my first dinner",
+    "home": "Back to my dinners",
+    "dinnerName": "Mexican night",
+    "filRouge": "Tonight's thread: Mexico 🇲🇽",
+    "code": "TACO42",
+    "you": "You",
+    "friendsIn": "Giulia, Marco and Inès have joined.",
+    "writingFor": "You are writing for {{name}}.",
+    "ballotHint": "Best first. Your own dish is not on the list.",
+    "cookedBy": "cooked by {{cook}}, written by {{sender}}",
+    "dishes": {
+      "tacos": "Tacos al pastor",
+      "guacamole": "Guacamole",
+      "elote": "Elote",
+      "churros": "Churros con chocolate"
+    },
+    "written": {
+      "dish": "Tacos al pastor",
+      "ingredients": [
+        "600 g pork shoulder",
+        "3 dried guajillo chillies",
+        "1/4 pineapple",
+        "1 onion",
+        "Corn tortillas",
+        "Coriander and lime"
+      ],
+      "procedure": "Soak the chillies, blend them with a little vinegar and marinate the pork overnight.\nGrill it in thin slices with the pineapple.\nServe on warm tortillas with onion, coriander and a squeeze of lime."
+    },
+    "received": {
+      "dish": "Churros con chocolate",
+      "ingredients": [
+        "250 ml water",
+        "150 g flour",
+        "1 pinch of salt",
+        "Oil for frying",
+        "Sugar and cinnamon",
+        "150 g dark chocolate",
+        "200 ml milk"
+      ],
+      "procedure": "Bring the water and salt to the boil, tip in the flour and stir into a smooth dough.\nPipe it into hot oil and fry until golden.\nRoll in cinnamon sugar. Melt the chocolate into the warm milk for dipping.",
+      "note": "Dip them while they are still hot. Trust me."
+    },
+    "messages": {
+      "first": "No pineapple at my shop — can I leave it out?",
+      "choices": {
+        "sure": "Of course, go ahead!",
+        "mango": "Try mango instead.",
+        "hunt": "Pineapple is the soul of it — hunt some down!"
+      },
+      "reply": "Perfect, thanks chef!",
+      "withCook": "Your conversation with {{name}}, who is cooking the recipe you wrote. They do not know it is you.",
+      "localOnly": "Nothing in the tour is sent anywhere: it stays on this screen."
+    },
+    "say": {
+      "createPick": "Hi, I'm the chef! Let's put on an evening: a Mexican dinner. Tap “Cook a friend's recipe” — it is the game as it was designed.",
+      "createGo": "Every card says what it sets before it makes anything. The name is filled in and tonight's thread is Mexico. Tap Create.",
+      "tableHello": "This is your table. Every envelope is a drawer. The red one is the pass: it tells you what the dinner needs from you right now. Only you see it — you are the Executive Chef.",
+      "tablePass": "Open the pass.",
+      "tableInvite": "This is where people get a seat: a code to share, or an invitation by username. For now, I'll bring my friends along.",
+      "tableClose": "Giulia, Marco and Inès are in — four of us. Close the sign-ups.",
+      "tableRoulette": "Now the roulette. It decides in secret who writes a recipe for whom. Spin it.",
+      "tableAssigned": "Done. Everyone writes a recipe for somebody else, and nobody knows who is writing theirs. Open “My order”.",
+      "briefWrite": "You are writing for Jalapeño — a code name, you do not know who it is. I have drafted a Mexican recipe for you: send it.",
+      "tableMessages": "Sent! Your cook has already written to you. Open the messages.",
+      "messagesSend": "Jalapeño is cooking your recipe and has a question — without knowing it is you. Pick a reply.",
+      "messagesReply": "That is how the whole evening talks: through code names, until the end. Back to the table.",
+      "tableDish": "The recipe you have to cook has arrived too, written by somebody at this table. Open “My dish”.",
+      "recipeRead": "This is what you will cook and bring. Who wrote it? You find out at the end. Back to the table.",
+      "tableDinner": "Everyone has written. On the evening itself, move the dinner on.",
+      "tableVote": "The dishes are on the table and everybody has tasted. Open the vote.",
+      "tableBallot": "Your turn to vote.",
+      "ballotSend": "Rank the dishes, favourite first. I have ordered them already: send.",
+      "tableResults": "Everybody has voted. Show the results.",
+      "tableOpenResults": "Open the results.",
+      "resultsWinner": "The winner: the tacos — the recipe YOU wrote for Jalapeño. They cooked it without knowing it came from you.",
+      "resultsReveal": "And now the best part: who was writing for whom. Reveal the chain.",
+      "resultsKeep": "Jalapeño was Marco, and your churros came from Giulia. The evening's photos go into the album and every recipe into your recipe book — both in your profile."
     }
   }
 }

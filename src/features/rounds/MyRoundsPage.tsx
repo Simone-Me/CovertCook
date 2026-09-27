@@ -7,6 +7,7 @@ import { isPastRound, useMyRounds, type MyRoundRow } from './hooks'
 import { roundDeletesAt } from '../../lib/rpc'
 import { getMyInvitations, respondToInvitation } from '../../lib/rpc'
 import { peekJoinCode } from '../../lib/pendingJoin'
+import { tutorialSeen } from '../../lib/tutorialSeen'
 import { HowItWorks } from './HowItWorks'
 import { Fold } from '../../components/Fold'
 import { themeMark } from '../../lib/themes'
@@ -89,6 +90,14 @@ export function MyRoundsPage() {
   useEffect(() => {
     if (pendingCode) navigate(`/join?code=${encodeURIComponent(pendingCode)}`, { replace: true })
   }, [pendingCode, navigate])
+
+  // First time on this device with no dinner yet: the guided one opens by
+  // itself. Never over an invitation somebody is following — that dinner is
+  // the one they came for.
+  const firstRun = !!rounds && rounds.length === 0 && !pendingCode && !tutorialSeen()
+  useEffect(() => {
+    if (firstRun) navigate('/tutorial')
+  }, [firstRun, navigate])
 
   // Said on arrival rather than on the page being left: the round page
   // disappears at the same moment, so a message shown there would be gone

@@ -70,6 +70,28 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Added: a guided dinner, told by the chef.** The first time somebody opens
+the app with no dinner yet, a pretend one starts by itself at `/tutorial`: a
+Mexican night with Giulia, Marco and Inès, from choosing the card to the
+reveal of the chain, in 23 presses. The chef from the new mark says one
+sentence per step in a bubble at the foot of the screen and rings the one
+thing that can be pressed; every other press is swallowed and the bubble
+shakes. *Skip this step* lands exactly where the press would have; *Leave the
+tour* is on every step.
+
+*It is the same dinner for everybody and nothing reaches the server* — the
+dinner is a step number, and every screen is drawn from it. The screens are
+built from the real pieces (`Envelope`, `HostPass`, `RoundProgress`,
+`ChainCircle`, the menu card) rather than being the real pages fed pretend
+data; `DESIGN.md` §19 says what that costs.
+
+*It opens once per device*, marked when it starts rather than when it ends, so
+walking out is not undone on the next visit; never over an invitation being
+followed; and it stays one press away under "How CovertCook works" (where the
+old "a guided example dinner is coming soon" line was) and in the profile.
+`RoundProgress` now takes only the two fields it reads, so the tour can hand it
+a phase without a whole round.
+
 **Changed: two cards open, four coming.** The grid of ready-made dinners
 named moods — "Party vibe", "No stress", "No surprises" — and left the host to
 work out what each one set. Only two stay open: the game as designed, now
