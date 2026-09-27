@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link } from 'react-router-dom'
+import { Fold } from '../../components/Fold'
 import { useAuth } from '../../lib/auth'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { FoodLabel } from '../../components/FoodLabel'
@@ -208,14 +208,36 @@ export function RecipeBook() {
 }
 
 /**
- * The last three recipes kept, on the profile, and the way to the whole book.
- *
- * The book lives on its own page now: a search, two filters, thirty folded
- * recipes and an export do not belong half-way down a profile between the
- * notifications and the allergies. What the profile keeps is a glance — what
- * went in last — and one press to the rest.
+ * The book, folded on the profile: closed it says how many; open it shows the
+ * last three kept, and "see all" widens it to the whole book in place — the
+ * search, the filters and the export only arrive once somebody asked for them.
  */
-export function RecipesPreview() {
+export function RecipesFold() {
+  const { t } = useTranslation()
+  const { profile } = useAuth()
+  const [all, setAll] = useState(false)
+  const { data: recipes } = useQuery({
+    queryKey: ['my-recipes', profile?.id],
+    enabled: !!profile?.id,
+    queryFn: listMyRecipes,
+  })
+  return (
+    <Fold title={t('book.title')} aside={recipes ? String(recipes.length) : undefined}>
+      {all ? (
+        <div className="stack">
+          <RecipeBook />
+          <button type="button" className="seeall" onClick={() => setAll(false)}>
+            ↑ {t('book.showLess')}
+          </button>
+        </div>
+      ) : (
+        <RecipesPreview onSeeAll={() => setAll(true)} />
+      )}
+    </Fold>
+  )
+}
+
+function RecipesPreview({ onSeeAll }: { onSeeAll: () => void }) {
   const { t } = useTranslation()
   const { profile } = useAuth()
   const { data: recipes } = useQuery({
@@ -235,20 +257,20 @@ export function RecipesPreview() {
       <ol className="menucard__list recipepreview">
         {latest.map((r) => (
           <li key={r.id} className="menucard__row">
-            <Link to="/profile/recipes" className="menucard__course recipepreview__row">
+            <button type="button" className="menucard__course recipepreview__row" onClick={onSeeAll}>
               <span className="menucard__name">
                 <strong>{r.dish_name}</strong>
                 <span className="muted recipepreview__from">
                   {r.round_name} · {t(`book.relation.${r.relation}`)}
                 </span>
               </span>
-            </Link>
+            </button>
           </li>
         ))}
       </ol>
-      <Link to="/profile/recipes" className="seeall">
+      <button type="button" className="seeall" onClick={onSeeAll}>
         {t('book.seeAll', { count: recipes.length })} →
-      </Link>
+      </button>
     </div>
   )
 }

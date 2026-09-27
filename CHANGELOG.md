@@ -73,6 +73,15 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Changed: the book and the album are folds again, above the notifications.**
+The two cards made the profile read as two pages glued onto a settings screen.
+They are folds like everything else there, first after the Crème and tour
+links, each with its count on the closed row. Open, they show the last three;
+*See all* widens the same fold to the whole book (search, filters, export) or
+the whole grid of prints, and *Show less* folds it back. The notifications
+moved below them. `/profile/recipes` and `/profile/album` stay for the link on
+the results page.
+
 **Added: four questions about the evening, instead of four moods.** The creation
 grid is now the game as designed (one press), *Answer four questions*, the long
 form, and the host's saved cards. The questions open inside their card, one at a

@@ -1401,7 +1401,8 @@
     "exportJson": "Download as JSON",
     "latest": "The latest you kept:",
     "seeAll_one": "Open the book ({{count}} recipe)",
-    "seeAll_other": "See the whole book ({{count}} recipes)"
+    "seeAll_other": "See the whole book ({{count}} recipes)",
+    "showLess": "Show less"
   },
   "moderation": {
     "byPseudonym": "You are shown what was said before who said it, and every action here is about a seat rather than a person. That is deliberate: knowing the author first is how an opinion of somebody decides whether their message was out of line — and you do not need a name to warn a seat or to remove one.",

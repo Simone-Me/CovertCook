@@ -7,9 +7,9 @@ import { FoodLabel } from '../../components/FoodLabel'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
-import { RecipesPreview } from './RecipeBook'
+import { RecipesFold } from './RecipeBook'
 import { BlockedList } from './BlockedList'
-import { AlbumPreview } from './Album'
+import { AlbumFold } from './Album'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
@@ -316,6 +316,14 @@ export function ProfilePage() {
         </span>
       </Link>
 
+      {/* The two things you kept come first, and next to each other: these are
+          the only sections of the profile somebody opens because they want to,
+          rather than because something needs correcting. Everything below them
+          is maintenance — notifications, what you cannot eat, who you have
+          blocked, how to leave. */}
+      <RecipesFold />
+      <AlbumFold />
+
       {/* Folded, all three of them. The page had become one long scroll where
           every setting shouted at once; they arrive closed and you open the
           one you came for. The closed row still says what the current answer
@@ -351,21 +359,6 @@ export function ProfilePage() {
       <PushTest state={shownPush} />
 
       </Fold>
-
-      {/* Above the dietary list on purpose, and next to each other: these two
-          are the only sections of the profile somebody opens because they want
-          to, rather than because something needs correcting. Everything below
-          them is maintenance — what you cannot eat, who you have blocked, how
-          to leave. The two things you kept come first. */}
-      <section className="paper stack">
-        <h2 style={{ margin: 0 }}>{t('book.title')}</h2>
-        <RecipesPreview />
-      </section>
-
-      <section className="paper stack">
-        <h2 style={{ margin: 0 }}>{t('album.profileTitle')}</h2>
-        <AlbumPreview />
-      </section>
 
       <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>
       {/* Round-wide, not per-dinner: a brief is checked against every

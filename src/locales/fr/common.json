@@ -1401,7 +1401,8 @@
     "exportJson": "Télécharger en JSON",
     "latest": "Les dernières gardées :",
     "seeAll_one": "Voir le carnet ({{count}} recette)",
-    "seeAll_other": "Voir tout le carnet ({{count}} recettes)"
+    "seeAll_other": "Voir tout le carnet ({{count}} recettes)",
+    "showLess": "Réduire"
   },
   "moderation": {
     "byPseudonym": "Vous voyez ce qui a été dit avant de savoir qui l’a dit, et chaque action ici vise une place à table plutôt qu’une personne. C’est voulu : connaître l’auteur d’abord, c’est laisser l’idée qu’on se fait de quelqu’un décider si son message était déplacé — et aucun nom n’est nécessaire pour avertir une place ou la retirer.",

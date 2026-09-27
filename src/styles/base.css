@@ -827,6 +827,11 @@ input.is-taken {
 
 /* Three prints side by side on the profile: a glance, and a door. */
 .albumstrip {
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
@@ -836,13 +841,25 @@ input.is-taken {
 /* The way from a glance to the whole thing. A link that reads as one. */
 .seeall {
   align-self: flex-start;
+  width: auto;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: var(--accent);
   font-size: 14px;
   font-weight: 600;
+  text-decoration: underline;
 }
 
 .recipepreview__row {
-  text-decoration: none;
+  width: 100%;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  border-radius: 0;
   color: var(--text);
+  text-align: left;
+  cursor: pointer;
 }
 
 .recipepreview .menucard__name {
