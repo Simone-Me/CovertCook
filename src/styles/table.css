@@ -3422,6 +3422,94 @@
   border-left-color: var(--ok);
 }
 
+/* The four questions, inside the card that was pressed. One on screen at a
+   time; each answer is a button the width of the card with its consequence
+   under it, so nothing needs an info bubble to be understood. */
+.questions__step {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.questions__dots {
+  display: flex;
+  gap: 5px;
+}
+
+.questions__dots span {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.questions__dots .is-done {
+  background: rgba(198, 32, 44, 0.45);
+}
+
+.questions__dots .is-now {
+  background: var(--accent);
+}
+
+.questions__ask {
+  font-size: 18px;
+  line-height: 1.3;
+}
+
+.questions__answer {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  width: 100%;
+  padding: 11px 13px;
+  background: var(--paper-solid);
+  color: var(--text);
+  border: 1px solid var(--env-edge);
+  border-left: 4px solid var(--env-edge);
+  border-radius: var(--radius-paper);
+  text-align: left;
+}
+
+.questions__answer:hover,
+.questions__answer:focus-visible {
+  border-left-color: var(--accent);
+  background: var(--bg-elevated);
+}
+
+.questions__answer.is-picked {
+  border-color: var(--accent);
+  border-left-color: var(--accent);
+}
+
+.questions__label {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.questions__hint {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+.questions__kind {
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.questions__back {
+  align-self: flex-start;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
 /* Coming, not choosable: the card is on the shelf so the shelf says what is
    on its way, and it looks like paper that cannot be picked up. */
 .setup--soon {

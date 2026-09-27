@@ -82,11 +82,13 @@ export function CreateScreen({ reached }: ScreenProps) {
             </div>
           )}
         </div>
-        <div className="setup">
-          <button type="button" className="setup__face">
-            <span className="setup__name">{t('rounds.presets.MANUAL')}</span>
-          </button>
-        </div>
+        {(['QUESTIONS', 'MANUAL'] as const).map((key) => (
+          <div key={key} className="setup">
+            <button type="button" className="setup__face">
+              <span className="setup__name">{t(`rounds.presets.${key}`)}</span>
+            </button>
+          </div>
+        ))}
         {PRESETS.filter((p) => p.soon).map((p) => (
           <div key={p.key} className="setup setup--soon">
             <div className="setup__face" aria-disabled="true">

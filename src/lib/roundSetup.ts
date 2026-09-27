@@ -70,46 +70,37 @@ export const DEFAULT_SETUP: RoundSetup = {
   menuVisibility: 'HIDDEN',
 }
 
-/** The cards on the grid. `MANUAL` opens the long form instead of creating
- *  anything; `RANDOM` is rolled at the moment it is pressed. */
-export type PresetKey = 'CLASSIC' | 'PARTY' | 'NO_SURPRISES' | 'NO_STRESS' | 'RANDOM' | 'MANUAL'
+/** The cards on the grid. `QUESTIONS` opens the four questions in place and
+ *  `MANUAL` the long form; neither creates anything by itself. */
+export type PresetKey = 'CLASSIC' | 'QUESTIONS' | 'MANUAL' | 'FOR_SOMEONE'
 
 export interface Preset {
   key: PresetKey
-  /** Absent for the two cards that are not a fixed set of answers. */
+  /** Only a card that IS a fixed set of answers carries one. */
   setup?: RoundSetup
-  /** On the grid, shut, marked as coming: the question that should lead to it
-   *  is not written yet. Its answers are kept so it can reopen as they are. */
+  /** On the grid, shut, marked as coming: it needs something the app does not
+   *  do yet. */
   soon?: boolean
 }
 
 /**
- * FOUR TABLES, A DICE AND A DOOR.
+ * THE GAME, FOUR QUESTIONS, AND THE DOOR.
  *
- * Every card here is a dinner somebody actually described wanting, and the
- * differences between them are the ones that change the evening rather than
- * the ones that are easy to write down:
+ * The grid used to be six moods — "party", "no stress", "no surprises", a dice
+ * — and each one left the host to work out what it set. Now there is the game
+ * as designed, one card that asks about the evening instead of naming it, and
+ * the long form. The moods are not lost: every one of them is an answer to the
+ * questions below.
  *
- *  · CLASSIC is the game as designed — covered, approved at the door, one
- *    course each so the menu is composed, and the costs split.
- *  · PARTY opens everything that makes a table louder: no cap on the seats,
- *    the menu readable while it is being written (so nobody brings the third
- *    tiramisù), a cloth and a word list drawn at random, and courses.
- *  · NO SURPRISES is the dinner for people who do not want a game: everybody
- *    knows everybody, the menu is visible, the costs are split and the door is
- *    a guest list.
- *  · NO STRESS is the opposite of a checklist — covered, a code, no cap, no
- *    thread, no courses to compose and no money to talk about.
+ * FOR SOMEONE is the one evening the questions cannot reach: a party where the
+ * table plans behind the back of the person it is for. That needs a space the
+ * guest of honour cannot see, which the app does not have yet, so the card is
+ * on the grid, shut.
  *
- * ONLY THE GAME AND THE LONG FORM ARE OPEN FOR NOW. The four others named a mood
- * ("party", "no stress") and left the host to guess what it set; they come back
- * once a few yes/no questions about the evening can lead to them. Until then
- * they stay on the grid, shut, so the shelf says what is coming.
- *
- * THE COSTS ARE SPLIT WITHOUT A CEILING wherever a card splits them, and that
- * is not laziness: a card cannot invent a number that means anything to your
- * table, and a budget is the one setting that can still be agreed after the
- * dinner exists (0074). The card turns the sharing on; the table says how much.
+ * THE COSTS ARE SPLIT WITHOUT A CEILING on the classic card, and that is not
+ * laziness: a card cannot invent a number that means anything to your table,
+ * and a budget is the one setting that can still be agreed after the dinner
+ * exists (0074). The questions ask for the number instead.
  */
 export const PRESETS: Preset[] = [
   {
@@ -124,107 +115,49 @@ export const PRESETS: Preset[] = [
       costMode: 'NO_BUDGET',
     },
   },
-  {
-    key: 'PARTY',
-    soon: true,
-    setup: {
-      ...DEFAULT_SETUP,
-      seats: null,
-      requiresApproval: false,
-      slotMode: 'CATEGORIES',
-      costMode: 'NO_BUDGET',
-      menuVisibility: 'NAMES',
-      // The two looks are drawn when the card is pressed, from what this
-      // account may actually use — see `rollLooks`.
-    },
-  },
-  {
-    key: 'NO_SURPRISES',
-    soon: true,
-    setup: {
-      ...DEFAULT_SETUP,
-      access: 'INVITE',
-      anonymity: 'OPEN',
-      seats: null,
-      costMode: 'NO_BUDGET',
-      menuVisibility: 'NAMES',
-    },
-  },
-  {
-    key: 'NO_STRESS',
-    soon: true,
-    setup: {
-      ...DEFAULT_SETUP,
-      access: 'CODE',
-      anonymity: 'ANONYMOUS',
-      seats: null,
-      requiresApproval: false,
-      slotMode: 'FREE',
-      costMode: 'NONE',
-    },
-  },
-  { key: 'RANDOM', soon: true },
+  { key: 'QUESTIONS' },
   { key: 'MANUAL' },
+  { key: 'FOR_SOMEONE', soon: true },
 ]
 
-function one<T>(list: readonly T[]): T {
-  return list[Math.floor(Math.random() * list.length)]
+/**
+ * FOUR QUESTIONS ABOUT THE EVENING, NOT ABOUT THE SETTINGS.
+ *
+ * Each answer moves one or two fields that already exist; everything else stays
+ * at `DEFAULT_SETUP`. None of them turns the chain off — who cooks for whom is
+ * secret in every dinner, whatever the answers — so the first question is about
+ * NAMES, which is what `anonymity` actually decides.
+ */
+export interface EventAnswers {
+  /** Code names until the reveal, or everybody's own name. */
+  codeNames: boolean
+  /** A meal in courses, or a buffet where everybody brings what they like. */
+  courses: boolean
+  /** Dish names readable while the recipes are being written. */
+  menuVisible: boolean
+  costs: 'OWN' | 'SHARED' | 'BUDGET'
+  /** Typed by a person: '15' or '12.50'. Only read when costs is BUDGET. */
+  budget: string
 }
 
-/**
- * A cloth and a word list, drawn from what this account may actually lay.
- *
- * Never from the whole catalogue: half of it is Crème and five of the cloths
- * are back in the workshop (0082), so an honest random has to be handed the
- * shelf as the server answered it. Given nothing, it stays on the house table
- * rather than guessing.
- */
-export function rollLooks(
-  nameThemes: { code: string; owned: boolean; paused?: boolean }[] | undefined,
-  tableThemes: { code: string; owned: boolean; paused?: boolean }[] | undefined,
-): Pick<RoundSetup, 'nameTheme' | 'tableTheme'> {
-  const names = (nameThemes ?? []).filter((x) => x.owned && !x.paused)
-  const tables = (tableThemes ?? []).filter((x) => x.owned && !x.paused)
-  return {
-    nameTheme: (names.length ? one(names).code : DEFAULT_SETUP.nameTheme) as NameTheme,
-    tableTheme: (tables.length ? one(tables).code : DEFAULT_SETUP.tableTheme) as TableTheme,
-  }
+/** What the two answers that change the evening most add up to. */
+export type EventKind = 'UNDERCOVER' | 'SURPRISE_BUFFET' | 'FRIENDS' | 'PICNIC'
+
+export function eventKind(a: Pick<EventAnswers, 'codeNames' | 'courses'>): EventKind {
+  if (a.codeNames) return a.courses ? 'UNDERCOVER' : 'SURPRISE_BUFFET'
+  return a.courses ? 'FRIENDS' : 'PICNIC'
 }
 
-/**
- * EVERYTHING SHUFFLED, AND NOTHING BROKEN.
- *
- * The dice roll only over answers this account can actually give: the looks
- * come from the shelf, the recipe count stays at one without Crème, and the
- * thread is left to the compass rather than picked from a catalogue the roll
- * cannot see — which also makes the random dinner the one where even the host
- * does not know what the table is cooking against (0089).
- */
-export function randomSetup(
-  isPro: boolean,
-  nameThemes: { code: string; owned: boolean; paused?: boolean }[] | undefined,
-  tableThemes: { code: string; owned: boolean; paused?: boolean }[] | undefined,
-): RoundSetup {
-  const costMode = one(['NONE', 'NO_BUDGET'] as const)
+export function setupFromAnswers(a: EventAnswers): RoundSetup {
   return {
     ...DEFAULT_SETUP,
-    ...rollLooks(nameThemes, tableThemes),
-    access: one(['CODE', 'INVITE', 'CODE_AND_INVITE'] as const),
-    anonymity: one(['ANONYMOUS', 'ANONYMOUS', 'SPY', 'OPEN'] as const),
-    requiresApproval: Math.random() < 0.5,
-    seats: one([6, 8, 10, null] as const),
-    slotMode: one(['FREE', 'CATEGORIES'] as const),
-    votingMode: one(['LIVE', 'TIMED', 'MANUAL'] as const),
-    recipesPerBrief: isPro ? one([1, 2, 3] as const) : 1,
-    filRougeCategory: one([null, 'COUNTRY', 'COLOUR', 'LETTER'] as const),
-    // '?' is the sealed draw: the server picks and tells nobody until the
-    // dinner is dealt. For the categories that are not the world it is the
-    // same mechanism — a value drawn from this week's shelf.
-    filRougeCode: '?',
-    filRougeScope: 'SHARED',
-    costMode,
-    budget: '',
-    menuVisibility: one(['HIDDEN', 'NAMES'] as const),
+    anonymity: a.codeNames ? 'ANONYMOUS' : 'OPEN',
+    slotMode: a.courses ? 'CATEGORIES' : 'FREE',
+    // A buffet has no shape to fill, so nothing to count seats against.
+    seats: a.courses ? DEFAULT_SETUP.seats : null,
+    menuVisibility: a.menuVisible ? 'NAMES' : 'HIDDEN',
+    costMode: a.costs === 'OWN' ? 'NONE' : a.costs === 'SHARED' ? 'NO_BUDGET' : 'BUDGET',
+    budget: a.costs === 'BUDGET' ? a.budget : '',
   }
 }
 

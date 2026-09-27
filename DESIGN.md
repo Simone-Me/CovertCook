@@ -608,6 +608,7 @@ La direzione è ferma. Restano tre scelte che cambiano il lavoro, non il mondo.
 
 | Data | Cosa è cambiato |
 |---|---|
+| 2026-09-27 | Creazione: le quattro carte-atmosfera sostituite da "Rispondi a 4 domande" (nomi in codice o veri, portate o buffet, menu visibile o no, spese). Resta grigia solo "Una festa per qualcuno". "Fil rouge" si legge "Thème du dîner". Il ricettario e l'album hanno pagine proprie. Via "Élégant": l'unico telo gratuito è a quadri rossi. |
 | 2026-09-27 | Aggiunta §19 "La cena guidata". Nuovo marchio: il cappello che sbircia sostituisce il wok. Nella creazione restano aperte solo "Cucina la ricetta di un amico" e "Configura da te"; le altre carte sono tratteggiate e "in sviluppo". |
 | 2026-08-23 | Trascrizione iniziale dall'artefatto. Aggiunte le sezioni "La lista dei chef" e "Quando si scoprono i chef", che fissano la regola della barratura durante le iscrizioni. |
 | 2026-08-23 | Aggiunta "Gli oggetti si spostano" (§3) con la tabella delle tre posizioni per oggetto, e "Il Frigo" (§3b) con il rullo e l'uovo. Piatto, bicchiere, scodella, tovagliolo, forchetta, coltello e tagliere adesso cambiano posizione fra le fasi invece di restare fermi. |

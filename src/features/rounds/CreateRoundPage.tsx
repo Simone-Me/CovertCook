@@ -4,21 +4,12 @@ import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate } from 'react-router-dom'
 import { BackToTable } from '../../components/BackToTable'
 import { InlineConfirm } from '../../components/InlineConfirm'
-import {
-  applySetup,
-  DEFAULT_SETUP,
-  PRESETS,
-  randomSetup,
-  rollLooks,
-  type Preset,
-  type RoundSetup,
-} from '../../lib/roundSetup'
+import { applySetup, DEFAULT_SETUP, PRESETS, type RoundSetup } from '../../lib/roundSetup'
+import { EventQuestions } from './EventQuestions'
 import {
   deleteSavedSetup,
-  listNameThemes,
   listSavedSetups,
   listTableThemes,
-  myProStatus,
   PRO_REQUIRED,
   THEME_LOCKED,
   type SavedSetup,
@@ -35,10 +26,9 @@ import {
  * being given none; what they want is to point at the evening they have in
  * mind.
  *
- * So the door is a grid of tables somebody might actually want to lay — the
- * game as designed, a loud one, a quiet one, one with no secrets — plus a dice
- * for the table that wants to be surprised and a card that opens the long form
- * for the one host in ten who has a fifteen-question answer.
+ * So the door is the game as designed in one press, four questions about the
+ * evening for the host who has a different one in mind, and the long form for
+ * the one host in ten who has a fifteen-question answer (see `PRESETS`).
  *
  * AND THE HOST'S OWN CARDS SIT ON THE SAME GRID (0090). A saved setup is not a
  * lesser kind of preset: it is the one the person in front of the screen
@@ -60,37 +50,16 @@ export function CreateRoundPage() {
   const [submitting, setSubmitting] = useState(false)
   const [removing, setRemoving] = useState<string | null>(null)
 
-  const { data: nameThemes } = useQuery({
-    queryKey: ['themes', 'name'],
-    queryFn: listNameThemes,
-    staleTime: 5 * 60 * 1000,
-  })
   const { data: tableThemes } = useQuery({
     queryKey: ['themes', 'table'],
     queryFn: listTableThemes,
     staleTime: 5 * 60 * 1000,
-  })
-  const { data: pro } = useQuery({
-    queryKey: ['pro', 'status'],
-    queryFn: myProStatus,
-    staleTime: 60 * 1000,
   })
   const { data: mine } = useQuery({
     queryKey: ['saved-setups'],
     queryFn: listSavedSetups,
   })
 
-  const isPro = pro?.pro ?? false
-
-  /** What a card will actually create, worked out at the moment it is needed:
-   *  two of them are rolled rather than written down. */
-  function setupFor(preset: Preset): RoundSetup {
-    if (preset.key === 'RANDOM') return randomSetup(isPro, nameThemes, tableThemes)
-    if (preset.key === 'PARTY') {
-      return { ...(preset.setup as RoundSetup), ...rollLooks(nameThemes, tableThemes) }
-    }
-    return preset.setup ?? DEFAULT_SETUP
-  }
 
   /** A saved card, read defensively: it was written by whatever version of the
    *  form the host was using that day, and a missing field is the normal case
@@ -142,7 +111,7 @@ export function CreateRoundPage() {
       setup.seats === null ? t('rounds.door.noLimit') : t('rounds.door.seats', { count: setup.seats }),
       t(`rounds.slotMode.${setup.slotMode}`),
       t(`rounds.voting.${setup.votingMode}`),
-      setup.costMode === 'NONE' ? t('costs.mode.NONE') : t('costs.mode.NO_BUDGET'),
+      t(`costs.mode.${setup.costMode}`),
       setup.menuVisibility === 'NAMES' ? t('rounds.sharedMenu.NAMES') : null,
       setup.filRougeCategory ? t(`filRouge.category.${setup.filRougeCategory}`) : null,
     ]
@@ -188,7 +157,19 @@ export function CreateRoundPage() {
                 <span className="setup__name">{t(`rounds.presets.${preset.key}`)}</span>
               </button>
 
-              {open && !manual && (
+              {open && preset.key === 'QUESTIONS' && (
+                <div className="setup__body">
+                  <EventQuestions
+                    named={named}
+                    submitting={submitting}
+                    summary={summary}
+                    onCreate={create}
+                    onTweak={(setup) => navigate('/rounds/new/custom', { state: { name, setup } })}
+                  />
+                </div>
+              )}
+
+              {open && !manual && preset.key !== 'QUESTIONS' && (
                 <div className="setup__body">
                   {/* WHAT IT IS, ONLY ONCE IT IS OPEN. The face of a card is
                       the name at the size a name deserves — six cards each
@@ -197,14 +178,12 @@ export function CreateRoundPage() {
                       what somebody scanning the grid is reading. It is what
                       they read when one of them has caught it. */}
                   <p className="setup__what">{t(`rounds.presets.${preset.key}Hint`)}</p>
-                  {/* The dice is rolled when it is pressed, so what it says
-                      here is what it will make — press it again for another. */}
-                  <p className="muted setup__summary">{summary(setupFor(preset))}</p>
+                  <p className="muted setup__summary">{summary((preset.setup ?? DEFAULT_SETUP))}</p>
                   <div className="row">
                     <button
                       type="button"
                       disabled={!named || submitting}
-                      onClick={() => create(setupFor(preset))}
+                      onClick={() => create((preset.setup ?? DEFAULT_SETUP))}
                     >
                       {t('rounds.createIt')}
                     </button>
@@ -213,7 +192,7 @@ export function CreateRoundPage() {
                       className="secondary"
                       onClick={() =>
                         navigate('/rounds/new/custom', {
-                          state: { name, setup: setupFor(preset) },
+                          state: { name, setup: (preset.setup ?? DEFAULT_SETUP) },
                         })
                       }
                     >

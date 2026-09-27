@@ -103,14 +103,8 @@
       "lead": "Choisissez la soirée que vous avez en tête. Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit.",
       "CLASSIC": "Cuisiner la recette d’un proche",
       "CLASSICHint": "Le jeu tel qu’il est pensé : chacun écrit en secret une recette pour quelqu’un d’autre et cuisine celle qu’on lui a donnée — personne ne sait qui a écrit la sienne avant la fin. Couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
-      "PARTY": "Ambiance fête",
-      "PARTYHint": "Pas de limite de couverts, le menu lisible pendant qu’il s’écrit, nappe et liste de pseudonymes tirées au sort, des services, frais partagés.",
-      "NO_SURPRISES": "Sans surprises",
-      "NO_SURPRISESHint": "Tout le monde se connaît, le menu est visible, la porte est une liste d’invités et les frais sont partagés.",
-      "NO_STRESS": "Sans stress",
-      "NO_STRESSHint": "Couvert, un code à partager, pas de limite, pas de thème, rien à composer et pas d’argent à évoquer.",
-      "RANDOM": "Tout au hasard",
-      "RANDOMHint": "Chaque réponse tirée au sort, cette table comprise — et le thème est scellé, donc vous le découvrez avec les autres.",
+      "QUESTIONS": "Répondre à 4 questions",
+      "FOR_SOMEONE": "Une fête pour quelqu’un",
       "MANUAL": "Je configure moi-même",
       "MANUALHint": "Le formulaire complet : chaque décision, une par une.",
       "soon": "En développement",
@@ -521,6 +515,54 @@
       "HIDDENHint": "Personne ne voit un plat avant le dîner.",
       "NAMES": "Montrer les noms des plats",
       "NAMESHint": "Les convives voient ce qui a été envoyé — les noms seuls, jamais qui. Évite que deux personnes écrivent le même plat."
+    },
+    "questions": {
+      "step": "Question {{n}} sur {{total}}",
+      "previous": "Question précédente",
+      "continue": "Continuer",
+      "restart": "Recommencer les questions",
+      "result": "Votre soirée",
+      "codeNames": {
+        "ask": "À table, des noms de code ou vos vrais prénoms ?",
+        "yes": "Des noms de code",
+        "yesHint": "Personne ne sait qui est qui avant la révélation — vous non plus. Le plus de mystère.",
+        "no": "Nos vrais prénoms",
+        "noHint": "Tout le monde se voit. Seul qui cuisine pour qui reste un secret, jusqu’à la fin."
+      },
+      "courses": {
+        "ask": "Comment se présente la table ?",
+        "yes": "Un repas avec des services",
+        "yesHint": "Entrées, plats, dessert : vous composez le menu et la roulette donne un plat à chacun.",
+        "no": "Un buffet ou un pique-nique",
+        "noHint": "Chacun apporte ce qu’il veut. Rien à composer, pas de limite de places."
+      },
+      "menuVisible": {
+        "ask": "Le menu se voit pendant qu’on écrit ?",
+        "no": "Non, c’est la surprise",
+        "noHint": "Personne ne voit un plat avant le dîner.",
+        "yes": "Oui, pour éviter trois tiramisùs",
+        "yesHint": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine."
+      },
+      "costs": {
+        "ask": "Et les courses ?",
+        "OWN": "Chacun paie les siennes",
+        "OWNHint": "Rien à compter, rien à régler.",
+        "SHARED": "On partage tout",
+        "SHAREDHint": "La table divise la note à la fin, sans plafond.",
+        "BUDGET": "On partage, avec un plafond",
+        "BUDGETHint": "Un montant par personne décidé maintenant, pour qu’il guide ce que chacun écrit.",
+        "perHead": "Par personne (€)"
+      },
+      "kind": {
+        "UNDERCOVER": "Dîner sous couverture",
+        "UNDERCOVERHint": "Le jeu dans sa forme complète : noms de code, un plat chacun, et tout se révèle à la fin.",
+        "SURPRISE_BUFFET": "Buffet surprise",
+        "SURPRISE_BUFFETHint": "Pour une fête ou un anniversaire : chacun apporte ce qu’il veut, sous un nom de code.",
+        "FRIENDS": "Dîner entre amis",
+        "FRIENDSHint": "Tout le monde se connaît et le repas a ses services ; seul qui cuisine pour qui reste secret.",
+        "PICNIC": "Pique-nique",
+        "PICNICHint": "Simple et détendu : vrais prénoms, chacun apporte un plat, et qui a écrit quoi se découvre à la fin."
+      }
     }
   },
   "briefs": {

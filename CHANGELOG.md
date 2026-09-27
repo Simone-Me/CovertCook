@@ -73,6 +73,34 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Added: four questions about the evening, instead of four moods.** The creation
+grid is now the game as designed (one press), *Answer four questions*, the long
+form, and the host's saved cards. The questions open inside their card, one at a
+time, each answer a full-width button with its consequence written under it:
+
+1. Code names, or your real names? → `anonymity` ANONYMOUS / OPEN. Asked about
+   names on purpose: who cooks for whom is secret in every dinner, whatever the
+   answer, so a question promising to switch that off would have been a lie.
+2. A meal in courses, or a buffet / picnic? → `slotMode` CATEGORIES / FREE (a
+   buffet also lifts the seat cap).
+3. Can the menu be seen while it is written? → `menuVisibility` HIDDEN / NAMES.
+4. And the shopping? → `costMode` NONE / NO_BUDGET / BUDGET, the last with the
+   amount typed right there.
+
+The first two answers name the evening — *Undercover dinner*, *Surprise buffet*,
+*Dinner among friends*, *Picnic* — and the end is what every card ends on: the
+summary, Create, or the long form with the answers already in it.
+`setupFromAnswers` in `roundSetup.ts` is the whole mapping.
+
+*Party vibe, No surprises, No stress and Total roll are gone*, with their code
+(`randomSetup`, `rollLooks`): each was an answer to these questions under a
+name that did not say what it set. One card stays shut and marked in
+development, *A party for someone* — planning behind the back of the guest of
+honour needs a space they cannot see, which the app does not have.
+
+*Fixed on the way:* a card's summary said "shared, no ceiling" for a dinner with
+a budget; it now names the cost mode it actually sets.
+
 **Changed: the recipe book and the album have pages of their own.** Both were
 folds half-way down the profile, between the notifications and the allergies —
 an album of photographs you could not see without opening something, and a

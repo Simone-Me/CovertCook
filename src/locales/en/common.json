@@ -103,14 +103,8 @@
       "lead": "Pick the evening you have in mind. Every card says what it sets before it makes anything.",
       "CLASSIC": "Cook a friend's recipe",
       "CLASSICHint": "The game as designed: everyone secretly writes a recipe for someone else and cooks the one they were given — nobody knows who wrote theirs until the end. Covered, approved at the door, one course each, costs split, vote at the end.",
-      "PARTY": "Party vibe",
-      "PARTYHint": "No cap on the seats, the menu readable while it is written, a cloth and a word list drawn at random, courses, costs split.",
-      "NO_SURPRISES": "No surprises",
-      "NO_SURPRISESHint": "Everybody knows everybody, the menu is visible, the door is a guest list and the costs are split.",
-      "NO_STRESS": "No stress",
-      "NO_STRESSHint": "Covered, a code to share, no cap, no theme, nothing to compose and no money to talk about.",
-      "RANDOM": "Total roll",
-      "RANDOMHint": "Every answer drawn, this table included — and the theme is sealed, so even you find out with everybody else.",
+      "QUESTIONS": "Answer four questions",
+      "FOR_SOMEONE": "A party for someone",
       "MANUAL": "Configure it myself",
       "MANUALHint": "The long form: every decision, one at a time.",
       "soon": "In development",
@@ -521,6 +515,54 @@
       "HIDDENHint": "Nobody sees a dish before the dinner.",
       "NAMES": "Show the dish names",
       "NAMESHint": "Members see what has been sent — the names only, never who. Stops two people writing the same dish."
+    },
+    "questions": {
+      "step": "Question {{n}} of {{total}}",
+      "previous": "Previous question",
+      "continue": "Continue",
+      "restart": "Start the questions again",
+      "result": "Your evening",
+      "codeNames": {
+        "ask": "At the table: code names, or your real names?",
+        "yes": "Code names",
+        "yesHint": "Nobody knows who is who until the reveal — you included. The most mystery.",
+        "no": "Our real names",
+        "noHint": "Everybody sees everybody. Only who cooks for whom stays secret, until the end."
+      },
+      "courses": {
+        "ask": "What does the table look like?",
+        "yes": "A meal in courses",
+        "yesHint": "Starters, mains, dessert: you compose the menu and the roulette deals one dish to each.",
+        "no": "A buffet or a picnic",
+        "noHint": "Everybody brings whatever they like. Nothing to compose, no cap on seats."
+      },
+      "menuVisible": {
+        "ask": "Can the menu be seen while it is being written?",
+        "no": "No, it's the surprise",
+        "noHint": "Nobody sees a dish before the dinner.",
+        "yes": "Yes, to avoid three tiramisùs",
+        "yesHint": "Dish names only — never who wrote them or who is cooking them."
+      },
+      "costs": {
+        "ask": "And the shopping?",
+        "OWN": "Everyone pays their own",
+        "OWNHint": "Nothing to tally, nothing to settle.",
+        "SHARED": "We share it all",
+        "SHAREDHint": "The table splits the bill at the end, no ceiling.",
+        "BUDGET": "We share, with a ceiling",
+        "BUDGETHint": "An amount per person agreed now, so it shapes what everyone writes.",
+        "perHead": "Per person (€)"
+      },
+      "kind": {
+        "UNDERCOVER": "Undercover dinner",
+        "UNDERCOVERHint": "The game in full: code names, one dish each, and everything is revealed at the end.",
+        "SURPRISE_BUFFET": "Surprise buffet",
+        "SURPRISE_BUFFETHint": "For a party or a birthday: everybody brings what they like, under a code name.",
+        "FRIENDS": "Dinner among friends",
+        "FRIENDSHint": "Everybody knows everybody and the meal has its courses; only who cooks for whom stays secret.",
+        "PICNIC": "Picnic",
+        "PICNICHint": "Simple and relaxed: real names, everybody brings a dish, and who wrote what comes out at the end."
+      }
     }
   },
   "briefs": {
