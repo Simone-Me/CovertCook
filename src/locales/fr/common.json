@@ -100,23 +100,20 @@
   "rounds": {
     "createIt": "Créer",
     "presets": {
-      "lead": "Choisissez la soirée que vous avez en tête. Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit.",
       "CLASSIC": "Cuisiner la recette d’un proche",
       "CLASSICHint": "Le jeu tel qu’il est pensé : chacun écrit en secret une recette pour quelqu’un d’autre et cuisine celle qu’on lui a donnée — personne ne sait qui a écrit la sienne avant la fin. Couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
       "QUESTIONS": "Répondre à 4 questions",
       "FOR_SOMEONE": "Une fête pour quelqu’un",
       "MANUAL": "Je configure moi-même",
-      "MANUALHint": "Le formulaire complet : chaque décision, une par une.",
       "soon": "En développement",
       "mine": "Enregistrée par vous",
       "tweak": "Ouvrir dans le formulaire",
-      "nameFirst": "Donnez d’abord un nom au dîner.",
       "removeAsk": "Supprimer « {{name}} » ?",
       "saveTitle": "Garder ces réglages",
-      "saveWhat": "Ils arrivent sur la grille comme une carte à vous, prête pour le prochain dîner. Enregistrer un nom déjà utilisé le remplace.",
+      "saveWhat": "Vous la retrouverez la prochaine fois en créant un dîner, sous « Reprendre une de mes tables ». Un nom déjà utilisé la remplace.",
       "namePlaceholder": "Le dimanche chez nous",
       "save": "Enregistrer",
-      "saved": "Enregistré. C’est sur la grille.",
+      "saved": "Enregistrée.",
       "tooMany": "Cela fait douze tables enregistrées — supprimez-en une avant d’en garder une autre."
     },
     "group": {
@@ -563,6 +560,21 @@
         "PICNIC": "Pique-nique",
         "PICNICHint": "Simple et détendu : vrais prénoms, chacun apporte un plat, et qui a écrit quoi se découvre à la fin."
       }
+    },
+    "chef": {
+      "lead": "Le chef vous pose deux ou trois questions et s’occupe du reste.",
+      "start": "Bonjour ! Qu’est-ce qu’on prépare ?",
+      "CLASSICHint": "Le jeu tel qu’il est pensé : chacun écrit en secret la recette d’un autre.",
+      "QUESTIONSHint": "Dites-moi quelle soirée vous avez en tête, je règle le reste.",
+      "SAVED_one": "Reprendre ma table enregistrée",
+      "SAVED_other": "Reprendre une de mes {{count}} tables",
+      "SAVEDHint": "Les réglages d’un dîner que vous avez gardés.",
+      "MANUALHint": "Chaque réglage, un par un, dans le formulaire complet.",
+      "savedAsk": "Laquelle on ressort ?",
+      "result": "Votre soirée",
+      "namePlaceholder": "Dimanche chez nous",
+      "keepAsk": "La garder pour la prochaine fois ?",
+      "kept": "Gardée. La prochaine fois, choisissez « Reprendre une de mes tables »."
     }
   },
   "briefs": {
@@ -1819,8 +1831,8 @@
       "localOnly": "Rien n’est envoyé pendant la visite : tout reste sur cet écran."
     },
     "say": {
-      "createPick": "Bonjour, je suis le chef ! Organisons une soirée : un dîner mexicain. Touchez « Cuisiner la recette d’un proche » — c’est le jeu tel qu’il est pensé.",
-      "createGo": "Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit. Le nom est rempli et le thème du dîner, c’est le Mexique. Touchez Créer.",
+      "createPick": "Bonjour, je suis le chef ! Organisons une soirée : un dîner mexicain. Quand vous créez un dîner, c’est moi qui pose les questions. Touchez « Cuisiner la recette d’un proche » — le jeu tel qu’il est pensé.",
+      "createGo": "Je vous montre ce que ça règle avant de créer quoi que ce soit. Le nom est rempli et le thème du dîner, c’est le Mexique. Touchez Créer.",
       "tableHello": "Voici votre table. Chaque enveloppe est un tiroir. La rouge, c’est le pass : il dit ce que le dîner attend de vous en ce moment. Vous seul le voyez — vous êtes l’Executive Chef.",
       "tablePass": "Ouvrez le pass.",
       "tableInvite": "C’est ici qu’on donne une place : un code à partager, ou une invitation par nom d’utilisateur. Pour l’instant, j’amène mes amis.",

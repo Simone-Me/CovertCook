@@ -608,6 +608,7 @@ La direzione è ferma. Restano tre scelte che cambiano il lavoro, non il mondo.
 
 | Data | Cosa è cambiato |
 |---|---|
+| 2026-09-27 | Creare una cena è un dialogo col cappello: foglio dal basso col bordo rosso a bancone, lo chef che sbircia con le mani sul bordo (`chef_peek.webp`), una battuta e i bottoni-risposta. Tavole salvate e "tenerla per la prossima volta" dentro il dialogo. Nel profilo ricettario e album tornano in tendina, sopra le notifiche. |
 | 2026-09-27 | Creazione: le quattro carte-atmosfera sostituite da "Rispondi a 4 domande" (nomi in codice o veri, portate o buffet, menu visibile o no, spese). Resta grigia solo "Una festa per qualcuno". "Fil rouge" si legge "Thème du dîner". Il ricettario e l'album hanno pagine proprie. Via "Élégant": l'unico telo gratuito è a quadri rossi. |
 | 2026-09-27 | Aggiunta §19 "La cena guidata". Nuovo marchio: il cappello che sbircia sostituisce il wok. Nella creazione restano aperte solo "Cucina la ricetta di un amico" e "Configura da te"; le altre carte sono tratteggiate e "in sviluppo". |
 | 2026-08-23 | Trascrizione iniziale dall'artefatto. Aggiunte le sezioni "La lista dei chef" e "Quando si scoprono i chef", che fissano la regola della barratura durante le iscrizioni. |

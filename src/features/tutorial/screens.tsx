@@ -8,6 +8,9 @@ import { RoundProgress } from '../rounds/RoundProgress'
 import { TableProps } from '../rounds/TableProps'
 import { ChainCircle } from '../rounds/ChainCircle'
 import { PRESETS } from '../../lib/roundSetup'
+import { ChefSheet } from '../rounds/ChefSheet'
+import { Answer } from '../rounds/CreateWithChef'
+import { useSetupSummary } from '../rounds/setupSummary'
 import { CHAIN, CHEFS, MESSAGE_CHOICES, WINNER, chef, type ChefKey } from './fixture'
 
 /**
@@ -43,61 +46,43 @@ function Back() {
 
 export function CreateScreen({ reached }: ScreenProps) {
   const { t } = useTranslation()
-  const open = reached('createGo')
+  const summary = useSetupSummary()
+  const result = reached('createGo')
+  const classic = PRESETS.find((p) => p.key === 'CLASSIC')!.setup!
   return (
     <div className="stack sheet">
       <h1>{t('rounds.create')}</h1>
-      <div>
-        <label htmlFor="tour-name">{t('rounds.name')}</label>
-        <input id="tour-name" readOnly value={t('tutorial.dinnerName')} />
-      </div>
-      <p className="muted">{t('rounds.presets.lead')}</p>
-      <div className="setups">
-        <div className={`setup${open ? ' is-open' : ''}`}>
-          <button type="button" className="setup__face" data-tour="classic" aria-expanded={open}>
-            <span className="setup__name">{t('rounds.presets.CLASSIC')}</span>
-          </button>
-          {open && (
-            <div className="setup__body">
-              <p className="setup__what">{t('rounds.presets.CLASSICHint')}</p>
-              <p className="muted setup__summary">
-                {[
-                  t('rounds.anonymity.ANONYMOUS'),
-                  t('rounds.access.CODE_AND_INVITE'),
-                  t('rounds.door.seats', { count: 8 }),
-                  t('rounds.slotMode.CATEGORIES'),
-                  t('rounds.voting.LIVE'),
-                  t('costs.mode.NO_BUDGET'),
-                  t('tutorial.filRouge'),
-                ].join(' · ')}
-              </p>
-              <div className="row">
-                <button type="button" data-tour="create">
-                  {t('rounds.createIt')}
-                </button>
-                <button type="button" className="secondary">
-                  {t('rounds.presets.tweak')}
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-        {(['QUESTIONS', 'MANUAL'] as const).map((key) => (
-          <div key={key} className="setup">
-            <button type="button" className="setup__face">
-              <span className="setup__name">{t(`rounds.presets.${key}`)}</span>
+      <p className="muted">{t('rounds.chef.lead')}</p>
+      {!result ? (
+        <ChefSheet step="start" inline>
+          <p className="chefsheet__say">{t('rounds.chef.start')}</p>
+          <Answer label={t('rounds.presets.CLASSIC')} hint={t('rounds.chef.CLASSICHint')} tour="classic" />
+          <Answer label={t('rounds.presets.QUESTIONS')} hint={t('rounds.chef.QUESTIONSHint')} />
+          <Answer label={t('rounds.presets.MANUAL')} hint={t('rounds.chef.MANUALHint')} />
+          <Answer label={t('rounds.presets.FOR_SOMEONE')} hint={t('rounds.presets.soon')} soon />
+        </ChefSheet>
+      ) : (
+        <ChefSheet step="result" inline>
+          <p className="questions__step">{t('rounds.chef.result')}</p>
+          <p className="chefsheet__say chefsheet__say--title">{t('rounds.presets.CLASSIC')}</p>
+          <p className="chefsheet__hint">{t('rounds.presets.CLASSICHint')}</p>
+          <p className="muted chefsheet__summary">
+            {summary(classic)} · {t('tutorial.filRouge')}
+          </p>
+          <div>
+            <label htmlFor="tour-name">{t('rounds.name')}</label>
+            <input id="tour-name" readOnly value={t('tutorial.dinnerName')} />
+          </div>
+          <div className="row">
+            <button type="button" data-tour="create">
+              {t('rounds.createIt')}
+            </button>
+            <button type="button" className="secondary">
+              {t('rounds.presets.tweak')}
             </button>
           </div>
-        ))}
-        {PRESETS.filter((p) => p.soon).map((p) => (
-          <div key={p.key} className="setup setup--soon">
-            <div className="setup__face" aria-disabled="true">
-              <span className="setup__name">{t(`rounds.presets.${p.key}`)}</span>
-              <span className="setup__soon">{t('rounds.presets.soon')}</span>
-            </div>
-          </div>
-        ))}
-      </div>
+        </ChefSheet>
+      )}
     </div>
   )
 }

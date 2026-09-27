@@ -1,0 +1,21 @@
+import { useTranslation } from 'react-i18next'
+import type { RoundSetup } from '../../lib/roundSetup'
+
+/** The dinner a setup describes, in the words the long form uses for the same
+ *  answers. The gist, never all fifteen: the form is where the rest lives. */
+export function useSetupSummary() {
+  const { t } = useTranslation()
+  return (setup: RoundSetup) =>
+    [
+      t(`rounds.anonymity.${setup.anonymity}`),
+      t(`rounds.access.${setup.access}`),
+      setup.seats === null ? t('rounds.door.noLimit') : t('rounds.door.seats', { count: setup.seats }),
+      t(`rounds.slotMode.${setup.slotMode}`),
+      t(`rounds.voting.${setup.votingMode}`),
+      t(`costs.mode.${setup.costMode}`),
+      setup.menuVisibility === 'NAMES' ? t('rounds.sharedMenu.NAMES') : null,
+      setup.filRougeCategory ? t(`filRouge.category.${setup.filRougeCategory}`) : null,
+    ]
+      .filter(Boolean)
+      .join(' · ')
+}

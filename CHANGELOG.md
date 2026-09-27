@@ -73,6 +73,28 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Changed: creating a dinner is a conversation with the chef.** The grid of
+cards is gone. `/rounds/new` opens a sheet rising from the foot of the screen,
+its red top edge a counter, and the chef from the mark (`chef_peek.webp`, cut
+from `logo_inverse.png`) peeking over it with both hands on the edge — he hops
+once each time he asks something new. His lines are the largest type on the
+screen; every answer is a button the width of the sheet with its consequence
+under it.
+
+- *What are we making?* — the game as designed, four questions, **one of my
+  saved tables** (only when there are any; × to delete, with an inline
+  confirm), the long form, and *A party for someone*, shut, in development.
+- The four questions, one per line of his.
+- *Your evening*: its name and what it sets, the dinner's name, Create, the long
+  form with the answers filled in, and **Keep it for next time?** — which saves
+  the setup to `round_presets` under a name of the host's choosing, the same
+  store the long form saves to. A table that came from the saved list does not
+  offer it again.
+
+Back walks one step, × leaves. The tour draws the same sheet inside its page,
+so its own bubble keeps the foot of the screen. `EventQuestions.tsx` and the
+card grid's CSS are removed; the summary line moved to `setupSummary.ts`.
+
 **Changed: the book and the album are folds again, above the notifications.**
 The two cards made the profile read as two pages glued onto a settings screen.
 They are folds like everything else there, first after the Crème and tour

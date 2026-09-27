@@ -64,3 +64,25 @@ To regenerate the fridge WebP after editing the master:
 ```
 python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png'); w=820; im.resize((w, round(im.height*w/im.width)), Image.LANCZOS).save('public/inside_fridge.webp','WEBP',quality=82,method=6)"
 ```
+
+`public/chef_peek.webp` — the chef leaning on the counter in the creation sheet —
+is cut from `icons/logo_inverse.png`: the white around him flood-filled to
+transparent from the corners (his fingers, white but closed by their red outline,
+stay white), cropped just under the fingers so the red band is the sheet's edge,
+and scaled to 300 px wide for a 150 px display:
+
+```
+python - <<'PY'
+from PIL import Image, ImageDraw
+im = Image.open('assets-src/icons/logo_inverse.png').convert('RGBA'); w, h = im.size
+for seed in [(0, 0), (w - 1, 0), (0, 200), (w - 1, 200)]:
+    ImageDraw.floodfill(im, seed, (255, 0, 255, 255), thresh=90)
+px = im.load()
+for y in range(h):
+    for x in range(w):
+        if px[x, y] == (255, 0, 255, 255): px[x, y] = (255, 255, 255, 0)
+band = next(y for y in range(300, h) if px[3, y][3] and px[3, y][1] < 80)
+crop = im.crop((0, im.getbbox()[1], w, band + 42))
+crop.resize((300, round(crop.height * 300 / w)), Image.LANCZOS).save('public/chef_peek.webp', 'WEBP', quality=90, method=6)
+PY
+```

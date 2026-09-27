@@ -3323,108 +3323,11 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The grid of ready-made dinners (0090).
- *
- * A card is a whole evening rather than a setting, so it is bigger than
- * anything else on the form, says what it is in a sentence, and opens IN PLACE
- * to show what it would actually do. Nothing here creates a dinner by being
- * pressed once: the second press, on a button that says Create, is the one
- * that commits.
+ * The four questions' pieces, used inside the chef's sheet.
  * ------------------------------------------------------------------------- */
 
-.setups {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
-}
-
-@media (max-width: 460px) {
-  .setups {
-    grid-template-columns: 1fr;
-  }
-}
-
-.setup {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  border: 1px solid var(--env-edge);
-  border-left-width: 4px;
-  border-radius: var(--radius-paper);
-  background: var(--paper-solid);
-  box-shadow: var(--paper-shadow);
-  overflow: hidden;
-}
-
-/* Open, it stops being a card in a row and becomes the thing being read, so it
-   takes the whole width — the summary is a sentence, not a caption. */
-.setup.is-open {
-  grid-column: 1 / -1;
-  border-left-color: var(--accent);
-}
-
-.setup__face {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-start;
-  justify-content: center;
-  gap: 4px;
-  width: 100%;
-  min-height: 84px;
-  padding: 16px 14px;
-  border: none;
-  border-radius: 0;
-  background: none;
-  color: var(--text);
-  text-align: left;
-  cursor: pointer;
-}
-
-.setup__face:hover,
-.setup__face:focus-visible,
-.setup__face:active {
-  background: var(--bg-elevated);
-}
-
-/* THE NAME IS THE CARD. No mark and no description on the face: six cards
-   each carrying an emoji and three lines of prose was a wall with nothing to
-   catch the eye, and what somebody scanning a grid reads is the name. It is
-   set at the size a name deserves and given the whole tile. */
-.setup__name {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.15;
-}
-
-.setup__what {
-  margin: 0;
-  font-size: 13px;
-  line-height: 1.45;
-  color: var(--text-muted);
-}
-
-.setup__body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0 13px 13px;
-}
-
-.setup__summary {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.45;
-}
-
-/* A card of the host's own, and the one difference that matters: it can be
-   taken off the shelf again. */
-.setup--mine {
-  border-left-color: var(--ok);
-}
-
-/* The four questions, inside the card that was pressed. One on screen at a
-   time; each answer is a button the width of the card with its consequence
-   under it, so nothing needs an info bubble to be understood. */
+/* One question on screen at a time; each answer is a button the width of the
+   sheet with its consequence under it, so nothing needs an info bubble. */
 .questions__step {
   margin: 0;
   font-size: 11px;
@@ -3451,11 +3354,6 @@
 
 .questions__dots .is-now {
   background: var(--accent);
-}
-
-.questions__ask {
-  font-size: 18px;
-  line-height: 1.3;
 }
 
 .questions__answer {
@@ -3485,75 +3383,15 @@
 }
 
 .questions__label {
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 700;
+  line-height: 1.25;
 }
 
 .questions__hint {
-  font-size: 13px;
+  font-size: 14px;
   line-height: 1.4;
   color: var(--text-muted);
-}
-
-.questions__kind {
-  font-size: 22px;
-  line-height: 1.2;
-}
-
-.questions__back {
-  align-self: flex-start;
-  padding: 4px 0;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 13px;
-  text-decoration: underline;
-}
-
-/* Coming, not choosable: the card is on the shelf so the shelf says what is
-   on its way, and it looks like paper that cannot be picked up. */
-.setup--soon {
-  border-style: dashed;
-  border-left-style: solid;
-  box-shadow: none;
-  background: var(--bg-elevated);
-}
-
-.setup--soon .setup__face {
-  cursor: default;
-  color: var(--text-muted);
-}
-
-.setup--soon .setup__face:hover {
-  background: none;
-}
-
-.setup__soon {
-  font-size: 12px;
-  font-style: italic;
-  color: var(--text-muted);
-}
-
-.setup__remove {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: auto;
-  padding: 2px 8px;
-  font-size: 15px;
-  line-height: 1;
-  color: var(--text-muted);
-  background: none;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  cursor: pointer;
-}
-
-.setup__remove:hover,
-.setup__remove:focus-visible,
-.setup__remove:active {
-  color: var(--accent);
-  border-color: var(--accent);
 }
 
 /* ---------------------------------------------------------------------------
@@ -3708,4 +3546,185 @@
 .tour__end-face {
   border-radius: 20px;
   box-shadow: var(--paper-shadow);
+}
+
+/* ---------------------------------------------------------------------------
+ * The chef's sheet: creating a dinner is a conversation.
+ *
+ * A sheet that rises from the foot of the screen. Its thick red top edge is
+ * the counter, and the chef from the app's mark (`chef_peek.webp`, cut from
+ * `logo_inverse.png`) grips it with both hands: the picture's own red band is
+ * laid exactly over the edge, so the hands hold the sheet rather than float
+ * above it. Everything inside is his line, in large type, and the answers.
+ * ------------------------------------------------------------------------- */
+
+.chefsheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
+}
+
+.chefsheet__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(40, 18, 14, 0.28);
+}
+
+.chefsheet__paper {
+  position: relative;
+  pointer-events: auto;
+  width: min(560px, calc(100% - 16px));
+  margin-bottom: 8px;
+  padding: 10px 16px 16px;
+  background: var(--paper-solid);
+  border-top: 10px solid var(--accent);
+  border-radius: 14px 14px 12px 12px;
+  box-shadow: 0 -4px 24px rgba(80, 20, 20, 0.22);
+}
+
+.chefsheet__chef {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 150px;
+  height: auto;
+  /* `bottom: 100%` is the inner edge of the red border, so the picture's own
+     red band — its last ten pixels — lands exactly on the counter. */
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  animation: chef-hop 0.42s ease-out;
+}
+
+@keyframes chef-hop {
+  0% {
+    transform: translate(-50%, 24px);
+  }
+  60% {
+    transform: translate(-50%, -6px);
+  }
+  100% {
+    transform: translate(-50%, 0);
+  }
+}
+
+.chefsheet__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+}
+
+.chefsheet__nav {
+  width: auto;
+  padding: 4px 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.chefsheet__body {
+  gap: 10px;
+  max-height: min(68vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 2px 4px;
+}
+
+/* His line: the largest thing on the sheet, because it is the question. */
+.chefsheet__say {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.chefsheet__say--title {
+  font-size: 26px;
+  color: var(--accent);
+}
+
+.chefsheet__hint {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.chefsheet__summary {
+  margin: 0;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.chefsheet__saved {
+  display: flex;
+  align-items: stretch;
+  gap: 6px;
+}
+
+.chefsheet__saved .questions__answer {
+  flex: 1;
+  min-width: 0;
+}
+
+.chefsheet__remove {
+  flex: none;
+  width: 40px;
+  padding: 0;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 18px;
+}
+
+.chefsheet__keep summary {
+  cursor: pointer;
+  color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.questions__answer.is-soon {
+  border-style: dashed;
+  background: var(--bg-elevated);
+  opacity: 0.75;
+}
+
+.questions__answer.is-soon .questions__hint {
+  font-style: italic;
+}
+
+/* In the guided tour the sheet is part of the page: the tour's own bubble
+   owns the foot of the screen, and two things rising from it would fight. */
+.chefsheet--inline {
+  position: static;
+  /* A flex item takes z-index even unpositioned; the tour's bubble is 50. */
+  z-index: auto;
+  display: block;
+  margin-top: 150px;
+  pointer-events: auto;
+}
+
+.chefsheet--inline .chefsheet__paper {
+  width: 100%;
+  margin: 0;
+  box-shadow: var(--paper-shadow);
+}
+
+.chefsheet--inline .chefsheet__body {
+  max-height: none;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chefsheet__chef {
+    animation: none;
+  }
 }

@@ -100,23 +100,20 @@
   "rounds": {
     "createIt": "Create",
     "presets": {
-      "lead": "Pick the evening you have in mind. Every card says what it sets before it makes anything.",
       "CLASSIC": "Cook a friend's recipe",
       "CLASSICHint": "The game as designed: everyone secretly writes a recipe for someone else and cooks the one they were given — nobody knows who wrote theirs until the end. Covered, approved at the door, one course each, costs split, vote at the end.",
       "QUESTIONS": "Answer four questions",
       "FOR_SOMEONE": "A party for someone",
       "MANUAL": "Configure it myself",
-      "MANUALHint": "The long form: every decision, one at a time.",
       "soon": "In development",
       "mine": "Saved by you",
       "tweak": "Open it in the form",
-      "nameFirst": "Give the dinner a name first.",
       "removeAsk": "Delete “{{name}}”?",
       "saveTitle": "Keep these settings",
-      "saveWhat": "They land on the grid as a card of your own, ready for the next dinner. Saving a name you have used before replaces it.",
+      "saveWhat": "Next time you create a dinner it is there, under “Use one of my tables”. Saving a name you have used before replaces it.",
       "namePlaceholder": "Sunday at ours",
       "save": "Save",
-      "saved": "Saved. It is on the grid.",
+      "saved": "Saved.",
       "tooMany": "That is twelve saved tables — delete one before saving another."
     },
     "group": {
@@ -563,6 +560,21 @@
         "PICNIC": "Picnic",
         "PICNICHint": "Simple and relaxed: real names, everybody brings a dish, and who wrote what comes out at the end."
       }
+    },
+    "chef": {
+      "lead": "The chef asks you two or three things and takes care of the rest.",
+      "start": "Hello! What are we making?",
+      "CLASSICHint": "The game as designed: everybody secretly writes a recipe for somebody else.",
+      "QUESTIONSHint": "Tell me what evening you have in mind and I will set the rest.",
+      "SAVED_one": "Use my saved table",
+      "SAVED_other": "Use one of my {{count}} tables",
+      "SAVEDHint": "The settings of a dinner you kept.",
+      "MANUALHint": "Every setting, one at a time, in the full form.",
+      "savedAsk": "Which one are we bringing out?",
+      "result": "Your evening",
+      "namePlaceholder": "Sunday at ours",
+      "keepAsk": "Keep it for next time?",
+      "kept": "Kept. Next time, choose “Use one of my tables”."
     }
   },
   "briefs": {
@@ -1819,8 +1831,8 @@
       "localOnly": "Nothing in the tour is sent anywhere: it stays on this screen."
     },
     "say": {
-      "createPick": "Hi, I'm the chef! Let's put on an evening: a Mexican dinner. Tap “Cook a friend's recipe” — it is the game as it was designed.",
-      "createGo": "Every card says what it sets before it makes anything. The name is filled in and the dinner theme is Mexico. Tap Create.",
+      "createPick": "Hi, I'm the chef! Let's put on an evening: a Mexican dinner. When you create a dinner, I'm the one asking the questions. Tap “Cook a friend's recipe” — the game as it was designed.",
+      "createGo": "I show you what it sets before anything is made. The name is filled in and the dinner theme is Mexico. Tap Create.",
       "tableHello": "This is your table. Every envelope is a drawer. The red one is the pass: it tells you what the dinner needs from you right now. Only you see it — you are the Executive Chef.",
       "tablePass": "Open the pass.",
       "tableInvite": "This is where people get a seat: a code to share, or an invitation by username. For now, I'll bring my friends along.",
