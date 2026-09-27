@@ -96,7 +96,13 @@ export function CreateRoundPage() {
    *  form the host was using that day, and a missing field is the normal case
    *  rather than a corrupt row. */
   function savedSetup(row: SavedSetup): RoundSetup {
-    return { ...DEFAULT_SETUP, ...(row.setup as Partial<RoundSetup>) }
+    const setup = { ...DEFAULT_SETUP, ...(row.setup as Partial<RoundSetup>) }
+    // A cloth that has left the shelf since the card was saved (0094) would
+    // make Create fail; the house cloth is what the card meant by "a table".
+    if (tableThemes && !tableThemes.some((x) => x.code === setup.tableTheme)) {
+      setup.tableTheme = DEFAULT_SETUP.tableTheme
+    }
+    return setup
   }
 
   async function create(setup: RoundSetup) {

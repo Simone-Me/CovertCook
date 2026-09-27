@@ -18,6 +18,9 @@ local Postgres 16; nothing has run against production. Deploy them together —
 `get_ballot_options`, and `0088` drops both `post_to_board` and `get_board`, so
 a partial apply leaves the client calling a signature that is not there.
 
+**`0094` (Elegant withdrawn) is written and NOT deployed.** Two deletes and
+nothing else; it can go on its own, before or after the rest.
+
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 **Next, in order:**
@@ -69,6 +72,13 @@ the interface, and add to its change log when a decision moves.
 ---
 
 ## 2026-09-27
+
+**Changed: one free cloth, the red checks (`0094`).** Elegant leaves the shelf
+for good — deleted from `table_theme_catalogue` rather than paused, because a
+paused row says it is coming back. Dinners already laid on it keep their cloth
+(no foreign key, and the `.theme-elegant` class stays); `create_round` refuses
+it like any unknown code. A saved card that still names it falls back to the
+red checks, so Create does not fail on a card written before today.
 
 **Added: a guided dinner, told by the chef.** The first time somebody opens
 the app with no dinner yet, a pretend one starts by itself at `/tutorial`: a
