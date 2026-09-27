@@ -73,6 +73,19 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Changed: no seat cap unless the host sets one.** `DEFAULT_SETUP.seats` is
+null, so the classic dinner, the four questions and the long form all start
+without a cap; the slider in the long form is where somebody sets one if they
+want it. A proposed dinner should not decide how many friends a host has. The
+summary only mentions seats when there is a cap to mention.
+
+**Changed: the book and the album are folds that lead to their own pages.**
+Widening the fold in place kept everything at profile size. Now the fold shows
+the last three and *See all* goes to `/profile/recipes` or `/profile/album`,
+which are set to be read: dish titles at 20px, ingredients and method at 17px
+with room between the lines, section labels in the accent, and the album one
+print per row on a phone, full width.
+
 **Changed: creating a dinner is a conversation with the chef.** The grid of
 cards is gone. `/rounds/new` opens a sheet rising from the foot of the screen,
 its red top edge a counter, and the chef from the mark (`chef_peek.webp`, cut

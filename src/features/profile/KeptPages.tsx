@@ -19,7 +19,7 @@ function ToProfile() {
 export function RecipesPage() {
   const { t } = useTranslation()
   return (
-    <div className="stack sheet">
+    <div className="stack sheet keptpage">
       <ToProfile />
       <h1>{t('book.title')}</h1>
       <RecipeBook />
@@ -30,7 +30,7 @@ export function RecipesPage() {
 export function AlbumPage() {
   const { t } = useTranslation()
   return (
-    <div className="stack sheet">
+    <div className="stack sheet keptpage">
       <ToProfile />
       <h1>{t('album.profileTitle')}</h1>
       <Album />

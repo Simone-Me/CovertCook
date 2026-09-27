@@ -9,7 +9,8 @@ export function useSetupSummary() {
     [
       t(`rounds.anonymity.${setup.anonymity}`),
       t(`rounds.access.${setup.access}`),
-      setup.seats === null ? t('rounds.door.noLimit') : t('rounds.door.seats', { count: setup.seats }),
+      // Only a cap is news: no cap is the default, and saying so is noise.
+      setup.seats === null ? null : t('rounds.door.seats', { count: setup.seats }),
       t(`rounds.slotMode.${setup.slotMode}`),
       t(`rounds.voting.${setup.votingMode}`),
       t(`costs.mode.${setup.costMode}`),

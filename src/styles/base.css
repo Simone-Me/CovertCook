@@ -852,6 +852,8 @@ input.is-taken {
 }
 
 .recipepreview__row {
+  display: flex;
+  text-decoration: none;
   width: 100%;
   padding: 6px 0;
   background: none;
@@ -866,6 +868,7 @@ input.is-taken {
   display: flex;
   flex-direction: column;
   gap: 1px;
+  font-size: 17px;
 }
 
 .recipepreview__from {
@@ -1095,4 +1098,70 @@ button.tone-diet.secondary {
 .app-foot__version {
   opacity: 0.65;
   font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * The book and the album on their own pages: set to be read, not scanned.
+ * The profile only glances at them; here a recipe is something somebody cooks
+ * from with their hands busy, and a print is something they look at.
+ * ------------------------------------------------------------------------- */
+
+.keptpage .recipe .fold__title {
+  font-size: 20px;
+}
+
+.keptpage .recipe .fold__aside {
+  font-size: 13px;
+}
+
+.keptpage .recipe__origin {
+  font-size: 14px;
+}
+
+.keptpage .recipe label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.keptpage .recipe__ingredients,
+.keptpage .recipe__procedure {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.keptpage input[type='search'],
+.keptpage select {
+  width: 100%;
+}
+
+/* One print per row on a phone: two across made each one smaller than a
+   thumbnail in a message. */
+.keptpage .albumgrid {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .keptpage .albumgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.keptpage .albumcard__name {
+  font-size: 20px;
+}
+
+.keptpage .albumcard__date {
+  font-size: 14px;
+}
+
+.keptpage .album__photo {
+  max-width: none;
+}
+
+.keptpage .album__menu {
+  font-size: 17px;
 }

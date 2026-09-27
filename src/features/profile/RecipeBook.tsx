@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { Fold } from '../../components/Fold'
 import { useAuth } from '../../lib/auth'
 import { InlineConfirm } from '../../components/InlineConfirm'
@@ -209,13 +210,12 @@ export function RecipeBook() {
 
 /**
  * The book, folded on the profile: closed it says how many; open it shows the
- * last three kept, and "see all" widens it to the whole book in place — the
- * search, the filters and the export only arrive once somebody asked for them.
+ * last three kept, and "see all" goes to the book's own page, where there is
+ * room to set a recipe at a size somebody can cook from.
  */
 export function RecipesFold() {
   const { t } = useTranslation()
   const { profile } = useAuth()
-  const [all, setAll] = useState(false)
   const { data: recipes } = useQuery({
     queryKey: ['my-recipes', profile?.id],
     enabled: !!profile?.id,
@@ -223,21 +223,12 @@ export function RecipesFold() {
   })
   return (
     <Fold title={t('book.title')} aside={recipes ? String(recipes.length) : undefined}>
-      {all ? (
-        <div className="stack">
-          <RecipeBook />
-          <button type="button" className="seeall" onClick={() => setAll(false)}>
-            ↑ {t('book.showLess')}
-          </button>
-        </div>
-      ) : (
-        <RecipesPreview onSeeAll={() => setAll(true)} />
-      )}
+      <RecipesPreview />
     </Fold>
   )
 }
 
-function RecipesPreview({ onSeeAll }: { onSeeAll: () => void }) {
+function RecipesPreview() {
   const { t } = useTranslation()
   const { profile } = useAuth()
   const { data: recipes } = useQuery({
@@ -257,20 +248,20 @@ function RecipesPreview({ onSeeAll }: { onSeeAll: () => void }) {
       <ol className="menucard__list recipepreview">
         {latest.map((r) => (
           <li key={r.id} className="menucard__row">
-            <button type="button" className="menucard__course recipepreview__row" onClick={onSeeAll}>
+            <Link to="/profile/recipes" className="menucard__course recipepreview__row">
               <span className="menucard__name">
                 <strong>{r.dish_name}</strong>
                 <span className="muted recipepreview__from">
                   {r.round_name} · {t(`book.relation.${r.relation}`)}
                 </span>
               </span>
-            </button>
+            </Link>
           </li>
         ))}
       </ol>
-      <button type="button" className="seeall" onClick={onSeeAll}>
+      <Link to="/profile/recipes" className="seeall">
         {t('book.seeAll', { count: recipes.length })} →
-      </button>
+      </Link>
     </div>
   )
 }

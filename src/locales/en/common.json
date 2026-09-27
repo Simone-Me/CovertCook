@@ -531,7 +531,7 @@
         "yes": "A meal in courses",
         "yesHint": "Starters, mains, dessert: you compose the menu and the roulette deals one dish to each.",
         "no": "A buffet or a picnic",
-        "noHint": "Everybody brings whatever they like. Nothing to compose, no cap on seats."
+        "noHint": "Everybody brings whatever they like. Nothing to compose."
       },
       "menuVisible": {
         "ask": "Can the menu be seen while it is being written?",
@@ -1413,8 +1413,7 @@
     "exportJson": "Download as JSON",
     "latest": "The latest you kept:",
     "seeAll_one": "Open the book ({{count}} recipe)",
-    "seeAll_other": "See the whole book ({{count}} recipes)",
-    "showLess": "Show less"
+    "seeAll_other": "See the whole book ({{count}} recipes)"
   },
   "moderation": {
     "byPseudonym": "You are shown what was said before who said it, and every action here is about a seat rather than a person. That is deliberate: knowing the author first is how an opinion of somebody decides whether their message was out of line — and you do not need a name to warn a seat or to remove one.",

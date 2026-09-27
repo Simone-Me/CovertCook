@@ -56,7 +56,9 @@ export const DEFAULT_SETUP: RoundSetup = {
   access: 'CODE',
   anonymity: 'ANONYMOUS',
   requiresApproval: true,
-  seats: 8,
+  // No cap unless the host sets one in the long form: a proposed dinner
+  // should not decide how many friends somebody has.
+  seats: null,
   slotMode: 'FREE',
   votingMode: 'LIVE',
   nameTheme: 'FOOD',
@@ -153,8 +155,6 @@ export function setupFromAnswers(a: EventAnswers): RoundSetup {
     ...DEFAULT_SETUP,
     anonymity: a.codeNames ? 'ANONYMOUS' : 'OPEN',
     slotMode: a.courses ? 'CATEGORIES' : 'FREE',
-    // A buffet has no shape to fill, so nothing to count seats against.
-    seats: a.courses ? DEFAULT_SETUP.seats : null,
     menuVisibility: a.menuVisible ? 'NAMES' : 'HIDDEN',
     costMode: a.costs === 'OWN' ? 'NONE' : a.costs === 'SHARED' ? 'NO_BUDGET' : 'BUDGET',
     budget: a.costs === 'BUDGET' ? a.budget : '',

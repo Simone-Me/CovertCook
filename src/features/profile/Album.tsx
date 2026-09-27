@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { Link } from 'react-router-dom'
 import { Fold } from '../../components/Fold'
 import { formatMoment } from '../../lib/datetime'
 import { forgetPhoto, myAlbum, photoUrl, type AlbumEntry } from '../../lib/rpc'
@@ -74,28 +75,18 @@ export function Album() {
 }
 
 /** The album, folded on the profile: the last three prints, and "see all"
- *  widens it to the whole grid in place. */
+ *  goes to the album's own page, where the prints are big enough to look at. */
 export function AlbumFold() {
   const { t } = useTranslation()
-  const [all, setAll] = useState(false)
   const { data: evenings } = useAlbum()
   return (
     <Fold title={t('album.profileTitle')} aside={evenings ? String(evenings.length) : undefined}>
-      {all ? (
-        <div className="stack">
-          <Album />
-          <button type="button" className="seeall" onClick={() => setAll(false)}>
-            ↑ {t('book.showLess')}
-          </button>
-        </div>
-      ) : (
-        <AlbumPreview onSeeAll={() => setAll(true)} />
-      )}
+      <AlbumPreview />
     </Fold>
   )
 }
 
-function AlbumPreview({ onSeeAll }: { onSeeAll: () => void }) {
+function AlbumPreview() {
   const { t } = useTranslation()
   const { data: evenings } = useAlbum()
 
@@ -105,22 +96,17 @@ function AlbumPreview({ onSeeAll }: { onSeeAll: () => void }) {
   return (
     <div className="stack">
       <p className="muted" style={{ margin: 0 }}>{t('album.latest')}</p>
-      <button
-        type="button"
-        className="albumstrip"
-        onClick={onSeeAll}
-        aria-label={t('album.seeAll', { count: evenings.length })}
-      >
+      <Link to="/profile/album" className="albumstrip" aria-label={t('album.seeAll', { count: evenings.length })}>
         {[...evenings]
           .sort(newestFirst)
           .slice(0, 3)
           .map((evening) => (
             <Print key={evening.id} path={evening.storage_path} alt={evening.caption ?? evening.round_name} />
           ))}
-      </button>
-      <button type="button" className="seeall" onClick={onSeeAll}>
+      </Link>
+      <Link to="/profile/album" className="seeall">
         {t('album.seeAll', { count: evenings.length })} →
-      </button>
+      </Link>
     </div>
   )
 }
