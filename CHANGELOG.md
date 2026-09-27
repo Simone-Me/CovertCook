@@ -73,6 +73,17 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Changed: the recipe book and the album have pages of their own.** Both were
+folds half-way down the profile, between the notifications and the allergies —
+an album of photographs you could not see without opening something, and a
+search, two filters and an export squeezed into a panel. The profile now shows a
+glance at each: the last three recipes kept (dish, dinner, whether you wrote,
+cooked or ate it) and the last three prints, each with *See the whole book /
+album (N)*. `/profile/recipes` is the full book, unchanged. `/profile/album` lays
+the prints two across, newest first; the one you touch lifts to the full width
+with its menu underneath, the gesture the setup cards use. The results page's
+"open the book" goes straight to the book.
+
 **Changed: the Crème page says what it opens in the dinner theme.** It listed the
 extra recipe ideas, the word lists and the cloths, and nothing about the theme —
 which since `0091`–`0093` is the largest thing Crème opens. A new fold, second

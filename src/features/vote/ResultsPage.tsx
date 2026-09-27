@@ -275,7 +275,7 @@ export function ResultsPage() {
           {savedCount !== null && (
             <p className="notice">
               {savedCount > 0 ? t('book.savedTo', { n: savedCount }) : t('book.savedNothingNew')}{' '}
-              <Link to="/profile">{t('book.openBook')}</Link>
+              <Link to="/profile/recipes">{t('book.openBook')}</Link>
             </p>
           )}
         </div>

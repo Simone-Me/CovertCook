@@ -1356,7 +1356,10 @@
     "forgetRecoverable": "That dinner still exists, so you can keep this recipe again from its menu.",
     "forgetLastCopy": "The dinner this came from is gone. This is the only copy left, and removing it cannot be undone by anyone.",
     "exportMarkdown": "Download as text",
-    "exportJson": "Download as JSON"
+    "exportJson": "Download as JSON",
+    "latest": "The latest you kept:",
+    "seeAll_one": "Open the book ({{count}} recipe)",
+    "seeAll_other": "See the whole book ({{count}} recipes)"
   },
   "moderation": {
     "byPseudonym": "You are shown what was said before who said it, and every action here is about a seat rather than a person. That is deliberate: knowing the author first is how an opinion of somebody decides whether their message was out of line — and you do not need a name to warn a seat or to remove one.",
@@ -1425,7 +1428,10 @@
       "NOT_AT_THIS_TABLE": "That chef is no longer at this table.",
       "PHOTO_REMOVED": "That photograph has been taken down.",
       "PHOTO_NOT_IN_YOUR_ALBUM": "That is not in your album."
-    }
+    },
+    "latest": "The latest evenings:",
+    "seeAll_one": "Open the album ({{count}} evening)",
+    "seeAll_other": "See the whole album ({{count}} evenings)"
   },
   "costs": {
     "label": "Shared costs",

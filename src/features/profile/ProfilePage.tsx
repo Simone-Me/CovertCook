@@ -7,9 +7,9 @@ import { FoodLabel } from '../../components/FoodLabel'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
-import { RecipeBook } from './RecipeBook'
+import { RecipesPreview } from './RecipeBook'
 import { BlockedList } from './BlockedList'
-import { Album } from './Album'
+import { AlbumPreview } from './Album'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
@@ -357,13 +357,15 @@ export function ProfilePage() {
           to, rather than because something needs correcting. Everything below
           them is maintenance — what you cannot eat, who you have blocked, how
           to leave. The two things you kept come first. */}
-      <Fold title={t('book.title')}>
-        <RecipeBook />
-      </Fold>
+      <section className="paper stack">
+        <h2 style={{ margin: 0 }}>{t('book.title')}</h2>
+        <RecipesPreview />
+      </section>
 
-      <Fold title={t('album.profileTitle')}>
-        <Album />
-      </Fold>
+      <section className="paper stack">
+        <h2 style={{ margin: 0 }}>{t('album.profileTitle')}</h2>
+        <AlbumPreview />
+      </section>
 
       <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>
       {/* Round-wide, not per-dinner: a brief is checked against every

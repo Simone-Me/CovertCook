@@ -2,52 +2,113 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
-import { Fold } from '../../components/Fold'
+import { Link } from 'react-router-dom'
 import { formatMoment } from '../../lib/datetime'
 import { forgetPhoto, myAlbum, photoUrl, type AlbumEntry } from '../../lib/rpc'
 
 /**
  * The evenings you chose to keep.
  *
- * A LIST FIRST, PICTURES SECOND. An album of full-width photographs is a
- * beautiful thing to scroll and a useless thing to look something up in: by the
- * fourth dinner you are pushing past pictures to find a night you can already
- * name. So the page is the index — one line per evening, its name and its date
- * — and the triangle opens the one you came for. The same disclosure the
- * settings use, for the same reason: read them one at a time.
- *
  * NOTHING IS HERE BY ACCIDENT. Being at a dinner does not put its photograph in
  * your album; pressing add on the results screen does (0068), exactly as it
  * does for a recipe (0058). That is what makes this worth opening — everything
  * in it was chosen — and it is also what makes it survive: each row is a copy,
  * so the dinner being purged three weeks later (0062) takes nothing from here.
+ *
+ * PRINTS ON A TABLE, TWO ACROSS. It used to be a list of folded rows inside the
+ * profile, which made an album of photographs the one place in the app where
+ * you could not see a photograph without opening something. On its own page
+ * the prints are laid out, and the one you touch lifts to the full width with
+ * its menu underneath — the same gesture the setup cards use.
  */
-export function Album() {
-  const { t, i18n } = useTranslation()
+function useAlbum() {
   const { profile } = useAuth()
-
-  const { data: evenings } = useQuery({
+  return useQuery({
     queryKey: ['my-album', profile?.id],
     enabled: !!profile?.id,
     queryFn: myAlbum,
   })
+}
 
-  if (!evenings || evenings.length === 0) {
-    return <p className="muted">{t('album.profileEmpty')}</p>
-  }
+/** Newest evening first; one with no date goes to the end rather than the top. */
+function newestFirst(a: AlbumEntry, b: AlbumEntry) {
+  return (b.dinner_at ?? '').localeCompare(a.dinner_at ?? '')
+}
+
+export function Album() {
+  const { t, i18n } = useTranslation()
+  const { data: evenings } = useAlbum()
+  const [open, setOpen] = useState<string | null>(null)
+
+  if (!evenings) return <p className="muted">…</p>
+  if (evenings.length === 0) return <p className="muted">{t('album.profileEmpty')}</p>
+
+  return (
+    <div className="albumgrid">
+      {[...evenings].sort(newestFirst).map((evening) => {
+        const isOpen = open === evening.id
+        return (
+          <div key={evening.id} className={`albumcard${isOpen ? ' is-open' : ''}`}>
+            <button
+              type="button"
+              className="albumcard__face"
+              aria-expanded={isOpen}
+              onClick={() => setOpen((cur) => (cur === evening.id ? null : evening.id))}
+            >
+              {!isOpen && <Print path={evening.storage_path} alt={evening.caption ?? evening.round_name} />}
+              <span className="albumcard__name">{evening.round_name}</span>
+              {evening.dinner_at && (
+                <span className="muted albumcard__date">{formatMoment(evening.dinner_at, i18n.language)}</span>
+              )}
+            </button>
+            {isOpen && (
+              <div className="albumcard__body">
+                <Evening evening={evening} />
+              </div>
+            )}
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
+/** The last three prints, on the profile, and the way to the rest. */
+export function AlbumPreview() {
+  const { t } = useTranslation()
+  const { data: evenings } = useAlbum()
+
+  if (!evenings) return <p className="muted">…</p>
+  if (evenings.length === 0) return <p className="muted">{t('album.profileEmpty')}</p>
 
   return (
     <div className="stack">
-      {evenings.map((evening) => (
-        <Fold
-          key={evening.id}
-          title={evening.round_name}
-          aside={evening.dinner_at ? formatMoment(evening.dinner_at, i18n.language) : undefined}
-        >
-          <Evening evening={evening} />
-        </Fold>
-      ))}
+      <p className="muted" style={{ margin: 0 }}>{t('album.latest')}</p>
+      <Link to="/profile/album" className="albumstrip" aria-label={t('album.seeAll', { count: evenings.length })}>
+        {[...evenings]
+          .sort(newestFirst)
+          .slice(0, 3)
+          .map((evening) => (
+            <Print key={evening.id} path={evening.storage_path} alt={evening.caption ?? evening.round_name} />
+          ))}
+      </Link>
+      <Link to="/profile/album" className="seeall">
+        {t('album.seeAll', { count: evenings.length })} →
+      </Link>
     </div>
+  )
+}
+
+function Print({ path, alt }: { path: string; alt: string }) {
+  const { data: url } = useQuery({
+    queryKey: ['photo-url', path],
+    queryFn: () => photoUrl(path),
+    staleTime: 45 * 60 * 1000,
+  })
+  return url ? (
+    <img className="albumprint" src={url} alt={alt} loading="lazy" />
+  ) : (
+    <span className="albumprint albumprint--pending" aria-hidden="true" />
   )
 }
 

@@ -14,6 +14,7 @@ import { SignUpPage } from './features/auth/SignUpPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { MyRoundsPage } from './features/rounds/MyRoundsPage'
 import { ProfilePage } from './features/profile/ProfilePage'
+import { AlbumPage, RecipesPage } from './features/profile/KeptPages'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
 import { CustomRoundPage } from './features/rounds/CustomRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
@@ -101,6 +102,22 @@ function AppRoutes() {
           element={
             <RequireAuth>
               <ProfilePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/profile/recipes"
+          element={
+            <RequireAuth>
+              <RecipesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/profile/album"
+          element={
+            <RequireAuth>
+              <AlbumPage />
             </RequireAuth>
           }
         />

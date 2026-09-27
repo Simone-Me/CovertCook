@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
 import { useAuth } from '../../lib/auth'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { FoodLabel } from '../../components/FoodLabel'
@@ -202,6 +203,52 @@ export function RecipeBook() {
       ))}
 
       <ExportButtons recipes={recipes} />
+    </div>
+  )
+}
+
+/**
+ * The last three recipes kept, on the profile, and the way to the whole book.
+ *
+ * The book lives on its own page now: a search, two filters, thirty folded
+ * recipes and an export do not belong half-way down a profile between the
+ * notifications and the allergies. What the profile keeps is a glance — what
+ * went in last — and one press to the rest.
+ */
+export function RecipesPreview() {
+  const { t } = useTranslation()
+  const { profile } = useAuth()
+  const { data: recipes } = useQuery({
+    queryKey: ['my-recipes', profile?.id],
+    enabled: !!profile?.id,
+    queryFn: listMyRecipes,
+  })
+
+  if (!recipes) return <p className="muted">…</p>
+  if (recipes.length === 0) return <p className="muted">{t('book.empty')}</p>
+
+  const latest = [...recipes].sort((a, b) => b.saved_at.localeCompare(a.saved_at)).slice(0, 3)
+
+  return (
+    <div className="stack">
+      <p className="muted" style={{ margin: 0 }}>{t('book.latest')}</p>
+      <ol className="menucard__list recipepreview">
+        {latest.map((r) => (
+          <li key={r.id} className="menucard__row">
+            <Link to="/profile/recipes" className="menucard__course recipepreview__row">
+              <span className="menucard__name">
+                <strong>{r.dish_name}</strong>
+                <span className="muted recipepreview__from">
+                  {r.round_name} · {t(`book.relation.${r.relation}`)}
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+      <Link to="/profile/recipes" className="seeall">
+        {t('book.seeAll', { count: recipes.length })} →
+      </Link>
     </div>
   )
 }
