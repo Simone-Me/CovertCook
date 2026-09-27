@@ -3422,6 +3422,30 @@
   border-left-color: var(--ok);
 }
 
+/* Coming, not choosable: the card is on the shelf so the shelf says what is
+   on its way, and it looks like paper that cannot be picked up. */
+.setup--soon {
+  border-style: dashed;
+  border-left-style: solid;
+  box-shadow: none;
+  background: var(--bg-elevated);
+}
+
+.setup--soon .setup__face {
+  cursor: default;
+  color: var(--text-muted);
+}
+
+.setup--soon .setup__face:hover {
+  background: none;
+}
+
+.setup__soon {
+  font-size: 12px;
+  font-style: italic;
+  color: var(--text-muted);
+}
+
 .setup__remove {
   position: absolute;
   top: 6px;

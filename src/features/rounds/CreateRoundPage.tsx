@@ -160,7 +160,7 @@ export function CreateRoundPage() {
       <p className="muted">{t('rounds.presets.lead')}</p>
 
       <div className="setups">
-        {PRESETS.map((preset) => {
+        {PRESETS.filter((preset) => !preset.soon).map((preset) => {
           const open = chosen === preset.key
           const manual = preset.key === 'MANUAL'
           return (
@@ -289,6 +289,16 @@ export function CreateRoundPage() {
             </div>
           )
         })}
+
+        {/* Last, and shut: what is coming, not what can be chosen. */}
+        {PRESETS.filter((preset) => preset.soon).map((preset) => (
+          <div key={preset.key} className="setup setup--soon">
+            <div className="setup__face" aria-disabled="true">
+              <span className="setup__name">{t(`rounds.presets.${preset.key}`)}</span>
+              <span className="setup__soon">{t('rounds.presets.soon')}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )

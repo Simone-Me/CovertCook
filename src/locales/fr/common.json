@@ -101,8 +101,8 @@
     "createIt": "Créer",
     "presets": {
       "lead": "Choisissez la soirée que vous avez en tête. Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit.",
-      "CLASSIC": "Classique",
-      "CLASSICHint": "Le jeu tel qu’il est pensé : couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
+      "CLASSIC": "Cuisiner la recette d’un proche",
+      "CLASSICHint": "Le jeu tel qu’il est pensé : chacun écrit en secret une recette pour quelqu’un d’autre et cuisine celle qu’on lui a donnée — personne ne sait qui a écrit la sienne avant la fin. Couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
       "PARTY": "Ambiance fête",
       "PARTYHint": "Pas de limite de couverts, le menu lisible pendant qu’il s’écrit, nappe et liste de pseudonymes tirées au sort, des services, frais partagés.",
       "NO_SURPRISES": "Sans surprises",
@@ -113,6 +113,7 @@
       "RANDOMHint": "Chaque réponse tirée au sort, cette table comprise — et le fil rouge est scellé, donc vous le découvrez avec les autres.",
       "MANUAL": "Je configure moi-même",
       "MANUALHint": "Le formulaire complet : chaque décision, une par une.",
+      "soon": "En développement",
       "mine": "Enregistrée par vous",
       "tweak": "Ouvrir dans le formulaire",
       "nameFirst": "Donnez d’abord un nom au dîner.",

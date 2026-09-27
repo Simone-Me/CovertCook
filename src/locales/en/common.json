@@ -101,8 +101,8 @@
     "createIt": "Create",
     "presets": {
       "lead": "Pick the evening you have in mind. Every card says what it sets before it makes anything.",
-      "CLASSIC": "Classic",
-      "CLASSICHint": "The game as designed: covered, approved at the door, one course each, costs split, vote at the end.",
+      "CLASSIC": "Cook a friend's recipe",
+      "CLASSICHint": "The game as designed: everyone secretly writes a recipe for someone else and cooks the one they were given — nobody knows who wrote theirs until the end. Covered, approved at the door, one course each, costs split, vote at the end.",
       "PARTY": "Party vibe",
       "PARTYHint": "No cap on the seats, the menu readable while it is written, a cloth and a word list drawn at random, courses, costs split.",
       "NO_SURPRISES": "No surprises",
@@ -113,6 +113,7 @@
       "RANDOMHint": "Every answer drawn, this table included — and the thread is sealed, so even you find out with everybody else.",
       "MANUAL": "Configure it myself",
       "MANUALHint": "The long form: every decision, one at a time.",
+      "soon": "In development",
       "mine": "Saved by you",
       "tweak": "Open it in the form",
       "nameFirst": "Give the dinner a name first.",

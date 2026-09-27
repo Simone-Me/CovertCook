@@ -78,6 +78,9 @@ export interface Preset {
   key: PresetKey
   /** Absent for the two cards that are not a fixed set of answers. */
   setup?: RoundSetup
+  /** On the grid, shut, marked as coming: the question that should lead to it
+   *  is not written yet. Its answers are kept so it can reopen as they are. */
+  soon?: boolean
 }
 
 /**
@@ -97,6 +100,11 @@ export interface Preset {
  *    a guest list.
  *  · NO STRESS is the opposite of a checklist — covered, a code, no cap, no
  *    thread, no courses to compose and no money to talk about.
+ *
+ * ONLY THE GAME AND THE LONG FORM ARE OPEN FOR NOW. The four others named a mood
+ * ("party", "no stress") and left the host to guess what it set; they come back
+ * once a few yes/no questions about the evening can lead to them. Until then
+ * they stay on the grid, shut, so the shelf says what is coming.
  *
  * THE COSTS ARE SPLIT WITHOUT A CEILING wherever a card splits them, and that
  * is not laziness: a card cannot invent a number that means anything to your
@@ -118,6 +126,7 @@ export const PRESETS: Preset[] = [
   },
   {
     key: 'PARTY',
+    soon: true,
     setup: {
       ...DEFAULT_SETUP,
       seats: null,
@@ -131,6 +140,7 @@ export const PRESETS: Preset[] = [
   },
   {
     key: 'NO_SURPRISES',
+    soon: true,
     setup: {
       ...DEFAULT_SETUP,
       access: 'INVITE',
@@ -142,6 +152,7 @@ export const PRESETS: Preset[] = [
   },
   {
     key: 'NO_STRESS',
+    soon: true,
     setup: {
       ...DEFAULT_SETUP,
       access: 'CODE',
@@ -152,7 +163,7 @@ export const PRESETS: Preset[] = [
       costMode: 'NONE',
     },
   },
-  { key: 'RANDOM' },
+  { key: 'RANDOM', soon: true },
   { key: 'MANUAL' },
 ]
 

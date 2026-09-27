@@ -70,6 +70,17 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-27
 
+**Changed: two cards open, four coming.** The grid of ready-made dinners
+named moods — "Party vibe", "No stress", "No surprises" — and left the host to
+work out what each one set. Only two stay open: the game as designed, now
+called for what it is (*Cook a friend's recipe* / *Cuisiner la recette d'un
+proche*, with a hint that explains the swap in one sentence), and the long
+form. The four others and the dice stay on the grid, dashed and shut, marked
+*In development*: they come back once a few yes/no questions about the evening
+(secret or not, menu visible or not, costs shared or not, a buffet or courses)
+can lead to them instead of a name. Their answers are kept in `roundSetup.ts`
+behind a `soon` flag. Saved cards stay open — they are the host's own.
+
 **Changed: the wok is gone, the peeking chef is the mark.** Drawn for this
 app rather than taken from Flaticon, so it is the first mark the store
 listing can actually carry (`assets-src/icon-proposals/README.md` explains why
