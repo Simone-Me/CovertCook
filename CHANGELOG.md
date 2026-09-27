@@ -68,6 +68,31 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-09-27
+
+**Changed: the wok is gone, the peeking chef is the mark.** Drawn for this
+app rather than taken from Flaticon, so it is the first mark the store
+listing can actually carry (`assets-src/icon-proposals/README.md` explains why
+the wok could not). Five masters in `assets-src/icons/`, each with one job:
+
+- `logo.png` — the chef peeking over the counter, hands on the edge. The
+  home-screen icon: `pwa-192x192`, `pwa-512x512`, `apple-touch-icon`.
+- `logo_face.png` — the same face without the hands, on the red tile. The
+  browser tab (`favicon-32`, `favicon-192`), because at 32 px the hands are
+  noise and the hat is the shape. Also the guide who speaks in the tutorial
+  (`public/logo_face.webp`).
+- `logo_face_inverse_nobg.png` — red lines on nothing. The header mark
+  (`public/logo.webp`), which sits on paper and needs no ground of its own.
+- `logo_inverse.png`, `logo_face_inverse.png` — white ground, red lines. Kept
+  as masters; nothing ships them yet.
+
+*The maskable icon is its own file now.* It used to be `pwa-512x512` again,
+which Android crops to a circle — the hands and the brim would have been cut.
+`pwa-maskable-512x512.png` is the face shrunk to 78% on the same red, inside
+the safe zone. The TWA manifest points at it too.
+
+---
+
 ## 2026-09-11
 
 **The fridge answers, the menu stops the second tiramisù, the evening leaves as

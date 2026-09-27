@@ -12,11 +12,12 @@ These are the masters. The versions the app actually loads live in `public/`:
 | `inside_fridge.png` (1122×1402, 1.2 MB) | `inside_fridge.webp` (820 px wide, 42 KB) | 28× smaller; 820 px covers a 2× phone and a desktop fold |
 | *(deleted)* `cutlery_anim.gif` | `cutlery_anim.mp4` (165 KB) + `cutlery_anim.png` poster | the GIF was the same animation 5× heavier and impossible to pause, so it was removed rather than kept as a master |
 
-`icons/` holds the 512×512 icon masters, `cooking_logo.png` among them — that
-one is the app mark, and everything in the browser tab and on the home screen
-is generated from it (see the CHANGELOG for 2026-08-24 (5)).
+`icons/` holds the icon masters. The five `logo*.png` are the app mark, drawn
+for this app and not from Flaticon, so the credit and the licence below do not
+apply to them. Which one becomes which shipped file is in the CHANGELOG for
+2026-09-27; the command to regenerate them is at the foot of this file.
 
-`icons/` holds the 512×512 icon masters. What ships is a 96 px WebP each —
+Every other file in `icons/` is a 512×512 tile master. What ships is a 96 px WebP each —
 3× a 32 px icon, which is every phone worth designing for — and the set went
 from **273 KB to 37 KB** doing it.
 
@@ -38,7 +39,24 @@ answer — a modification stays a derivative. See `icon-proposals/README.md`.
 To regenerate the icons after editing a master:
 
 ```
-python -c "from PIL import Image; import glob,os; [Image.open(f).convert('RGBA').resize((96,96), Image.LANCZOS).save('public/'+os.path.basename(f)[:-4]+'.webp','WEBP',quality=88,method=6) for f in glob.glob('assets-src/icons/*.png')]"
+python -c "from PIL import Image; import glob,os; [Image.open(f).convert('RGBA').resize((96,96), Image.LANCZOS).save('public/'+os.path.basename(f)[:-4]+'.webp','WEBP',quality=88,method=6) for f in glob.glob('assets-src/icons/*.png') if 'logo' not in f]"
+```
+
+The mark is regenerated separately, because each size comes from a different
+master (the masters are not exactly square, so they are cropped first):
+
+```
+python - <<'PY'
+from PIL import Image
+L=Image.LANCZOS
+def sq(p): im=Image.open(p).convert('RGBA'); s=min(im.size); return im.crop((0,0,s,s))
+logo=sq('assets-src/icons/logo.png'); face=sq('assets-src/icons/logo_face.png'); nobg=sq('assets-src/icons/logo_face_inverse_nobg.png')
+for n,o in [(180,'apple-touch-icon.png'),(192,'pwa-192x192.png'),(512,'pwa-512x512.png')]: logo.resize((n,n),L).save('public/'+o,optimize=True)
+for n,o in [(32,'favicon-32.png'),(192,'favicon-192.png')]: face.resize((n,n),L).save('public/'+o,optimize=True)
+m=Image.new('RGBA',(512,512),face.getpixel((2,2))); m.paste(face.resize((400,400),L),(56,56)); m.save('public/pwa-maskable-512x512.png',optimize=True)
+nobg.resize((96,96),L).save('public/logo.webp','WEBP',quality=88,method=6)
+face.resize((168,168),L).save('public/logo_face.webp','WEBP',quality=88,method=6)
+PY
 ```
 
 To regenerate the fridge WebP after editing the master:
