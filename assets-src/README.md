@@ -65,8 +65,8 @@ To regenerate the fridge WebP after editing the master:
 python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png'); w=820; im.resize((w, round(im.height*w/im.width)), Image.LANCZOS).save('public/inside_fridge.webp','WEBP',quality=82,method=6)"
 ```
 
-`public/logo-hands-white-borders.png` (the chef peeking over the counter in the
-creation sheet) and `public/pwa-maskable-white-borders.png` (the face in the
+`public/logo-hands-white-borders-nobg2.png` (the chef peeking over the counter
+in the creation sheet, transparent with a white outline) and `public/pwa-maskable-white-borders.png` (the face in the
 tour's bubble and on its last screen) are used exactly as the designer supplied
-them, white background included: that white is what keeps the red hat visible
+them: their white is what keeps the red hat visible
 on the red tablecloth. They are not converted, cropped or recoloured.

@@ -80,8 +80,9 @@ the interface, and add to its change log when a decision moves.
 **Changed: the chef is on white where he stands on the red cloth.** The
 peeking chef above the creation sheet and the face in the tour's bubble were red
 on red — the hat melted into the tablecloth. They are now the designer's two
-white-background pictures, used as supplied: `logo-hands-white-borders.png`
-(hands, no counter; his fingertips sit on the sheet's red edge) and
+pictures, used as supplied: `logo-hands-white-borders-nobg2.png` (transparent,
+a white outline round every red stroke, hands but no counter; his fingertips sit
+on the sheet's red edge) and
 `pwa-maskable-white-borders.png` for the bubble and the tour's last screen.
 `chef_peek.webp` is gone. The installed app's icon is unchanged.
 
