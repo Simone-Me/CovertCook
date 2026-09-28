@@ -2313,12 +2313,6 @@
 /* Linen, pressed. No checks at all — the whole point of the elegant table is
    that there is nothing printed on it — so the two gradients are turned into a
    whisper of weave rather than a grid. */
-.theme-elegant {
-  --cloth-ground: #f4f1e8;
-  --cloth-check: rgba(120, 110, 92, 0.07);
-  --cloth-square: 4px;
-}
-
 .theme-scifi {
   --cloth-ground: #101820;
   --cloth-check: rgba(94, 234, 212, 0.22);

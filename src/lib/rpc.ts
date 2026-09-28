@@ -32,7 +32,7 @@ export type NameTheme = 'FOOD' | 'BRIGADE' | 'PASTA' | 'PATISSERIE' | 'BATTERIE'
 
 // How the cloth is dressed (0072). Look only: nothing here touches a rule.
 export type TableTheme =
-  | 'CHECKS' | 'ELEGANT' | 'SCIFI' | 'BAROQUE' | 'HALLOWEEN' | 'XMAS' | 'CARNIVAL'
+  | 'CHECKS' | 'SCIFI' | 'BAROQUE' | 'HALLOWEEN' | 'XMAS' | 'CARNIVAL'
 
 /** DEFAULT is what a dinner gets for free by default, FREE is the second one
  *  everybody also gets, PAID carries a price and is refused until it is
@@ -189,9 +189,13 @@ export async function listNameThemes() {
   return unwrap<NameThemeOption[]>(res)
 }
 
+/** Cloths withdrawn for good (0094). Filtered here too, so the shelf is right
+ *  even on a database the migration has not reached yet. */
+const RETIRED_TABLE_THEMES = ['ELEGANT']
+
 export async function listTableThemes() {
   const res = await supabase.rpc('list_table_themes', {})
-  return unwrap<TableThemeOption[]>(res)
+  return unwrap<TableThemeOption[]>(res)?.filter((x) => !RETIRED_TABLE_THEMES.includes(x.code))
 }
 
 export type RoundAnonymity = 'ANONYMOUS' | 'SPY' | 'OPEN'

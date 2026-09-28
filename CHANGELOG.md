@@ -71,6 +71,16 @@ the interface, and add to its change log when a decision moves.
 
 ---
 
+## 2026-09-28
+
+**Fixed: Elegant still on the shelf.** The shelf comes from the server, and
+`0094` has not reached production, so the cloth kept appearing. The client now
+drops it from `listTableThemes` as well, and its label, hint, type member and
+`.theme-elegant` class are gone: a dinner laid on it before reads as the red
+checks.
+
+---
+
 ## 2026-09-27
 
 **Changed: no seat cap unless the host sets one.** `DEFAULT_SETUP.seats` is
