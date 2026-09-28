@@ -27,6 +27,7 @@ const ICONS = {
   // for a while, borrowed from the info drawer beside it — two envelopes with
   // the same mark, one of them about money.
   costs: 'jar_money',
+  menu: 'menu',
 } as const
 
 export type IconName = keyof typeof ICONS

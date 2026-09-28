@@ -131,6 +131,7 @@
       "multiple": "Multiple",
       "budget": "Budget",
       "courses": "Courses",
+      "menu": "Menu",
       "vote": "Vote"
     },
     "myRounds": "My rounds",
@@ -336,6 +337,8 @@
       "vote": "Vote the menu",
       "results": "Results",
       "allergies": "Allergies",
+      "menu": "The menu",
+      "menuMeta": "Dishes sent so far",
       "info": "The dinner",
       "costs": "The costs",
       "myRecipeMeta": "The dish I am asking for"
@@ -480,7 +483,7 @@
     "copyLink": "Copy the link",
     "rules": {
       "liveTitle": "Changeable during the dinner",
-      "liveNote": "Pick something now and think again later: the turning arrow ↺ on the pass comes back to either of these.",
+      "liveNote": "Pick something now and think again later: courses and vote with the turning arrow ↺ on the pass, the menu in the dinner's settings.",
       "settled": "Everything in these three is settled for the whole dinner — by you, now, and by nobody afterwards. What can still be changed while it runs is in the green box at the foot.",
       "liveMark": "Changeable during the dinner: the turning arrow ↺ on the pass comes back to this one."
     },
@@ -515,11 +518,14 @@
       "title": "Already on the menu",
       "nothingYet": "Nothing has been sent yet.",
       "why": "Dish names only — never who wrote them or who is cooking them. It is here so the table does not end up with three tiramisùs.",
-      "label": "Show the menu while recipes are being written",
-      "HIDDEN": "Keep it a surprise",
+      "label": "The menu while recipes are written",
+      "HIDDEN": "Keep the surprise",
       "HIDDENHint": "Nobody sees a dish before the dinner.",
-      "NAMES": "Show the dish names",
-      "NAMESHint": "Members see what has been sent — the names only, never who. Stops two people writing the same dish."
+      "NAMES": "Visible to everyone",
+      "NAMESHint": "Members see the names of the dishes sent, never who. Stops the same dish turning up twice.",
+      "HOST": "Only the Executive Chef",
+      "HOSTHint": "You keep track of what has been sent; the table keeps its surprise.",
+      "onlyYou": "Only you can see this menu."
     },
     "questions": {
       "step": "Question {{n}} of {{total}}",
@@ -546,7 +552,9 @@
         "no": "No, it's the surprise",
         "noHint": "Nobody sees a dish before the dinner.",
         "yes": "Yes, to avoid three tiramisùs",
-        "yesHint": "Dish names only — never who wrote them or who is cooking them."
+        "yesHint": "Dish names only — never who wrote them or who is cooking them.",
+        "host": "Just me, to keep track",
+        "hostHint": "You see the dishes sent; everyone else keeps the surprise."
       },
       "costs": {
         "ask": "And the shopping?",

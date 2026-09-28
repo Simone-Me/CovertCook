@@ -11,6 +11,7 @@ import { MyWarnings } from './MyWarnings'
 import { fromCents, roundDeletesAt } from '../../lib/rpc'
 import { tableThemeClass, themeMark } from '../../lib/themes'
 import { Envelope } from './Envelope'
+import { SharedMenu } from './SharedMenu'
 import { CutleryLink } from '../../components/CutleryLink'
 import { FilRougeLine } from './FilRougeLine'
 import { CopyButton } from '../../components/CopyButton'
@@ -65,7 +66,7 @@ import {
   type VotingMode,
 } from '../../lib/rpc'
 
-type OpenDrawer = 'chefs' | 'allergies' | 'info' | 'costs' | null
+type OpenDrawer = 'chefs' | 'allergies' | 'info' | 'costs' | 'menu' | null
 
 // The same order the creation form asks in, so a host meets the four choices
 // laid out the way they first met them.
@@ -366,6 +367,10 @@ export function RoundHomePage() {
     phaseIdx < ROUND_PHASE_ORDER.indexOf('VOTING') ? t('rounds.waiting.vote') : undefined
 
   const resultsOpen = phaseIdx >= ROUND_PHASE_ORDER.indexOf('RESULTS')
+  const menuShown =
+    assigned &&
+    phaseIdx <= ROUND_PHASE_ORDER.indexOf('DINNER') &&
+    (round.menu_visibility === 'NAMES' || (round.menu_visibility === 'HOST' && round.host_id === profile?.id))
 
   /**
    * Whether the table can already read the results, asked the way the server
@@ -1291,6 +1296,25 @@ export function RoundHomePage() {
         )}
         {round.voting_mode === 'DISABLED' && resultsOpen && (
           <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
+        )}
+
+        {/* The dishes already sent, by name and never by who. Only on a dinner
+            that shows its menu — to everybody (NAMES) or to the Executive Chef
+            alone (HOST) — and only while there is a menu being written: before
+            the roulette there are no dishes, after the dinner the results page
+            has the whole menu. A hidden menu has no envelope at all. */}
+        {menuShown && (
+          <Envelope
+            icon={<Icon name="menu" />}
+            name={t('rounds.drawers.menu')}
+            meta={t('rounds.drawers.menuMeta')}
+            tilt={3}
+            onOpen={() => toggle('menu')}
+          >
+            {open === 'menu' && (
+              <SharedMenu roundId={roundId} shared onlyYou={round.menu_visibility === 'HOST'} />
+            )}
+          </Envelope>
         )}
 
         {/* The count on the flap, and nothing at all when it is zero: a badge

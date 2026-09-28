@@ -41,8 +41,9 @@ const CHOICES: Record<Question, { key: string; value: EventAnswers[Question] }[]
     { key: 'no', value: false },
   ],
   menuVisible: [
-    { key: 'no', value: false },
-    { key: 'yes', value: true },
+    { key: 'no', value: 'HIDDEN' },
+    { key: 'yes', value: 'NAMES' },
+    { key: 'host', value: 'HOST' },
   ],
   costs: [
     { key: 'OWN', value: 'OWN' },

@@ -25,6 +25,12 @@ nothing else; it can go on its own, before or after the rest.
 only, no change to anything existing. Until it is applied the results page
 simply shows no chain card (the call fails quietly).
 
+**`0096` (the menu for the host) is written and NOT deployed.** Widens the
+`menu_visibility` check to `HOST` and replaces `set_menu_visibility` and
+`get_round_dishes` with the same signatures; it can go on its own. Until it is
+applied, choosing "Only the Executive Chef" fails when the dinner is created or
+changed (the constraint refuses the value).
+
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 **Next, in order:**
@@ -76,6 +82,19 @@ the interface, and add to its change log when a decision moves.
 ---
 
 ## 2026-09-28
+
+**Changed: the menu is an envelope on the dinner's page.** When a dinner shows
+its menu, the dishes already sent (course and name, never who) sat under the
+form in "My order", where nobody read them. They are now the Menu envelope on
+the table, with its own icon (`menu.webp`), opening in place like Allergies —
+from the roulette until the dinner, and not at all when the menu is hidden.
+
+**Added: a menu for the Executive Chef alone** (`0096`). The menu's visibility is
+now hidden, visible to everyone, or visible only to the Executive Chef, who can
+keep track of what is coming while the table keeps its surprise. The chef's
+third question has the third answer ("Just me, to keep track"), the dinner's
+settings have the third option, and the long creation form finally has the
+choice at all — it used to carry whatever value it arrived with.
 
 **Changed: the chef is on white where he stands on the red cloth.** The
 peeking chef above the creation sheet and the face in the tour's bubble were red

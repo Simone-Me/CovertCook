@@ -2089,9 +2089,12 @@ export async function postToBoard(
 /** OPEN starts something, REPLY answers one (0088). */
 export type BoardRole = 'OPEN' | 'REPLY'
 
-/** The menu while it is still being written (0087). HIDDEN keeps the
- *  surprise; NAMES lets the table avoid three tiramisùs. */
-export type MenuVisibility = 'HIDDEN' | 'NAMES'
+/** The menu while it is still being written (0087, 0096). HIDDEN keeps the
+ *  surprise; NAMES lets the table avoid three tiramisùs; HOST keeps the
+ *  surprise for the table and lets the Executive Chef follow the evening. */
+export type MenuVisibility = 'HIDDEN' | 'NAMES' | 'HOST'
+
+export const MENU_VISIBILITIES: MenuVisibility[] = ['HIDDEN', 'NAMES', 'HOST']
 
 export const MENU_NOT_SHARED = 'MENU_NOT_SHARED'
 

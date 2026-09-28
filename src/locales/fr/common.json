@@ -131,6 +131,7 @@
       "multiple": "Multiple",
       "budget": "Budget",
       "courses": "Services",
+      "menu": "Menu",
       "vote": "Vote"
     },
     "myRounds": "Mes dîners",
@@ -336,6 +337,8 @@
       "vote": "Votez le menu",
       "results": "Résultats",
       "allergies": "Allergies",
+      "menu": "Le menu",
+      "menuMeta": "Les plats déjà envoyés",
       "info": "Le dîner",
       "costs": "Les frais",
       "myRecipeMeta": "Le plat que je demande"
@@ -480,7 +483,7 @@
     "copyLink": "Copier le lien",
     "rules": {
       "liveTitle": "Modifiable pendant le dîner",
-      "liveNote": "Choisissez maintenant et changez d’avis plus tard : la flèche qui tourne ↺ sur la passe revient sur ces deux-là.",
+      "liveNote": "Choisissez maintenant et changez d’avis plus tard : les services et le vote avec la flèche qui tourne ↺ sur la passe, le menu dans les réglages du dîner.",
       "settled": "Tout ce qui est dans ces trois groupes est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Ce qui peut encore bouger en cours de route est dans l’encadré vert, en bas.",
       "liveMark": "Modifiable pendant le dîner : la flèche qui tourne ↺ sur la passe revient sur celui-ci."
     },
@@ -515,11 +518,14 @@
       "title": "Déjà au menu",
       "nothingYet": "Rien n'a encore été envoyé.",
       "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisùs à la même table.",
-      "label": "Montrer le menu pendant l'écriture des recettes",
+      "label": "Le menu pendant l'écriture des recettes",
       "HIDDEN": "Garder la surprise",
       "HIDDENHint": "Personne ne voit un plat avant le dîner.",
-      "NAMES": "Montrer les noms des plats",
-      "NAMESHint": "Les convives voient ce qui a été envoyé — les noms seuls, jamais qui. Évite que deux personnes écrivent le même plat."
+      "NAMES": "Visible par tous",
+      "NAMESHint": "Les convives voient les noms des plats envoyés, jamais qui. Évite deux fois le même plat.",
+      "HOST": "Visible par l'Executive Chef seulement",
+      "HOSTHint": "Vous suivez ce qui a été envoyé ; les convives gardent la surprise.",
+      "onlyYou": "Vous seul voyez ce menu."
     },
     "questions": {
       "step": "Question {{n}} sur {{total}}",
@@ -546,7 +552,9 @@
         "no": "Non, c’est la surprise",
         "noHint": "Personne ne voit un plat avant le dîner.",
         "yes": "Oui, pour éviter trois tiramisùs",
-        "yesHint": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine."
+        "yesHint": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine.",
+        "host": "Seulement moi, pour suivre",
+        "hostHint": "Vous voyez les plats envoyés, les autres gardent la surprise."
       },
       "costs": {
         "ask": "Et les courses ?",

@@ -135,8 +135,9 @@ export interface EventAnswers {
   codeNames: boolean
   /** A meal in courses, or a buffet where everybody brings what they like. */
   courses: boolean
-  /** Dish names readable while the recipes are being written. */
-  menuVisible: boolean
+  /** Who reads the dish names while the recipes are being written: nobody,
+   *  everybody, or the Executive Chef alone. */
+  menuVisible: MenuVisibility
   costs: 'OWN' | 'SHARED' | 'BUDGET'
   /** Typed by a person: '15' or '12.50'. Only read when costs is BUDGET. */
   budget: string
@@ -155,7 +156,7 @@ export function setupFromAnswers(a: EventAnswers): RoundSetup {
     ...DEFAULT_SETUP,
     anonymity: a.codeNames ? 'ANONYMOUS' : 'OPEN',
     slotMode: a.courses ? 'CATEGORIES' : 'FREE',
-    menuVisibility: a.menuVisible ? 'NAMES' : 'HIDDEN',
+    menuVisibility: a.menuVisible,
     costMode: a.costs === 'OWN' ? 'NONE' : a.costs === 'SHARED' ? 'NO_BUDGET' : 'BUDGET',
     budget: a.costs === 'BUDGET' ? a.budget : '',
   }

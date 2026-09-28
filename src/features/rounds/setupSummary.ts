@@ -14,7 +14,7 @@ export function useSetupSummary() {
       t(`rounds.slotMode.${setup.slotMode}`),
       t(`rounds.voting.${setup.votingMode}`),
       t(`costs.mode.${setup.costMode}`),
-      setup.menuVisibility === 'NAMES' ? t('rounds.sharedMenu.NAMES') : null,
+      setup.menuVisibility !== 'HIDDEN' ? t(`rounds.sharedMenu.${setup.menuVisibility}`) : null,
       setup.filRougeCategory ? t(`filRouge.category.${setup.filRougeCategory}`) : null,
     ]
       .filter(Boolean)
