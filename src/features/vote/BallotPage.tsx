@@ -25,88 +25,83 @@ import { getFilRouge } from '../../lib/rpc'
 function RankedRow({
   option,
   rank,
-  originality,
-  briefRespect,
   theme,
   threadLabel,
-  onScoreChange,
+  onThemeChange,
 }: {
   option: BallotOption
   rank: number
-  originality: number | null
-  briefRespect: number | null
   theme: number | null
-  /** The thread this dish owed, already in words — absent when the dinner has
-   *  none, which is what keeps the third dropdown off most ballots. */
+  /** The theme this dish owed, already in words — absent when the dinner has
+   *  none, which is what keeps every extra score off most ballots. */
   threadLabel: string | null
-  onScoreChange: (kind: 'originality' | 'briefRespect' | 'theme', value: number | null) => void
+  onThemeChange: (value: number) => void
 }) {
   const { t } = useTranslation()
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: option.brief_id })
   const style = { transform: CSS.Transform.toString(transform), transition }
 
   return (
-    // Dish above, scores below. Four things on one line meant the dish name —
-    // the only part you are actually judging — was squeezed between a rank and
-    // two dropdowns, and on a phone it wrapped to nothing.
+    // Dish above, its one score below. The six dots on the left are the
+    // handle people already know from every list they have reordered: without
+    // them a ballot of cards read as a list to read, not one to arrange.
     <div ref={setNodeRef} style={style} className="card ballotrow" {...attributes} {...listeners}>
       <div className="ballotrow__head">
+        <span className="ballotrow__grip" aria-hidden="true">
+          ⠿
+        </span>
         <strong className="ballotrow__rank">#{rank}</strong>
         <div className="ballotrow__dish">
           <div className="ballotrow__name">{option.dish_name}</div>
           <div className="muted">{t(`briefs.courseOption.${option.course}`)}</div>
           {/* Named on the row rather than once at the top: on a per-cook
-              dinner every dish owed a different thread, so "did it honour it"
+              dinner every dish owed a different theme, so "did it honour it"
               cannot be answered without saying which. */}
           {threadLabel && <div className="muted">{threadLabel}</div>}
         </div>
       </div>
 
-      <div className="ballotrow__scores">
-      <select
-        aria-label={t('vote.originality')}
-        value={originality ?? ''}
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-        onChange={(e) => onScoreChange('originality', e.target.value ? Number(e.target.value) : null)}
-      >
-        <option value="">{t('vote.originality')}</option>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <option key={n} value={n}>
-            {n}
-          </option>
-        ))}
-      </select>
-      <select
-        aria-label={t('vote.briefRespect')}
-        value={briefRespect ?? ''}
-        onClick={(e) => e.stopPropagation()}
-        onPointerDown={(e) => e.stopPropagation()}
-        onChange={(e) => onScoreChange('briefRespect', e.target.value ? Number(e.target.value) : null)}
-      >
-        <option value="">{t('vote.briefRespect')}</option>
-        {[1, 2, 3, 4, 5].map((n) => (
-          <option key={n} value={n}>
-            {n}
-          </option>
-        ))}
-      </select>
-      {threadLabel && (
-        <select
-          aria-label={t('vote.themeRespect')}
-          value={theme ?? ''}
-          onClick={(e) => e.stopPropagation()}
-          onPointerDown={(e) => e.stopPropagation()}
-          onChange={(e) => onScoreChange('theme', e.target.value ? Number(e.target.value) : null)}
-        >
-          <option value="">{t('vote.themeRespect')}</option>
-          {[1, 2, 3, 4, 5].map((n) => (
-            <option key={n} value={n}>
-              {n}
-            </option>
-          ))}
-        </select>
-      )}
+      {threadLabel && <ThemeSlider value={theme} onChange={onThemeChange} />}
+    </div>
+  )
+}
+
+/**
+ * ONE SCORE, AND ONLY WHEN THERE IS A THEME TO SCORE AGAINST.
+ *
+ * Originality and "followed the recipe" were two dropdowns on every row of
+ * every ballot: two questions people answered at random or not at all. What a
+ * table actually wants to argue about is the theme — who took "Mexico" or "the
+ * colour green" somewhere nobody expected — so that is the one question, and
+ * it is only asked when the dinner had one.
+ *
+ * A dot on a line rather than a menu of numbers: dragging it is a feeling, and
+ * picking "4" from a list is a form. It starts grey and unset; nothing is sent
+ * for a dish nobody touched.
+ */
+function ThemeSlider({ value, onChange }: { value: number | null; onChange: (value: number) => void }) {
+  const { t } = useTranslation()
+  const stop = (e: { stopPropagation: () => void }) => e.stopPropagation()
+  return (
+    <div className="themeslider" onPointerDown={stop} onKeyDown={stop}>
+      <label className="themeslider__label">
+        {t('vote.themeScore')}
+        <input
+          type="range"
+          min={1}
+          max={5}
+          step={1}
+          className={value === null ? 'themeslider__input is-unset' : 'themeslider__input'}
+          value={value ?? 3}
+          onChange={(e) => onChange(Number(e.target.value))}
+          // Pressing the dot where it already sits fires no change; that
+          // press still means "this one".
+          onClick={(e) => value === null && onChange(Number(e.currentTarget.value))}
+        />
+      </label>
+      <div className="themeslider__ends" aria-hidden="true">
+        <span>{t('vote.themeScoreLow')}</span>
+        <span>{t('vote.themeScoreHigh')}</span>
       </div>
     </div>
   )
@@ -123,9 +118,7 @@ export function BallotPage() {
   })
 
   const [order, setOrder] = useState<string[]>([])
-  const [scores, setScores] = useState<
-    Record<string, { originality: number | null; briefRespect: number | null; theme: number | null }>
-  >({})
+  const [scores, setScores] = useState<Record<string, number>>({})
   const filRougeLabel = useFilRougeLabel()
   // Asked once for the round: it decides whether the third dropdown exists at
   // all, and on a shared dinner it is also the answer for every dish.
@@ -179,9 +172,11 @@ export function BallotPage() {
         order.map((briefId, i) => ({
           brief_id: briefId,
           rank: i + 1,
-          originality_score: scores[briefId]?.originality ?? null,
-          brief_respect_score: scores[briefId]?.briefRespect ?? null,
-          theme_score: scores[briefId]?.theme ?? null,
+          // Originality and recipe respect are no longer asked (the columns
+          // stay for ballots cast before); the one score is the theme's.
+          originality_score: null,
+          brief_respect_score: null,
+          theme_score: scores[briefId] ?? null,
         })),
       )
       setSubmitted(true)
@@ -258,7 +253,7 @@ export function BallotPage() {
         </ol>
       </div>
 
-      <p className="muted">{t('vote.instructions')}</p>
+      <p className="muted">{t(filRouge?.category ? 'vote.instructionsTheme' : 'vote.instructions')}</p>
       {error && <div className="error">{error}</div>}
 
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
@@ -272,21 +267,9 @@ export function BallotPage() {
                   key={id}
                   option={option}
                   rank={i + 1}
-                  originality={scores[id]?.originality ?? null}
-                  briefRespect={scores[id]?.briefRespect ?? null}
-                  theme={scores[id]?.theme ?? null}
+                  theme={scores[id] ?? null}
                   threadLabel={threadFor(option)}
-                  onScoreChange={(kind, value) =>
-                    setScores((prev) => ({
-                      ...prev,
-                      [id]: {
-                        originality: prev[id]?.originality ?? null,
-                        briefRespect: prev[id]?.briefRespect ?? null,
-                        theme: prev[id]?.theme ?? null,
-                        [kind]: value,
-                      },
-                    }))
-                  }
+                  onThemeChange={(value) => setScores((prev) => ({ ...prev, [id]: value }))}
                 />
               )
             })}

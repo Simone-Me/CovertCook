@@ -77,6 +77,20 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
+**Changed: one score on the ballot, and only when there is a theme.**
+Originality and "followed the recipe" were two dropdowns on every row of every
+ballot, answered at random or not at all. Now a dinner without a theme is a
+ranking and nothing else; a dinner with one asks a single question per dish,
+*Originality and fit to the theme*, as a dot on a line (Barely → Completely)
+that stays grey — and sends nothing — until it is touched. It is stored as
+`theme_score` (no migration); `originality_score` and `brief_respect_score` go
+out null, so their two awards simply stop appearing, and the theme award reads
+*Most original on the theme*.
+
+**Added: a grip on every ballot row.** Six dots on the left and a grab cursor:
+the mark every reorderable list uses, so a ballot of cards reads as something
+to arrange.
+
 **Added: the chain on the results page, for everybody (`0095`).** The ring was
 the Executive Chef's alone, on a page of its own, while it is the punchline of
 the evening. `get_revealed_chain` gives it to every active member once the

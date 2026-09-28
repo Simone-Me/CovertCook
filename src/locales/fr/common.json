@@ -732,9 +732,7 @@
   "vote": {
     "title": "Votez le menu",
     "theMenu": "Le menu de ce soir",
-    "instructions": "Glissez pour classer chaque plat, du meilleur au moins bon. Optionnel : notez l'originalité et le respect de la recette.",
-    "originality": "Originalité",
-    "briefRespect": "Respect de la recette",
+    "instructions": "Glissez les plats pour les classer, du meilleur au moins bon.",
     "submitBallot": "Valider le vote",
     "thanks": "Merci — votre vote a été enregistré.",
     "nothingToRank": "Rien à classer pour l'instant.",
@@ -792,7 +790,10 @@
     "allVoted": "Tout le monde a voté. Fermeture du vote…",
     "deadlineSetAlready": "Ce vote a déjà une heure de fermeture, et elle ne bouge pas. Retirez-la d'abord si elle doit changer.",
     "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde.",
-    "themeRespect": "Thème"
+    "instructionsTheme": "Glissez les plats pour les classer, du meilleur au moins bon. Si vous voulez, notez aussi l’originalité et le respect du thème.",
+    "themeScore": "Originalité et respect du thème",
+    "themeScoreLow": "Peu",
+    "themeScoreHigh": "Tout à fait"
   },
   "share": {
     "what": "Choisissez ce qui figure sur la carte. Rien n’est envoyé avant que vous appuyiez sur envoyer, et l’image ci-dessous est exactement ce qui quitte ce téléphone.",
@@ -818,7 +819,7 @@
       "BEST_DRINK": "Meilleure boisson",
       "MOST_ORIGINAL": "Plus original",
       "BEST_BRIEF_RESPECT": "Meilleur respect de la recette",
-      "BEST_FIL_ROUGE": "Meilleure interprétation du thème"
+      "BEST_FIL_ROUGE": "Le plus original sur le thème"
     },
     "nothingServed": "Aucun plat n’a été enregistré pour ce dîner.",
     "notServed": "non servi",

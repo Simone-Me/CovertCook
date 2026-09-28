@@ -732,9 +732,7 @@
   "vote": {
     "title": "Vote the menu",
     "theMenu": "Tonight's menu",
-    "instructions": "Drag to rank every dish, best first. Optional: rate originality and how closely the brief was followed.",
-    "originality": "Originality",
-    "briefRespect": "Brief respect",
+    "instructions": "Drag the dishes to rank them, best first.",
     "submitBallot": "Submit ballot",
     "thanks": "Thanks — your ballot has been recorded.",
     "nothingToRank": "Nothing to rank yet.",
@@ -792,7 +790,10 @@
     "allVoted": "Everybody has voted. Closing the vote…",
     "deadlineSetAlready": "This vote already has a closing time, and it does not move. Remove it first if it has to change.",
     "liveNoDeadline": "No countdown on this one — you close it yourself when the table is done, and you see the results before anybody else.",
-    "themeRespect": "Theme"
+    "instructionsTheme": "Drag the dishes to rank them, best first. If you like, also rate originality and fit to the theme.",
+    "themeScore": "Originality and fit to the theme",
+    "themeScoreLow": "Barely",
+    "themeScoreHigh": "Completely"
   },
   "share": {
     "what": "Choose what goes on the card. Nothing is sent until you press send, and the picture below is exactly what leaves this phone.",
@@ -818,7 +819,7 @@
       "BEST_DRINK": "Best drink",
       "MOST_ORIGINAL": "Most original",
       "BEST_BRIEF_RESPECT": "Best brief respect",
-      "BEST_FIL_ROUGE": "Best interpretation of the theme"
+      "BEST_FIL_ROUGE": "Most original on the theme"
     },
     "nothingServed": "No dishes were recorded for this dinner.",
     "notServed": "not served",
