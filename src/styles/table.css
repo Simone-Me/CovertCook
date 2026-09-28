@@ -3675,7 +3675,7 @@
   margin-bottom: 8px;
   padding: 10px 16px 16px;
   background: var(--paper-solid);
-  /* As thick as the counter in the drawing at 150px, so the two are one. */
+  /* The counter the chef grips: thick enough to hold his fingers. */
   border-top: 22px solid var(--accent);
   border-radius: 14px 14px 12px 12px;
   box-shadow: 0 -4px 24px rgba(80, 20, 20, 0.22);
@@ -3687,8 +3687,8 @@
   bottom: 100%;
   width: 150px;
   height: auto;
-  /* `bottom: 100%` is the inner edge of the red border, so the picture's own
-     red band — the whole counter, fingers and all — lands exactly on it. */
+  /* `bottom: 100%` is the inner edge of the red border: the picture has no
+     counter of its own any more, so its fingers lie on this straight one. */
   transform: translate(-50%, 0);
   pointer-events: none;
   animation: chef-hop 0.42s ease-out;

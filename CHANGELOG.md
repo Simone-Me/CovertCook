@@ -77,6 +77,15 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
+**Fixed: a step where the drawn counter met the sheet.** The chef's picture
+carried its own red counter, drawn slightly slanted, laid over the sheet's
+straight red edge — so at both ends of the picture the two never quite lined up.
+The drawn counter is now removed under its top edge (fingers kept), and the
+fingers lie on the sheet's own edge: one straight counter, no join.
+
+**Fixed: the tour kept the menu on the pass after the roulette.** At step 10 the
+menu is already composed; the pass now shows only the assignment.
+
 **Changed: the guided dinner is pressed, never read.** No step closes with an
 OK in the bubble any more; each one moves on because something on the table was
 pressed, and the bubble gains *← Previous step*. 27 steps, rebuilt around what

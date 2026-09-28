@@ -67,10 +67,10 @@ python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png');
 
 `public/chef_peek.webp` — the chef leaning on the counter in the creation sheet —
 is cut from `icons/logo_inverse.png`: the white around him flood-filled to
-transparent from the corners (his fingers, white but closed by their red outline,
-stay white), kept down to the bottom of the drawing so the fingers are whole and
-the red band is the sheet's 22 px top edge, and scaled to 300 px wide for a
-150 px display:
+transparent from the corners, and the drawn red counter removed under its top
+edge, fingers kept, so the sheet's own straight 22px red edge is the counter and
+the fingers lie on it (the drawn one slanted, and never lined up). Scaled to
+300 px wide for a 150 px display:
 
 ```
 python - <<'PY'
@@ -82,6 +82,22 @@ px = im.load()
 for y in range(h):
     for x in range(w):
         if px[x, y] == (255, 0, 255, 255): px[x, y] = (255, 255, 255, 0)
+# The drawn counter: everything under its top edge that is not a finger goes,
+# so the sheet's own straight red edge is the counter and the fingers lie on it.
+left, right = 509, 502
+for x in range(w):
+    top = round(left + (right - left) * x / (w - 1)) - 2
+    for y in range(top, h):
+        r, g, b, a = px[x, y]
+        finger = 48 <= x <= 172 or 405 <= x <= 562
+        if a and not (finger and r > 200 and g > 200 and b > 200):
+            px[x, y] = (255, 255, 255, 0)
+# Stray white specks the flood fill left beside the fingers.
+for y in range(440, h):
+    for x in range(w):
+        r, g, b, a = px[x, y]
+        if a and r > 200 and g > 200 and b > 200 and not (48 <= x <= 172 or 405 <= x <= 562):
+            px[x, y] = (255, 255, 255, 0)
 crop = im.crop((0, im.getbbox()[1], w, h))
 crop.resize((300, round(crop.height * 300 / w)), Image.LANCZOS).save('public/chef_peek.webp', 'WEBP', quality=90, method=6)
 PY

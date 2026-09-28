@@ -152,25 +152,31 @@ export function TableScreen({ phase, reached }: ScreenProps) {
 
             {phase === 'LOCKED' && (
               <div className="stack">
-                <span className="pass__section-title">{t('rounds.menu.title')}</span>
-                <div className="row">
-                  <button type="button" className="secondary">
-                    {t('tutorial.menuFree')}
-                  </button>
-                  <button type="button" className={composed ? '' : 'secondary'} data-tour="menuCourses">
-                    {t('tutorial.menuCourses')}
-                  </button>
-                </div>
-                {composed && (
-                  <ol className="menucard__list">
-                    {COURSES.map((c) => (
-                      <li key={c} className="menucard__course">
-                        <span className="menucard__name">{t(`briefs.courseOption.${c}`)}</span>
-                      </li>
-                    ))}
-                  </ol>
+                {/* The menu is composed once, before the roulette; after it
+                    the pass is about the assignment alone. */}
+                {!dealt && (
+                  <>
+                  <span className="pass__section-title">{t('rounds.menu.title')}</span>
+                  <div className="row">
+                    <button type="button" className="secondary">
+                      {t('tutorial.menuFree')}
+                    </button>
+                    <button type="button" className={composed ? '' : 'secondary'} data-tour="menuCourses">
+                      {t('tutorial.menuCourses')}
+                    </button>
+                  </div>
+                  {composed && (
+                    <ol className="menucard__list">
+                      {COURSES.map((c) => (
+                        <li key={c} className="menucard__course">
+                          <span className="menucard__name">{t(`briefs.courseOption.${c}`)}</span>
+                        </li>
+                      ))}
+                    </ol>
+                  )}
+                    <hr className="pass__rule" />
+                  </>
                 )}
-                <hr className="pass__rule" />
                 <span className="pass__section-title">{t('rounds.assignment.title')}</span>
                 <p className="muted" style={{ margin: 0 }}>
                   {dealt ? t('rounds.assignment.ready') : t('rounds.assignment.explain')}
