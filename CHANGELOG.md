@@ -77,14 +77,13 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
-**Changed: the chef has a white edge where he stands on the red cloth.** The
+**Changed: the chef is on white where he stands on the red cloth.** The
 peeking chef above the creation sheet and the face in the tour's bubble were red
-on red — the hat melted into the tablecloth. Two new masters from the designer
-(`assets-src/icons/chef_hands_white.png`, `logo_face_white.png`): the sheet's
-chef is now cut from the one with hands and no counter, with a white line round
-every red stroke and his fingertips over the sheet's own red edge; the bubble and
-the tour's last screen use `logo_face_light.webp`, red hat on white. The
-installed app's icon is unchanged.
+on red — the hat melted into the tablecloth. They are now the designer's two
+white-background pictures, used as supplied: `logo-hands-white-borders.png`
+(hands, no counter; his fingertips sit on the sheet's red edge) and
+`pwa-maskable-white-borders.png` for the bubble and the tour's last screen.
+`chef_peek.webp` is gone. The installed app's icon is unchanged.
 
 **Changed: "Cook a friend's recipe" is now "CovertCook dinner"** (fr "Dîner
 CovertCook") — the first answer the chef offers is the game the app is named

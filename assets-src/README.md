@@ -65,40 +65,8 @@ To regenerate the fridge WebP after editing the master:
 python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png'); w=820; im.resize((w, round(im.height*w/im.width)), Image.LANCZOS).save('public/inside_fridge.webp','WEBP',quality=82,method=6)"
 ```
 
-`public/chef_peek.webp` — the chef peeking over the counter in the creation
-sheet — is cut from `icons/chef_hands_white.png`: hands but no counter, since the
-sheet's own straight 22px red edge is the counter. The white round him is kept as
-a line about 10px wide round every red stroke and the rest made transparent, so
-he stands out on the red tablecloth. Scaled to 300 px wide for a 150 px display:
-
-```
-python - <<'PY'
-from PIL import Image, ImageDraw, ImageFilter, ImageOps
-im = ImageOps.expand(Image.open('assets-src/icons/chef_hands_white.png').convert('RGB'), 24, fill=(255, 255, 255))
-w, h = im.size
-probe = im.copy()
-ImageDraw.floodfill(probe, (0, 0), (255, 0, 255), thresh=60)
-shape = Image.new('L', (w, h), 0)
-sp, pp = shape.load(), probe.load()
-for y in range(h):
-    for x in range(w):
-        if pp[x, y] != (255, 0, 255): sp[x, y] = 255
-halo = shape.filter(ImageFilter.MaxFilter(21)).filter(ImageFilter.GaussianBlur(1.2))
-out = im.convert('RGBA'); out.putalpha(halo); out = out.crop(out.getbbox())
-out.resize((300, round(out.height * 300 / out.width)), Image.LANCZOS).save('public/chef_peek.webp', 'WEBP', quality=90, method=6)
-PY
-```
-
-`public/logo_face_light.webp` — the face wherever it sits on the tablecloth (the
-tour's bubble and last screen) — is `icons/logo_face_white.png`, red on white,
-cropped square round the drawing with a white margin:
-
-```
-python - <<'PY'
-from PIL import Image, ImageOps
-im = Image.open('assets-src/icons/logo_face_white.png').convert('RGB')
-x0, y0, x1, y1 = ImageOps.invert(im).getbbox()
-cx, cy, s = (x0 + x1) / 2, (y0 + y1) / 2, max(x1 - x0, y1 - y0) * 1.18
-im.crop((round(cx - s / 2), round(cy - s / 2), round(cx + s / 2), round(cy + s / 2))).resize((168, 168), Image.LANCZOS).save('public/logo_face_light.webp', 'WEBP', quality=88, method=6)
-PY
-```
+`public/logo-hands-white-borders.png` (the chef peeking over the counter in the
+creation sheet) and `public/pwa-maskable-white-borders.png` (the face in the
+tour's bubble and on its last screen) are used exactly as the designer supplied
+them, white background included: that white is what keeps the red hat visible
+on the red tablecloth. They are not converted, cropped or recoloured.
