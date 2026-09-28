@@ -77,6 +77,19 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
+**Fixed: a refused phase change was said at the top of the page, in English.**
+"need at least 3 active, approved players to lock the round" appeared above the
+dinner's name while the host was looking at the button at the foot of the pass.
+It now appears right above that button, in the reader's language, for the three
+refusals a host actually meets (too few chefs, no roulette yet, courses ≠
+chefs). Two invitation refusals (already at the table, invitations closed) are
+translated the same way.
+
+**Fixed: a request that could only fail.** The brief editor asked for the shared
+menu on every dinner and the server refused it on the ones that keep it secret —
+harmless, but a red 400 in the console. It is now only asked when the dinner
+shows its menu.
+
 **Fixed: a step where the drawn counter met the sheet.** The chef's picture
 carried its own red counter, drawn slightly slanted, laid over the sheet's
 straight red edge — so at both ends of the picture the two never quite lined up.

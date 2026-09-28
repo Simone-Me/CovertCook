@@ -443,7 +443,7 @@ export function BriefEditorPage() {
 
       {/* What is already on the menu, so nobody writes the second tiramisù.
           Renders nothing at all unless the dinner turned this on (0087). */}
-      <SharedMenu roundId={roundId} />
+      <SharedMenu roundId={roundId} shared={round?.menu_visibility === 'NAMES'} />
 
       {/* THE IDEAS, AS TABS, and only on a dinner that asked for more than one.
           A free dinner never sees this row at all — the feature has to be

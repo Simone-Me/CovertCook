@@ -314,7 +314,9 @@
       "noSuchChef": "Aucun chef ne porte ce nom. Vérifiez l'orthographe — les noms d'utilisateur sont exactement comme leur propriétaire les a tapés.",
       "inviteUsername": "Son nom d'utilisateur",
       "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
-      "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant."
+      "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant.",
+      "alreadyHere": "Ce chef est déjà à cette table.",
+      "closed": "Les invitations sont fermées : les inscriptions sont closes."
     },
     "pastRounds": "Dîners passés ({{count}})",
     "backToTable": "Retour à la table",
@@ -586,6 +588,10 @@
       "line": "Dîner dans {{when}}",
       "days": "{{d}} j {{h}} h",
       "hours": "{{h}} h {{m}} min"
+    },
+    "advanceError": {
+      "tooFew": "Il faut au moins 3 chefs inscrits et approuvés pour fermer les inscriptions.",
+      "slots": "Le menu compte {{courses}} plats pour {{chefs}} chefs : il en faut un par chef."
     }
   },
   "briefs": {

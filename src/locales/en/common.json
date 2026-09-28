@@ -314,7 +314,9 @@
       "noSuchChef": "No chef goes by that name. Check the spelling — usernames are exactly as their owner typed them.",
       "inviteUsername": "Their username",
       "notByInvitation": "This dinner is entered with the code. There is no guest list to add to.",
-      "inviteHelp": "Their username, not their email — the name they picked when they signed up."
+      "inviteHelp": "Their username, not their email — the name they picked when they signed up.",
+      "alreadyHere": "That chef is already at this table.",
+      "closed": "Invitations are closed: sign-ups have ended."
     },
     "pastRounds": "Past dinners ({{count}})",
     "backToTable": "Back to the table",
@@ -586,6 +588,10 @@
       "line": "Dinner in {{when}}",
       "days": "{{d}} d {{h}} h",
       "hours": "{{h}} h {{m}} min"
+    },
+    "advanceError": {
+      "tooFew": "You need at least 3 signed-up, approved chefs to close sign-ups.",
+      "slots": "The menu has {{courses}} dishes for {{chefs}} chefs: it needs one per chef."
     }
   },
   "briefs": {

@@ -84,6 +84,9 @@ export function RoundHomePage() {
   const { data: round, isLoading: roundLoading } = useRound(roundId)
   const { data: members, error: membersError } = useRoundMembers(roundId)
   const [error, setError] = useState<string | null>(null)
+  // Said beside the button that caused it: at the top of the page it was a
+  // sentence nobody scrolled back up to read.
+  const [advanceError, setAdvanceError] = useState<string | null>(null)
   const [passHelp, setPassHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
@@ -408,13 +411,23 @@ export function RoundHomePage() {
 
   async function onAdvance() {
     if (!nextPhase || !roundId) return
-    setError(null)
+    setAdvanceError(null)
     try {
       await advancePhase(roundId, nextPhase)
       void notifyRoundPhase(roundId, nextPhase)
       queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      const raw = err instanceof Error ? err.message : ''
+      const slots = raw.match(/slot count \((\d+)\) must equal active player count \((\d+)\)/)
+      setAdvanceError(
+        raw.includes('need at least 3')
+          ? t('rounds.advanceError.tooFew')
+          : raw.includes('generate an assignment')
+            ? t('rounds.assignment.needed')
+            : slots
+              ? t('rounds.advanceError.slots', { courses: slots[1], chefs: slots[2] })
+              : raw || t('errors.generic'),
+      )
     }
   }
 
@@ -523,7 +536,11 @@ export function RoundHomePage() {
           ? t('rounds.invitations.noSuchChef')
           : message === NOT_BY_INVITATION
             ? t('rounds.invitations.notByInvitation')
-            : null
+            : message.includes('already at this table') || message.includes('already in this round')
+              ? t('rounds.invitations.alreadyHere')
+              : message.includes('close once the round is locked')
+                ? t('rounds.invitations.closed')
+                : null
       setInviteNote(known ?? message)
     } finally {
       setInviting(false)
@@ -1065,6 +1082,7 @@ export function RoundHomePage() {
           <div className="stack pass__advance">
             <hr className="pass__rule" />
             {nextBlockedReason && <p className="muted" style={{ margin: 0 }}>{nextBlockedReason}</p>}
+            {advanceError && <div className="error">{advanceError}</div>}
             <button type="button" onClick={onAdvance} disabled={!!nextBlockedReason}>
               {/* What pressing it does, not which phase comes next: the phase
                   names are the app's vocabulary, the action is the host's. */}

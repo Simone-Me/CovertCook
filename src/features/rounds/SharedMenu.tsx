@@ -17,19 +17,21 @@ import { getRoundDishes, MENU_NOT_SHARED } from '../../lib/rpc'
  * returning nothing, so a closed menu and an empty one can be told apart, and
  * a closed one renders nothing at all rather than an empty heading.
  */
-export function SharedMenu({ roundId }: { roundId: string | undefined }) {
+export function SharedMenu({ roundId, shared }: { roundId: string | undefined; shared: boolean }) {
   const { t } = useTranslation()
 
   const { data, error } = useQuery({
     queryKey: ['rounds', roundId, 'shared-dishes'],
-    enabled: !!roundId,
+    // Not asked at all on a dinner that keeps its menu secret: the server
+    // would only refuse, and a refusal is still a failed request in the log.
+    enabled: !!roundId && shared,
     queryFn: () => getRoundDishes(roundId as string),
     retry: false,
     staleTime: 30 * 1000,
   })
 
   const closed = error instanceof Error && error.message === MENU_NOT_SHARED
-  if (closed || !data) return null
+  if (!shared || closed || !data) return null
 
   return (
     <div className="menucard">
