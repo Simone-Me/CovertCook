@@ -13,23 +13,39 @@ import { getRoundDishes, MENU_NOT_SHARED } from '../../lib/rpc'
  * which is all get_round_dishes returns (0087) — the server does not have a
  * mode where it would return more.
  *
- * Silent when the dinner did not ask for this: the RPC refuses rather than
- * returning nothing, so a closed menu and an empty one can be told apart, and
- * a closed one renders nothing at all rather than an empty heading.
+ * WHERE IT LIVES. Inside the Menu envelope on the dinner's page, which is only
+ * drawn when this reader may see it: everybody on a NAMES dinner, the
+ * Executive Chef alone on a HOST one (0096). It used to sit inside "My
+ * recipe", under the form, where nobody read it.
+ *
+ * Silent if the server refuses anyway: the RPC refuses rather than returning
+ * nothing, so a closed menu and an empty one can be told apart, and a closed
+ * one renders nothing at all rather than an empty heading.
  */
-export function SharedMenu({ roundId }: { roundId: string | undefined }) {
+export function SharedMenu({
+  roundId,
+  shared,
+  onlyYou = false,
+}: {
+  roundId: string | undefined
+  shared: boolean
+  /** A HOST dinner, read by its host: say so, so nobody quotes it at the table. */
+  onlyYou?: boolean
+}) {
   const { t } = useTranslation()
 
   const { data, error } = useQuery({
     queryKey: ['rounds', roundId, 'shared-dishes'],
-    enabled: !!roundId,
+    // Not asked at all on a dinner that keeps its menu secret: the server
+    // would only refuse, and a refusal is still a failed request in the log.
+    enabled: !!roundId && shared,
     queryFn: () => getRoundDishes(roundId as string),
     retry: false,
     staleTime: 30 * 1000,
   })
 
   const closed = error instanceof Error && error.message === MENU_NOT_SHARED
-  if (closed || !data) return null
+  if (!shared || closed || !data) return null
 
   return (
     <div className="menucard">
@@ -47,6 +63,7 @@ export function SharedMenu({ roundId }: { roundId: string | undefined }) {
         </ul>
       )}
       <p className="menucard__note">{t('rounds.sharedMenu.why')}</p>
+      {onlyYou && <p className="menucard__note">{t('rounds.sharedMenu.onlyYou')}</p>}
     </div>
   )
 }

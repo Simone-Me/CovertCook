@@ -7,9 +7,9 @@ import { FoodLabel } from '../../components/FoodLabel'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
-import { RecipeBook } from './RecipeBook'
+import { RecipesFold } from './RecipeBook'
 import { BlockedList } from './BlockedList'
-import { Album } from './Album'
+import { AlbumFold } from './Album'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { supabase } from '../../lib/supabase'
@@ -309,6 +309,21 @@ export function ProfilePage() {
         </span>
       </Link>
 
+      <Link to="/tutorial" className="pass__link">
+        <img src="/logo_face.webp" alt="" width={22} height={22} style={{ borderRadius: 4 }} />
+        <span>
+          <strong>{t('tutorial.profileLink')}</strong> — {t('tutorial.profileWhat')}
+        </span>
+      </Link>
+
+      {/* The two things you kept come first, and next to each other: these are
+          the only sections of the profile somebody opens because they want to,
+          rather than because something needs correcting. Everything below them
+          is maintenance — notifications, what you cannot eat, who you have
+          blocked, how to leave. */}
+      <RecipesFold />
+      <AlbumFold />
+
       {/* Folded, all three of them. The page had become one long scroll where
           every setting shouted at once; they arrive closed and you open the
           one you came for. The closed row still says what the current answer
@@ -343,19 +358,6 @@ export function ProfilePage() {
           five friends and a dinner. */}
       <PushTest state={shownPush} />
 
-      </Fold>
-
-      {/* Above the dietary list on purpose, and next to each other: these two
-          are the only sections of the profile somebody opens because they want
-          to, rather than because something needs correcting. Everything below
-          them is maintenance — what you cannot eat, who you have blocked, how
-          to leave. The two things you kept come first. */}
-      <Fold title={t('book.title')}>
-        <RecipeBook />
-      </Fold>
-
-      <Fold title={t('album.profileTitle')}>
-        <Album />
       </Fold>
 
       <Fold title={t('dietary.title')} aside={String(entries?.length ?? 0)}>

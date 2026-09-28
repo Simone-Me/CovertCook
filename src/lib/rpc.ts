@@ -32,7 +32,7 @@ export type NameTheme = 'FOOD' | 'BRIGADE' | 'PASTA' | 'PATISSERIE' | 'BATTERIE'
 
 // How the cloth is dressed (0072). Look only: nothing here touches a rule.
 export type TableTheme =
-  | 'CHECKS' | 'ELEGANT' | 'SCIFI' | 'BAROQUE' | 'HALLOWEEN' | 'XMAS' | 'CARNIVAL'
+  | 'CHECKS' | 'SCIFI' | 'BAROQUE' | 'HALLOWEEN' | 'XMAS' | 'CARNIVAL'
 
 /** DEFAULT is what a dinner gets for free by default, FREE is the second one
  *  everybody also gets, PAID carries a price and is refused until it is
@@ -189,9 +189,13 @@ export async function listNameThemes() {
   return unwrap<NameThemeOption[]>(res)
 }
 
+/** Cloths withdrawn for good (0094). Filtered here too, so the shelf is right
+ *  even on a database the migration has not reached yet. */
+const RETIRED_TABLE_THEMES = ['ELEGANT']
+
 export async function listTableThemes() {
   const res = await supabase.rpc('list_table_themes', {})
-  return unwrap<TableThemeOption[]>(res)
+  return unwrap<TableThemeOption[]>(res)?.filter((x) => !RETIRED_TABLE_THEMES.includes(x.code))
 }
 
 export type RoundAnonymity = 'ANONYMOUS' | 'SPY' | 'OPEN'
@@ -1228,6 +1232,12 @@ export async function getChain(roundId: string) {
   return unwrap<ChainLink[]>(res)
 }
 
+/** The same chain for everybody at the table, once the results are out (0095). */
+export async function getRevealedChain(roundId: string) {
+  const res = await supabase.rpc('get_revealed_chain', { p_round_id: roundId })
+  return unwrap<ChainLink[]>(res)
+}
+
 export async function setPairing(roundId: string, senderId: string, cookId: string) {
   const res = await supabase.rpc('set_pairing', { p_round_id: roundId, p_sender_id: senderId, p_cook_id: cookId })
   return unwrap(res)
@@ -2079,9 +2089,12 @@ export async function postToBoard(
 /** OPEN starts something, REPLY answers one (0088). */
 export type BoardRole = 'OPEN' | 'REPLY'
 
-/** The menu while it is still being written (0087). HIDDEN keeps the
- *  surprise; NAMES lets the table avoid three tiramisùs. */
-export type MenuVisibility = 'HIDDEN' | 'NAMES'
+/** The menu while it is still being written (0087, 0096). HIDDEN keeps the
+ *  surprise; NAMES lets the table avoid three tiramisùs; HOST keeps the
+ *  surprise for the table and lets the Executive Chef follow the evening. */
+export type MenuVisibility = 'HIDDEN' | 'NAMES' | 'HOST'
+
+export const MENU_VISIBILITIES: MenuVisibility[] = ['HIDDEN', 'NAMES', 'HOST']
 
 export const MENU_NOT_SHARED = 'MENU_NOT_SHARED'
 

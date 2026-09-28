@@ -875,54 +875,120 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The wire between a phrase and its answer.
+ * The wire between a phrase and its answers.
  *
- * An elbow, not a curve and not a rail down the whole column: it leaves the
- * bubble above through the gap, turns once at a right angle, and ends in a
- * knot where it meets the answer. The indent said a reply was a reply; one
- * right angle says WHICH line it answers, which is what a fridge with three
- * conversations in it actually needs.
+ * A conversation is one piece: the phrase, then its answers hanging under it.
+ * The wire leaves from a knot just under the phrase — under its face — runs
+ * down past every answer, and turns into each one with an elbow. So it is plain
+ * that all of them answer the first line, not each the one above it; the short
+ * elbow that used to join a reply only to the bubble right above said the
+ * wrong thing as soon as there were two.
  *
- * Drawn in the gutter the indent already opens, so it costs no width.
+ * It hangs on the phrase's own side: under one of yours (red, on the right)
+ * the wire and the answers are on the right too, mirrored. And it ends on the
+ * last answer — a rail tied to one phrase, not to the whole column.
  * ------------------------------------------------------------------------- */
 
-.chat-tie {
+.fridge__thread {
+  --wire: rgba(198, 32, 44, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* A little more air between two conversations than inside one. */
+.fridge__thread + .fridge__thread {
+  margin-top: 6px;
+}
+
+.fridge__replies {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 15px;
+}
+
+/* The knot under the phrase the wire belongs to. */
+.fridge__replies::before {
+  content: '';
   position: absolute;
-  top: -12px;
-  left: -15px;
-  width: 9px;
-  height: 22px;
-  border-left: 2px solid rgba(198, 32, 44, 0.45);
-  border-bottom: 2px solid rgba(198, 32, 44, 0.45);
-  border-bottom-left-radius: 7px;
+  top: -9px;
+  left: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wire);
+}
+
+.fridge__reply {
+  position: relative;
+  display: flex;
+  padding-left: 18px;
+}
+
+/* Down from above, then one turn into the answer. */
+.fridge__reply::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 17px;
+  height: 20px;
+  border-left: 2px solid var(--wire);
+  border-bottom: 2px solid var(--wire);
+  border-bottom-left-radius: 8px;
   pointer-events: none;
 }
 
-/* The knot: the small weight at the end of the wire that says it arrived
-   here, at this phrase, rather than passing by on its way down the column. */
-.chat-tie::after {
+/* On past this answer to the next one; not after the last. */
+.fridge__reply:not(:last-child)::after {
   content: '';
   position: absolute;
-  right: -4px;
-  bottom: -3px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(198, 32, 44, 0.55);
+  top: 10px;
+  bottom: -6px;
+  left: 0;
+  border-left: 2px solid var(--wire);
+  pointer-events: none;
 }
 
-.chat-bubble--reply.mine .chat-tie {
+.fridge__reply > .chat-bubble {
+  flex: 1 1 auto;
+  max-width: 100%;
+}
+
+/* A phrase of yours: the whole conversation hangs on the right. */
+.fridge__thread--mine .fridge__replies {
+  align-items: flex-end;
+  margin-left: 0;
+  margin-right: 15px;
+}
+
+.fridge__thread--mine .fridge__replies::before {
   left: auto;
-  right: -15px;
-  border-left: none;
-  border-right: 2px solid rgba(198, 32, 44, 0.45);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 7px;
+  right: -3px;
 }
 
-.chat-bubble--reply.mine .chat-tie::after {
-  right: auto;
-  left: -4px;
+.fridge__thread--mine .fridge__reply {
+  justify-content: flex-end;
+  padding-left: 0;
+  padding-right: 18px;
+}
+
+.fridge__thread--mine .fridge__reply::before {
+  left: auto;
+  right: 0;
+  border-left: none;
+  border-right: 2px solid var(--wire);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 8px;
+}
+
+.fridge__thread--mine .fridge__reply:not(:last-child)::after {
+  left: auto;
+  right: 0;
+  border-left: none;
+  border-right: 2px solid var(--wire);
 }
 
 /* Which opener the roller is answering, said between the fridge and the pin
@@ -1630,13 +1696,35 @@
 }
 
 .chainring__name {
-  font-size: 10px;
+  font-size: 12px;
   fill: var(--text);
+}
+
+.chainring__secret {
+  font-size: 10px;
+  font-style: italic;
+  fill: var(--text-muted);
 }
 
 .chainring__name.is-you {
   font-weight: 700;
   fill: var(--accent);
+}
+
+.chainname {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.chainname__secret {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chainring {
+  overflow: visible;
 }
 
 .chainring__pairs {
@@ -1980,16 +2068,96 @@
   overflow-wrap: anywhere;
 }
 
-.ballotrow__scores {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+.ballotrow {
+  cursor: grab;
 }
 
-@media (max-width: 400px) {
-  .ballotrow__scores {
-    grid-template-columns: 1fr;
-  }
+.ballotrow:active {
+  cursor: grabbing;
+}
+
+/* The handle: six dots, the mark every reorderable list uses. */
+.ballotrow__grip {
+  flex: none;
+  align-self: center;
+  font-size: 20px;
+  line-height: 1;
+  color: var(--text-muted);
+  letter-spacing: -1px;
+}
+
+/* One score on a line: a dot you drag, the two ends named under it. Grey
+   until touched, because an untouched dish sends nothing. */
+.themeslider {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  cursor: default;
+}
+
+.themeslider__label {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.themeslider__input {
+  width: 100%;
+  height: 30px;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+  border: none;
+  -webkit-appearance: none;
+  appearance: none;
+  cursor: pointer;
+  --dot: var(--accent);
+}
+
+/* Untouched: the line is there, the dot is grey. Nothing is sent for it. */
+.themeslider__input.is-unset {
+  --dot: var(--env-edge);
+}
+
+.themeslider__input::-webkit-slider-runnable-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.themeslider__input::-moz-range-track {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
+}
+
+.themeslider__input::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 22px;
+  height: 22px;
+  margin-top: -9px;
+  border-radius: 50%;
+  background: var(--dot);
+  border: 3px solid var(--paper-solid);
+  box-shadow: 0 1px 4px rgba(80, 20, 20, 0.35);
+}
+
+.themeslider__input::-moz-range-thumb {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--dot);
+  border: 3px solid var(--paper-solid);
+  box-shadow: 0 1px 4px rgba(80, 20, 20, 0.35);
+}
+
+.themeslider__ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: var(--text-muted);
 }
 
 /* Real icons in place of emoji: the envelope chip stops being a coloured
@@ -2308,15 +2476,6 @@
   --cloth-ground: #fffcf6;
   --cloth-check: rgba(198, 32, 44, 0.5);
   --cloth-square: 13px;
-}
-
-/* Linen, pressed. No checks at all — the whole point of the elegant table is
-   that there is nothing printed on it — so the two gradients are turned into a
-   whisper of weave rather than a grid. */
-.theme-elegant {
-  --cloth-ground: #f4f1e8;
-  --cloth-check: rgba(120, 110, 92, 0.07);
-  --cloth-square: 4px;
 }
 
 .theme-scifi {
@@ -2802,23 +2961,6 @@
   font-size: 10.5px;
   font-weight: 400;
   color: var(--text-muted);
-}
-
-/* A reply sits under the phrase it answers rather than beside it (0088). The
-   indent says it is an answer; the elbow drawn in the gutter it opens says
-   which line it answers — see .chat-tie above. The flat rail that used to run
-   down the left is gone: it connected a reply to the whole column rather than
-   to one phrase, which is the question a reader actually has. */
-.chat-bubble--reply {
-  position: relative;
-  margin-top: 8px;
-  margin-left: 26px;
-  max-width: calc(96% - 26px);
-}
-
-.chat-bubble--reply.mine {
-  margin-left: 0;
-  margin-right: 26px;
 }
 
 /* The opener currently being answered, so the roller full of replies has a
@@ -3323,123 +3465,417 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The grid of ready-made dinners (0090).
- *
- * A card is a whole evening rather than a setting, so it is bigger than
- * anything else on the form, says what it is in a sentence, and opens IN PLACE
- * to show what it would actually do. Nothing here creates a dinner by being
- * pressed once: the second press, on a button that says Create, is the one
- * that commits.
+ * The four questions' pieces, used inside the chef's sheet.
  * ------------------------------------------------------------------------- */
 
-.setups {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 10px;
+/* One question on screen at a time; each answer is a button the width of the
+   sheet with its consequence under it, so nothing needs an info bubble. */
+.questions__step {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--text-muted);
 }
 
-@media (max-width: 460px) {
-  .setups {
-    grid-template-columns: 1fr;
-  }
-}
-
-.setup {
-  position: relative;
+.questions__dots {
   display: flex;
-  flex-direction: column;
-  border: 1px solid var(--env-edge);
-  border-left-width: 4px;
-  border-radius: var(--radius-paper);
-  background: var(--paper-solid);
-  box-shadow: var(--paper-shadow);
-  overflow: hidden;
+  gap: 5px;
 }
 
-/* Open, it stops being a card in a row and becomes the thing being read, so it
-   takes the whole width — the summary is a sentence, not a caption. */
-.setup.is-open {
-  grid-column: 1 / -1;
-  border-left-color: var(--accent);
+.questions__dots span {
+  flex: 1;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--border);
 }
 
-.setup__face {
+.questions__dots .is-done {
+  background: rgba(198, 32, 44, 0.45);
+}
+
+.questions__dots .is-now {
+  background: var(--accent);
+}
+
+.questions__answer {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  justify-content: center;
-  gap: 4px;
+  gap: 3px;
   width: 100%;
-  min-height: 84px;
-  padding: 16px 14px;
-  border: none;
-  border-radius: 0;
-  background: none;
+  padding: 11px 13px;
+  background: var(--paper-solid);
   color: var(--text);
+  border: 1px solid var(--env-edge);
+  border-left: 4px solid var(--env-edge);
+  border-radius: var(--radius-paper);
   text-align: left;
-  cursor: pointer;
 }
 
-.setup__face:hover,
-.setup__face:focus-visible,
-.setup__face:active {
+.questions__answer:hover,
+.questions__answer:focus-visible {
+  border-left-color: var(--accent);
   background: var(--bg-elevated);
 }
 
-/* THE NAME IS THE CARD. No mark and no description on the face: six cards
-   each carrying an emoji and three lines of prose was a wall with nothing to
-   catch the eye, and what somebody scanning a grid reads is the name. It is
-   set at the size a name deserves and given the whole tile. */
-.setup__name {
-  font-size: 20px;
-  font-weight: 700;
-  line-height: 1.15;
+.questions__answer.is-picked {
+  border-color: var(--accent);
+  border-left-color: var(--accent);
 }
 
-.setup__what {
+.questions__label {
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.questions__hint {
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--text-muted);
+}
+
+/* ---------------------------------------------------------------------------
+ * The guided dinner.
+ *
+ * The chef sits at the foot of the screen and the page leaves room for it, so
+ * the thing being pointed at is always scrolled into the space above rather
+ * than under the bubble. What can be pressed is ringed in the accent; nothing
+ * else is dimmed, because the screen is meant to look like the real one.
+ * ------------------------------------------------------------------------- */
+
+.tour--coached {
+  padding-bottom: 220px;
+}
+
+.tour-target {
+  position: relative;
+  z-index: 3;
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 6px;
+  animation: tour-ring 1.6s ease-in-out infinite;
+}
+
+@keyframes tour-ring {
+  0%,
+  100% {
+    outline-color: var(--accent);
+  }
+  50% {
+    outline-color: rgba(198, 32, 44, 0.3);
+  }
+}
+
+.coach {
+  position: fixed;
+  left: 50%;
+  bottom: 12px;
+  z-index: 50;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  width: min(560px, calc(100% - 24px));
+  transform: translateX(-50%);
+}
+
+.coach__face {
+  flex: none;
+  width: 56px;
+  height: 56px;
+  border-radius: 12px;
+  box-shadow: var(--paper-shadow);
+}
+
+.coach__bubble {
+  position: relative;
+  flex: 1;
+  min-width: 0;
+  padding: 12px 14px;
+  background: var(--paper-solid);
+  border: 2px solid var(--accent);
+  border-radius: 14px;
+  box-shadow: var(--paper-shadow);
+}
+
+/* The tail, pointing at the face that is speaking. */
+.coach__bubble::before {
+  content: '';
+  position: absolute;
+  left: -9px;
+  bottom: 18px;
+  width: 14px;
+  height: 14px;
+  background: var(--paper-solid);
+  border-left: 2px solid var(--accent);
+  border-bottom: 2px solid var(--accent);
+  transform: rotate(45deg);
+}
+
+.coach__say {
+  margin: 0 0 10px;
+  font-size: 15px;
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.coach__row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+}
+
+.coach__row button {
+  width: auto;
+  padding: 7px 14px;
+  font-size: 14px;
+}
+
+.coach__row .coach__exit {
+  padding: 4px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 13px;
+  text-decoration: underline;
+}
+
+.coach__count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* A press somewhere else: the chef shakes its head once. */
+.coach--nudge .coach__bubble {
+  animation: coach-nudge 0.45s;
+}
+
+@keyframes coach-nudge {
+  20% {
+    transform: translateX(-5px);
+  }
+  40% {
+    transform: translateX(5px);
+  }
+  60% {
+    transform: translateX(-3px);
+  }
+  80% {
+    transform: translateX(3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tour-target {
+    animation: none;
+  }
+
+  .coach--nudge .coach__bubble {
+    animation: none;
+    border-color: var(--danger);
+  }
+}
+
+.tour__end {
+  align-items: center;
+  text-align: center;
+}
+
+.tour__end-face {
+  border-radius: 20px;
+  box-shadow: var(--paper-shadow);
+}
+
+/* ---------------------------------------------------------------------------
+ * The chef's sheet: creating a dinner is a conversation.
+ *
+ * A sheet that rises from the foot of the screen. Its thick red top edge is
+ * the counter, and the chef from the app's mark
+ * (`logo-hands-white-borders-nobg2.png`, used as supplied) grips it with both hands:
+ * the picture has hands but no counter, and its lower edge sits on the inside
+ * of the red border, so the fingertips hang over the sheet's own edge. Its
+ * white outline is what keeps the red hat visible on the red tablecloth.
+ * Everything inside is his line, in large type, and the answers.
+ * ------------------------------------------------------------------------- */
+
+.chefsheet {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  pointer-events: none;
+}
+
+.chefsheet__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(40, 18, 14, 0.28);
+}
+
+.chefsheet__paper {
+  position: relative;
+  pointer-events: auto;
+  width: min(560px, calc(100% - 16px));
+  margin-bottom: 8px;
+  padding: 10px 16px 16px;
+  background: var(--paper-solid);
+  /* The counter the chef grips: thick enough to hold his fingers. */
+  border-top: 22px solid var(--accent);
+  border-radius: 14px 14px 12px 12px;
+  box-shadow: 0 -4px 24px rgba(80, 20, 20, 0.22);
+}
+
+.chefsheet__chef {
+  position: absolute;
+  left: 50%;
+  bottom: 100%;
+  width: 150px;
+  height: auto;
+  /* `bottom: 100%` is the inner edge of the red border, so the lower half of
+     his fingers is laid over the 22px counter and the upper half above it. */
+  transform: translate(-50%, 0);
+  pointer-events: none;
+  animation: chef-hop 0.42s ease-out;
+}
+
+@keyframes chef-hop {
+  0% {
+    transform: translate(-50%, 24px);
+  }
+  60% {
+    transform: translate(-50%, -6px);
+  }
+  100% {
+    transform: translate(-50%, 0);
+  }
+}
+
+.chefsheet__bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 28px;
+}
+
+.chefsheet__nav {
+  width: auto;
+  padding: 4px 6px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
+.chefsheet__body {
+  gap: 10px;
+  max-height: min(68vh, 620px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 2px 2px 4px;
+}
+
+/* His line: the largest thing on the sheet, because it is the question. */
+.chefsheet__say {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--text);
+}
+
+.chefsheet__say--title {
+  font-size: 26px;
+  color: var(--accent);
+}
+
+.chefsheet__hint {
+  margin: 0;
+  font-size: 15px;
+  line-height: 1.45;
+}
+
+.chefsheet__summary {
   margin: 0;
   font-size: 13px;
   line-height: 1.45;
-  color: var(--text-muted);
 }
 
-.setup__body {
+.chefsheet__saved {
   display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 0 13px 13px;
+  align-items: stretch;
+  gap: 6px;
 }
 
-.setup__summary {
-  margin: 0;
-  font-size: 12.5px;
-  line-height: 1.45;
+.chefsheet__saved .questions__answer {
+  flex: 1;
+  min-width: 0;
 }
 
-/* A card of the host's own, and the one difference that matters: it can be
-   taken off the shelf again. */
-.setup--mine {
-  border-left-color: var(--ok);
-}
-
-.setup__remove {
-  position: absolute;
-  top: 6px;
-  right: 6px;
-  width: auto;
-  padding: 2px 8px;
-  font-size: 15px;
-  line-height: 1;
-  color: var(--text-muted);
+.chefsheet__remove {
+  flex: none;
+  width: 40px;
+  padding: 0;
   background: none;
-  border: 1px solid transparent;
-  border-radius: 999px;
-  cursor: pointer;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: 18px;
 }
 
-.setup__remove:hover,
-.setup__remove:focus-visible,
-.setup__remove:active {
+.chefsheet__keep summary {
+  cursor: pointer;
   color: var(--accent);
-  border-color: var(--accent);
+  font-weight: 600;
+  font-size: 14px;
+  margin-bottom: 8px;
+}
+
+.questions__answer.is-soon {
+  border-style: dashed;
+  background: var(--bg-elevated);
+  opacity: 0.75;
+}
+
+.questions__answer.is-soon .questions__hint {
+  font-style: italic;
+}
+
+/* In the guided tour the sheet is part of the page: the tour's own bubble
+   owns the foot of the screen, and two things rising from it would fight. */
+.chefsheet--inline {
+  position: static;
+  /* A flex item takes z-index even unpositioned; the tour's bubble is 50. */
+  z-index: auto;
+  display: block;
+  margin-top: 150px;
+  pointer-events: auto;
+}
+
+.chefsheet--inline .chefsheet__paper {
+  width: 100%;
+  margin: 0;
+  box-shadow: var(--paper-shadow);
+}
+
+.chefsheet--inline .chefsheet__body {
+  max-height: none;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chefsheet__chef {
+    animation: none;
+  }
+}
+
+/* How long until the dinner, under its name while recipes are written. */
+.dinnercountdown {
+  margin: 2px 0 0;
+  font-size: 13px;
 }

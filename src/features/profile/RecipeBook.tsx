@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { Link } from 'react-router-dom'
+import { Fold } from '../../components/Fold'
 import { useAuth } from '../../lib/auth'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import { FoodLabel } from '../../components/FoodLabel'
@@ -202,6 +204,64 @@ export function RecipeBook() {
       ))}
 
       <ExportButtons recipes={recipes} />
+    </div>
+  )
+}
+
+/**
+ * The book, folded on the profile: closed it says how many; open it shows the
+ * last three kept, and "see all" goes to the book's own page, where there is
+ * room to set a recipe at a size somebody can cook from.
+ */
+export function RecipesFold() {
+  const { t } = useTranslation()
+  const { profile } = useAuth()
+  const { data: recipes } = useQuery({
+    queryKey: ['my-recipes', profile?.id],
+    enabled: !!profile?.id,
+    queryFn: listMyRecipes,
+  })
+  return (
+    <Fold title={t('book.title')} aside={recipes ? String(recipes.length) : undefined}>
+      <RecipesPreview />
+    </Fold>
+  )
+}
+
+function RecipesPreview() {
+  const { t } = useTranslation()
+  const { profile } = useAuth()
+  const { data: recipes } = useQuery({
+    queryKey: ['my-recipes', profile?.id],
+    enabled: !!profile?.id,
+    queryFn: listMyRecipes,
+  })
+
+  if (!recipes) return <p className="muted">…</p>
+  if (recipes.length === 0) return <p className="muted">{t('book.empty')}</p>
+
+  const latest = [...recipes].sort((a, b) => b.saved_at.localeCompare(a.saved_at)).slice(0, 3)
+
+  return (
+    <div className="stack">
+      <p className="muted" style={{ margin: 0 }}>{t('book.latest')}</p>
+      <ol className="menucard__list recipepreview">
+        {latest.map((r) => (
+          <li key={r.id} className="menucard__row">
+            <Link to="/profile/recipes" className="menucard__course recipepreview__row">
+              <span className="menucard__name">
+                <strong>{r.dish_name}</strong>
+                <span className="muted recipepreview__from">
+                  {r.round_name} · {t(`book.relation.${r.relation}`)}
+                </span>
+              </span>
+            </Link>
+          </li>
+        ))}
+      </ol>
+      <Link to="/profile/recipes" className="seeall">
+        {t('book.seeAll', { count: recipes.length })} →
+      </Link>
     </div>
   )
 }

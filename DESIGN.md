@@ -544,6 +544,23 @@ del design) e *chef de garde* (è un turno, non una postazione).
 
 ---
 
+## 19 · La cena guidata
+
+Alla prima apertura, senza nessuna cena, parte da sola una cena finta
+(`/tutorial`): il cappello del logo (`logo_face`) parla in un fumetto in basso
+e indica l'unico pulsante che si può premere. Gli altri clic vengono ignorati e
+il cappello "scuote la testa". Sempre visibili: **Salta questo passo** (arriva
+esattamente dove sarebbe arrivato il clic) ed **Esci**.
+
+Le schermate sono **copie** di quelle vere fatte con gli stessi pezzi (busta,
+pass, barra, anello, carta del menu), non le pagine vere con dati finti. Quindi:
+**se cambi un passaggio del round, controlla `src/features/tutorial/`** — i
+pezzi condivisi seguono da soli, l'impaginazione intorno no.
+
+Parte una sola volta per dispositivo (segnata all'avvio, non alla fine), mai
+sopra un invito in corso, e resta sempre riapribile da "Come funziona
+CovertCook" e dal profilo. Non scrive niente sul server.
+
 ## Gli asset veri (e il loro peso)
 
 Le prime immagini vere sono arrivate. La regola del §4 vale da subito: è una PWA
@@ -591,6 +608,11 @@ La direzione è ferma. Restano tre scelte che cambiano il lavoro, non il mondo.
 
 | Data | Cosa è cambiato |
 |---|---|
+| 2026-09-28 | Il menu è una busta sulla pagina della cena (icona `menu.webp`), che si apre sul posto come Allergie: i piatti già inviati, nome e portata, mai chi. C'è dall'attribuzione alla cena, e solo se il menu non è nascosto; tolto da "Ma commande". La visibilità ha tre valori — nascosto, visibile a tutti, solo per l'Executive Chef (`0096`) — offerti nelle domande dello chef, nel modulo completo (prima mancava) e nelle impostazioni. |
+| 2026-09-28 | Lo chef sulla tovaglia ha il bianco attorno: il rosso del cappello sul rosso della tovaglia spariva. Si usano le due immagini della designer così come sono, senza elaborarle: `logo-hands-white-borders-nobg2.png` nel foglio di creazione (trasparente con contorno bianco, mani senza bancone, le dita sul bordo rosso del foglio) e `pwa-maskable-white-borders.png` nella bolla del tutorial e alla fine. Tolto `chef_peek.webp`. L'icona dell'app installata non cambia. La prima risposta dello chef si chiama "Dîner CovertCook" / "CovertCook dinner" (era "Cuisiner la recette d'un proche"). |
+| 2026-09-27 | Creare una cena è un dialogo col cappello: foglio dal basso col bordo rosso a bancone, lo chef che sbircia con le mani sul bordo (`chef_peek.webp`), una battuta e i bottoni-risposta. Tavole salvate e "tenerla per la prossima volta" dentro il dialogo. Nel profilo ricettario e album tornano in tendina, sopra le notifiche. |
+| 2026-09-27 | Creazione: le quattro carte-atmosfera sostituite da "Rispondi a 4 domande" (nomi in codice o veri, portate o buffet, menu visibile o no, spese). Resta grigia solo "Una festa per qualcuno". "Fil rouge" si legge "Thème du dîner". Il ricettario e l'album hanno pagine proprie. Via "Élégant": l'unico telo gratuito è a quadri rossi. |
+| 2026-09-27 | Aggiunta §19 "La cena guidata". Nuovo marchio: il cappello che sbircia sostituisce il wok. Nella creazione restano aperte solo "Cucina la ricetta di un amico" e "Configura da te"; le altre carte sono tratteggiate e "in sviluppo". |
 | 2026-08-23 | Trascrizione iniziale dall'artefatto. Aggiunte le sezioni "La lista dei chef" e "Quando si scoprono i chef", che fissano la regola della barratura durante le iscrizioni. |
 | 2026-08-23 | Aggiunta "Gli oggetti si spostano" (§3) con la tabella delle tre posizioni per oggetto, e "Il Frigo" (§3b) con il rullo e l'uovo. Piatto, bicchiere, scodella, tovagliolo, forchetta, coltello e tagliere adesso cambiano posizione fra le fasi invece di restare fermi. |
 | 2026-08-23 | Aggiunte §17 "Il frigo adesso è firmato" (marcia indietro voluta sull'anonimato della bacheca) e §18 "I due insiemi di pseudonimi". La catena si vede dal pass; `Verrouillé`→Attribuzione e `Attribué`→Preparazione. |

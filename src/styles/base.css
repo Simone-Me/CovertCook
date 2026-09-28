@@ -754,6 +754,128 @@ input.is-taken {
 }
 
 /* ---------------------------------------------------------------------------
+ * The album on its own page: prints two across, and the one you touch lifts
+ * to the full width with its menu under it — the setup cards' gesture.
+ * ------------------------------------------------------------------------- */
+
+.albumgrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.albumcard {
+  min-width: 0;
+}
+
+.albumcard.is-open {
+  grid-column: 1 / -1;
+}
+
+.albumcard__face {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 2px;
+  width: 100%;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.albumcard__name {
+  margin-top: 6px;
+  font-weight: 700;
+  font-size: 14px;
+  line-height: 1.25;
+}
+
+.albumcard__date {
+  font-size: 12px;
+}
+
+.albumcard.is-open .albumcard__name {
+  margin-top: 0;
+  font-size: 18px;
+}
+
+.albumcard__body {
+  margin-top: 8px;
+}
+
+/* A print: white edge and the cloth's shadow, the same as the big one. */
+.albumprint {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  border-radius: 3px;
+  border: 4px solid var(--paper-solid, #fff);
+  box-shadow: 0 1px 2px rgba(120, 60, 30, 0.16), 0 6px 14px rgba(120, 60, 30, 0.16);
+  background: var(--bg-elevated);
+}
+
+.albumprint--pending {
+  border-style: dashed;
+  border-width: 1px;
+  border-color: var(--border);
+  box-shadow: none;
+}
+
+/* Three prints side by side on the profile: a glance, and a door. */
+.albumstrip {
+  width: 100%;
+  padding: 0;
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  max-width: 360px;
+}
+
+/* The way from a glance to the whole thing. A link that reads as one. */
+.seeall {
+  align-self: flex-start;
+  width: auto;
+  padding: 4px 0;
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: underline;
+}
+
+.recipepreview__row {
+  display: flex;
+  text-decoration: none;
+  width: 100%;
+  padding: 6px 0;
+  background: none;
+  border: none;
+  border-radius: 0;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.recipepreview .menucard__name {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  font-size: 17px;
+}
+
+.recipepreview__from {
+  font-size: 12px;
+}
+
+/* ---------------------------------------------------------------------------
  * The recipe book. A card per recipe, folded, because thirty recipes open at
  * once is a wall and the thing somebody came for is one of them.
  * ------------------------------------------------------------------------- */
@@ -976,4 +1098,70 @@ button.tone-diet.secondary {
 .app-foot__version {
   opacity: 0.65;
   font-variant-numeric: tabular-nums;
+}
+
+/* ---------------------------------------------------------------------------
+ * The book and the album on their own pages: set to be read, not scanned.
+ * The profile only glances at them; here a recipe is something somebody cooks
+ * from with their hands busy, and a print is something they look at.
+ * ------------------------------------------------------------------------- */
+
+.keptpage .recipe .fold__title {
+  font-size: 20px;
+}
+
+.keptpage .recipe .fold__aside {
+  font-size: 13px;
+}
+
+.keptpage .recipe__origin {
+  font-size: 14px;
+}
+
+.keptpage .recipe label {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.keptpage .recipe__ingredients,
+.keptpage .recipe__procedure {
+  font-size: 17px;
+  line-height: 1.6;
+}
+
+.keptpage input[type='search'],
+.keptpage select {
+  width: 100%;
+}
+
+/* One print per row on a phone: two across made each one smaller than a
+   thumbnail in a message. */
+.keptpage .albumgrid {
+  grid-template-columns: 1fr;
+  gap: 20px;
+}
+
+@media (min-width: 640px) {
+  .keptpage .albumgrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+.keptpage .albumcard__name {
+  font-size: 20px;
+}
+
+.keptpage .albumcard__date {
+  font-size: 14px;
+}
+
+.keptpage .album__photo {
+  max-width: none;
+}
+
+.keptpage .album__menu {
+  font-size: 17px;
 }

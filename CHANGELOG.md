@@ -18,6 +18,19 @@ local Postgres 16; nothing has run against production. Deploy them together —
 `get_ballot_options`, and `0088` drops both `post_to_board` and `get_board`, so
 a partial apply leaves the client calling a signature that is not there.
 
+**`0094` (Elegant withdrawn) is written and NOT deployed.** Two deletes and
+nothing else; it can go on its own, before or after the rest.
+
+**`0095` (`get_revealed_chain`) is written and NOT deployed.** A new function
+only, no change to anything existing. Until it is applied the results page
+simply shows no chain card (the call fails quietly).
+
+**`0096` (the menu for the host) is written and NOT deployed.** Widens the
+`menu_visibility` check to `HOST` and replaces `set_menu_visibility` and
+`get_round_dishes` with the same signatures; it can go on its own. Until it is
+applied, choosing "Only the Executive Chef" fails when the dinner is created or
+changed (the constraint refuses the value).
+
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 **Next, in order:**
@@ -65,6 +78,310 @@ of the "Buste sulla Tavola" artifact — palette, the three rules that hold
 the table together, the envelope-to-document gesture, the three states of
 wear, and the constraints on the object renders. Read it before touching
 the interface, and add to its change log when a decision moves.
+
+---
+
+## 2026-09-28
+
+**Changed: the menu is an envelope on the dinner's page.** When a dinner shows
+its menu, the dishes already sent (course and name, never who) sat under the
+form in "My order", where nobody read them. They are now the Menu envelope on
+the table, with its own icon (`menu.webp`), opening in place like Allergies —
+from the roulette until the dinner, and not at all when the menu is hidden.
+
+**Added: a menu for the Executive Chef alone** (`0096`). The menu's visibility is
+now hidden, visible to everyone, or visible only to the Executive Chef, who can
+keep track of what is coming while the table keeps its surprise. The chef's
+third question has the third answer ("Just me, to keep track"), the dinner's
+settings have the third option, and the long creation form finally has the
+choice at all — it used to carry whatever value it arrived with.
+
+**Changed: the chef is on white where he stands on the red cloth.** The
+peeking chef above the creation sheet and the face in the tour's bubble were red
+on red — the hat melted into the tablecloth. They are now the designer's two
+pictures, used as supplied: `logo-hands-white-borders-nobg2.png` (transparent,
+a white outline round every red stroke, hands but no counter; his fingertips sit
+on the sheet's red edge) and
+`pwa-maskable-white-borders.png` for the bubble and the tour's last screen.
+`chef_peek.webp` is gone. The installed app's icon is unchanged.
+
+**Changed: "Cook a friend's recipe" is now "CovertCook dinner"** (fr "Dîner
+CovertCook") — the first answer the chef offers is the game the app is named
+after. The tour's first line names it the same way.
+
+**Changed: in the fridge, a conversation hangs on one wire.** Each answer used to
+carry a short elbow up to whatever bubble sat above it, so with two answers the
+second seemed to answer the first answer — and under a phrase of yours (red, on
+the right) the elbow on the left touched nothing. The board is now grouped into
+conversations (the server already sends answers straight under their phrase): a
+knot under the phrase, a wire running down past every answer, an elbow into each,
+ending on the last. It hangs on the phrase's own side, mirrored for yours.
+`.chat-tie` and the reply indent are gone.
+
+**Fixed: a refused phase change was said at the top of the page, in English.**
+"need at least 3 active, approved players to lock the round" appeared above the
+dinner's name while the host was looking at the button at the foot of the pass.
+It now appears right above that button, in the reader's language, for the three
+refusals a host actually meets (too few chefs, no roulette yet, courses ≠
+chefs). Two invitation refusals (already at the table, invitations closed) are
+translated the same way.
+
+**Fixed: a request that could only fail.** The brief editor asked for the shared
+menu on every dinner and the server refused it on the ones that keep it secret —
+harmless, but a red 400 in the console. It is now only asked when the dinner
+shows its menu.
+
+**Fixed: a step where the drawn counter met the sheet.** The chef's picture
+carried its own red counter, drawn slightly slanted, laid over the sheet's
+straight red edge — so at both ends of the picture the two never quite lined up.
+The drawn counter is now removed under its top edge (fingers kept), and the
+fingers lie on the sheet's own edge: one straight counter, no join.
+
+**Fixed: the tour kept the menu on the pass after the roulette.** At step 10 the
+menu is already composed; the pass now shows only the assignment.
+
+**Changed: the guided dinner is pressed, never read.** No step closes with an
+OK in the bubble any more; each one moves on because something on the table was
+pressed, and the bubble gains *← Previous step*. 27 steps, rebuilt around what
+changed in the real dinner:
+
+- the greeting and "open the pass" are one step; *Add* brings two friends in;
+- a third chef waits at the door: open *Chefs*, *Approve* — after which every
+  name but yours sits under the black marker, as it does while sign-ups are
+  open. Chefs appear by their code names only (Avocado, Jalapeño, Lime); real
+  names wait for the chain;
+- *Close sign-ups and start the assignment*, then the new Attribution step:
+  *Courses* composes starter, first course, main, dessert; the roulette; *On
+  to writing the recipes*;
+- the dinner-day countdown under the dinner's name while recipes are written;
+- the ballot with its grip and the theme slider;
+- the results card shows dishes and points only, as the real one does — names
+  live in the chain, code name over real name;
+- then *Keep recipes from this dinner*, *Add the photo*, and a last screen of
+  the profile with just the recipe and the photo kept, and *Finish the tour*.
+
+**Changed: one score on the ballot, and only when there is a theme.**
+Originality and "followed the recipe" were two dropdowns on every row of every
+ballot, answered at random or not at all. Now a dinner without a theme is a
+ranking and nothing else; a dinner with one asks a single question per dish,
+*Originality and fit to the theme*, as a dot on a line (Barely → Completely)
+that stays grey — and sends nothing — until it is touched. It is stored as
+`theme_score` (no migration); `originality_score` and `brief_respect_score` go
+out null, so their two awards simply stop appearing, and the theme award reads
+*Most original on the theme*.
+
+**Added: a grip on every ballot row.** Six dots on the left and a grab cursor:
+the mark every reorderable list uses, so a ballot of cards reads as something
+to arrange.
+
+**Added: the chain on the results page, for everybody (`0095`).** The ring was
+the Executive Chef's alone, on a page of its own, while it is the punchline of
+the evening. `get_revealed_chain` gives it to every active member once the
+dinner is in RESULTS or ARCHIVED — same columns as `get_chain`, which stays the
+host's. The results page shows it under the menu, *The chain: who wrote for
+whom*, your own node marked.
+
+**Changed: a name in the chain carries its code name above it.** A ring of
+real names said nothing about who "Avocado" had been all evening. With names
+open, each node reads the pseudonym small and in italics, the real name under
+it; the list on the chain page does the same. `walkCycles` moved to
+`lib/chain.ts` so both pages use it.
+
+**Fixed: the chef's fingers were cut off.** `chef_peek.webp` was cropped
+through the fingers, and its red band sat above the sheet's thinner edge. It is
+now kept to the bottom of the drawing — whole fingers, whole counter — and the
+sheet's top edge is 22px, the counter's own thickness at 150px, so the two read
+as one.
+
+**Changed: the pass says what its button does.** "Next → Registration open"
+named the app's phases; the button now names the host's act: *Open sign-ups*,
+*Close sign-ups and start the assignment*, *On to writing the recipes*, *It's
+dinner day*, *Open the vote*, *Close the vote and see the results*
+(`rounds.pass.go.<phase>`, falling back to the old wording for any phase
+without one). The two assignment notes stop citing an "Assigned" phase that
+does not exist.
+
+**Changed: the menu is composed at Attribution, and only there.** The
+free-or-courses panel used to be on the pass from the draft onwards; it now
+appears once the door is shut, with the answer given at creation already in it.
+
+**Added: how long until the dinner.** While the recipes are being written, one
+quiet line under the dinner's name — *Dinner in 3 d 4 h* — for everybody, when
+a date is set and still ahead. Nothing otherwise.
+
+**Fixed: Elegant still on the shelf.** The shelf comes from the server, and
+`0094` has not reached production, so the cloth kept appearing. The client now
+drops it from `listTableThemes` as well, and its label, hint, type member and
+`.theme-elegant` class are gone: a dinner laid on it before reads as the red
+checks.
+
+---
+
+## 2026-09-27
+
+**Changed: no seat cap unless the host sets one.** `DEFAULT_SETUP.seats` is
+null, so the classic dinner, the four questions and the long form all start
+without a cap; the slider in the long form is where somebody sets one if they
+want it. A proposed dinner should not decide how many friends a host has. The
+summary only mentions seats when there is a cap to mention.
+
+**Changed: the book and the album are folds that lead to their own pages.**
+Widening the fold in place kept everything at profile size. Now the fold shows
+the last three and *See all* goes to `/profile/recipes` or `/profile/album`,
+which are set to be read: dish titles at 20px, ingredients and method at 17px
+with room between the lines, section labels in the accent, and the album one
+print per row on a phone, full width.
+
+**Changed: creating a dinner is a conversation with the chef.** The grid of
+cards is gone. `/rounds/new` opens a sheet rising from the foot of the screen,
+its red top edge a counter, and the chef from the mark (`chef_peek.webp`, cut
+from `logo_inverse.png`) peeking over it with both hands on the edge — he hops
+once each time he asks something new. His lines are the largest type on the
+screen; every answer is a button the width of the sheet with its consequence
+under it.
+
+- *What are we making?* — the game as designed, four questions, **one of my
+  saved tables** (only when there are any; × to delete, with an inline
+  confirm), the long form, and *A party for someone*, shut, in development.
+- The four questions, one per line of his.
+- *Your evening*: its name and what it sets, the dinner's name, Create, the long
+  form with the answers filled in, and **Keep it for next time?** — which saves
+  the setup to `round_presets` under a name of the host's choosing, the same
+  store the long form saves to. A table that came from the saved list does not
+  offer it again.
+
+Back walks one step, × leaves. The tour draws the same sheet inside its page,
+so its own bubble keeps the foot of the screen. `EventQuestions.tsx` and the
+card grid's CSS are removed; the summary line moved to `setupSummary.ts`.
+
+**Changed: the book and the album are folds again, above the notifications.**
+The two cards made the profile read as two pages glued onto a settings screen.
+They are folds like everything else there, first after the Crème and tour
+links, each with its count on the closed row. Open, they show the last three;
+*See all* widens the same fold to the whole book (search, filters, export) or
+the whole grid of prints, and *Show less* folds it back. The notifications
+moved below them. `/profile/recipes` and `/profile/album` stay for the link on
+the results page.
+
+**Added: four questions about the evening, instead of four moods.** The creation
+grid is now the game as designed (one press), *Answer four questions*, the long
+form, and the host's saved cards. The questions open inside their card, one at a
+time, each answer a full-width button with its consequence written under it:
+
+1. Code names, or your real names? → `anonymity` ANONYMOUS / OPEN. Asked about
+   names on purpose: who cooks for whom is secret in every dinner, whatever the
+   answer, so a question promising to switch that off would have been a lie.
+2. A meal in courses, or a buffet / picnic? → `slotMode` CATEGORIES / FREE (a
+   buffet also lifts the seat cap).
+3. Can the menu be seen while it is written? → `menuVisibility` HIDDEN / NAMES.
+4. And the shopping? → `costMode` NONE / NO_BUDGET / BUDGET, the last with the
+   amount typed right there.
+
+The first two answers name the evening — *Undercover dinner*, *Surprise buffet*,
+*Dinner among friends*, *Picnic* — and the end is what every card ends on: the
+summary, Create, or the long form with the answers already in it.
+`setupFromAnswers` in `roundSetup.ts` is the whole mapping.
+
+*Party vibe, No surprises, No stress and Total roll are gone*, with their code
+(`randomSetup`, `rollLooks`): each was an answer to these questions under a
+name that did not say what it set. One card stays shut and marked in
+development, *A party for someone* — planning behind the back of the guest of
+honour needs a space they cannot see, which the app does not have.
+
+*Fixed on the way:* a card's summary said "shared, no ceiling" for a dinner with
+a budget; it now names the cost mode it actually sets.
+
+**Changed: the recipe book and the album have pages of their own.** Both were
+folds half-way down the profile, between the notifications and the allergies —
+an album of photographs you could not see without opening something, and a
+search, two filters and an export squeezed into a panel. The profile now shows a
+glance at each: the last three recipes kept (dish, dinner, whether you wrote,
+cooked or ate it) and the last three prints, each with *See the whole book /
+album (N)*. `/profile/recipes` is the full book, unchanged. `/profile/album` lays
+the prints two across, newest first; the one you touch lifts to the full width
+with its menu underneath, the gesture the setup cards use. The results page's
+"open the book" goes straight to the book.
+
+**Changed: the Crème page says what it opens in the dinner theme.** It listed the
+extra recipe ideas, the word lists and the cloths, and nothing about the theme —
+which since `0091`–`0093` is the largest thing Crème opens. A new fold, second
+after the recipes, shows the six kinds as cards: an ingredient and a way of
+cooking marked free, the countries, colours, letters and eras marked Crème, each
+with how many values it holds. Under them, the two sentences that keep it
+honest: without Crème the four are not shut (a pick a week in each is free), and
+Crème also deals a different theme to every cook. The kind lists moved from
+`FilRougePicker` to `lib/filRouge.ts` so both screens read the same ones.
+
+**Changed: the fil rouge is called the dinner theme on screen.** "Fil rouge" and
+"thread" asked people to learn a word before they could use the setting; *Thème
+du dîner* / *Dinner theme* says what it is. Every string a person reads says it
+now — the label, the line on the table and the recipe, the ballot's column, the
+award, the weekly selection, the tutorial. The code, the i18n keys and the
+schema keep `filRouge`: it is still the product's internal word (README). In the
+setup form the fold is *Sujet du dîner* / *Dinner topic*, and the group that
+held it, the pseudonyms and the cloth becomes *Ambiance*, so the page does not
+read "Theme › Topic › theme".
+
+**Changed: one free cloth, the red checks (`0094`).** Elegant leaves the shelf
+for good — deleted from `table_theme_catalogue` rather than paused, because a
+paused row says it is coming back. Dinners already laid on it keep their cloth
+(no foreign key, and the `.theme-elegant` class stays); `create_round` refuses
+it like any unknown code. A saved card that still names it falls back to the
+red checks, so Create does not fail on a card written before today.
+
+**Added: a guided dinner, told by the chef.** The first time somebody opens
+the app with no dinner yet, a pretend one starts by itself at `/tutorial`: a
+Mexican night with Giulia, Marco and Inès, from choosing the card to the
+reveal of the chain, in 23 presses. The chef from the new mark says one
+sentence per step in a bubble at the foot of the screen and rings the one
+thing that can be pressed; every other press is swallowed and the bubble
+shakes. *Skip this step* lands exactly where the press would have; *Leave the
+tour* is on every step.
+
+*It is the same dinner for everybody and nothing reaches the server* — the
+dinner is a step number, and every screen is drawn from it. The screens are
+built from the real pieces (`Envelope`, `HostPass`, `RoundProgress`,
+`ChainCircle`, the menu card) rather than being the real pages fed pretend
+data; `DESIGN.md` §19 says what that costs.
+
+*It opens once per device*, marked when it starts rather than when it ends, so
+walking out is not undone on the next visit; never over an invitation being
+followed; and it stays one press away under "How CovertCook works" (where the
+old "a guided example dinner is coming soon" line was) and in the profile.
+`RoundProgress` now takes only the two fields it reads, so the tour can hand it
+a phase without a whole round.
+
+**Changed: two cards open, four coming.** The grid of ready-made dinners
+named moods — "Party vibe", "No stress", "No surprises" — and left the host to
+work out what each one set. Only two stay open: the game as designed, now
+called for what it is (*Cook a friend's recipe* / *Cuisiner la recette d'un
+proche*, with a hint that explains the swap in one sentence), and the long
+form. The four others and the dice stay on the grid, dashed and shut, marked
+*In development*: they come back once a few yes/no questions about the evening
+(secret or not, menu visible or not, costs shared or not, a buffet or courses)
+can lead to them instead of a name. Their answers are kept in `roundSetup.ts`
+behind a `soon` flag. Saved cards stay open — they are the host's own.
+
+**Changed: the wok is gone, the peeking chef is the mark.** Drawn for this
+app rather than taken from Flaticon, so it is the first mark the store
+listing can actually carry (`assets-src/icon-proposals/README.md` explains why
+the wok could not). Five masters in `assets-src/icons/`, each with one job:
+
+- `logo.png` — the chef peeking over the counter, hands on the edge. The
+  home-screen icon: `pwa-192x192`, `pwa-512x512`, `apple-touch-icon`.
+- `logo_face.png` — the same face without the hands, on the red tile. The
+  browser tab (`favicon-32`, `favicon-192`), because at 32 px the hands are
+  noise and the hat is the shape. Also the guide who speaks in the tutorial
+  (`public/logo_face.webp`).
+- `logo_face_inverse_nobg.png` — red lines on nothing. The header mark
+  (`public/logo.webp`), which sits on paper and needs no ground of its own.
+- `logo_inverse.png`, `logo_face_inverse.png` — white ground, red lines. Kept
+  as masters; nothing ships them yet.
+
+*The maskable icon is its own file now.* It used to be `pwa-512x512` again,
+which Android crops to a circle — the hands and the brim would have been cut.
+`pwa-maskable-512x512.png` is the face shrunk to 78% on the same red, inside
+the safe zone. The TWA manifest points at it too.
 
 ---
 

@@ -58,7 +58,8 @@ export function ChainCircle({
   return (
     <svg
       className="chainring"
-      viewBox={`0 0 ${size} ${size}`}
+      // Room outside the ring for two-line labels on every side.
+      viewBox={`-28 -10 ${size + 56} ${size + 20}`}
       role="img"
       aria-label={cycle.map((l) => `${nameOf(l, 'sender')} → ${nameOf(l, 'cook')}`).join('; ')}
     >
@@ -122,11 +123,37 @@ export function ChainCircle({
               dominantBaseline="middle"
               className={isYou ? 'chainring__name is-you' : 'chainring__name'}
             >
-              {nameOf(link, 'sender')}
+              {/* Once names are open, the code name stays on top: it is the
+                  name everybody wrote to all evening, and the real one under
+                  it is the answer. Without it the ring is a list of friends
+                  that says nothing about who "Avocado" was. */}
+              {realNames && link.sender_display_name ? (
+                <>
+                  <tspan x={lx} dy="-0.6em" className="chainring__secret">
+                    {link.sender_secret_name}
+                  </tspan>
+                  <tspan x={lx} dy="1.25em">
+                    {link.sender_display_name}
+                  </tspan>
+                </>
+              ) : (
+                link.sender_secret_name
+              )}
             </text>
           </g>
         )
       })}
     </svg>
+  )
+}
+
+/** A chef in a list of the chain: the code name, and the real one beside it
+ *  once the reader is entitled to it. */
+export function ChainName({ secret, real }: { secret: string; real: string | null }) {
+  return (
+    <span className="badge chainname">
+      <span className="chainname__secret">{secret}</span>
+      {real && <strong>{real}</strong>}
+    </span>
   )
 }

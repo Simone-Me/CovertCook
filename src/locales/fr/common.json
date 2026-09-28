@@ -100,28 +100,20 @@
   "rounds": {
     "createIt": "Créer",
     "presets": {
-      "lead": "Choisissez la soirée que vous avez en tête. Chaque carte dit ce qu’elle règle avant de créer quoi que ce soit.",
-      "CLASSIC": "Classique",
-      "CLASSICHint": "Le jeu tel qu’il est pensé : couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
-      "PARTY": "Ambiance fête",
-      "PARTYHint": "Pas de limite de couverts, le menu lisible pendant qu’il s’écrit, nappe et liste de pseudonymes tirées au sort, des services, frais partagés.",
-      "NO_SURPRISES": "Sans surprises",
-      "NO_SURPRISESHint": "Tout le monde se connaît, le menu est visible, la porte est une liste d’invités et les frais sont partagés.",
-      "NO_STRESS": "Sans stress",
-      "NO_STRESSHint": "Couvert, un code à partager, pas de limite, pas de fil rouge, rien à composer et pas d’argent à évoquer.",
-      "RANDOM": "Tout au hasard",
-      "RANDOMHint": "Chaque réponse tirée au sort, cette table comprise — et le fil rouge est scellé, donc vous le découvrez avec les autres.",
+      "CLASSIC": "Dîner CovertCook",
+      "CLASSICHint": "Le jeu tel qu’il est pensé : chacun écrit en secret une recette pour quelqu’un d’autre et cuisine celle qu’on lui a donnée — personne ne sait qui a écrit la sienne avant la fin. Couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
+      "QUESTIONS": "Répondre à 4 questions",
+      "FOR_SOMEONE": "Une fête pour quelqu’un",
       "MANUAL": "Je configure moi-même",
-      "MANUALHint": "Le formulaire complet : chaque décision, une par une.",
+      "soon": "En développement",
       "mine": "Enregistrée par vous",
       "tweak": "Ouvrir dans le formulaire",
-      "nameFirst": "Donnez d’abord un nom au dîner.",
       "removeAsk": "Supprimer « {{name}} » ?",
       "saveTitle": "Garder ces réglages",
-      "saveWhat": "Ils arrivent sur la grille comme une carte à vous, prête pour le prochain dîner. Enregistrer un nom déjà utilisé le remplace.",
+      "saveWhat": "Vous la retrouverez la prochaine fois en créant un dîner, sous « Reprendre une de mes tables ». Un nom déjà utilisé la remplace.",
       "namePlaceholder": "Le dimanche chez nous",
       "save": "Enregistrer",
-      "saved": "Enregistré. C’est sur la grille.",
+      "saved": "Enregistrée.",
       "tooMany": "Cela fait douze tables enregistrées — supprimez-en une avant d’en garder une autre."
     },
     "group": {
@@ -129,9 +121,9 @@
       "chefsHint": "Qui est à cette table, et ce qu’ils ont le droit de savoir.",
       "invitation": "Invitation",
       "covert": "Couverture",
-      "theme": "Thème",
+      "theme": "Ambiance",
       "themeHint": "De quoi parle la soirée, et à quoi elle ressemble.",
-      "topic": "Sujet",
+      "topic": "Sujet du dîner",
       "pseudonym": "Pseudonymes",
       "design": "Décor",
       "recipe": "Recette",
@@ -139,6 +131,7 @@
       "multiple": "Multiple",
       "budget": "Budget",
       "courses": "Services",
+      "menu": "Menu",
       "vote": "Vote"
     },
     "myRounds": "Mes dîners",
@@ -252,8 +245,8 @@
       "generate": "Générer l'attribution",
       "reroll": "Relancer l'attribution",
       "rerollConfirm": "Ceci remplace le tirage actuel de tout le monde par un nouveau, aléatoire. Continuer ?",
-      "ready": "Attribution générée — prêt à passer à « Attribué ».",
-      "needed": "Générez l'attribution ci-dessous avant de pouvoir passer à « Attribué ».",
+      "ready": "Attribution faite — les recettes peuvent s'écrire.",
+      "needed": "Lancez la roulette avant de passer à l'écriture des recettes.",
       "waitingForHost": "En attente que l'Executive Chef lance la roulette.",
       "explain": "Tout le monde est inscrit et la table est verrouillée. Lancez la roulette pour associer chaque chef à celui pour qui il cuisinera.",
       "clear": "Effacer l'attribution",
@@ -322,7 +315,9 @@
       "noSuchChef": "Aucun chef ne porte ce nom. Vérifiez l'orthographe — les noms d'utilisateur sont exactement comme leur propriétaire les a tapés.",
       "inviteUsername": "Son nom d'utilisateur",
       "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
-      "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant."
+      "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant.",
+      "alreadyHere": "Ce chef est déjà à cette table.",
+      "closed": "Les invitations sont fermées : les inscriptions sont closes."
     },
     "pastRounds": "Dîners passés ({{count}})",
     "backToTable": "Retour à la table",
@@ -342,6 +337,8 @@
       "vote": "Votez le menu",
       "results": "Résultats",
       "allergies": "Allergies",
+      "menu": "Le menu",
+      "menuMeta": "Les plats déjà envoyés",
       "info": "Le dîner",
       "costs": "Les frais",
       "myRecipeMeta": "Le plat que je demande"
@@ -435,7 +432,15 @@
       },
       "empty": "vide",
       "whatIsItToggle": "Qu’est-ce que le passe ?",
-      "advance": "Faire avancer le dîner"
+      "advance": "Faire avancer le dîner",
+      "go": {
+        "DRAFT": "Ouvrir les inscriptions",
+        "OPEN": "Fermer les inscriptions et lancer l'attribution",
+        "LOCKED": "Passer à l'écriture des recettes",
+        "ASSIGNED": "C'est le jour J",
+        "DINNER": "Ouvrir le vote",
+        "VOTING": "Fermer le vote et voir les résultats"
+      }
     },
     "lateJoinerShort": "Ajouter quelqu'un maintenant change les partenaires de deux chefs.",
     "briefProgress": "{{done}} recettes écrites sur {{total}}",
@@ -478,7 +483,7 @@
     "copyLink": "Copier le lien",
     "rules": {
       "liveTitle": "Modifiable pendant le dîner",
-      "liveNote": "Choisissez maintenant et changez d’avis plus tard : la flèche qui tourne ↺ sur la passe revient sur ces deux-là.",
+      "liveNote": "Choisissez maintenant et changez d’avis plus tard : les services et le vote avec la flèche qui tourne ↺ sur la passe, le menu dans les réglages du dîner.",
       "settled": "Tout ce qui est dans ces trois groupes est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Ce qui peut encore bouger en cours de route est dans l’encadré vert, en bas.",
       "liveMark": "Modifiable pendant le dîner : la flèche qui tourne ↺ sur la passe revient sur celui-ci."
     },
@@ -486,8 +491,6 @@
       "label": "Thème de la table",
       "CHECKS": "Carreaux rouges",
       "CHECKSHint": "La table de la maison : carreaux rouges sur crème. À quoi ressemble CovertCook.",
-      "ELEGANT": "Élégant",
-      "ELEGANTHint": "Lin repassé, rien d’imprimé dessus. Pour la soirée sur son trente-et-un.",
       "SCIFI": "Science-fiction",
       "SCIFIHint": "Un pont sombre sous une grille cyan.",
       "BAROQUE": "Baroque",
@@ -515,11 +518,88 @@
       "title": "Déjà au menu",
       "nothingYet": "Rien n'a encore été envoyé.",
       "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisùs à la même table.",
-      "label": "Montrer le menu pendant l'écriture des recettes",
+      "label": "Le menu pendant l'écriture des recettes",
       "HIDDEN": "Garder la surprise",
       "HIDDENHint": "Personne ne voit un plat avant le dîner.",
-      "NAMES": "Montrer les noms des plats",
-      "NAMESHint": "Les convives voient ce qui a été envoyé — les noms seuls, jamais qui. Évite que deux personnes écrivent le même plat."
+      "NAMES": "Visible par tous",
+      "NAMESHint": "Les convives voient les noms des plats envoyés, jamais qui. Évite deux fois le même plat.",
+      "HOST": "Visible par l'Executive Chef seulement",
+      "HOSTHint": "Vous suivez ce qui a été envoyé ; les convives gardent la surprise.",
+      "onlyYou": "Vous seul voyez ce menu."
+    },
+    "questions": {
+      "step": "Question {{n}} sur {{total}}",
+      "previous": "Question précédente",
+      "continue": "Continuer",
+      "restart": "Recommencer les questions",
+      "result": "Votre soirée",
+      "codeNames": {
+        "ask": "À table, des noms de code ou vos vrais prénoms ?",
+        "yes": "Des noms de code",
+        "yesHint": "Personne ne sait qui est qui avant la révélation — vous non plus. Le plus de mystère.",
+        "no": "Nos vrais prénoms",
+        "noHint": "Tout le monde se voit. Seul qui cuisine pour qui reste un secret, jusqu’à la fin."
+      },
+      "courses": {
+        "ask": "Comment se présente la table ?",
+        "yes": "Un repas avec des services",
+        "yesHint": "Entrées, plats, dessert : vous composez le menu et la roulette donne un plat à chacun.",
+        "no": "Un buffet ou un pique-nique",
+        "noHint": "Chacun apporte ce qu’il veut. Rien à composer."
+      },
+      "menuVisible": {
+        "ask": "Le menu se voit pendant qu’on écrit ?",
+        "no": "Non, c’est la surprise",
+        "noHint": "Personne ne voit un plat avant le dîner.",
+        "yes": "Oui, pour éviter trois tiramisùs",
+        "yesHint": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine.",
+        "host": "Seulement moi, pour suivre",
+        "hostHint": "Vous voyez les plats envoyés, les autres gardent la surprise."
+      },
+      "costs": {
+        "ask": "Et les courses ?",
+        "OWN": "Chacun paie les siennes",
+        "OWNHint": "Rien à compter, rien à régler.",
+        "SHARED": "On partage tout",
+        "SHAREDHint": "La table divise la note à la fin, sans plafond.",
+        "BUDGET": "On partage, avec un plafond",
+        "BUDGETHint": "Un montant par personne décidé maintenant, pour qu’il guide ce que chacun écrit.",
+        "perHead": "Par personne (€)"
+      },
+      "kind": {
+        "UNDERCOVER": "Dîner sous couverture",
+        "UNDERCOVERHint": "Le jeu dans sa forme complète : noms de code, un plat chacun, et tout se révèle à la fin.",
+        "SURPRISE_BUFFET": "Buffet surprise",
+        "SURPRISE_BUFFETHint": "Pour une fête ou un anniversaire : chacun apporte ce qu’il veut, sous un nom de code.",
+        "FRIENDS": "Dîner entre amis",
+        "FRIENDSHint": "Tout le monde se connaît et le repas a ses services ; seul qui cuisine pour qui reste secret.",
+        "PICNIC": "Pique-nique",
+        "PICNICHint": "Simple et détendu : vrais prénoms, chacun apporte un plat, et qui a écrit quoi se découvre à la fin."
+      }
+    },
+    "chef": {
+      "lead": "Le chef vous pose deux ou trois questions et s’occupe du reste.",
+      "start": "Bonjour ! Qu’est-ce qu’on prépare ?",
+      "CLASSICHint": "Le jeu tel qu’il est pensé : chacun écrit en secret la recette d’un autre.",
+      "QUESTIONSHint": "Dites-moi quelle soirée vous avez en tête, je règle le reste.",
+      "SAVED_one": "Reprendre ma table enregistrée",
+      "SAVED_other": "Reprendre une de mes {{count}} tables",
+      "SAVEDHint": "Les réglages d’un dîner que vous avez gardés.",
+      "MANUALHint": "Chaque réglage, un par un, dans le formulaire complet.",
+      "savedAsk": "Laquelle on ressort ?",
+      "result": "Votre soirée",
+      "namePlaceholder": "Dimanche chez nous",
+      "keepAsk": "La garder pour la prochaine fois ?",
+      "kept": "Gardée. La prochaine fois, choisissez « Reprendre une de mes tables »."
+    },
+    "countdown": {
+      "line": "Dîner dans {{when}}",
+      "days": "{{d}} j {{h}} h",
+      "hours": "{{h}} h {{m}} min"
+    },
+    "advanceError": {
+      "tooFew": "Il faut au moins 3 chefs inscrits et approuvés pour fermer les inscriptions.",
+      "slots": "Le menu compte {{courses}} plats pour {{chefs}} chefs : il en faut un par chef."
     }
   },
   "briefs": {
@@ -666,9 +746,7 @@
   "vote": {
     "title": "Votez le menu",
     "theMenu": "Le menu de ce soir",
-    "instructions": "Glissez pour classer chaque plat, du meilleur au moins bon. Optionnel : notez l'originalité et le respect de la recette.",
-    "originality": "Originalité",
-    "briefRespect": "Respect de la recette",
+    "instructions": "Glissez les plats pour les classer, du meilleur au moins bon.",
     "submitBallot": "Valider le vote",
     "thanks": "Merci — votre vote a été enregistré.",
     "nothingToRank": "Rien à classer pour l'instant.",
@@ -726,7 +804,10 @@
     "allVoted": "Tout le monde a voté. Fermeture du vote…",
     "deadlineSetAlready": "Ce vote a déjà une heure de fermeture, et elle ne bouge pas. Retirez-la d'abord si elle doit changer.",
     "liveNoDeadline": "Pas de compte à rebours ici — vous le fermez vous-même quand la table a fini, et vous voyez les résultats avant tout le monde.",
-    "themeRespect": "Fil rouge"
+    "instructionsTheme": "Glissez les plats pour les classer, du meilleur au moins bon. Si vous voulez, notez aussi l’originalité et le respect du thème.",
+    "themeScore": "Originalité et respect du thème",
+    "themeScoreLow": "Peu",
+    "themeScoreHigh": "Tout à fait"
   },
   "share": {
     "what": "Choisissez ce qui figure sur la carte. Rien n’est envoyé avant que vous appuyiez sur envoyer, et l’image ci-dessous est exactement ce qui quitte ce téléphone.",
@@ -752,7 +833,7 @@
       "BEST_DRINK": "Meilleure boisson",
       "MOST_ORIGINAL": "Plus original",
       "BEST_BRIEF_RESPECT": "Meilleur respect de la recette",
-      "BEST_FIL_ROUGE": "Meilleure interprétation du fil rouge"
+      "BEST_FIL_ROUGE": "Le plus original sur le thème"
     },
     "nothingServed": "Aucun plat n’a été enregistré pour ce dîner.",
     "notServed": "non servi",
@@ -766,7 +847,8 @@
       "note": "Les plats seulement, sauf si vous cochez une liste ci-dessus. Les noms des gens à table leur appartiennent.",
       "winner": "Plat de la soirée : {{dish}}",
       "downloaded": "Enregistrée. Publiez-la où vous voulez."
-    }
+    },
+    "chainTitle": "La chaîne : qui écrivait pour qui"
   },
   "chain": {
     "title": "Chaîne",
@@ -943,7 +1025,12 @@
       "recipesEg3": "Idée 3",
       "recipesWhy": "Plus d’écriture pour vous, plus de marge pour lui. Personne à table n’est désavantagé — et comme un dîner porte le Crème de son organisateur, chaque invité en écrit trois quand le Executive Chef l’a.",
       "names": "La liste de mots dont sortent les pseudonymes de votre table. Elle donne aussi sa marque au dîner et son visage à chaque chef dans le frigo.",
-      "tables": "La nappe sur laquelle la soirée est mise. Uniquement l’apparence — rien ici ne change une règle du jeu."
+      "tables": "La nappe sur laquelle la soirée est mise. Uniquement l’apparence — rien ici ne change une règle du jeu.",
+      "theme": "Ce vers quoi toute la table cuisine. Un ingrédient et une façon de cuisiner sont gratuits, en entier, pour toujours. Crème ouvre les quatre autres en entier : les pays du monde, les couleurs, les lettres et les époques.",
+      "themeSize_one": "{{count}} choix",
+      "themeSize_other": "{{count}} choix",
+      "themeWeek": "Sans Crème, ces quatre-là ne sont pas fermés pour autant : chaque semaine, un choix dans chacun est offert à tout le monde, avec la raison de ce choix.",
+      "themePerCook": "Et un thème différent pour chaque cuisinier, tiré par la roulette : six pays sur une table, c'est un tour du monde en une soirée."
     },
     "ways": {
       "title": "Comment l’obtenir",
@@ -1279,7 +1366,6 @@
       "Que vous aimiez cuisiner ou que vous mangiez toujours les trois mêmes plats tout prêts, j’espère que vous prendrez plaisir à préparer la recette que quelqu’un a eu envie de partager avec vous."
     ],
     "start": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé.",
-    "next": "Un dîner d’exemple guidé arrivera bientôt ici.",
     "readAgain": "Comment fonctionne CovertCook"
   },
   "food": {
@@ -1351,7 +1437,10 @@
     "forgetRecoverable": "Ce dîner existe encore : vous pourrez regarder son menu et la reprendre.",
     "forgetLastCopy": "Le dîner d’où elle vient n’existe plus. C’est la seule copie qui reste, et la retirer est sans retour, pour personne.",
     "exportMarkdown": "Télécharger en texte",
-    "exportJson": "Télécharger en JSON"
+    "exportJson": "Télécharger en JSON",
+    "latest": "Les dernières gardées :",
+    "seeAll_one": "Voir le carnet ({{count}} recette)",
+    "seeAll_other": "Voir tout le carnet ({{count}} recettes)"
   },
   "moderation": {
     "byPseudonym": "Vous voyez ce qui a été dit avant de savoir qui l’a dit, et chaque action ici vise une place à table plutôt qu’une personne. C’est voulu : connaître l’auteur d’abord, c’est laisser l’idée qu’on se fait de quelqu’un décider si son message était déplacé — et aucun nom n’est nécessaire pour avertir une place ou la retirer.",
@@ -1420,7 +1509,10 @@
       "NOT_AT_THIS_TABLE": "Ce chef n’est plus à cette table.",
       "PHOTO_REMOVED": "Cette photo a été retirée.",
       "PHOTO_NOT_IN_YOUR_ALBUM": "Elle n’est pas dans votre album."
-    }
+    },
+    "latest": "Les derniers souvenirs :",
+    "seeAll_one": "Voir l’album ({{count}} soirée)",
+    "seeAll_other": "Voir tout l’album ({{count}} soirées)"
   },
   "costs": {
     "label": "Frais partagés",
@@ -1479,25 +1571,25 @@
     "freeKind": "Gratuit, en entier, pour toujours — ce type n’est jamais Crème.",
     "week": {
       "title": "La sélection de la semaine",
-      "hint": "Un fil rouge de chaque type, choisi à la main — gratuit pour tout le monde jusqu’à dimanche, avec ou sans Crème. La raison de chacun est écrite dessous.",
-      "hintPerCook": "Un fil rouge de chaque type, choisi à la main et gratuit jusqu’à dimanche. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
+      "hint": "Un thème de chaque type, choisi à la main — gratuit pour tout le monde jusqu’à dimanche, avec ou sans Crème. La raison de chacun est écrite dessous.",
+      "hintPerCook": "Un thème de chaque type, choisi à la main et gratuit jusqu’à dimanche. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
       "take": "Prendre celui-là",
-      "taken": "Pris — c’est le fil rouge du dîner"
+      "taken": "Pris — c’est le thème du dîner"
     },
     "searchCountry": "Chercher un pays",
     "compass": "En tirer un au hasard, scellé",
     "sealedChosen": "🧭 Scellé. Un pays a été tiré pour ce dîner et personne ne sait lequel — vous non plus — jusqu’à ce que la roulette tourne et que les recettes s’écrivent.",
-    "sealedLine": "Le fil rouge du soir : scellé jusqu’au tirage 🧭",
+    "sealedLine": "Le thème du dîner : scellé jusqu’au tirage 🧭",
     "noCountry": "Aucun pays de ce nom.",
     "oneEach": "Un chacun",
     "pickOne": "Rien de choisi",
     "useThisKind": "Distribuer ce type, un par cuisinier",
     "kindChosen": "Distribué, un par cuisinier",
-    "hardLetters": "Avertissement : {{items}} ne sont pas difficiles, elles sont quasi impossibles — et le bulletin demande si le plat a bien suivi le fil rouge.",
-    "label": "Le fil rouge",
-    "none": "Sans fil rouge",
+    "hardLetters": "Avertissement : {{items}} ne sont pas difficiles, elles sont quasi impossibles — et le bulletin demande si le plat a bien suivi le thème.",
+    "label": "Le thème du dîner",
+    "none": "Sans thème",
     "noneHint": "Le dîner est libre — chacun cuisine ce qu'il veut.",
-    "pick": "Donner un fil rouge au dîner",
+    "pick": "Donner un thème au dîner",
     "explain": "Une direction que chaque recette suit. Rien ne le vérifie : c'est la table qui juge.",
     "turnsIn": "Nouvelle sélection dans {{time}}",
     "turnsAt": "La sélection change le dimanche à midi.",
@@ -1507,15 +1599,15 @@
     "scope": {
       "label": "Pour qui vaut-il ?",
       "SHARED": "Le même pour tout le monde",
-      "SHAREDHint": "Un seul fil pour toute la table. Six plats qui vont ensemble.",
+      "SHAREDHint": "Un seul thème pour toute la table. Six plats qui vont ensemble.",
       "PER_COOK": "Un différent pour chaque cuisinier",
       "PER_COOKHint": "Le tirage en donne un à chacun. Six pays sur une table, c'est un tour du monde en une soirée."
     },
     "mine": "Le vôtre : {{value}}",
     "forMyCook": "Votre cuisinier a : {{value}}",
-    "onTheMenu": "Le fil rouge du soir : {{value}}",
-    "clash": "Ce fil rouge met {{items}} sur la table, et quelqu'un ici a dit que cela comptait pour lui. Le choix reste le vôtre — le dîner est partagé, il faudra donc le dire.",
-    "frozen": "Le fil rouge est arrêté : la roulette a déjà distribué, et on écrit déjà avec.",
+    "onTheMenu": "Le thème du dîner : {{value}}",
+    "clash": "Ce thème met {{items}} sur la table, et quelqu'un ici a dit que cela comptait pour lui. Le choix reste le vôtre — le dîner est partagé, il faudra donc le dire.",
+    "frozen": "Le thème est arrêté : la roulette a déjà distribué, et on écrit déjà avec.",
     "category": {
       "COUNTRY": "Un pays",
       "COLOUR": "Une couleur",
@@ -1627,11 +1719,11 @@
     "hours": "{{count}} heure",
     "hours_other": "{{count}} heures",
     "nextWeek": "Dimanche : {{items}}",
-    "saved": "Le fil rouge est enregistré. Il reste modifiable jusqu'au tirage.",
+    "saved": "Le thème est enregistré. Il reste modifiable jusqu'au tirage.",
     "someDishes": "Quelques plats de là-bas : {{items}}. Des pistes, pas un menu.",
     "shut": "Ce type fait partie de Crème. Tout y est montré, et rien n’y est encore choisissable.",
     "shutButWeek": "Ce type fait partie de Crème. Un seul y est gratuit cette semaine — {{value}} — et il se prend dans la sélection plus haut, là où se trouve la raison.",
-    "perCookShut": "Distribuer un fil rouge par cuisinier dans ce type demande Crème : sans lui la seule valeur ici est celle de la semaine, et six cuisiniers recevraient tous la même."
+    "perCookShut": "Distribuer un thème par cuisinier dans ce type demande Crème : sans lui la seule valeur ici est celle de la semaine, et six cuisiniers recevraient tous la même."
   },
   "help": {
     "title": "Questions, et comment nous joindre",
@@ -1701,5 +1793,102 @@
       "title": "Contact",
       "body": "Une personne lit cette adresse. Pour n'importe quoi — une question, un problème, un signalement, une demande concernant vos données :"
     }
+  },
+  "tutorial": {
+    "title": "Visite guidée",
+    "cta": "Faire la visite guidée — deux minutes",
+    "profileLink": "Refaire la visite guidée",
+    "profileWhat": "Un dîner pour de faux, de l’invitation à la révélation.",
+    "skip": "Passer cette étape",
+    "exit": "Quitter la visite",
+    "endTitle": "À vous de jouer",
+    "endBody": "C’est toute la soirée : vous choisissez ce qu’un autre cuisine, quelqu’un choisit le vôtre, et tout le monde le découvre à la fin. La visite reste disponible sous « Comment fonctionne CovertCook » et dans votre profil.",
+    "createFirst": "Créer mon premier dîner",
+    "home": "Retour à mes dîners",
+    "dinnerName": "Soirée mexicaine",
+    "filRouge": "Le thème du dîner : Mexique 🇲🇽",
+    "code": "TACO42",
+    "you": "Vous",
+    "friendsIn": "Avocado et Jalapeño sont arrivés.",
+    "writingFor": "Vous écrivez pour {{name}}.",
+    "dishes": {
+      "tacos": "Tacos al pastor",
+      "guacamole": "Guacamole",
+      "churros": "Churros con chocolate",
+      "sopa": "Sopa de tortilla"
+    },
+    "written": {
+      "dish": "Tacos al pastor",
+      "ingredients": [
+        "600 g d’échine de porc",
+        "3 piments guajillo séchés",
+        "1/4 d’ananas",
+        "1 oignon",
+        "Tortillas de maïs",
+        "Coriandre et citron vert"
+      ],
+      "procedure": "Faites tremper les piments, mixez-les avec un peu de vinaigre et laissez mariner le porc toute une nuit.\nGrillez-le en fines tranches avec l’ananas.\nServez sur des tortillas chaudes avec oignon, coriandre et un filet de citron vert."
+    },
+    "received": {
+      "dish": "Churros con chocolate",
+      "ingredients": [
+        "25 cl d’eau",
+        "150 g de farine",
+        "1 pincée de sel",
+        "Huile de friture",
+        "Sucre et cannelle",
+        "150 g de chocolat noir",
+        "20 cl de lait"
+      ],
+      "procedure": "Portez l’eau salée à ébullition, versez la farine d’un coup et mélangez jusqu’à obtenir une pâte lisse.\nPochez-la dans l’huile chaude et faites frire jusqu’à ce qu’elle soit dorée.\nRoulez dans le sucre à la cannelle. Faites fondre le chocolat dans le lait chaud pour tremper.",
+      "note": "Trempez-les tant qu’ils sont chauds. Faites-moi confiance."
+    },
+    "messages": {
+      "first": "Pas d’ananas chez mon épicier — je peux m’en passer ?",
+      "choices": {
+        "sure": "Bien sûr, allez-y !",
+        "mango": "Essayez avec de la mangue.",
+        "hunt": "L’ananas, c’est l’âme du plat — trouvez-en !"
+      },
+      "reply": "Parfait, merci chef !",
+      "withCook": "Votre conversation avec {{name}}, qui cuisine la recette que vous avez écrite. Il ne sait pas que c’est vous.",
+      "localOnly": "Rien n’est envoyé pendant la visite : tout reste sur cet écran."
+    },
+    "say": {
+      "createPick": "Bonjour, je suis le chef ! Organisons une soirée : un dîner mexicain. Quand vous créez un dîner, c’est moi qui pose les questions. Touchez « Dîner CovertCook » — le jeu tel qu’il est pensé.",
+      "createGo": "Je vous montre ce que ça règle avant de créer quoi que ce soit. Le nom est rempli et le thème du dîner, c’est le Mexique. Touchez Créer.",
+      "tablePass": "Voici votre table. Chaque enveloppe est un tiroir. La rouge, c’est le pass : il dit ce que le dîner attend de vous, et vous seul le voyez — vous êtes l’Executive Chef. Ouvrez-le.",
+      "tableInvite": "C’est ici qu’on donne une place : un code à partager, ou une invitation par nom d’utilisateur. J’ai déjà tapé le nom de mes amis : touchez Ajouter.",
+      "tableClose": "Pendant les inscriptions, les noms des autres restent sous le marqueur — même pour vous. Nous voilà quatre : fermez les inscriptions et lancez l’attribution.",
+      "tableRoulette": "Entrée, premier plat, plat principal, dessert : quatre plats pour quatre chefs. Maintenant la roulette : elle décide en secret qui écrit pour qui. Lancez-la.",
+      "tableAssigned": "Chacun écrit maintenant la recette d’un autre — sous le nom du dîner, le temps qui reste avant le jour J. Ouvrez « Ma commande ».",
+      "briefWrite": "Vous écrivez pour Jalapeño — un nom de code, vous ne savez pas qui c’est. Je vous ai préparé une recette mexicaine : envoyez-la.",
+      "tableMessages": "Envoyée ! Votre cuisinier vous a déjà écrit. Ouvrez les messages.",
+      "messagesSend": "Jalapeño cuisine votre recette et a une question — sans savoir que c’est vous. Choisissez une réponse.",
+      "messagesReply": "Toute la soirée se parle comme ça : par noms de code, jusqu’à la fin. Retour à la table.",
+      "tableDish": "La recette que vous devez cuisiner est arrivée, écrite par quelqu’un de cette table. Ouvrez « Mon plat ».",
+      "recipeRead": "Voilà ce que vous cuisinerez et apporterez. Qui l’a écrite ? Vous le saurez à la fin. Retour à la table.",
+      "tableDinner": "Tout le monde a écrit et cuisiné. Le soir venu : c’est le jour J.",
+      "tableVote": "Les plats sont sur la table et tout le monde a goûté. Ouvrez le vote.",
+      "tableBallot": "À vous de voter.",
+      "ballotSend": "Glissez les plats par les six points pour les classer. Le dîner avait un thème, alors un curseur note l’originalité sur le Mexique. J’ai tout rempli : envoyez.",
+      "tableResults": "Tout le monde a voté. Fermez le vote et voyez les résultats.",
+      "tableOpenResults": "Ouvrez les résultats.",
+      "resultsReveal": "Le gagnant : les tacos — la recette que VOUS avez écrite pour Jalapeño, qui l’a cuisinée sans savoir que c’était vous. Et maintenant le meilleur : révélez la chaîne.",
+      "resultsKeep": "Jalapeño, c’était Marco, et vos churros venaient d’Avocado — Giulia. Une recette vous plaît ? Gardez-la dans votre carnet.",
+      "tableChefs": "Avocado et Jalapeño sont là. Quelqu’un attend encore à la porte : ouvrez « Chefs ».",
+      "tableAccept": "C’est Lime, ma comparse. Faites-la entrer : touchez Approuver.",
+      "tableMenu": "Place au menu : un plat par chef. Pour une vraie soirée, choisissez « Des services ».",
+      "tableWrite": "C’est fait, et personne ne sait qui écrit pour qui. Passez à l’écriture des recettes.",
+      "resultsPhoto": "Et la photo de la soirée, pour l’album : ajoutez-la.",
+      "profileKept": "Tout ce que vous gardez vous attend dans votre profil : la recette dans le carnet, la photo dans l’album. Terminez la visite."
+    },
+    "inviteName": "giulia, marco",
+    "menuFree": "Libre",
+    "menuCourses": "Des services",
+    "points_one": "{{count}} pt",
+    "points_other": "{{count}} pts",
+    "finish": "Terminer la visite",
+    "previous": "← Étape précédente"
   }
 }

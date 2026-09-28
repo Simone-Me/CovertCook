@@ -198,7 +198,7 @@ select _refusal($$select create_round('Bought With Nothing', 'CODE', 'ANONYMOUS'
 
 \echo '--- the free ones are genuinely free'
 select create_round('Free Shelf', 'CODE', 'ANONYMOUS', 'FREE', null, null,
-                    'Europe/Paris', null, false, false, 'LIVE', 'BRIGADE', 'ELEGANT')
+                    'Europe/Paris', null, false, false, 'LIVE', 'BRIGADE', 'CHECKS')
        as free_round \gset
 select name_theme, table_theme from rounds where id = :'free_round'::uuid;
 

@@ -28,6 +28,7 @@ import {
   filRougeClash,
   setMenuVisibility,
   type MenuVisibility,
+  MENU_VISIBILITIES,
   getFilRouge,
   setFilRouge,
   FIL_ROUGE_FROZEN,
@@ -415,7 +416,7 @@ export function RoundSettingsPage() {
                   setError(err instanceof Error ? err.message : t('errors.generic'))
                 }
               }}
-              options={(['HIDDEN', 'NAMES'] as MenuVisibility[]).map((v) => ({
+              options={MENU_VISIBILITIES.map((v) => ({
                 value: v,
                 label: t(`rounds.sharedMenu.${v}`),
                 hint: t(`rounds.sharedMenu.${v}Hint`),

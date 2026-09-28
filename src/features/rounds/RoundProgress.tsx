@@ -27,7 +27,13 @@ const STEP_OF: Record<string, Step | 'done'> = {
   ARCHIVED: 'done',
 }
 
-export function RoundProgress({ round, isHost }: { round: RoundRow; isHost: boolean }) {
+export function RoundProgress({
+  round,
+  isHost,
+}: {
+  round: Pick<RoundRow, 'status' | 'voting_mode'>
+  isHost: boolean
+}) {
   const { t } = useTranslation()
 
   // A cancelled dinner has no progress to show, only a fact to state.

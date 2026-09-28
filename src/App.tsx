@@ -14,6 +14,7 @@ import { SignUpPage } from './features/auth/SignUpPage'
 import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { MyRoundsPage } from './features/rounds/MyRoundsPage'
 import { ProfilePage } from './features/profile/ProfilePage'
+import { AlbumPage, RecipesPage } from './features/profile/KeptPages'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
 import { CustomRoundPage } from './features/rounds/CustomRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
@@ -28,6 +29,7 @@ import { BallotPage } from './features/vote/BallotPage'
 import { ManualTallyPage } from './features/vote/ManualTallyPage'
 import { ResultsPage } from './features/vote/ResultsPage'
 import { ProPage } from './features/pro/ProPage'
+import { TutorialPage } from './features/tutorial/TutorialPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, profile, loading, needsSignupCompletion } = useAuth()
@@ -86,11 +88,36 @@ function AppRoutes() {
             </RequireAuth>
           }
         />
+        {/* A dinner with nobody else at it, and nothing sent to the server. */}
+        <Route
+          path="/tutorial"
+          element={
+            <RequireAuth>
+              <TutorialPage />
+            </RequireAuth>
+          }
+        />
         <Route
           path="/profile"
           element={
             <RequireAuth>
               <ProfilePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/profile/recipes"
+          element={
+            <RequireAuth>
+              <RecipesPage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/profile/album"
+          element={
+            <RequireAuth>
+              <AlbumPage />
             </RequireAuth>
           }
         />

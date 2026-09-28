@@ -32,6 +32,8 @@ import {
   FIL_ROUGE_SEALED,
   type FilRougeCategory,
   type FilRougeScope,
+  MENU_VISIBILITIES,
+  type MenuVisibility,
 } from '../../lib/rpc'
 
 // The order the questions are actually asked in, which is not the order the
@@ -123,6 +125,7 @@ export function CustomRoundPage() {
   // Null is "no cap", which is what the slider's far-right position means. One
   // value instead of a flag and a number, because they were one question.
   const [seats, setSeats] = useState<number | null>(start.seats)
+  const [menuVisibility, setMenuVisibility] = useState<MenuVisibility>(start.menuVisibility)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   // Saving these answers under a name, so the grid carries them next time.
@@ -175,10 +178,7 @@ export function CustomRoundPage() {
       filRougeScope: filRouge.scope,
       costMode,
       budget,
-      // Not on this form: a dinner whose menu is readable while it is written
-      // is a decision taken on the dinner itself, where it can also be undone
-      // (0087). Carried through so a saved card keeps whatever it arrived with.
-      menuVisibility: start.menuVisibility,
+      menuVisibility,
     }
   }
 
@@ -501,6 +501,27 @@ export function CustomRoundPage() {
               {slotMode === 'CATEGORIES' && (
                 <p className="muted">{t('rounds.slotMode.composedLater')}</p>
               )}
+            </Fold>
+
+            {/* Who reads the dish names while the recipes are being written.
+                It used to be missing here — decided only on the dinner itself
+                — so the one form that claims to hold every choice did not.
+                Still changeable later, which is why it sits in this box. */}
+            <Fold
+              title={t('rounds.group.menu')}
+              hint={t('rounds.sharedMenu.label')}
+              aside={t(`rounds.sharedMenu.${menuVisibility}`)}
+            >
+              <ChoiceList
+                name="menu-visibility"
+                value={menuVisibility}
+                onChange={(v) => setMenuVisibility(v as MenuVisibility)}
+                options={MENU_VISIBILITIES.map((v) => ({
+                  value: v,
+                  label: t(`rounds.sharedMenu.${v}`),
+                  hint: t(`rounds.sharedMenu.${v}Hint`),
+                }))}
+              />
             </Fold>
 
             <Fold

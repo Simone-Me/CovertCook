@@ -11,6 +11,7 @@ import { MyWarnings } from './MyWarnings'
 import { fromCents, roundDeletesAt } from '../../lib/rpc'
 import { tableThemeClass, themeMark } from '../../lib/themes'
 import { Envelope } from './Envelope'
+import { SharedMenu } from './SharedMenu'
 import { CutleryLink } from '../../components/CutleryLink'
 import { FilRougeLine } from './FilRougeLine'
 import { CopyButton } from '../../components/CopyButton'
@@ -21,6 +22,7 @@ import { ChoiceList } from '../../components/ChoiceList'
 import { RoundProNotice } from '../pro/ProNotices'
 import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
+import { DinnerCountdown } from './DinnerCountdown'
 import { MenuPanel } from './MenuPanel'
 import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
@@ -64,7 +66,7 @@ import {
   type VotingMode,
 } from '../../lib/rpc'
 
-type OpenDrawer = 'chefs' | 'allergies' | 'info' | 'costs' | null
+type OpenDrawer = 'chefs' | 'allergies' | 'info' | 'costs' | 'menu' | null
 
 // The same order the creation form asks in, so a host meets the four choices
 // laid out the way they first met them.
@@ -83,6 +85,9 @@ export function RoundHomePage() {
   const { data: round, isLoading: roundLoading } = useRound(roundId)
   const { data: members, error: membersError } = useRoundMembers(roundId)
   const [error, setError] = useState<string | null>(null)
+  // Said beside the button that caused it: at the top of the page it was a
+  // sentence nobody scrolled back up to read.
+  const [advanceError, setAdvanceError] = useState<string | null>(null)
   const [passHelp, setPassHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
@@ -362,6 +367,10 @@ export function RoundHomePage() {
     phaseIdx < ROUND_PHASE_ORDER.indexOf('VOTING') ? t('rounds.waiting.vote') : undefined
 
   const resultsOpen = phaseIdx >= ROUND_PHASE_ORDER.indexOf('RESULTS')
+  const menuShown =
+    assigned &&
+    phaseIdx <= ROUND_PHASE_ORDER.indexOf('DINNER') &&
+    (round.menu_visibility === 'NAMES' || (round.menu_visibility === 'HOST' && round.host_id === profile?.id))
 
   /**
    * Whether the table can already read the results, asked the way the server
@@ -407,13 +416,23 @@ export function RoundHomePage() {
 
   async function onAdvance() {
     if (!nextPhase || !roundId) return
-    setError(null)
+    setAdvanceError(null)
     try {
       await advancePhase(roundId, nextPhase)
       void notifyRoundPhase(roundId, nextPhase)
       queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      const raw = err instanceof Error ? err.message : ''
+      const slots = raw.match(/slot count \((\d+)\) must equal active player count \((\d+)\)/)
+      setAdvanceError(
+        raw.includes('need at least 3')
+          ? t('rounds.advanceError.tooFew')
+          : raw.includes('generate an assignment')
+            ? t('rounds.assignment.needed')
+            : slots
+              ? t('rounds.advanceError.slots', { courses: slots[1], chefs: slots[2] })
+              : raw || t('errors.generic'),
+      )
     }
   }
 
@@ -522,7 +541,11 @@ export function RoundHomePage() {
           ? t('rounds.invitations.noSuchChef')
           : message === NOT_BY_INVITATION
             ? t('rounds.invitations.notByInvitation')
-            : null
+            : message.includes('already at this table') || message.includes('already in this round')
+              ? t('rounds.invitations.alreadyHere')
+              : message.includes('close once the round is locked')
+                ? t('rounds.invitations.closed')
+                : null
       setInviteNote(known ?? message)
     } finally {
       setInviting(false)
@@ -593,6 +616,9 @@ export function RoundHomePage() {
           <p className="muted" style={{ margin: '2px 0 0' }}>
             {t('rounds.seatCount', { count: activeApprovedCount })}
           </p>
+          {(round.status === 'ASSIGNED' || round.status === 'BRIEFS_CLOSED') && round.dinner_at && (
+            <DinnerCountdown at={round.dinner_at} />
+          )}
         </div>
 
         <div className="paper">
@@ -780,17 +806,13 @@ export function RoundHomePage() {
           </>
         )}
 
-        {/* Courses stay changeable for the whole of the dinner's life before
-            the roulette — which is what set_slot_mode has always allowed
-            (DRAFT, OPEN, LOCKED — 0036) and what the pass was not offering.
-            Showing it only at LOCKED made a host who wanted specific courses
-            wait for a phase, and a host who changed their mind at LOCKED think
-            they had missed their chance.
-            The sum still only balances at LOCKED, and the panel says so
-            itself: the number of courses has to equal the number of chefs, and
-            that number is only settled once the door shuts. Earlier it is a
-            choice being made, not a sum being checked. */}
-        {['DRAFT', 'OPEN', 'LOCKED'].includes(round.status) && roundId && (
+        {/* THE MENU IS COMPOSED AT ATTRIBUTION, and only there. Free or in
+            courses, and which courses, is the first thing the Executive Chef
+            decides once the door is shut: before that the number of chefs is
+            still moving, and a menu offered earlier was a choice made against
+            a number nobody knew. The answer given at creation is already in
+            it, so most hosts only confirm. */}
+        {round.status === 'LOCKED' && roundId && (
           <MenuPanel roundId={roundId} slotMode={round.slot_mode} status={round.status} />
         )}
 
@@ -1065,8 +1087,13 @@ export function RoundHomePage() {
           <div className="stack pass__advance">
             <hr className="pass__rule" />
             {nextBlockedReason && <p className="muted" style={{ margin: 0 }}>{nextBlockedReason}</p>}
+            {advanceError && <div className="error">{advanceError}</div>}
             <button type="button" onClick={onAdvance} disabled={!!nextBlockedReason}>
-              {t('actions.next')} → {t(`rounds.phase.${nextPhase}`)}
+              {/* What pressing it does, not which phase comes next: the phase
+                  names are the app's vocabulary, the action is the host's. */}
+              {t(`rounds.pass.go.${round.status}`, {
+                defaultValue: `${t('actions.next')} → ${t(`rounds.phase.${nextPhase}`)}`,
+              })}
             </button>
           </div>
         )}
@@ -1269,6 +1296,25 @@ export function RoundHomePage() {
         )}
         {round.voting_mode === 'DISABLED' && resultsOpen && (
           <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
+        )}
+
+        {/* The dishes already sent, by name and never by who. Only on a dinner
+            that shows its menu — to everybody (NAMES) or to the Executive Chef
+            alone (HOST) — and only while there is a menu being written: before
+            the roulette there are no dishes, after the dinner the results page
+            has the whole menu. A hidden menu has no envelope at all. */}
+        {menuShown && (
+          <Envelope
+            icon={<Icon name="menu" />}
+            name={t('rounds.drawers.menu')}
+            meta={t('rounds.drawers.menuMeta')}
+            tilt={3}
+            onOpen={() => toggle('menu')}
+          >
+            {open === 'menu' && (
+              <SharedMenu roundId={roundId} shared onlyYou={round.menu_visibility === 'HOST'} />
+            )}
+          </Envelope>
         )}
 
         {/* The count on the flap, and nothing at all when it is zero: a badge

@@ -6,9 +6,11 @@ import { useAuth } from '../../lib/auth'
 import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
 import { themeMark } from '../../lib/themes'
+import { FIL_ROUGE_KINDS, FREE_KINDS, KIND_MARK } from '../../lib/filRouge'
 import { ProEndingNotice } from './ProNotices'
 import {
   fromCents,
+  listFilRouge,
   listNameThemes,
   listTableThemes,
   myProStatus,
@@ -59,6 +61,7 @@ export function ProPage() {
   const { data: pro } = useQuery({ queryKey: ['pro', 'status'], queryFn: myProStatus })
   const { data: nameThemes } = useQuery({ queryKey: ['themes', 'name'], queryFn: listNameThemes })
   const { data: tableThemes } = useQuery({ queryKey: ['themes', 'table'], queryFn: listTableThemes })
+  const { data: themeShelf } = useQuery({ queryKey: ['fil-rouge', 'shelf'], queryFn: listFilRouge })
 
   async function onRedeem() {
     setNote(null)
@@ -121,6 +124,8 @@ export function ProPage() {
 
   const paidNames = (nameThemes ?? []).filter((x) => x.tier === 'PAID')
   const paidTables = (tableThemes ?? []).filter((x) => x.tier === 'PAID')
+  const kindSize = (kind: string) => (themeShelf ?? []).filter((o) => o.category === kind).length
+  const paidThemeCount = (themeShelf ?? []).filter((o) => !FREE_KINDS.includes(o.category)).length
 
   /**
    * What to print in the corner of a card on the shelf.
@@ -250,6 +255,38 @@ export function ProPage() {
             <span className="ideatab secondary">{t('pro.opens.recipesEg3')}</span>
           </div>
           <p className="muted" style={{ margin: 0 }}>{t('pro.opens.recipesWhy')}</p>
+        </div>
+      </Fold>
+
+      {/* THE DINNER THEME, second: after the recipes it is the one Crème
+          thing that changes what gets cooked rather than how it looks. Six
+          kinds, the two free ones first and said to be free — the shelf is how
+          somebody on the free app learns what they already have. */}
+      <Fold title={t('filRouge.label')} aside={t('pro.opens.count', { count: paidThemeCount })}>
+        <div className="card stack">
+          <p className="muted" style={{ margin: 0 }}>{t('pro.opens.theme')}</p>
+          <div className="prorow">
+            {FIL_ROUGE_KINDS.map((kind) => {
+              const free = FREE_KINDS.includes(kind)
+              const owned = free || !!pro?.pro
+              return (
+                <div key={kind} className={`procard${owned ? ' is-owned' : ''}`}>
+                  <span className="procard__mark" aria-hidden="true">
+                    {KIND_MARK[kind]}
+                  </span>
+                  <strong>{t(`filRouge.category.${kind}`)}</strong>
+                  <span className="muted procard__eg">
+                    {themeShelf ? t('pro.opens.themeSize', { count: kindSize(kind) }) : '…'}
+                  </span>
+                  <span className="procard__price">
+                    {free ? t('themes.free') : shelfLabel({ owned: !!pro?.pro })}
+                  </span>
+                </div>
+              )
+            })}
+          </div>
+          <p className="muted" style={{ margin: 0 }}>{t('pro.opens.themeWeek')}</p>
+          <p className="muted" style={{ margin: 0 }}>{t('pro.opens.themePerCook')}</p>
         </div>
       </Fold>
 

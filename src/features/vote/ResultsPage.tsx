@@ -3,7 +3,10 @@ import { useTranslation } from 'react-i18next'
 import { Link, useParams } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { ChatThread } from '../chat/ChatThread'
-import { useRound } from '../rounds/hooks'
+import { useRound, useRoundMembers } from '../rounds/hooks'
+import { useAuth } from '../../lib/auth'
+import { ChainCircle } from '../rounds/ChainCircle'
+import { walkCycles } from '../../lib/chain'
 import {
   getMyAssignment,
   getMyBriefOffers,
@@ -18,7 +21,7 @@ import { BackToTable } from '../../components/BackToTable'
 import { FilRougeLine } from '../rounds/FilRougeLine'
 import { ShareMenuCard } from './ShareMenuCard'
 import { useFilRougeLabel } from '../../lib/filRouge'
-import { getFilRouge } from '../../lib/rpc'
+import { getFilRouge, getRevealedChain } from '../../lib/rpc'
 import { DinnerAlbum } from '../rounds/DinnerAlbum'
 
 /**
@@ -59,6 +62,15 @@ export function ResultsPage() {
   const [error, setError] = useState<string | null>(null)
 
   const { data: round } = useRound(roundId)
+  const { profile } = useAuth()
+  const { data: members } = useRoundMembers(roundId)
+  const me = members?.find((m) => m.profile_id === profile?.id)
+  const { data: chain } = useQuery({
+    queryKey: ['rounds', roundId, 'revealed-chain'],
+    enabled: !!roundId && (round?.status === 'RESULTS' || round?.status === 'ARCHIVED'),
+    queryFn: () => getRevealedChain(roundId as string),
+    retry: false,
+  })
   const filRougeLabel = useFilRougeLabel()
   // Already fetched by FilRougeLine on this same screen, so this is the cache
   // rather than a second request — it is here because the card has to draw the
@@ -275,9 +287,21 @@ export function ResultsPage() {
           {savedCount !== null && (
             <p className="notice">
               {savedCount > 0 ? t('book.savedTo', { n: savedCount }) : t('book.savedNothingNew')}{' '}
-              <Link to="/profile">{t('book.openBook')}</Link>
+              <Link to="/profile/recipes">{t('book.openBook')}</Link>
             </p>
           )}
+        </div>
+      )}
+
+      {/* THE CHAIN, for everybody, now that it is no longer a secret: it is
+          the punchline of the evening, and until now only the Executive Chef
+          could read it. Each code name sits over the real one. */}
+      {chain && chain.length > 0 && (
+        <div className="card stack">
+          <h2 style={{ margin: 0 }}>{t('results.chainTitle')}</h2>
+          {walkCycles(chain).map((cycle, i) => (
+            <ChainCircle key={i} cycle={cycle} realNames youId={me?.id} />
+          ))}
         </div>
       )}
 
