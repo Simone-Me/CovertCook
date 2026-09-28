@@ -65,40 +65,40 @@ To regenerate the fridge WebP after editing the master:
 python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png'); w=820; im.resize((w, round(im.height*w/im.width)), Image.LANCZOS).save('public/inside_fridge.webp','WEBP',quality=82,method=6)"
 ```
 
-`public/chef_peek.webp` — the chef leaning on the counter in the creation sheet —
-is cut from `icons/logo_inverse.png`: the white around him flood-filled to
-transparent from the corners, and the drawn red counter removed under its top
-edge, fingers kept, so the sheet's own straight 22px red edge is the counter and
-the fingers lie on it (the drawn one slanted, and never lined up). Scaled to
-300 px wide for a 150 px display:
+`public/chef_peek.webp` — the chef peeking over the counter in the creation
+sheet — is cut from `icons/chef_hands_white.png`: hands but no counter, since the
+sheet's own straight 22px red edge is the counter. The white round him is kept as
+a line about 10px wide round every red stroke and the rest made transparent, so
+he stands out on the red tablecloth. Scaled to 300 px wide for a 150 px display:
 
 ```
 python - <<'PY'
-from PIL import Image, ImageDraw
-im = Image.open('assets-src/icons/logo_inverse.png').convert('RGBA'); w, h = im.size
-for seed in [(0, 0), (w - 1, 0), (0, 200), (w - 1, 200)]:
-    ImageDraw.floodfill(im, seed, (255, 0, 255, 255), thresh=90)
-px = im.load()
+from PIL import Image, ImageDraw, ImageFilter, ImageOps
+im = ImageOps.expand(Image.open('assets-src/icons/chef_hands_white.png').convert('RGB'), 24, fill=(255, 255, 255))
+w, h = im.size
+probe = im.copy()
+ImageDraw.floodfill(probe, (0, 0), (255, 0, 255), thresh=60)
+shape = Image.new('L', (w, h), 0)
+sp, pp = shape.load(), probe.load()
 for y in range(h):
     for x in range(w):
-        if px[x, y] == (255, 0, 255, 255): px[x, y] = (255, 255, 255, 0)
-# The drawn counter: everything under its top edge that is not a finger goes,
-# so the sheet's own straight red edge is the counter and the fingers lie on it.
-left, right = 509, 502
-for x in range(w):
-    top = round(left + (right - left) * x / (w - 1)) - 2
-    for y in range(top, h):
-        r, g, b, a = px[x, y]
-        finger = 48 <= x <= 172 or 405 <= x <= 562
-        if a and not (finger and r > 200 and g > 200 and b > 200):
-            px[x, y] = (255, 255, 255, 0)
-# Stray white specks the flood fill left beside the fingers.
-for y in range(440, h):
-    for x in range(w):
-        r, g, b, a = px[x, y]
-        if a and r > 200 and g > 200 and b > 200 and not (48 <= x <= 172 or 405 <= x <= 562):
-            px[x, y] = (255, 255, 255, 0)
-crop = im.crop((0, im.getbbox()[1], w, h))
-crop.resize((300, round(crop.height * 300 / w)), Image.LANCZOS).save('public/chef_peek.webp', 'WEBP', quality=90, method=6)
+        if pp[x, y] != (255, 0, 255): sp[x, y] = 255
+halo = shape.filter(ImageFilter.MaxFilter(21)).filter(ImageFilter.GaussianBlur(1.2))
+out = im.convert('RGBA'); out.putalpha(halo); out = out.crop(out.getbbox())
+out.resize((300, round(out.height * 300 / out.width)), Image.LANCZOS).save('public/chef_peek.webp', 'WEBP', quality=90, method=6)
+PY
+```
+
+`public/logo_face_light.webp` — the face wherever it sits on the tablecloth (the
+tour's bubble and last screen) — is `icons/logo_face_white.png`, red on white,
+cropped square round the drawing with a white margin:
+
+```
+python - <<'PY'
+from PIL import Image, ImageOps
+im = Image.open('assets-src/icons/logo_face_white.png').convert('RGB')
+x0, y0, x1, y1 = ImageOps.invert(im).getbbox()
+cx, cy, s = (x0 + x1) / 2, (y0 + y1) / 2, max(x1 - x0, y1 - y0) * 1.18
+im.crop((round(cx - s / 2), round(cy - s / 2), round(cx + s / 2), round(cy + s / 2))).resize((168, 168), Image.LANCZOS).save('public/logo_face_light.webp', 'WEBP', quality=88, method=6)
 PY
 ```

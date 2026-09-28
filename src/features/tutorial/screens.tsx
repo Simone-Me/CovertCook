@@ -590,7 +590,7 @@ export function EndScreen({ onCreate, onHome }: { onCreate: () => void; onHome: 
   const { t } = useTranslation()
   return (
     <div className="stack sheet tour__end">
-      <img src="/logo_face.webp" alt="" width={96} height={96} className="tour__end-face" />
+      <img src="/logo_face_light.webp" alt="" width={96} height={96} className="tour__end-face" />
       <h1>{t('tutorial.endTitle')}</h1>
       <p>{t('tutorial.endBody')}</p>
       <div className="row">

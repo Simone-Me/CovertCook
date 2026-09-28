@@ -100,7 +100,7 @@
   "rounds": {
     "createIt": "Créer",
     "presets": {
-      "CLASSIC": "Cuisiner la recette d’un proche",
+      "CLASSIC": "Dîner CovertCook",
       "CLASSICHint": "Le jeu tel qu’il est pensé : chacun écrit en secret une recette pour quelqu’un d’autre et cuisine celle qu’on lui a donnée — personne ne sait qui a écrit la sienne avant la fin. Couvert, validation à la porte, une portée chacun, frais partagés, vote à la fin.",
       "QUESTIONS": "Répondre à 4 questions",
       "FOR_SOMEONE": "Une fête pour quelqu’un",
@@ -1847,7 +1847,7 @@
       "localOnly": "Rien n’est envoyé pendant la visite : tout reste sur cet écran."
     },
     "say": {
-      "createPick": "Bonjour, je suis le chef ! Organisons une soirée : un dîner mexicain. Quand vous créez un dîner, c’est moi qui pose les questions. Touchez « Cuisiner la recette d’un proche » — le jeu tel qu’il est pensé.",
+      "createPick": "Bonjour, je suis le chef ! Organisons une soirée : un dîner mexicain. Quand vous créez un dîner, c’est moi qui pose les questions. Touchez « Dîner CovertCook » — le jeu tel qu’il est pensé.",
       "createGo": "Je vous montre ce que ça règle avant de créer quoi que ce soit. Le nom est rempli et le thème du dîner, c’est le Mexique. Touchez Créer.",
       "tablePass": "Voici votre table. Chaque enveloppe est un tiroir. La rouge, c’est le pass : il dit ce que le dîner attend de vous, et vous seul le voyez — vous êtes l’Executive Chef. Ouvrez-le.",
       "tableInvite": "C’est ici qu’on donne une place : un code à partager, ou une invitation par nom d’utilisateur. J’ai déjà tapé le nom de mes amis : touchez Ajouter.",

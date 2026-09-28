@@ -100,7 +100,7 @@
   "rounds": {
     "createIt": "Create",
     "presets": {
-      "CLASSIC": "Cook a friend's recipe",
+      "CLASSIC": "CovertCook dinner",
       "CLASSICHint": "The game as designed: everyone secretly writes a recipe for someone else and cooks the one they were given — nobody knows who wrote theirs until the end. Covered, approved at the door, one course each, costs split, vote at the end.",
       "QUESTIONS": "Answer four questions",
       "FOR_SOMEONE": "A party for someone",
@@ -1847,7 +1847,7 @@
       "localOnly": "Nothing in the tour is sent anywhere: it stays on this screen."
     },
     "say": {
-      "createPick": "Hi, I'm the chef! Let's put on an evening: a Mexican dinner. When you create a dinner, I'm the one asking the questions. Tap “Cook a friend's recipe” — the game as it was designed.",
+      "createPick": "Hi, I'm the chef! Let's put on an evening: a Mexican dinner. When you create a dinner, I'm the one asking the questions. Tap “CovertCook dinner” — the game as it was designed.",
       "createGo": "I show you what it sets before anything is made. The name is filled in and the dinner theme is Mexico. Tap Create.",
       "tablePass": "This is your table. Every envelope is a drawer. The red one is the pass: it tells you what the dinner needs from you, and only you see it — you are the Executive Chef. Open it.",
       "tableInvite": "This is where people get a seat: a code to share, or an invitation by username. I've already typed my friends' names: tap Add.",

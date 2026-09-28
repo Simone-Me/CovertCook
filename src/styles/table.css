@@ -3695,9 +3695,11 @@
  *
  * A sheet that rises from the foot of the screen. Its thick red top edge is
  * the counter, and the chef from the app's mark (`chef_peek.webp`, cut from
- * `logo_inverse.png`) grips it with both hands: the picture's own red band is
- * laid exactly over the edge, so the hands hold the sheet rather than float
- * above it. Everything inside is his line, in large type, and the answers.
+ * `chef_hands_white.png`) grips it with both hands: the picture has hands but
+ * no counter, and its lower edge sits on the inside of the red border, so the
+ * fingertips hang over the sheet's own edge. A white line runs round every red
+ * stroke of him — without it the hat vanished into the red tablecloth behind.
+ * Everything inside is his line, in large type, and the answers.
  * ------------------------------------------------------------------------- */
 
 .chefsheet {
@@ -3736,8 +3738,8 @@
   bottom: 100%;
   width: 150px;
   height: auto;
-  /* `bottom: 100%` is the inner edge of the red border: the picture has no
-     counter of its own any more, so its fingers lie on this straight one. */
+  /* `bottom: 100%` is the inner edge of the red border, so the lower half of
+     his fingers is laid over the 22px counter and the upper half above it. */
   transform: translate(-50%, 0);
   pointer-events: none;
   animation: chef-hop 0.42s ease-out;
