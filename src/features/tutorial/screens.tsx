@@ -11,7 +11,7 @@ import { PRESETS } from '../../lib/roundSetup'
 import { ChefSheet } from '../rounds/ChefSheet'
 import { Answer } from '../rounds/CreateWithChef'
 import { useSetupSummary } from '../rounds/setupSummary'
-import { CHAIN, CHEFS, MESSAGE_CHOICES, WINNER, chef, type ChefKey } from './fixture'
+import { CHAIN, COURSES, MESSAGE_CHOICES, POINTS, WINNER, chef, type ChefKey } from './fixture'
 
 /**
  * THE SCREENS OF THE GUIDED DINNER.
@@ -32,7 +32,6 @@ export interface ScreenProps {
   reached: (id: string) => boolean
   /** Which of the offered messages was sent, once one has been. */
   sent: number | null
-  revealed: boolean
 }
 
 function Back() {
@@ -89,19 +88,25 @@ export function CreateScreen({ reached }: ScreenProps) {
 
 export function TableScreen({ phase, reached }: ScreenProps) {
   const { t } = useTranslation()
-  const friendsIn = reached('tableClose')
   const passOpen = reached('tableInvite')
+  const friendsIn = reached('tableChefs')
+  const inesIn = reached('tableClose')
+  const rosterOpen = reached('tableAccept') && !reached('tableMenu')
+  const composed = reached('tableRoulette')
+  const dealt = reached('tableWrite')
   const assigned = reached('tableAssigned')
-  const seats = friendsIn ? CHEFS.length : 1
-
-  const next: Partial<Record<RoundStatus, RoundStatus>> = {
-    OPEN: 'LOCKED',
-    BRIEFS_CLOSED: 'DINNER',
-    DINNER: 'VOTING',
-    VOTING: 'RESULTS',
-  }
-  const nextPhase = friendsIn || phase !== 'OPEN' ? next[phase] : undefined
+  const seats = inesIn ? 4 : friendsIn ? 3 : 1
   const resultsOpen = phase === 'RESULTS'
+
+  // Where the button at the foot of the pass appears: only once the thing it
+  // closes is actually done, as on the real table.
+  const advance =
+    (phase === 'OPEN' && inesIn) ||
+    (phase === 'LOCKED' && dealt) ||
+    phase === 'ASSIGNED' ||
+    phase === 'DINNER' ||
+    (phase === 'VOTING' && reached('tableResults'))
+
 
   return (
     <div className="cloth table-scene theme-checks tour__table">
@@ -113,6 +118,11 @@ export function TableScreen({ phase, reached }: ScreenProps) {
           </h1>
           <p className="muted" style={{ margin: '2px 0 0' }}>{t('tutorial.filRouge')}</p>
           <p className="muted" style={{ margin: '2px 0 0' }}>{t('rounds.seatCount', { count: seats })}</p>
+          {phase === 'ASSIGNED' && (
+            <p className="muted dinnercountdown">
+              ⏳ {t('rounds.countdown.line', { when: t('rounds.countdown.days', { d: 5, h: 3 }) })}
+            </p>
+          )}
         </div>
 
         <div className="paper">
@@ -131,8 +141,10 @@ export function TableScreen({ phase, reached }: ScreenProps) {
                 </div>
                 <label htmlFor="tour-invite">{t('rounds.invitations.invite')}</label>
                 <div className="row">
-                  <input id="tour-invite" readOnly placeholder={t('rounds.invitations.inviteUsername')} />
-                  <button type="button" className="secondary">{t('actions.add')}</button>
+                  <input id="tour-invite" readOnly value={friendsIn ? '' : t('tutorial.inviteName')} />
+                  <button type="button" className="secondary" data-tour="invite">
+                    {t('actions.add')}
+                  </button>
                 </div>
                 {friendsIn && <p className="muted" style={{ margin: 0 }}>{t('tutorial.friendsIn')}</p>}
               </div>
@@ -140,42 +152,93 @@ export function TableScreen({ phase, reached }: ScreenProps) {
 
             {phase === 'LOCKED' && (
               <div className="stack">
+                <span className="pass__section-title">{t('rounds.menu.title')}</span>
+                <div className="row">
+                  <button type="button" className="secondary">
+                    {t('tutorial.menuFree')}
+                  </button>
+                  <button type="button" className={composed ? '' : 'secondary'} data-tour="menuCourses">
+                    {t('tutorial.menuCourses')}
+                  </button>
+                </div>
+                {composed && (
+                  <ol className="menucard__list">
+                    {COURSES.map((c) => (
+                      <li key={c} className="menucard__course">
+                        <span className="menucard__name">{t(`briefs.courseOption.${c}`)}</span>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+                <hr className="pass__rule" />
                 <span className="pass__section-title">{t('rounds.assignment.title')}</span>
-                <p className="muted" style={{ margin: 0 }}>{t('rounds.assignment.explain')}</p>
-                <button type="button" data-tour="roulette">{t('rounds.assignment.generate')}</button>
+                <p className="muted" style={{ margin: 0 }}>
+                  {dealt ? t('rounds.assignment.ready') : t('rounds.assignment.explain')}
+                </p>
+                {!dealt && (
+                  <button type="button" data-tour="roulette">
+                    {t('rounds.assignment.generate')}
+                  </button>
+                )}
               </div>
-            )}
-
-            {(phase === 'ASSIGNED' || phase === 'BRIEFS_CLOSED') && (
-              <p className="muted" style={{ margin: 0 }}>{t(`rounds.pass.phase.${phase}`)}</p>
             )}
 
             {phase === 'VOTING' && (
               <p className="muted" style={{ margin: 0 }}>
-                {t('vote.progress', { voted: reached('tableResults') ? CHEFS.length : 0, eligible: CHEFS.length })}
+                {t('vote.progress', { voted: reached('tableResults') ? 4 : 1, eligible: 4 })}
               </p>
             )}
 
-            {phase === 'RESULTS' && <p className="muted" style={{ margin: 0 }}>{t('vote.published')}</p>}
+            {resultsOpen && <p className="muted" style={{ margin: 0 }}>{t('vote.published')}</p>}
 
-            {nextPhase && (
+            {advance && (
               <div className="stack pass__advance">
                 <hr className="pass__rule" />
                 <button type="button" data-tour="advance">
-                  {t('actions.next')} → {t(`rounds.phase.${nextPhase}`)}
+                  {t(`rounds.pass.go.${phase}`)}
                 </button>
               </div>
             )}
           </HostPass>
         </div>
 
-        <Envelope
-          icon={<Icon name="chefs" />}
-          name={t('rounds.drawers.chefs')}
-          meta={`${t('rounds.chefCount', { count: seats })} — ${t('rounds.executiveChef')} : ${t('tutorial.you')}`}
-          tilt={1}
-          onOpen={() => {}}
-        />
+        <div data-tour="envChefs">
+          <Envelope
+            icon={<Icon name="chefs" />}
+            name={t('rounds.drawers.chefs')}
+            meta={`${t('rounds.chefCount', { count: seats })} — ${t('rounds.executiveChef')} : ${chef('you').secret}`}
+            badge={friendsIn && !inesIn ? 1 : undefined}
+            tilt={1}
+            onOpen={() => {}}
+          >
+            {rosterOpen ? (
+              <div className="stack">
+                <div className="row" style={{ justifyContent: 'space-between' }}>
+                  <strong>
+                    {chef('you').secret} <span className="muted">({t('tutorial.you')})</span>
+                  </strong>
+                </div>
+                {/* While the door is open everybody else is under the marker —
+                    the host included — so arrival order says nothing (0032). */}
+                {(['giulia', 'marco'] as ChefKey[]).concat(inesIn ? ['ines'] : []).map((k) => (
+                  <div key={k}>
+                    <span className="redact">{chef(k).secret}</span>
+                  </div>
+                ))}
+                {!inesIn && (
+                  <div className="row" style={{ justifyContent: 'space-between' }}>
+                    <span>
+                      {chef('ines').secret} <span className="badge">{t('rounds.pendingApproval')}</span>
+                    </span>
+                    <button type="button" data-tour="accept">
+                      {t('actions.approve')}
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : undefined}
+          </Envelope>
+        </div>
         <div data-tour="envOrder">
           <Envelope
             icon={<Icon name="myRecipe" />}
@@ -332,17 +395,42 @@ export function MessagesScreen({ sent, reached }: ScreenProps) {
 export function BallotScreen() {
   const { t } = useTranslation()
   const dishes = CHAIN.filter((l) => l.cook !== 'you')
+  const ordered = [...dishes].sort((x, y) => POINTS[y.dish] - POINTS[x.dish])
   return (
     <div className="stack sheet">
       <Back />
       <h1>{t('vote.title')}</h1>
-      <p className="muted">{t('tutorial.ballotHint')}</p>
+      <p className="muted">{t('vote.instructionsTheme')}</p>
       <div className="stack">
-        {[WINNER, ...dishes.map((d) => d.dish).filter((d) => d !== WINNER)].map((dish, i) => (
-          <div key={dish} className="card ballotrow">
+        {ordered.map((l, i) => (
+          <div key={l.dish} className="card ballotrow">
             <div className="ballotrow__head">
-              <span className="ballotrow__rank">{i + 1}</span>
-              <span className="ballotrow__name">{t(`tutorial.dishes.${dish}`)}</span>
+              <span className="ballotrow__grip" aria-hidden="true">
+                ⠿
+              </span>
+              <strong className="ballotrow__rank">#{i + 1}</strong>
+              <div className="ballotrow__dish">
+                <div className="ballotrow__name">{t(`tutorial.dishes.${l.dish}`)}</div>
+                <div className="muted">{t(`briefs.courseOption.${l.course}`)}</div>
+                <div className="muted">{t('tutorial.filRouge')}</div>
+              </div>
+            </div>
+            <div className="themeslider">
+              <label className="themeslider__label">
+                {t('vote.themeScore')}
+                <input
+                  type="range"
+                  min={1}
+                  max={5}
+                  readOnly
+                  className={i === 0 ? 'themeslider__input' : 'themeslider__input is-unset'}
+                  value={i === 0 ? 5 : 3}
+                />
+              </label>
+              <div className="themeslider__ends" aria-hidden="true">
+                <span>{t('vote.themeScoreLow')}</span>
+                <span>{t('vote.themeScoreHigh')}</span>
+              </div>
             </div>
           </div>
         ))}
@@ -354,10 +442,10 @@ export function BallotScreen() {
   )
 }
 
-export function ResultsScreen({ revealed }: ScreenProps) {
+function useTourChain() {
   const { t } = useTranslation()
   const realName = (key: ChefKey) => (key === 'you' ? t('tutorial.you') : chef(key).name)
-  const cycle = CHAIN.map((l, i) => ({
+  return CHAIN.map((l, i) => ({
     sender_member_id: l.sender,
     sender_secret_name: chef(l.sender).secret,
     sender_display_name: realName(l.sender),
@@ -368,16 +456,26 @@ export function ResultsScreen({ revealed }: ScreenProps) {
     course: l.course,
     lap: 1,
   }))
+}
+
+export function ResultsScreen({ reached }: ScreenProps) {
+  const { t } = useTranslation()
+  const cycle = useTourChain()
+  const revealed = reached('resultsKeep')
+  const kept = reached('resultsPhoto')
+  const photo = reached('profileKept')
 
   return (
     <div className="stack sheet">
       <Back />
       <h1>{t('rounds.drawers.results')}</h1>
+      {/* The real carte: dishes, points and the winner — never names. Who
+          cooked what is the chain's to tell, below. */}
       <div className="menucard">
-        <p className="menucard__head">{t('vote.theMenu')}</p>
+        <p className="menucard__head">{t('tutorial.dinnerName')}</p>
         <ol className="menucard__list">
           {[...CHAIN]
-            .sort((a, b) => (a.dish === WINNER ? -1 : b.dish === WINNER ? 1 : 0))
+            .sort((x, y) => POINTS[y.dish] - POINTS[x.dish])
             .map((l) => (
               <li key={l.dish} className="menucard__row">
                 <div className="menucard__course">
@@ -385,13 +483,8 @@ export function ResultsScreen({ revealed }: ScreenProps) {
                     {l.dish === WINNER && '🏆 '}
                     {t(`tutorial.dishes.${l.dish}`)}
                   </span>
-                  <span className="muted" style={{ fontSize: 12 }}>
-                    {revealed
-                      ? t('tutorial.cookedBy', {
-                          cook: realName(l.cook),
-                          sender: realName(l.sender),
-                        })
-                      : chef(l.cook).secret}
+                  <span className="muted" style={{ fontSize: 13 }}>
+                    {t('tutorial.points', { count: POINTS[l.dish] })}
                   </span>
                 </div>
               </li>
@@ -400,7 +493,7 @@ export function ResultsScreen({ revealed }: ScreenProps) {
       </div>
 
       <div className="card stack">
-        <h2 style={{ margin: 0 }}>{t('chain.title')}</h2>
+        <h2 style={{ margin: 0 }}>{t('results.chainTitle')}</h2>
         {revealed ? (
           <ChainCircle cycle={cycle} youId="you" realNames />
         ) : (
@@ -412,6 +505,77 @@ export function ResultsScreen({ revealed }: ScreenProps) {
           </>
         )}
       </div>
+
+      {revealed && (
+        <div className="stack">
+          <button type="button" className={kept ? 'secondary' : undefined} data-tour="keepRecipe">
+            {t('book.keepRecipes')}
+          </button>
+          {kept && <p className="notice">{t('book.savedTo', { n: 1 })}</p>}
+        </div>
+      )}
+
+      {kept && (
+        <div className="stack">
+          <h2 style={{ margin: 0 }}>{t('album.title')}</h2>
+          {photo ? (
+            <img className="album__photo" src="/mais.avif" alt="" />
+          ) : (
+            <>
+              <div className="album__pending" aria-hidden="true" />
+              <button type="button" data-tour="addPhoto">
+                {t('album.add')}
+              </button>
+            </>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/** The profile, reduced to the two things the evening left behind. */
+export function ProfileScreen() {
+  const { t } = useTranslation()
+  return (
+    <div className="stack sheet">
+      <h1>{t('profile.title')}</h1>
+      <details className="fold" open>
+        <summary className="fold__summary">
+          <span className="fold__tri" aria-hidden="true">
+            ▸
+          </span>
+          <span className="fold__title">{t('book.title')}</span>
+          <span className="fold__aside">1</span>
+        </summary>
+        <ol className="menucard__list recipepreview">
+          <li className="menucard__row">
+            <div className="menucard__course recipepreview__row">
+              <span className="menucard__name">
+                <strong>{t('tutorial.dishes.tacos')}</strong>
+                <span className="muted recipepreview__from">
+                  {t('tutorial.dinnerName')} · {t('book.relation.WROTE')}
+                </span>
+              </span>
+            </div>
+          </li>
+        </ol>
+      </details>
+      <details className="fold" open>
+        <summary className="fold__summary">
+          <span className="fold__tri" aria-hidden="true">
+            ▸
+          </span>
+          <span className="fold__title">{t('album.profileTitle')}</span>
+          <span className="fold__aside">1</span>
+        </summary>
+        <div className="albumstrip">
+          <img className="albumprint" src="/mais.avif" alt="" />
+        </div>
+      </details>
+      <button type="button" data-tour="finish">
+        {t('tutorial.finish')}
+      </button>
     </div>
   )
 }

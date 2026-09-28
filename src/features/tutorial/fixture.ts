@@ -23,9 +23,15 @@ export type ChefKey = (typeof CHEFS)[number]['key']
 export const CHAIN: { sender: ChefKey; cook: ChefKey; dish: string; course: Course }[] = [
   { sender: 'you', cook: 'marco', dish: 'tacos', course: 'MAIN' },
   { sender: 'marco', cook: 'ines', dish: 'guacamole', course: 'STARTER' },
-  { sender: 'ines', cook: 'giulia', dish: 'elote', course: 'SIDE' },
+  { sender: 'ines', cook: 'giulia', dish: 'sopa', course: 'FIRST' },
   { sender: 'giulia', cook: 'you', dish: 'churros', course: 'DESSERT' },
 ]
+
+/** The menu the host composes at Attribution, in the order a meal is eaten. */
+export const COURSES: Course[] = ['STARTER', 'FIRST', 'MAIN', 'DESSERT']
+
+/** Points on the results card, the winner first. */
+export const POINTS: Record<string, number> = { tacos: 9, churros: 7, guacamole: 5, sopa: 3 }
 
 export const WINNER = 'tacos'
 

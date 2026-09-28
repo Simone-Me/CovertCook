@@ -11,6 +11,7 @@ import {
   EndScreen,
   MessagesScreen,
   RecipeScreen,
+  ProfileScreen,
   ResultsScreen,
   TableScreen,
   type ScreenProps,
@@ -92,7 +93,6 @@ export function TutorialPage() {
     phase: step.phase,
     reached: (id) => at >= indexOf(id),
     sent,
-    revealed: at > indexOf('resultsReveal'),
   }
 
   return (
@@ -105,6 +105,7 @@ export function TutorialPage() {
         {step.screen === 'messages' && <MessagesScreen {...props} />}
         {step.screen === 'ballot' && <BallotScreen />}
         {step.screen === 'results' && <ResultsScreen {...props} />}
+        {step.screen === 'profile' && <ProfileScreen />}
         {step.screen === 'end' && (
           <EndScreen onCreate={() => navigate('/rounds/new')} onHome={() => navigate('/')} />
         )}
@@ -120,6 +121,7 @@ export function TutorialPage() {
           nudge={nudge}
           onOk={next}
           onSkip={next}
+          onPrev={at > 0 ? () => setAt((n) => n - 1) : undefined}
           onExit={() => navigate('/')}
         />
       )}

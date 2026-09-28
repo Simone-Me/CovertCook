@@ -77,6 +77,26 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
+**Changed: the guided dinner is pressed, never read.** No step closes with an
+OK in the bubble any more; each one moves on because something on the table was
+pressed, and the bubble gains *← Previous step*. 27 steps, rebuilt around what
+changed in the real dinner:
+
+- the greeting and "open the pass" are one step; *Add* brings two friends in;
+- a third chef waits at the door: open *Chefs*, *Approve* — after which every
+  name but yours sits under the black marker, as it does while sign-ups are
+  open. Chefs appear by their code names only (Avocado, Jalapeño, Lime); real
+  names wait for the chain;
+- *Close sign-ups and start the assignment*, then the new Attribution step:
+  *Courses* composes starter, first course, main, dessert; the roulette; *On
+  to writing the recipes*;
+- the dinner-day countdown under the dinner's name while recipes are written;
+- the ballot with its grip and the theme slider;
+- the results card shows dishes and points only, as the real one does — names
+  live in the chain, code name over real name;
+- then *Keep recipes from this dinner*, *Add the photo*, and a last screen of
+  the profile with just the recipe and the photo kept, and *Finish the tour*.
+
 **Changed: one score on the ballot, and only when there is a theme.**
 Originality and "followed the recipe" were two dropdowns on every row of every
 ballot, answered at random or not at all. Now a dinner without a theme is a

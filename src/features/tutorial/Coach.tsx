@@ -9,7 +9,8 @@ import { useTranslation } from 'react-i18next'
  * the page scrolls that into the space above it.
  *
  * "Leave" is on every step. A tour you cannot walk out of is a tour people
- * resent, and "skip this step" lands exactly where the press would have.
+ * resent; "skip this step" lands exactly where the press would have, and
+ * "previous step" walks back one.
  */
 export function Coach({
   say,
@@ -20,6 +21,7 @@ export function Coach({
   nudge,
   onOk,
   onSkip,
+  onPrev,
   onExit,
 }: {
   say: string
@@ -30,6 +32,9 @@ export function Coach({
   nudge: boolean
   onOk: () => void
   onSkip: () => void
+  /** Absent on the first step. The dinner is drawn from the step number, so
+   *  going back is exactly the screen as it was. */
+  onPrev?: () => void
   onExit: () => void
 }) {
   const { t } = useTranslation()
@@ -39,6 +44,11 @@ export function Coach({
       <div className="coach__bubble">
         <p className="coach__say">{say}</p>
         <div className="coach__row">
+          {onPrev && (
+            <button type="button" className="coach__exit" onClick={onPrev}>
+              {t('tutorial.previous')}
+            </button>
+          )}
           {canOk && (
             <button type="button" className="coach__ok" onClick={onOk}>
               {t('actions.ok')}
