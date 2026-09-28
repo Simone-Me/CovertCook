@@ -244,8 +244,8 @@
       "generate": "Générer l'attribution",
       "reroll": "Relancer l'attribution",
       "rerollConfirm": "Ceci remplace le tirage actuel de tout le monde par un nouveau, aléatoire. Continuer ?",
-      "ready": "Attribution générée — prêt à passer à « Attribué ».",
-      "needed": "Générez l'attribution ci-dessous avant de pouvoir passer à « Attribué ».",
+      "ready": "Attribution faite — les recettes peuvent s'écrire.",
+      "needed": "Lancez la roulette avant de passer à l'écriture des recettes.",
       "waitingForHost": "En attente que l'Executive Chef lance la roulette.",
       "explain": "Tout le monde est inscrit et la table est verrouillée. Lancez la roulette pour associer chaque chef à celui pour qui il cuisinera.",
       "clear": "Effacer l'attribution",
@@ -427,7 +427,15 @@
       },
       "empty": "vide",
       "whatIsItToggle": "Qu’est-ce que le passe ?",
-      "advance": "Faire avancer le dîner"
+      "advance": "Faire avancer le dîner",
+      "go": {
+        "DRAFT": "Ouvrir les inscriptions",
+        "OPEN": "Fermer les inscriptions et lancer l'attribution",
+        "LOCKED": "Passer à l'écriture des recettes",
+        "ASSIGNED": "C'est le jour J",
+        "DINNER": "Ouvrir le vote",
+        "VOTING": "Fermer le vote et voir les résultats"
+      }
     },
     "lateJoinerShort": "Ajouter quelqu'un maintenant change les partenaires de deux chefs.",
     "briefProgress": "{{done}} recettes écrites sur {{total}}",
@@ -573,6 +581,11 @@
       "namePlaceholder": "Dimanche chez nous",
       "keepAsk": "La garder pour la prochaine fois ?",
       "kept": "Gardée. La prochaine fois, choisissez « Reprendre une de mes tables »."
+    },
+    "countdown": {
+      "line": "Dîner dans {{when}}",
+      "days": "{{d}} j {{h}} h",
+      "hours": "{{h}} h {{m}} min"
     }
   },
   "briefs": {

@@ -21,6 +21,7 @@ import { ChoiceList } from '../../components/ChoiceList'
 import { RoundProNotice } from '../pro/ProNotices'
 import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
+import { DinnerCountdown } from './DinnerCountdown'
 import { MenuPanel } from './MenuPanel'
 import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
@@ -593,6 +594,9 @@ export function RoundHomePage() {
           <p className="muted" style={{ margin: '2px 0 0' }}>
             {t('rounds.seatCount', { count: activeApprovedCount })}
           </p>
+          {(round.status === 'ASSIGNED' || round.status === 'BRIEFS_CLOSED') && round.dinner_at && (
+            <DinnerCountdown at={round.dinner_at} />
+          )}
         </div>
 
         <div className="paper">
@@ -780,17 +784,13 @@ export function RoundHomePage() {
           </>
         )}
 
-        {/* Courses stay changeable for the whole of the dinner's life before
-            the roulette — which is what set_slot_mode has always allowed
-            (DRAFT, OPEN, LOCKED — 0036) and what the pass was not offering.
-            Showing it only at LOCKED made a host who wanted specific courses
-            wait for a phase, and a host who changed their mind at LOCKED think
-            they had missed their chance.
-            The sum still only balances at LOCKED, and the panel says so
-            itself: the number of courses has to equal the number of chefs, and
-            that number is only settled once the door shuts. Earlier it is a
-            choice being made, not a sum being checked. */}
-        {['DRAFT', 'OPEN', 'LOCKED'].includes(round.status) && roundId && (
+        {/* THE MENU IS COMPOSED AT ATTRIBUTION, and only there. Free or in
+            courses, and which courses, is the first thing the Executive Chef
+            decides once the door is shut: before that the number of chefs is
+            still moving, and a menu offered earlier was a choice made against
+            a number nobody knew. The answer given at creation is already in
+            it, so most hosts only confirm. */}
+        {round.status === 'LOCKED' && roundId && (
           <MenuPanel roundId={roundId} slotMode={round.slot_mode} status={round.status} />
         )}
 
@@ -1066,7 +1066,11 @@ export function RoundHomePage() {
             <hr className="pass__rule" />
             {nextBlockedReason && <p className="muted" style={{ margin: 0 }}>{nextBlockedReason}</p>}
             <button type="button" onClick={onAdvance} disabled={!!nextBlockedReason}>
-              {t('actions.next')} → {t(`rounds.phase.${nextPhase}`)}
+              {/* What pressing it does, not which phase comes next: the phase
+                  names are the app's vocabulary, the action is the host's. */}
+              {t(`rounds.pass.go.${round.status}`, {
+                defaultValue: `${t('actions.next')} → ${t(`rounds.phase.${nextPhase}`)}`,
+              })}
             </button>
           </div>
         )}

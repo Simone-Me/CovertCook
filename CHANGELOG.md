@@ -73,6 +73,22 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
+**Changed: the pass says what its button does.** "Next → Registration open"
+named the app's phases; the button now names the host's act: *Open sign-ups*,
+*Close sign-ups and start the assignment*, *On to writing the recipes*, *It's
+dinner day*, *Open the vote*, *Close the vote and see the results*
+(`rounds.pass.go.<phase>`, falling back to the old wording for any phase
+without one). The two assignment notes stop citing an "Assigned" phase that
+does not exist.
+
+**Changed: the menu is composed at Attribution, and only there.** The
+free-or-courses panel used to be on the pass from the draft onwards; it now
+appears once the door is shut, with the answer given at creation already in it.
+
+**Added: how long until the dinner.** While the recipes are being written, one
+quiet line under the dinner's name — *Dinner in 3 d 4 h* — for everybody, when
+a date is set and still ahead. Nothing otherwise.
+
 **Fixed: Elegant still on the shelf.** The shelf comes from the server, and
 `0094` has not reached production, so the cloth kept appearing. The client now
 drops it from `listTableThemes` as well, and its label, hint, type member and

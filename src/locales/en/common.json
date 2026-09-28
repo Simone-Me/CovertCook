@@ -244,8 +244,8 @@
       "generate": "Generate assignment",
       "reroll": "Re-roll assignment",
       "rerollConfirm": "This replaces everyone's current pairing with a new random one. Continue?",
-      "ready": "Assignment generated — ready to move to \"Assigned\".",
-      "needed": "Generate the assignment below before you can move to \"Assigned\".",
+      "ready": "Assignment done — the recipes can be written.",
+      "needed": "Spin the roulette before moving on to the recipes.",
       "waitingForHost": "Waiting for the Executive Chef to spin the roulette.",
       "explain": "Everyone is signed up and the table is locked. Spin the roulette to pair each chef with the one they will cook for.",
       "clear": "Clear the assignment",
@@ -427,7 +427,15 @@
       },
       "empty": "empty",
       "whatIsItToggle": "What is the pass?",
-      "advance": "Move the dinner on"
+      "advance": "Move the dinner on",
+      "go": {
+        "DRAFT": "Open sign-ups",
+        "OPEN": "Close sign-ups and start the assignment",
+        "LOCKED": "On to writing the recipes",
+        "ASSIGNED": "It's dinner day",
+        "DINNER": "Open the vote",
+        "VOTING": "Close the vote and see the results"
+      }
     },
     "lateJoinerShort": "Adding someone now changes two chefs' partners.",
     "briefProgress": "{{done}} of {{total}} recipes written",
@@ -573,6 +581,11 @@
       "namePlaceholder": "Sunday at ours",
       "keepAsk": "Keep it for next time?",
       "kept": "Kept. Next time, choose “Use one of my tables”."
+    },
+    "countdown": {
+      "line": "Dinner in {{when}}",
+      "days": "{{d}} d {{h}} h",
+      "hours": "{{h}} h {{m}} min"
     }
   },
   "briefs": {
