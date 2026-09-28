@@ -875,54 +875,120 @@
 }
 
 /* ---------------------------------------------------------------------------
- * The wire between a phrase and its answer.
+ * The wire between a phrase and its answers.
  *
- * An elbow, not a curve and not a rail down the whole column: it leaves the
- * bubble above through the gap, turns once at a right angle, and ends in a
- * knot where it meets the answer. The indent said a reply was a reply; one
- * right angle says WHICH line it answers, which is what a fridge with three
- * conversations in it actually needs.
+ * A conversation is one piece: the phrase, then its answers hanging under it.
+ * The wire leaves from a knot just under the phrase — under its face — runs
+ * down past every answer, and turns into each one with an elbow. So it is plain
+ * that all of them answer the first line, not each the one above it; the short
+ * elbow that used to join a reply only to the bubble right above said the
+ * wrong thing as soon as there were two.
  *
- * Drawn in the gutter the indent already opens, so it costs no width.
+ * It hangs on the phrase's own side: under one of yours (red, on the right)
+ * the wire and the answers are on the right too, mirrored. And it ends on the
+ * last answer — a rail tied to one phrase, not to the whole column.
  * ------------------------------------------------------------------------- */
 
-.chat-tie {
+.fridge__thread {
+  --wire: rgba(198, 32, 44, 0.7);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+/* A little more air between two conversations than inside one. */
+.fridge__thread + .fridge__thread {
+  margin-top: 6px;
+}
+
+.fridge__replies {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-left: 15px;
+}
+
+/* The knot under the phrase the wire belongs to. */
+.fridge__replies::before {
+  content: '';
   position: absolute;
-  top: -12px;
-  left: -15px;
-  width: 9px;
-  height: 22px;
-  border-left: 2px solid rgba(198, 32, 44, 0.45);
-  border-bottom: 2px solid rgba(198, 32, 44, 0.45);
-  border-bottom-left-radius: 7px;
+  top: -9px;
+  left: -3px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--wire);
+}
+
+.fridge__reply {
+  position: relative;
+  display: flex;
+  padding-left: 18px;
+}
+
+/* Down from above, then one turn into the answer. */
+.fridge__reply::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 0;
+  width: 17px;
+  height: 20px;
+  border-left: 2px solid var(--wire);
+  border-bottom: 2px solid var(--wire);
+  border-bottom-left-radius: 8px;
   pointer-events: none;
 }
 
-/* The knot: the small weight at the end of the wire that says it arrived
-   here, at this phrase, rather than passing by on its way down the column. */
-.chat-tie::after {
+/* On past this answer to the next one; not after the last. */
+.fridge__reply:not(:last-child)::after {
   content: '';
   position: absolute;
-  right: -4px;
-  bottom: -3px;
-  width: 5px;
-  height: 5px;
-  border-radius: 50%;
-  background: rgba(198, 32, 44, 0.55);
+  top: 10px;
+  bottom: -6px;
+  left: 0;
+  border-left: 2px solid var(--wire);
+  pointer-events: none;
 }
 
-.chat-bubble--reply.mine .chat-tie {
+.fridge__reply > .chat-bubble {
+  flex: 1 1 auto;
+  max-width: 100%;
+}
+
+/* A phrase of yours: the whole conversation hangs on the right. */
+.fridge__thread--mine .fridge__replies {
+  align-items: flex-end;
+  margin-left: 0;
+  margin-right: 15px;
+}
+
+.fridge__thread--mine .fridge__replies::before {
   left: auto;
-  right: -15px;
-  border-left: none;
-  border-right: 2px solid rgba(198, 32, 44, 0.45);
-  border-bottom-left-radius: 0;
-  border-bottom-right-radius: 7px;
+  right: -3px;
 }
 
-.chat-bubble--reply.mine .chat-tie::after {
-  right: auto;
-  left: -4px;
+.fridge__thread--mine .fridge__reply {
+  justify-content: flex-end;
+  padding-left: 0;
+  padding-right: 18px;
+}
+
+.fridge__thread--mine .fridge__reply::before {
+  left: auto;
+  right: 0;
+  border-left: none;
+  border-right: 2px solid var(--wire);
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 8px;
+}
+
+.fridge__thread--mine .fridge__reply:not(:last-child)::after {
+  left: auto;
+  right: 0;
+  border-left: none;
+  border-right: 2px solid var(--wire);
 }
 
 /* Which opener the roller is answering, said between the fridge and the pin
@@ -2895,23 +2961,6 @@
   font-size: 10.5px;
   font-weight: 400;
   color: var(--text-muted);
-}
-
-/* A reply sits under the phrase it answers rather than beside it (0088). The
-   indent says it is an answer; the elbow drawn in the gutter it opens says
-   which line it answers — see .chat-tie above. The flat rail that used to run
-   down the left is gone: it connected a reply to the whole column rather than
-   to one phrase, which is the question a reader actually has. */
-.chat-bubble--reply {
-  position: relative;
-  margin-top: 8px;
-  margin-left: 26px;
-  max-width: calc(96% - 26px);
-}
-
-.chat-bubble--reply.mine {
-  margin-left: 0;
-  margin-right: 26px;
 }
 
 /* The opener currently being answered, so the roller full of replies has a

@@ -12,6 +12,7 @@ import {
   blockMember,
   notifyHostOfAlert,
   reportBoardMessage,
+  type BoardMessage,
   type MessageTemplate,
 } from '../../lib/rpc'
 
@@ -125,6 +126,19 @@ function RollingPin({
   )
 }
 
+/** The board, as conversations: every phrase with the answers to it. The
+ *  server already sends answers straight under their phrase (0088); an answer
+ *  whose phrase is not on the board (its author blocked) stands on its own. */
+function threadsOf(board: BoardMessage[]) {
+  const threads: { head: BoardMessage; replies: BoardMessage[] }[] = []
+  for (const m of board) {
+    const last = threads[threads.length - 1]
+    if (m.parent_id && last && last.head.message_id === m.parent_id) last.replies.push(m)
+    else threads.push({ head: m, replies: [] })
+  }
+  return threads
+}
+
 export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinnerDay: boolean }) {
   const { t } = useTranslation()
   const { profile } = useAuth()
@@ -228,6 +242,100 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
     await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'board'] })
   }
 
+  // A notice from the Executive Chef (0080). It wears no face and carries no
+  // buttons: there is no seat behind it to report or to block, and it is signed
+  // on purpose — the one phrase in this fridge that is not anonymous is the one
+  // that had to be.
+  function notice(m: BoardMessage) {
+    return (
+      <div key={m.message_id} className="chat-bubble chat-bubble--notice">
+        <span className="chat-bubble__food" aria-hidden="true">
+          📣
+        </span>
+        <span className="chat-bubble__body">
+          <span className="chat-bubble__who">{t('board.fromExecutiveChef')}</span>
+          <span>{m.body}</span>
+        </span>
+      </div>
+    )
+  }
+
+  function bubble(m: BoardMessage) {
+    return (
+      <div
+        key={m.message_id}
+        className={`chat-bubble chat-bubble--food${m.is_mine ? ' mine' : ''}${
+          answering === m.message_id ? ' is-answering' : ''
+        }`}
+      >
+        <span className="chat-bubble__food" aria-hidden="true">
+          {faceFor(m.author_name ?? '', round?.name_theme)}
+        </span>
+        <span className="chat-bubble__body">
+          {/* Your own name would be telling you something you know. */}
+          {!m.is_mine && <span className="chat-bubble__who">{m.author_name}</span>}
+          <span>{m.body}</span>
+
+          {/* THE MARKS SIT ON SOMETHING NOW. Three grey glyphs at half
+              opacity, over a photograph of a fridge full of groceries,
+              were invisible: people could not find the way to report a
+              phrase, let alone the way to answer one. The same marks on
+              a small plate in the table's own red read as controls
+              without shouting. */}
+          <span className="row chat-bubble__foot">
+            <span className="chat-acts">
+              {/* Answering is offered on openers only: one level, as
+                  the server enforces. Pressing it does not send
+                  anything — it turns the roller over to the replies. */}
+              {!m.parent_id && !m.reported && (
+                <button
+                  type="button"
+                  className="chat-act"
+                  title={t('board.answer')}
+                  aria-label={t('board.answer')}
+                  aria-pressed={answering === m.message_id}
+                  onClick={() => {
+                    setAiming(null)
+                    setAnswering((cur) => (cur === m.message_id ? null : m.message_id))
+                  }}
+                >
+                  ↩
+                </button>
+              )}
+              {m.reported ? (
+                <span className="muted">{t('chat.reported')}</span>
+              ) : (
+                !m.is_mine &&
+                m.author_member_id && (
+                  <>
+                    <button
+                      type="button"
+                      className="chat-act"
+                      title={t('chat.report')}
+                      aria-label={t('chat.report')}
+                      onClick={() => onReport(m.message_id)}
+                    >
+                      ⚑
+                    </button>
+                    <button
+                      type="button"
+                      className="chat-act"
+                      title={t('moderation.block')}
+                      aria-label={t('moderation.block')}
+                      onClick={() => onBlock(m.author_member_id as string)}
+                    >
+                      🚫
+                    </button>
+                  </>
+                )
+              )}
+            </span>
+          </span>
+        </span>
+      </div>
+    )
+  }
+
   return (
     <div className="stack">
       {error && <div className="error">{error}</div>}
@@ -239,100 +347,28 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
       <div className="fridge">
         <div className="fridge__stack">
           {board?.length === 0 && <p className="muted fridge__empty">{t('board.empty')}</p>}
-          {board?.map((m) =>
-            // A notice from the Executive Chef (0080). It wears no face and
-            // carries no buttons: there is no seat behind it to report or to
-            // block, and it is signed on purpose — the one phrase in this
-            // fridge that is not anonymous is the one that had to be.
-            m.from_host ? (
-              <div key={m.message_id} className="chat-bubble chat-bubble--notice">
-                <span className="chat-bubble__food" aria-hidden="true">
-                  📣
-                </span>
-                <span className="chat-bubble__body">
-                  <span className="chat-bubble__who">{t('board.fromExecutiveChef')}</span>
-                  <span>{m.body}</span>
-                </span>
-              </div>
+          {threadsOf(board ?? []).map(({ head, replies }) =>
+            head.from_host ? (
+              notice(head)
             ) : (
+              // A phrase and every answer to it, as one piece: the wire leaves
+              // from under the phrase and runs down past each answer, so it is
+              // plain that all of them answer this one — not each the one
+              // above it. It hangs on the phrase's own side.
               <div
-                key={m.message_id}
-                className={`chat-bubble chat-bubble--food${m.is_mine ? ' mine' : ''}${
-                  m.parent_id ? ' chat-bubble--reply' : ''
-                }${answering === m.message_id ? ' is-answering' : ''}`}
+                key={head.message_id}
+                className={`fridge__thread${head.is_mine ? ' fridge__thread--mine' : ''}`}
               >
-                {/* The wire between an answer and what it answers: up out of
-                    the phrase above, one right angle, and a knot where it
-                    meets this one. The indent alone said a reply was a reply;
-                    it did not say WHICH line it was answering, which is the
-                    only thing a reader of a fridge with three conversations in
-                    it actually needs. */}
-                {m.parent_id && <span className="chat-tie" aria-hidden="true" />}
-
-                <span className="chat-bubble__food" aria-hidden="true">
-                  {faceFor(m.author_name ?? '', round?.name_theme)}
-                </span>
-                <span className="chat-bubble__body">
-                  {/* Your own name would be telling you something you know. */}
-                  {!m.is_mine && <span className="chat-bubble__who">{m.author_name}</span>}
-                  <span>{m.body}</span>
-
-                  {/* THE MARKS SIT ON SOMETHING NOW. Three grey glyphs at half
-                      opacity, over a photograph of a fridge full of groceries,
-                      were invisible: people could not find the way to report a
-                      phrase, let alone the way to answer one. The same marks on
-                      a small plate in the table's own red read as controls
-                      without shouting. */}
-                  <span className="row chat-bubble__foot">
-                    <span className="chat-acts">
-                      {/* Answering is offered on openers only: one level, as
-                          the server enforces. Pressing it does not send
-                          anything — it turns the roller over to the replies. */}
-                      {!m.parent_id && !m.reported && (
-                        <button
-                          type="button"
-                          className="chat-act"
-                          title={t('board.answer')}
-                          aria-label={t('board.answer')}
-                          aria-pressed={answering === m.message_id}
-                          onClick={() => {
-                            setAiming(null)
-                            setAnswering((cur) => (cur === m.message_id ? null : m.message_id))
-                          }}
-                        >
-                          ↩
-                        </button>
-                      )}
-                      {m.reported ? (
-                        <span className="muted">{t('chat.reported')}</span>
-                      ) : (
-                        !m.is_mine &&
-                        m.author_member_id && (
-                          <>
-                            <button
-                              type="button"
-                              className="chat-act"
-                              title={t('chat.report')}
-                              aria-label={t('chat.report')}
-                              onClick={() => onReport(m.message_id)}
-                            >
-                              ⚑
-                            </button>
-                            <button
-                              type="button"
-                              className="chat-act"
-                              title={t('moderation.block')}
-                              aria-label={t('moderation.block')}
-                              onClick={() => onBlock(m.author_member_id as string)}
-                            >
-                              🚫
-                            </button>
-                          </>
-                        )
-                      )}
-                    </span>
-                  </span>
-                </span>
+                {bubble(head)}
+                {replies.length > 0 && (
+                  <div className="fridge__replies">
+                    {replies.map((r) => (
+                      <div key={r.message_id} className="fridge__reply">
+                        {bubble(r)}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             ),
           )}

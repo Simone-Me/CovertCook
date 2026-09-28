@@ -77,6 +77,15 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
+**Changed: in the fridge, a conversation hangs on one wire.** Each answer used to
+carry a short elbow up to whatever bubble sat above it, so with two answers the
+second seemed to answer the first answer — and under a phrase of yours (red, on
+the right) the elbow on the left touched nothing. The board is now grouped into
+conversations (the server already sends answers straight under their phrase): a
+knot under the phrase, a wire running down past every answer, an elbow into each,
+ending on the last. It hangs on the phrase's own side, mirrored for yours.
+`.chat-tie` and the reply indent are gone.
+
 **Fixed: a refused phase change was said at the top of the page, in English.**
 "need at least 3 active, approved players to lock the round" appeared above the
 dinner's name while the host was looking at the button at the foot of the pass.
