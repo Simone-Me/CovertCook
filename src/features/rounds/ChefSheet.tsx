@@ -32,7 +32,7 @@ export function ChefSheet({
     <div className={inline ? 'chefsheet chefsheet--inline' : 'chefsheet'}>
       {!inline && <div className="chefsheet__backdrop" aria-hidden="true" />}
       <div className="chefsheet__paper" role={inline ? undefined : 'dialog'} aria-modal={inline ? undefined : true}>
-        <img key={step} className="chefsheet__chef" src="/chef_peek.webp" alt="" width={150} height={133} />
+        <img key={step} className="chefsheet__chef" src="/chef_peek.webp" alt="" width={150} height={144} />
         <div className="chefsheet__bar">
           {onBack ? (
             <button type="button" className="chefsheet__nav" onClick={onBack}>

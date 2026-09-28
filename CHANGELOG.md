@@ -73,6 +73,12 @@ the interface, and add to its change log when a decision moves.
 
 ## 2026-09-28
 
+**Fixed: the chef's fingers were cut off.** `chef_peek.webp` was cropped
+through the fingers, and its red band sat above the sheet's thinner edge. It is
+now kept to the bottom of the drawing — whole fingers, whole counter — and the
+sheet's top edge is 22px, the counter's own thickness at 150px, so the two read
+as one.
+
 **Changed: the pass says what its button does.** "Next → Registration open"
 named the app's phases; the button now names the host's act: *Open sign-ups*,
 *Close sign-ups and start the assignment*, *On to writing the recipes*, *It's
