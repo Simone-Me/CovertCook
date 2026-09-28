@@ -832,7 +832,8 @@
       "note": "Les plats seulement, sauf si vous cochez une liste ci-dessus. Les noms des gens à table leur appartiennent.",
       "winner": "Plat de la soirée : {{dish}}",
       "downloaded": "Enregistrée. Publiez-la où vous voulez."
-    }
+    },
+    "chainTitle": "La chaîne : qui écrivait pour qui"
   },
   "chain": {
     "title": "Chaîne",

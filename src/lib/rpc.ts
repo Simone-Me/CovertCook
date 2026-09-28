@@ -1232,6 +1232,12 @@ export async function getChain(roundId: string) {
   return unwrap<ChainLink[]>(res)
 }
 
+/** The same chain for everybody at the table, once the results are out (0095). */
+export async function getRevealedChain(roundId: string) {
+  const res = await supabase.rpc('get_revealed_chain', { p_round_id: roundId })
+  return unwrap<ChainLink[]>(res)
+}
+
 export async function setPairing(roundId: string, senderId: string, cookId: string) {
   const res = await supabase.rpc('set_pairing', { p_round_id: roundId, p_sender_id: senderId, p_cook_id: cookId })
   return unwrap(res)

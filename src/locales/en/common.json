@@ -832,7 +832,8 @@
       "note": "Dish names only unless you tick a list above. The names of the people at a table belong to them.",
       "winner": "Dish of the evening: {{dish}}",
       "downloaded": "Saved. Post it wherever you like."
-    }
+    },
+    "chainTitle": "The chain: who wrote for whom"
   },
   "chain": {
     "title": "Chain",

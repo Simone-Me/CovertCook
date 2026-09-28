@@ -21,6 +21,10 @@ a partial apply leaves the client calling a signature that is not there.
 **`0094` (Elegant withdrawn) is written and NOT deployed.** Two deletes and
 nothing else; it can go on its own, before or after the rest.
 
+**`0095` (`get_revealed_chain`) is written and NOT deployed.** A new function
+only, no change to anything existing. Until it is applied the results page
+simply shows no chain card (the call fails quietly).
+
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
 **Next, in order:**
@@ -72,6 +76,19 @@ the interface, and add to its change log when a decision moves.
 ---
 
 ## 2026-09-28
+
+**Added: the chain on the results page, for everybody (`0095`).** The ring was
+the Executive Chef's alone, on a page of its own, while it is the punchline of
+the evening. `get_revealed_chain` gives it to every active member once the
+dinner is in RESULTS or ARCHIVED — same columns as `get_chain`, which stays the
+host's. The results page shows it under the menu, *The chain: who wrote for
+whom*, your own node marked.
+
+**Changed: a name in the chain carries its code name above it.** A ring of
+real names said nothing about who "Avocado" had been all evening. With names
+open, each node reads the pseudonym small and in italics, the real name under
+it; the list on the chain page does the same. `walkCycles` moved to
+`lib/chain.ts` so both pages use it.
 
 **Fixed: the chef's fingers were cut off.** `chef_peek.webp` was cropped
 through the fingers, and its red band sat above the sheet's thinner edge. It is

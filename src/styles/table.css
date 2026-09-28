@@ -1630,13 +1630,35 @@
 }
 
 .chainring__name {
-  font-size: 10px;
+  font-size: 12px;
   fill: var(--text);
+}
+
+.chainring__secret {
+  font-size: 10px;
+  font-style: italic;
+  fill: var(--text-muted);
 }
 
 .chainring__name.is-you {
   font-weight: 700;
   fill: var(--accent);
+}
+
+.chainname {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 5px;
+}
+
+.chainname__secret {
+  font-style: italic;
+  color: var(--text-muted);
+  font-size: 12px;
+}
+
+.chainring {
+  overflow: visible;
 }
 
 .chainring__pairs {
