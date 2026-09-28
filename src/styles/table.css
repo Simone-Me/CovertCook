@@ -2310,9 +2310,6 @@
   --cloth-square: 13px;
 }
 
-/* Linen, pressed. No checks at all — the whole point of the elegant table is
-   that there is nothing printed on it — so the two gradients are turned into a
-   whisper of weave rather than a grid. */
 .theme-scifi {
   --cloth-ground: #101820;
   --cloth-check: rgba(94, 234, 212, 0.22);
