@@ -46,8 +46,8 @@ export function CutleryLink({ to }: { to: string }) {
       <video
         ref={video}
         className="cutlery__anim"
-        src="/cutlery_anim.mp4"
-        poster="/cutlery_anim.png"
+        src="/media/cutlery-anim.mp4"
+        poster="/media/cutlery-anim-poster.png"
         muted
         loop
         playsInline

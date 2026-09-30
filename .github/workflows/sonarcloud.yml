@@ -1,0 +1,24 @@
+name: SonarCloud
+
+# Static analysis: duplicated code, unused/empty variables, code smells,
+# security hotspots. Needs a one-time setup — see sonar-project.properties.
+# Skipped (not failed) until the SONAR_TOKEN secret exists, so forks and the
+# first pushes stay green.
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  sonar:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        if: env.SONAR_TOKEN != ''
+        with:
+          fetch-depth: 0 # Sonar needs full history for blame and new-code detection
+      - uses: SonarSource/sonarqube-scan-action@v5
+        if: env.SONAR_TOKEN != ''

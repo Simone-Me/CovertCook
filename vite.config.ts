@@ -1,5 +1,5 @@
 import { execSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
@@ -34,6 +34,36 @@ function appVersion(): string {
   return sha ? `v${pkg.version} · ${sha}` : `v${pkg.version}`
 }
 
+
+/**
+ * The install dialog's screenshots, discovered rather than listed.
+ *
+ * Every PNG in public/screenshots/ becomes a manifest entry, in filename order
+ * (01-table.png, 02-brief.png, ...), with its real size read from the PNG
+ * header. A hand-written list would name files that are not there yet and turn
+ * the manifest into a warning; this one can only ever describe what ships.
+ * Portrait shots are `narrow` (phones), landscape ones `wide` (desktop).
+ */
+function manifestScreenshots() {
+  const dir = new URL('./public/screenshots/', import.meta.url)
+  if (!existsSync(dir)) return []
+  return readdirSync(dir)
+    .filter((f) => f.toLowerCase().endsWith('.png'))
+    .sort()
+    .map((f) => {
+      const head = readFileSync(new URL(f, dir))
+      const w = head.readUInt32BE(16)
+      const h = head.readUInt32BE(20)
+      return {
+        src: `screenshots/${f}`,
+        sizes: `${w}x${h}`,
+        type: 'image/png',
+        form_factor: (h >= w ? 'narrow' : 'wide') as 'narrow' | 'wide',
+        label: f.replace(/^\d+-/, '').replace(/\.png$/i, '').replace(/[-_]+/g, ' '),
+      }
+    })
+}
+
 // https://vite.dev/config/
 export default defineConfig({
   define: {
@@ -51,7 +81,7 @@ export default defineConfig({
       srcDir: 'src',
       filename: 'sw.ts',
       registerType: 'autoUpdate',
-      includeAssets: ['favicon-32.png', 'favicon-192.png', 'apple-touch-icon.png'],
+      includeAssets: ['favicons/favicon-32.png', 'favicons/favicon-192.png', 'favicons/apple-touch-icon.png'],
       manifest: {
         // THE IDENTITY OF THE INSTALLED APP, and the one field here that is
         // expensive to add late. Without `id`, a browser derives the app's
@@ -87,10 +117,10 @@ export default defineConfig({
         // From the W3C-registered set, not free text: anything outside it is
         // ignored rather than shown.
         categories: ['food', 'lifestyle', 'social'],
+        screenshots: manifestScreenshots(),
         icons: [
-          { src: 'pwa-192x192.png', sizes: '192x192', type: 'image/png' },
-          { src: 'pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
+          { src: 'pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
+          { src: 'pwa/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
         ],
       },
       injectManifest: {
@@ -101,7 +131,7 @@ export default defineConfig({
         // flat: the recipe card, the shopping list, the dietary panel. These
         // are fetched when the grid opens and then cached at runtime (src/sw.ts),
         // which costs one load and nothing afterwards.
-        globIgnores: ['**/allergy/*', '**/diet/*'],
+        globIgnores: ['**/icons/allergy/*', '**/icons/diet/*', '**/screenshots/*'],
       },
     }),
   ],

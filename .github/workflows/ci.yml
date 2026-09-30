@@ -1,0 +1,44 @@
+name: CI
+
+# Runs on every pull request and on main, so nothing reaches Netlify or Play
+# without lint, type-check and a production build having passed.
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Lint (oxlint)
+        run: npm run lint
+      - name: Tests (vitest)
+        run: npm test
+      - name: Type-check and build
+        run: npm run build
+        env:
+          # Public values, same as the Netlify build; a build needs them to exist.
+          VITE_SUPABASE_URL: ${{ vars.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ vars.VITE_SUPABASE_ANON_KEY }}
+      - name: Manifest sanity (icons and screenshots exist)
+        run: |
+          node -e "
+          const fs=require('fs');
+          const m=JSON.parse(fs.readFileSync('dist/manifest.webmanifest','utf8'));
+          const files=[...m.icons,...(m.screenshots||[])].map(i=>i.src);
+          const missing=files.filter(f=>!fs.existsSync('dist/'+f));
+          if(missing.length){console.error('Missing in dist:',missing);process.exit(1)}
+          console.log('ok',files.length,'manifest images')"

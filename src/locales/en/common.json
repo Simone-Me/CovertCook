@@ -72,6 +72,10 @@
       "checking": "Checking…",
       "free": "Free — it is yours.",
       "taken": "Already taken. Try another one.",
+      "invalid": "Only letters a to z (no accents), digits and - _ . are allowed, at least 2 characters.",
+      "reserved": "That name looks like CovertCook or its team. Pick another.",
+      "offensive": "That name is not allowed. Pick another.",
+      "rule": "Names are lowercase; spaces become “-”.",
       "changeLater": "Changing it later is planned as part of Crème.",
       "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
     },
@@ -941,6 +945,7 @@
     }
   },
   "errors": {
+    "profanity": "This contains vulgar language (“{{word}}”). Please change that word.",
     "generic": "Something went wrong. Please try again.",
     "notAuthenticated": "You must be signed in.",
     "databaseBehind": {

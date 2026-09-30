@@ -9,7 +9,7 @@ import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { MyWarnings } from './MyWarnings'
 import { fromCents, roundDeletesAt } from '../../lib/rpc'
-import { tableThemeClass, themeMark } from '../../lib/themes'
+import { tableThemeClass } from '../../lib/themes'
 import { Envelope } from './Envelope'
 import { SharedMenu } from './SharedMenu'
 import { CutleryLink } from '../../components/CutleryLink'
@@ -608,7 +608,7 @@ export function RoundHomePage() {
                 the faces the fridge hands out, so the evening reads as one
                 thing rather than three unrelated decorations (0072). */}
             <h1 style={{ margin: 0 }}>
-              {themeMark(round.name_theme)} {round.name}
+              {round.accent_emoji} {round.name}
             </h1>
             {isHost && <CutleryLink to={`/rounds/${roundId}/settings`} />}
           </div>
@@ -703,7 +703,7 @@ export function RoundHomePage() {
             {accessAdmitsInvites(round.access) && (
               <>
                 <label htmlFor="invite-username">{t('rounds.invitations.invite')}</label>
-                <div className="row">
+                <div className="stack" style={{ gap: 8 }}>
                   {/* A username, not an address (0071). The address was the one
                       thing about an account its owner never chose to show
                       anybody; the username is the name they picked. */}
@@ -718,7 +718,7 @@ export function RoundHomePage() {
                   />
                   <button
                     type="button"
-                    className="secondary"
+                    style={{ width: '100%' }}
                     disabled={inviting || !inviteName.trim()}
                     onClick={onInvite}
                   >

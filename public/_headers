@@ -45,3 +45,8 @@
   #   frame-ancestors  the modern X-Frame-Options, kept alongside it for
   #                older browsers.
   Content-Security-Policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' data: https://fonts.gstatic.com; img-src 'self' data: blob: https://*.supabase.co; media-src 'self'; connect-src 'self' https://*.supabase.co wss://*.supabase.co https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+
+# Digital Asset Links: what lets the Android app open without a browser bar.
+/.well-known/assetlinks.json
+  Content-Type: application/json
+  Access-Control-Allow-Origin: *

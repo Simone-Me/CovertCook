@@ -19,8 +19,13 @@
 // tap on it opens.
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches, type PrecacheEntry } from 'workbox-precaching'
-import { registerRoute } from 'workbox-routing'
+import {
+  createHandlerBoundToURL,
+  precacheAndRoute,
+  cleanupOutdatedCaches,
+  type PrecacheEntry,
+} from 'workbox-precaching'
+import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
@@ -32,11 +37,21 @@ declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: (string | PrecacheEntry)[]
 }
 
-self.skipWaiting()
+void self.skipWaiting()
 clientsClaim()
 
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
+
+// Any page the app owns opens offline: the SPA shell comes from the precache
+// whatever the path (/rounds/abc, /join?code=...). Without it only '/' itself
+// answered offline, which is what PWABuilder's offline check and Play's TWA
+// review both test. The push-notification and Supabase paths are not pages.
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL('/index.html'), {
+    denylist: [/^\/rest\//, /^\/auth\//, /^\/functions\//, /^\/\.well-known\//],
+  }),
+)
 
 registerRoute(
   ({ url, request }) => url.pathname.startsWith('/rest/v1/') && request.method === 'GET',
@@ -51,7 +66,7 @@ registerRoute(
 // than NetworkFirst: an icon of a peanut does not change, so once it is on the
 // device there is no reason to ask about it again.
 registerRoute(
-  ({ url }) => url.pathname.startsWith('/allergy/') || url.pathname.startsWith('/diet/'),
+  ({ url }) => url.pathname.startsWith('/icons/allergy/') || url.pathname.startsWith('/icons/diet/'),
   new CacheFirst({
     cacheName: 'covertcook-food-icons',
     plugins: [new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 90 })],
@@ -85,8 +100,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title ?? 'CovertCook'
   const options: NotificationOptions = {
     body: payload.body ?? '',
-    icon: '/pwa-192x192.png',
-    badge: '/favicon-192.png',
+    icon: '/pwa/pwa-192x192.png',
+    badge: '/favicons/favicon-192.png',
     // One tag per round-and-kind, so a second push about the same moment
     // replaces the first instead of stacking. Nobody needs to be told twice
     // that voting opened.

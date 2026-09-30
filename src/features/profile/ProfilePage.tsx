@@ -310,7 +310,7 @@ export function ProfilePage() {
       </Link>
 
       <Link to="/tutorial" className="pass__link">
-        <img src="/logo_face.webp" alt="" width={22} height={22} style={{ borderRadius: 4 }} />
+        <img src="/logos/logo-face.webp" alt="" width={22} height={22} style={{ borderRadius: 4 }} />
         <span>
           <strong>{t('tutorial.profileLink')}</strong> — {t('tutorial.profileWhat')}
         </span>

@@ -39,7 +39,7 @@ answer — a modification stays a derivative. See `icon-proposals/README.md`.
 To regenerate the icons after editing a master:
 
 ```
-python -c "from PIL import Image; import glob,os; [Image.open(f).convert('RGBA').resize((96,96), Image.LANCZOS).save('public/'+os.path.basename(f)[:-4]+'.webp','WEBP',quality=88,method=6) for f in glob.glob('assets-src/icons/*.png') if 'logo' not in f]"
+python -c "from PIL import Image; import glob,os; [Image.open(f).convert('RGBA').resize((96,96), Image.LANCZOS).save('public/icons/'+os.path.basename(f)[:-4]+'.webp','WEBP',quality=88,method=6) for f in glob.glob('assets-src/icons/*.png') if 'logo' not in f]"
 ```
 
 The mark is regenerated separately, because each size comes from a different
@@ -51,22 +51,21 @@ from PIL import Image
 L=Image.LANCZOS
 def sq(p): im=Image.open(p).convert('RGBA'); s=min(im.size); return im.crop((0,0,s,s))
 logo=sq('assets-src/icons/logo.png'); face=sq('assets-src/icons/logo_face.png'); nobg=sq('assets-src/icons/logo_face_inverse_nobg.png')
-for n,o in [(180,'apple-touch-icon.png'),(192,'pwa-192x192.png'),(512,'pwa-512x512.png')]: logo.resize((n,n),L).save('public/'+o,optimize=True)
-for n,o in [(32,'favicon-32.png'),(192,'favicon-192.png')]: face.resize((n,n),L).save('public/'+o,optimize=True)
-m=Image.new('RGBA',(512,512),face.getpixel((2,2))); m.paste(face.resize((400,400),L),(56,56)); m.save('public/pwa-maskable-512x512.png',optimize=True)
-nobg.resize((96,96),L).save('public/logo.webp','WEBP',quality=88,method=6)
-face.resize((168,168),L).save('public/logo_face.webp','WEBP',quality=88,method=6)
+for n,o in [(180,'apple-touch-icon.png'),(192,'pwa-192x192.png'),(512,'pwa-512x512.png')]: logo.resize((n,n),L).save('public/pwa/'+o,optimize=True)
+for n,o in [(32,'favicon-32.png'),(192,'favicon-192.png')]: face.resize((n,n),L).save('public/pwa/'+o,optimize=True)
+nobg.resize((96,96),L).save('public/logos/logo-mark.webp','WEBP',quality=88,method=6)
+face.resize((168,168),L).save('public/logos/logo-face.webp','WEBP',quality=88,method=6)
 PY
 ```
 
 To regenerate the fridge WebP after editing the master:
 
 ```
-python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png'); w=820; im.resize((w, round(im.height*w/im.width)), Image.LANCZOS).save('public/inside_fridge.webp','WEBP',quality=82,method=6)"
+python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png'); w=820; im.resize((w, round(im.height*w/im.width)), Image.LANCZOS).save('public/backgrounds/fridge-inside.webp','WEBP',quality=82,method=6)"
 ```
 
 `public/logo-hands-white-borders-nobg2.png` (the chef peeking over the counter
-in the creation sheet, transparent with a white outline) and `public/pwa-maskable-white-borders.png` (the face in the
+in the creation sheet, transparent with a white outline) and `public/logos/hat-red-on-white.png` (the face in the
 tour's bubble and on its last screen) are used exactly as the designer supplied
 them: their white is what keeps the red hat visible
 on the red tablecloth. They are not converted, cropped or recoloured.
