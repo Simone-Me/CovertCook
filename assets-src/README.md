@@ -53,7 +53,6 @@ def sq(p): im=Image.open(p).convert('RGBA'); s=min(im.size); return im.crop((0,0
 logo=sq('assets-src/icons/logo.png'); face=sq('assets-src/icons/logo_face.png'); nobg=sq('assets-src/icons/logo_face_inverse_nobg.png')
 for n,o in [(180,'apple-touch-icon.png'),(192,'pwa-192x192.png'),(512,'pwa-512x512.png')]: logo.resize((n,n),L).save('public/pwa/'+o,optimize=True)
 for n,o in [(32,'favicon-32.png'),(192,'favicon-192.png')]: face.resize((n,n),L).save('public/pwa/'+o,optimize=True)
-m=Image.new('RGBA',(512,512),face.getpixel((2,2))); m.paste(face.resize((400,400),L),(56,56)); m.save('public/pwa/pwa-maskable-512x512.png',optimize=True)
 nobg.resize((96,96),L).save('public/logos/logo-mark.webp','WEBP',quality=88,method=6)
 face.resize((168,168),L).save('public/logos/logo-face.webp','WEBP',quality=88,method=6)
 PY
@@ -66,7 +65,7 @@ python -c "from PIL import Image; im=Image.open('assets-src/inside_fridge.png');
 ```
 
 `public/logo-hands-white-borders-nobg2.png` (the chef peeking over the counter
-in the creation sheet, transparent with a white outline) and `public/pwa-maskable-white-borders.png` (the face in the
+in the creation sheet, transparent with a white outline) and `public/logos/hat-red-on-white.png` (the face in the
 tour's bubble and on its last screen) are used exactly as the designer supplied
 them: their white is what keeps the red hat visible
 on the red tablecloth. They are not converted, cropped or recoloured.

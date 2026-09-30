@@ -10,7 +10,6 @@ import { peekJoinCode } from '../../lib/pendingJoin'
 import { tutorialSeen } from '../../lib/tutorialSeen'
 import { HowItWorks } from './HowItWorks'
 import { Fold } from '../../components/Fold'
-import { themeMark } from '../../lib/themes'
 
 function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
   const { t, i18n } = useTranslation()
@@ -38,7 +37,7 @@ function RoundCard({ round, isHost }: { round: MyRoundRow; isHost: boolean }) {
                 face in the fridge. The random accent emoji stays on the
                 invitations below, which arrive before there is a theme to
                 read. */}
-            {themeMark(round.name_theme)} {round.name}
+            {round.accent_emoji} {round.name}
             {/* The dinners you run and the dinners you were invited to look
                 identical in this list, and they are not the same job. The
                 toque says which ones are yours to steer. */}

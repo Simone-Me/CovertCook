@@ -329,7 +329,7 @@ export function ShareMenuCard({
       // Full width, it sits at the foot of the menu rather than immediately
       // under it: a photograph floating mid-sheet with white under it reads as
       // a gap somebody forgot to fill.
-      const top = full ? floor - h : floor - h
+      const top = floor - h
 
       ctx.save()
       // A white edge and a shadow: it is a print laid on the menu, and without

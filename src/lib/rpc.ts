@@ -5,6 +5,43 @@
 // arguments) only need to be spelled correctly once.
 import { supabase } from './supabase'
 import { invokeFunction } from './functions'
+import i18n from './i18n'
+import { findProfanity } from './profanity'
+
+// Everything a person types reaches the database through an RPC, so this is
+// the one place that can refuse vulgarity in a chat line, a recipe, a dinner
+// title or a note without touching forty inputs. The error's message is what
+// every caller already shows, in the reader's language. The server never sees
+// the text when this fires.
+//
+// Skipped: credentials, push keys, codes and anything that is an identifier —
+// they are not prose, and a random token matching a word is not worth the
+// false alarm.
+const NOT_PROSE = /token|password|endpoint|p256dh|auth|code|email|locale|_id$|^p_id$|url/i
+
+function firstProfanity(value: unknown, key = ''): string | null {
+  if (typeof value === 'string') {
+    return NOT_PROSE.test(key) ? null : findProfanity(value)
+  }
+  if (Array.isArray(value)) {
+    for (const v of value) {
+      const hit = firstProfanity(v, key)
+      if (hit) return hit
+    }
+  } else if (value && typeof value === 'object') {
+    for (const [k, v] of Object.entries(value)) {
+      const hit = firstProfanity(v, k)
+      if (hit) return hit
+    }
+  }
+  return null
+}
+
+function guardedRpc(fn: string, args: Record<string, unknown> = {}) {
+  const word = firstProfanity(args)
+  if (word) throw new Error(i18n.t('errors.profanity', { word }))
+  return supabase.rpc(fn, args)
+}
 
 // How someone gets a seat. CODE = share a code, anyone holding it can ask;
 // INVITE = the host names existing accounts by username, who accept or
@@ -158,7 +195,7 @@ export interface ProStatus {
 }
 
 export async function myProStatus() {
-  const res = await supabase.rpc('my_pro_status', {})
+  const res = await guardedRpc('my_pro_status', {})
   const rows = unwrap<ProStatus[]>(res)
   return rows[0] ?? null
 }
@@ -168,7 +205,7 @@ export async function myProStatus() {
 export const TEST_WINDOW_CLOSED = 'TEST_WINDOW_CLOSED'
 
 export async function setProTestOverride(mode: 'FORCE_ON' | 'FORCE_OFF' | null) {
-  const res = await supabase.rpc('set_pro_test_override', { p_mode: mode })
+  const res = await guardedRpc('set_pro_test_override', { p_mode: mode })
   return unwrap(res)
 }
 
@@ -180,12 +217,12 @@ export const ALREADY_REDEEMED = 'ALREADY_REDEEMED'
 
 /** Returns what was handed over: 'PRO', 'NAME_THEME' or 'TABLE_THEME'. */
 export async function redeemCode(code: string) {
-  const res = await supabase.rpc('redeem_code', { p_code: code })
+  const res = await guardedRpc('redeem_code', { p_code: code })
   return unwrap<string>(res)
 }
 
 export async function listNameThemes() {
-  const res = await supabase.rpc('list_name_themes', {})
+  const res = await guardedRpc('list_name_themes', {})
   return unwrap<NameThemeOption[]>(res)
 }
 
@@ -194,7 +231,7 @@ export async function listNameThemes() {
 const RETIRED_TABLE_THEMES = ['ELEGANT']
 
 export async function listTableThemes() {
-  const res = await supabase.rpc('list_table_themes', {})
+  const res = await guardedRpc('list_table_themes', {})
   return unwrap<TableThemeOption[]>(res)?.filter((x) => !RETIRED_TABLE_THEMES.includes(x.code))
 }
 
@@ -284,7 +321,7 @@ function unwrap<T>({ data, error }: { data: T | null; error: { message: string; 
 // submit, which is why complete_signup checks again and the unique index
 // checks after that.
 export async function displayNameAvailable(name: string): Promise<boolean> {
-  const res = await supabase.rpc('display_name_available', { p_name: name })
+  const res = await guardedRpc('display_name_available', { p_name: name })
   return unwrap<boolean>(res)
 }
 
@@ -360,7 +397,7 @@ async function notify(roundId: string, kind: NotifiedMoment) {
 }
 
 export async function setNotificationsEnabled(enabled: boolean) {
-  const res = await supabase.rpc('set_notifications_enabled', { p_enabled: enabled })
+  const res = await guardedRpc('set_notifications_enabled', { p_enabled: enabled })
   return unwrap(res)
 }
 
@@ -369,12 +406,12 @@ export async function setNotificationsEnabled(enabled: boolean) {
 // the date it becomes irreversible, so the interface can say it out loud
 // instead of implying "soon".
 export async function requestAccountDeletion(): Promise<string> {
-  const res = await supabase.rpc('request_account_deletion')
+  const res = await guardedRpc('request_account_deletion')
   return unwrap<string>(res)
 }
 
 export async function cancelAccountDeletion() {
-  const res = await supabase.rpc('cancel_account_deletion')
+  const res = await guardedRpc('cancel_account_deletion')
   return unwrap(res)
 }
 
@@ -388,7 +425,7 @@ export interface RoundPerson {
 }
 
 export async function listRoundPeople(roundId: string): Promise<RoundPerson[]> {
-  const res = await supabase.rpc('list_round_people', { p_round_id: roundId })
+  const res = await guardedRpc('list_round_people', { p_round_id: roundId })
   return unwrap<RoundPerson[]>(res)
 }
 
@@ -401,7 +438,7 @@ export async function savePushSubscription(input: {
   auth: string
   userAgent?: string
 }) {
-  const res = await supabase.rpc('save_push_subscription', {
+  const res = await guardedRpc('save_push_subscription', {
     p_endpoint: input.endpoint,
     p_p256dh: input.p256dh,
     p_auth: input.auth,
@@ -411,7 +448,7 @@ export async function savePushSubscription(input: {
 }
 
 export async function forgetPushSubscription(endpoint: string) {
-  const res = await supabase.rpc('forget_push_subscription', { p_endpoint: endpoint })
+  const res = await guardedRpc('forget_push_subscription', { p_endpoint: endpoint })
   return unwrap(res)
 }
 
@@ -427,7 +464,7 @@ export interface MyPushDevices {
 }
 
 export async function myPushDevices(endpoint: string | null): Promise<MyPushDevices> {
-  const res = await supabase.rpc('my_push_devices', { p_endpoint: endpoint })
+  const res = await guardedRpc('my_push_devices', { p_endpoint: endpoint })
   const rows = unwrap<MyPushDevices[]>(res)
   return rows[0] ?? { this_device: false, devices: 0, last_seen: null }
 }
@@ -468,7 +505,7 @@ export async function completeSignup(input: {
   hasNoRestrictions: boolean
   dietaryEntries: DietaryEntryInput[]
 }) {
-  const res = await supabase.rpc('complete_signup', {
+  const res = await guardedRpc('complete_signup', {
     p_display_name: input.displayName,
     p_locale: input.locale,
     p_has_no_restrictions: input.hasNoRestrictions,
@@ -496,7 +533,7 @@ export async function createRound(input: {
   filRougeCode?: string | null
   filRougeScope?: FilRougeScope
 }) {
-  const res = await supabase.rpc('create_round', {
+  const res = await guardedRpc('create_round', {
     p_name: input.name,
     p_access: input.access,
     p_anonymity: input.anonymity,
@@ -526,7 +563,7 @@ export interface MemberIdentity {
 }
 
 export async function getMemberIdentities(roundId: string) {
-  const res = await supabase.rpc('get_member_identities', { p_round_id: roundId })
+  const res = await guardedRpc('get_member_identities', { p_round_id: roundId })
   return unwrap<MemberIdentity[]>(res)
 }
 
@@ -542,7 +579,7 @@ export const NOT_BY_INVITATION = 'NOT_BY_INVITATION'
 // account its owner never chose to show anyone; `display_name` has been a
 // unique identity since 0046 and is the name they picked themselves.
 export async function inviteMember(roundId: string, username: string) {
-  const res = await supabase.rpc('invite_member', { p_round_id: roundId, p_username: username })
+  const res = await guardedRpc('invite_member', { p_round_id: roundId, p_username: username })
   return unwrap<string>(res) // invitation id
 }
 
@@ -558,12 +595,12 @@ export interface RoundInvitation {
 // not a member yet and cannot read `rounds` — without it they'd be looking
 // at an invitation to a dinner they can't see the name of.
 export async function getMyInvitations() {
-  const res = await supabase.rpc('get_my_invitations', {})
+  const res = await guardedRpc('get_my_invitations', {})
   return unwrap<RoundInvitation[]>(res)
 }
 
 export async function respondToInvitation(invitationId: string, accept: boolean) {
-  const res = await supabase.rpc('respond_to_invitation', {
+  const res = await guardedRpc('respond_to_invitation', {
     p_invitation_id: invitationId,
     p_accept: accept,
   })
@@ -628,7 +665,7 @@ export function previousPhaseFor(status: RoundStatus, votingEnabled: boolean): R
 // `join_round` asks for none — and where the Edge Function that mints them is
 // not called at all.
 export async function joinRound(input: { code: string; turnstileTicket: string | null }) {
-  const res = await supabase.rpc('join_round', {
+  const res = await guardedRpc('join_round', {
     p_code: input.code,
     p_turnstile_ticket: input.turnstileTicket,
   })
@@ -641,22 +678,22 @@ export async function joinRound(input: { code: string; turnstileTicket: string |
 export type LeaveOutcome = 'LEFT' | 'REQUESTED' | 'ALREADY_REQUESTED'
 
 export async function cancelLeaveRequest(roundId: string) {
-  const res = await supabase.rpc('cancel_leave_request', { p_round_id: roundId })
+  const res = await guardedRpc('cancel_leave_request', { p_round_id: roundId })
   return unwrap(res)
 }
 
 export async function leaveRound(roundId: string): Promise<LeaveOutcome> {
-  const res = await supabase.rpc('leave_round', { p_round_id: roundId })
+  const res = await guardedRpc('leave_round', { p_round_id: roundId })
   return unwrap<LeaveOutcome>(res)
 }
 
 export async function approveMember(roundId: string, memberId: string) {
-  const res = await supabase.rpc('approve_member', { p_round_id: roundId, p_member_id: memberId })
+  const res = await guardedRpc('approve_member', { p_round_id: roundId, p_member_id: memberId })
   return unwrap(res)
 }
 
 export async function rejectMember(roundId: string, memberId: string) {
-  const res = await supabase.rpc('reject_member', { p_round_id: roundId, p_member_id: memberId })
+  const res = await guardedRpc('reject_member', { p_round_id: roundId, p_member_id: memberId })
   return unwrap(res)
 }
 
@@ -672,21 +709,21 @@ export interface PendingMember {
 // (0015_pending_member_identity.sql). Approving them ends this: from then
 // on they are their secret name, to the host too.
 export async function getPendingMembers(roundId: string) {
-  const res = await supabase.rpc('get_pending_members', { p_round_id: roundId })
+  const res = await guardedRpc('get_pending_members', { p_round_id: roundId })
   return unwrap<PendingMember[]>(res)
 }
 
 // Feeds the Messaggi envelope's badge: messages addressed to me, across
 // both of my conversations, that I haven't opened yet (0022).
 export async function getUnreadCount(roundId: string) {
-  const res = await supabase.rpc('get_unread_count', { p_round_id: roundId })
+  const res = await guardedRpc('get_unread_count', { p_round_id: roundId })
   return unwrap<number>(res)
 }
 
 // Stamps the other party's messages in one thread as read. Called when a
 // thread is opened — a badge that clears on a timer stops meaning anything.
 export async function markThreadRead(pairingId: string) {
-  const res = await supabase.rpc('mark_thread_read', { p_pairing_id: pairingId })
+  const res = await guardedRpc('mark_thread_read', { p_pairing_id: pairingId })
   return unwrap(res)
 }
 
@@ -694,27 +731,27 @@ export async function markThreadRead(pairingId: string) {
 // silence and CANNOT_COOK, and the only way a sender learns their recipe
 // landed at all.
 export async function acknowledgeBrief(roundId: string) {
-  const res = await supabase.rpc('acknowledge_brief', { p_round_id: roundId })
+  const res = await guardedRpc('acknowledge_brief', { p_round_id: roundId })
   return unwrap(res)
 }
 
 export async function transferHost(roundId: string, memberId: string) {
-  const res = await supabase.rpc('transfer_host', { p_round_id: roundId, p_member_id: memberId })
+  const res = await guardedRpc('transfer_host', { p_round_id: roundId, p_member_id: memberId })
   return unwrap(res)
 }
 
 export async function advancePhase(roundId: string, target: RoundStatus) {
-  const res = await supabase.rpc('advance_phase', { p_round_id: roundId, p_target: target })
+  const res = await guardedRpc('advance_phase', { p_round_id: roundId, p_target: target })
   return unwrap(res)
 }
 
 export async function generateAssignment(roundId: string) {
-  const res = await supabase.rpc('generate_assignment', { p_round_id: roundId })
+  const res = await guardedRpc('generate_assignment', { p_round_id: roundId })
   return unwrap<number>(res) // new assignment_version
 }
 
 export async function assignmentExists(roundId: string) {
-  const res = await supabase.rpc('assignment_exists', { p_round_id: roundId })
+  const res = await guardedRpc('assignment_exists', { p_round_id: roundId })
   return unwrap<boolean>(res)
 }
 
@@ -726,7 +763,7 @@ export async function updateRoundDetails(input: {
   dinnerAt: string | null
   timezone: string
 }) {
-  const res = await supabase.rpc('update_round_details', {
+  const res = await guardedRpc('update_round_details', {
     p_round_id: input.roundId,
     p_location: input.location,
     p_city: input.city,
@@ -745,7 +782,7 @@ export interface RoundProgress {
 }
 
 export async function getRoundProgress(roundId: string) {
-  const res = await supabase.rpc('get_round_progress', { p_round_id: roundId })
+  const res = await guardedRpc('get_round_progress', { p_round_id: roundId })
   const rows = unwrap<RoundProgress[]>(res)
   return rows[0] ?? null
 }
@@ -756,7 +793,7 @@ export interface DietaryPanelEntry {
 }
 
 export async function getDietaryPanel(roundId: string) {
-  const res = await supabase.rpc('get_dietary_panel', { p_round_id: roundId })
+  const res = await guardedRpc('get_dietary_panel', { p_round_id: roundId })
   return unwrap<DietaryPanelEntry[]>(res)
 }
 
@@ -807,7 +844,7 @@ export interface MyAssignment {
 }
 
 export async function getMyAssignment(roundId: string) {
-  const res = await supabase.rpc('get_my_assignment', { p_round_id: roundId })
+  const res = await guardedRpc('get_my_assignment', { p_round_id: roundId })
   const rows = unwrap<MyAssignment[]>(res)
   return rows[0] ?? null
 }
@@ -861,7 +898,7 @@ export interface MyBrief {
  * than silently the wrong recipe.
  */
 export async function getMyBriefOffers(roundId: string) {
-  const res = await supabase.rpc('get_my_brief', { p_round_id: roundId })
+  const res = await guardedRpc('get_my_brief', { p_round_id: roundId })
   return unwrap<MyBrief[]>(res)
 }
 
@@ -880,7 +917,7 @@ export function pickChosenBrief(rows: MyBrief[]) {
 
 /** The cook picks the one that suits them. Nobody else may. */
 export async function chooseBrief(briefId: string) {
-  const res = await supabase.rpc('choose_brief', { p_brief_id: briefId })
+  const res = await guardedRpc('choose_brief', { p_brief_id: briefId })
   return unwrap(res)
 }
 
@@ -904,7 +941,7 @@ export async function saveBriefDraft(input: {
    *  own `recipes_per_brief`, so a hand-made call cannot buy a second recipe. */
   position?: number
 }) {
-  const res = await supabase.rpc('save_brief_draft', {
+  const res = await guardedRpc('save_brief_draft', {
     p_round_id: input.roundId,
     p_dish_name: input.dishName,
     p_course: input.course,
@@ -923,7 +960,7 @@ export async function saveBriefDraft(input: {
 }
 
 export async function submitBrief(roundId: string) {
-  const res = await supabase.rpc('submit_brief', { p_round_id: roundId })
+  const res = await guardedRpc('submit_brief', { p_round_id: roundId })
   return unwrap(res)
 }
 
@@ -948,7 +985,7 @@ export interface MyBriefDraft {
 
 /** All of them, lowest first. */
 export async function getMyBriefDrafts(roundId: string) {
-  const res = await supabase.rpc('get_my_brief_draft', { p_round_id: roundId })
+  const res = await guardedRpc('get_my_brief_draft', { p_round_id: roundId })
   return unwrap<MyBriefDraft[]>(res)
 }
 
@@ -962,7 +999,7 @@ export async function getMyBriefDrafts(roundId: string) {
 /** A second idea thought better of. Drafts only — an offer already in front of
  *  the cook is not the sender's to withdraw. */
 export async function discardBriefDraft(roundId: string, position: number) {
-  const res = await supabase.rpc('discard_brief_draft', {
+  const res = await guardedRpc('discard_brief_draft', {
     p_round_id: roundId,
     p_position: position,
   })
@@ -1013,7 +1050,7 @@ export async function getMessageTemplates(locale: string) {
 }
 
 export async function sendMessage(input: { pairingId: string; templateId: string; slotValue: string | null }) {
-  const res = await supabase.rpc('send_message', {
+  const res = await guardedRpc('send_message', {
     p_pairing_id: input.pairingId,
     p_template_id: input.templateId,
     p_slot_value: input.slotValue,
@@ -1037,12 +1074,12 @@ export interface ThreadMessage {
 }
 
 export async function getThread(pairingId: string) {
-  const res = await supabase.rpc('get_thread', { p_pairing_id: pairingId })
+  const res = await guardedRpc('get_thread', { p_pairing_id: pairingId })
   return unwrap<ThreadMessage[]>(res)
 }
 
 export async function reportMessage(messageId: string, roundId?: string) {
-  const res = await supabase.rpc('report_message', { p_message_id: messageId })
+  const res = await guardedRpc('report_message', { p_message_id: messageId })
   // Not awaited: reporting has already happened, and it must not appear to have
   // failed because a push service was slow (0059).
   if (roundId) void notifyHostOfAlert(roundId)
@@ -1069,7 +1106,7 @@ export interface ReportedMessage {
 }
 
 export async function getReportedMessages(roundId: string) {
-  const res = await supabase.rpc('get_reported_messages', { p_round_id: roundId })
+  const res = await guardedRpc('get_reported_messages', { p_round_id: roundId })
   return unwrap<ReportedMessage[]>(res)
 }
 
@@ -1090,7 +1127,7 @@ export interface BallotOption {
 }
 
 export async function getBallotOptions(roundId: string) {
-  const res = await supabase.rpc('get_ballot_options', { p_round_id: roundId })
+  const res = await guardedRpc('get_ballot_options', { p_round_id: roundId })
   return unwrap<BallotOption[]>(res)
 }
 
@@ -1105,7 +1142,7 @@ export interface BallotItemInput {
 }
 
 export async function submitBallot(roundId: string, items: BallotItemInput[]) {
-  const res = await supabase.rpc('submit_ballot', { p_round_id: roundId, p_items: items })
+  const res = await guardedRpc('submit_ballot', { p_round_id: roundId, p_items: items })
   return unwrap<string>(res) // ballot id
 }
 
@@ -1124,7 +1161,7 @@ export interface RoundResult {
 }
 
 export async function getResults(roundId: string) {
-  const res = await supabase.rpc('get_results', { p_round_id: roundId })
+  const res = await guardedRpc('get_results', { p_round_id: roundId })
   return unwrap<RoundResult[]>(res)
 }
 
@@ -1156,7 +1193,7 @@ export interface RoundRecipe {
 // The deliberate exposure (0058): every submitted recipe of one finished round,
 // to its members. Nothing else in this app has ever read somebody else's brief.
 export async function listRoundRecipes(roundId: string) {
-  const res = await supabase.rpc('list_round_recipes', { p_round_id: roundId })
+  const res = await guardedRpc('list_round_recipes', { p_round_id: roundId })
   return unwrap<RoundRecipe[]>(res)
 }
 
@@ -1165,7 +1202,7 @@ export async function listRoundRecipes(roundId: string) {
 // duplicated, and the sentence on screen reports what came back so it and the
 // book cannot disagree.
 export async function saveRecipes(roundId: string, briefIds: string[]): Promise<number> {
-  const res = await supabase.rpc('save_recipes', { p_round_id: roundId, p_brief_ids: briefIds })
+  const res = await guardedRpc('save_recipes', { p_round_id: roundId, p_brief_ids: briefIds })
   return unwrap<number>(res)
 }
 
@@ -1193,17 +1230,17 @@ export interface SavedRecipe {
 }
 
 export async function listMyRecipes() {
-  const res = await supabase.rpc('list_my_recipes')
+  const res = await guardedRpc('list_my_recipes')
   return unwrap<SavedRecipe[]>(res)
 }
 
 export async function forgetRecipe(id: string) {
-  const res = await supabase.rpc('forget_recipe', { p_id: id })
+  const res = await guardedRpc('forget_recipe', { p_id: id })
   return unwrap(res)
 }
 
 export async function markDishDelivery(roundId: string, briefId: string, delivered: boolean) {
-  const res = await supabase.rpc('mark_dish_delivery', {
+  const res = await guardedRpc('mark_dish_delivery', {
     p_round_id: roundId,
     p_brief_id: briefId,
     p_delivered: delivered,
@@ -1228,18 +1265,18 @@ export interface ChainLink {
 }
 
 export async function getChain(roundId: string) {
-  const res = await supabase.rpc('get_chain', { p_round_id: roundId })
+  const res = await guardedRpc('get_chain', { p_round_id: roundId })
   return unwrap<ChainLink[]>(res)
 }
 
 /** The same chain for everybody at the table, once the results are out (0095). */
 export async function getRevealedChain(roundId: string) {
-  const res = await supabase.rpc('get_revealed_chain', { p_round_id: roundId })
+  const res = await guardedRpc('get_revealed_chain', { p_round_id: roundId })
   return unwrap<ChainLink[]>(res)
 }
 
 export async function setPairing(roundId: string, senderId: string, cookId: string) {
-  const res = await supabase.rpc('set_pairing', { p_round_id: roundId, p_sender_id: senderId, p_cook_id: cookId })
+  const res = await guardedRpc('set_pairing', { p_round_id: roundId, p_sender_id: senderId, p_cook_id: cookId })
   return unwrap(res)
 }
 
@@ -1252,7 +1289,7 @@ export const SPLICE_REQUIRES_CONFIRMATION = 'SPLICE_REQUIRES_CONFIRMATION'
 export const REMOVE_REQUIRES_CONFIRMATION = 'REMOVE_REQUIRES_CONFIRMATION'
 
 export async function spliceMember(roundId: string, memberId: string, confirmDishChange = false) {
-  const res = await supabase.rpc('splice_member', {
+  const res = await guardedRpc('splice_member', {
     p_round_id: roundId,
     p_member_id: memberId,
     p_confirm_dish_change: confirmDishChange,
@@ -1273,7 +1310,7 @@ export async function removeMember(
   confirmDishChange = false,
   mode: RemovalMode = 'COLLAPSE',
 ) {
-  const res = await supabase.rpc('remove_member', {
+  const res = await guardedRpc('remove_member', {
     p_round_id: roundId,
     p_member_id: memberId,
     p_confirm_dish_change: confirmDishChange,
@@ -1350,7 +1387,7 @@ export interface HostAlertDetail {
 }
 
 export async function getHostAlertsDetailed(roundId: string) {
-  const res = await supabase.rpc('get_host_alerts_detailed', { p_round_id: roundId })
+  const res = await guardedRpc('get_host_alerts_detailed', { p_round_id: roundId })
   return unwrap<HostAlertDetail[]>(res)
 }
 
@@ -1363,7 +1400,7 @@ export type HostNotice = 'HOST_RECIPE_REVIEW' | 'HOST_ALLERGEN_CARE'
 export const NOTICE_ALREADY_POSTED = 'NOTICE_ALREADY_POSTED'
 
 export async function postHostNotice(roundId: string, key: HostNotice) {
-  const res = await supabase.rpc('post_host_notice', { p_round_id: roundId, p_key: key })
+  const res = await guardedRpc('post_host_notice', { p_round_id: roundId, p_key: key })
   return unwrap(res)
 }
 
@@ -1420,7 +1457,7 @@ export async function setCostSettings(input: {
   budgetPerHead: number | null
   currency?: string
 }) {
-  const res = await supabase.rpc('set_cost_settings', {
+  const res = await guardedRpc('set_cost_settings', {
     p_round_id: input.roundId,
     p_mode: input.mode,
     p_budget_per_head: input.budgetPerHead,
@@ -1438,7 +1475,7 @@ export async function setCostSettings(input: {
  * is a real answer — "we're splitting, with no ceiling".
  */
 export async function setBudgetPerHead(roundId: string, budgetPerHead: number | null) {
-  const res = await supabase.rpc('set_budget_per_head', {
+  const res = await guardedRpc('set_budget_per_head', {
     p_round_id: roundId,
     p_budget_per_head: budgetPerHead,
   })
@@ -1446,7 +1483,7 @@ export async function setBudgetPerHead(roundId: string, budgetPerHead: number | 
 }
 
 export async function recordExpense(roundId: string, amountCents: number, note?: string | null) {
-  const res = await supabase.rpc('record_expense', {
+  const res = await guardedRpc('record_expense', {
     p_round_id: roundId,
     p_amount_cents: amountCents,
     p_note: note ?? null,
@@ -1473,7 +1510,7 @@ export interface CostsSoFar {
 }
 
 export async function costsSoFar(roundId: string) {
-  const res = await supabase.rpc('costs_so_far', { p_round_id: roundId })
+  const res = await guardedRpc('costs_so_far', { p_round_id: roundId })
   const rows = unwrap<CostsSoFar[]>(res)
   return rows[0] ?? null
 }
@@ -1489,7 +1526,7 @@ export interface Settlement {
 }
 
 export async function settleCosts(roundId: string) {
-  const res = await supabase.rpc('settle_costs', { p_round_id: roundId })
+  const res = await guardedRpc('settle_costs', { p_round_id: roundId })
   return unwrap<Settlement[]>(res)
 }
 
@@ -1558,7 +1595,7 @@ export interface TableChef {
 }
 
 export async function listTableChefs(roundId: string) {
-  const res = await supabase.rpc('list_table_chefs', { p_round_id: roundId })
+  const res = await guardedRpc('list_table_chefs', { p_round_id: roundId })
   return unwrap<TableChef[]>(res)
 }
 
@@ -1569,7 +1606,7 @@ export async function listTableChefs(roundId: string) {
  * the host, because that is who may actually do it.
  */
 export async function getPhotographer(roundId: string) {
-  const res = await supabase.rpc('get_photographer', { p_round_id: roundId })
+  const res = await guardedRpc('get_photographer', { p_round_id: roundId })
   const rows = unwrap<TableChef[]>(res)
   return rows[0] ?? null
 }
@@ -1580,7 +1617,7 @@ export async function getPhotographer(roundId: string) {
  * suggestion, not a handover.
  */
 export async function setPhotographer(roundId: string, profileId: string | null) {
-  const res = await supabase.rpc('set_photographer', {
+  const res = await guardedRpc('set_photographer', {
     p_round_id: roundId,
     p_profile_id: profileId,
   })
@@ -1589,12 +1626,12 @@ export async function setPhotographer(roundId: string, profileId: string | null)
 
 /** Keep this picture. The one act that puts anything in an album. */
 export async function savePhoto(photoId: string) {
-  const res = await supabase.rpc('save_photo', { p_photo_id: photoId })
+  const res = await guardedRpc('save_photo', { p_photo_id: photoId })
   return unwrap<string>(res)
 }
 
 export async function forgetPhoto(id: string) {
-  const res = await supabase.rpc('forget_photo', { p_id: id })
+  const res = await guardedRpc('forget_photo', { p_id: id })
   return unwrap(res)
 }
 
@@ -1620,7 +1657,7 @@ export async function uploadPhoto(roundId: string, blob: Blob, caption?: string)
   })
   if (error) throw new Error(error.message)
 
-  const res = await supabase.rpc('record_photo', {
+  const res = await guardedRpc('record_photo', {
     p_round_id: roundId,
     p_path: path,
     p_caption: caption ?? null,
@@ -1651,17 +1688,17 @@ export async function deletePhotoObject(path: string) {
 }
 
 export async function listRoundPhotos(roundId: string) {
-  const res = await supabase.rpc('list_round_photos', { p_round_id: roundId })
+  const res = await guardedRpc('list_round_photos', { p_round_id: roundId })
   return unwrap<DinnerPhoto[]>(res)
 }
 
 export async function myAlbum() {
-  const res = await supabase.rpc('my_album')
+  const res = await guardedRpc('my_album')
   return unwrap<AlbumEntry[]>(res)
 }
 
 export async function reportPhoto(photoId: string, roundId: string) {
-  const res = await supabase.rpc('report_photo', { p_id: photoId })
+  const res = await guardedRpc('report_photo', { p_id: photoId })
   // Same pipeline as a reported phrase (0059), so the host finds both in one
   // inbox and is told about both the same way.
   void notifyHostOfAlert(roundId)
@@ -1669,7 +1706,7 @@ export async function reportPhoto(photoId: string, roundId: string) {
 }
 
 export async function hidePhoto(photoId: string) {
-  const res = await supabase.rpc('hide_photo', { p_id: photoId })
+  const res = await guardedRpc('hide_photo', { p_id: photoId })
   return unwrap(res)
 }
 
@@ -1688,7 +1725,7 @@ export interface OpenAlerts {
 }
 
 export async function myOpenAlerts() {
-  const res = await supabase.rpc('my_open_alerts')
+  const res = await guardedRpc('my_open_alerts')
   return unwrap<OpenAlerts[]>(res)
 }
 
@@ -1700,7 +1737,7 @@ export async function warnMember(input: {
   messageId?: string | null
   reason?: string | null
 }) {
-  const res = await supabase.rpc('warn_member', {
+  const res = await guardedRpc('warn_member', {
     p_round_id: input.roundId,
     p_member_id: input.memberId,
     p_message_id: input.messageId ?? null,
@@ -1716,12 +1753,12 @@ export interface MyWarning {
 }
 
 export async function myWarnings(roundId: string) {
-  const res = await supabase.rpc('my_warnings', { p_round_id: roundId })
+  const res = await guardedRpc('my_warnings', { p_round_id: roundId })
   return unwrap<MyWarning[]>(res)
 }
 
 export async function acknowledgeWarning(id: string) {
-  const res = await supabase.rpc('acknowledge_warning', { p_id: id })
+  const res = await guardedRpc('acknowledge_warning', { p_id: id })
   return unwrap(res)
 }
 
@@ -1729,7 +1766,7 @@ export async function acknowledgeWarning(id: string) {
 // Requires a reason in writing and writes AUTHOR_REVEALED to audit_log — never
 // a side effect of opening an alert.
 export async function revealMessageAuthor(messageId: string, reason: string): Promise<string> {
-  const res = await supabase.rpc('reveal_message_author', {
+  const res = await guardedRpc('reveal_message_author', {
     p_message_id: messageId,
     p_reason: reason,
   })
@@ -1739,12 +1776,12 @@ export async function revealMessageAuthor(messageId: string, reason: string): Pr
 // Blocked by seat, so you never have to learn who somebody is to decide you
 // would rather not sit with them again.
 export async function blockMember(memberId: string) {
-  const res = await supabase.rpc('block_member', { p_member_id: memberId })
+  const res = await guardedRpc('block_member', { p_member_id: memberId })
   return unwrap(res)
 }
 
 export async function unblockUser(profileId: string) {
-  const res = await supabase.rpc('unblock_user', { p_profile_id: profileId })
+  const res = await guardedRpc('unblock_user', { p_profile_id: profileId })
   return unwrap(res)
 }
 
@@ -1755,7 +1792,7 @@ export interface BlockedUser {
 }
 
 export async function listMyBlocks() {
-  const res = await supabase.rpc('list_my_blocks')
+  const res = await guardedRpc('list_my_blocks')
   return unwrap<BlockedUser[]>(res)
 }
 
@@ -1851,7 +1888,7 @@ export const DEADLINE_ALREADY_SET = 'DEADLINE_ALREADY_SET'
 // host naming a dinner three weeks out has no idea yet whether everyone will
 // be round a table with phones away (0043).
 export async function setVotingMode(roundId: string, mode: VotingMode) {
-  const res = await supabase.rpc('set_voting_mode', { p_round_id: roundId, p_mode: mode })
+  const res = await guardedRpc('set_voting_mode', { p_round_id: roundId, p_mode: mode })
   return unwrap(res)
 }
 
@@ -1859,12 +1896,12 @@ export async function setVotingMode(roundId: string, mode: VotingMode) {
 // round may call it: the last person to vote should not have to find the host
 // to end a vote that is already over.
 export async function closeVotingIfComplete(roundId: string) {
-  const res = await supabase.rpc('close_voting_if_complete', { p_round_id: roundId })
+  const res = await guardedRpc('close_voting_if_complete', { p_round_id: roundId })
   return unwrap<boolean>(res)
 }
 
 export async function setVotingDeadline(roundId: string, minutes: DeadlineMinutes | null) {
-  const res = await supabase.rpc('set_voting_deadline', { p_round_id: roundId, p_minutes: minutes })
+  const res = await guardedRpc('set_voting_deadline', { p_round_id: roundId, p_minutes: minutes })
   return unwrap<string | null>(res)
 }
 
@@ -1875,27 +1912,27 @@ export interface VoteProgress {
 
 // Counts only — the host must never learn a single ballot's contents.
 export async function getVoteProgress(roundId: string) {
-  const res = await supabase.rpc('get_vote_progress', { p_round_id: roundId })
+  const res = await guardedRpc('get_vote_progress', { p_round_id: roundId })
   const rows = unwrap<VoteProgress[]>(res)
   return rows[0] ?? null
 }
 
 export async function publishResults(roundId: string) {
-  const res = await supabase.rpc('publish_results', { p_round_id: roundId })
+  const res = await guardedRpc('publish_results', { p_round_id: roundId })
   return unwrap(res)
 }
 
 // Drops the ballot so it can be cast again. Replacing rather than editing:
 // ballot_items cascade, so one delete leaves nothing half-rewritten.
 export async function withdrawBallot(roundId: string) {
-  const res = await supabase.rpc('withdraw_ballot', { p_round_id: roundId })
+  const res = await guardedRpc('withdraw_ballot', { p_round_id: roundId })
   return unwrap(res)
 }
 
 // Straight to the results without a vote, for the evening that ran long.
 // Does not rewrite voting_mode — the round was a voting round.
 export async function skipVoting(roundId: string) {
-  const res = await supabase.rpc('skip_voting', { p_round_id: roundId })
+  const res = await guardedRpc('skip_voting', { p_round_id: roundId })
   return unwrap(res)
 }
 
@@ -1909,7 +1946,7 @@ export async function skipVoting(roundId: string) {
 // version left the menu one course short of the table between the two calls —
 // exactly the condition generate_assignment refuses on (0036).
 export async function changeCourse(roundId: string, slotId: string, course: Course) {
-  const res = await supabase.rpc('change_course', {
+  const res = await guardedRpc('change_course', {
     p_round_id: roundId,
     p_slot_id: slotId,
     p_course: course,
@@ -1926,7 +1963,7 @@ export const BRIEFS_EXIST = 'BRIEFS_EXIST'
 // it cost. Without discardBriefs it raises BRIEFS_EXIST instead of deleting
 // anything (0041).
 export async function clearAssignment(roundId: string, discardBriefs = false) {
-  const res = await supabase.rpc('clear_assignment', {
+  const res = await guardedRpc('clear_assignment', {
     p_round_id: roundId,
     p_discard_briefs: discardBriefs,
   })
@@ -1952,7 +1989,7 @@ export interface ManualMenuRow {
 }
 
 export async function getManualMenu(roundId: string) {
-  const res = await supabase.rpc('get_manual_menu', { p_round_id: roundId })
+  const res = await guardedRpc('get_manual_menu', { p_round_id: roundId })
   return unwrap<ManualMenuRow[]>(res)
 }
 
@@ -1972,17 +2009,17 @@ export const VOTES_ALREADY_CAST = 'VOTES_ALREADY_CAST'
 // Asked, not derived from the member count: somebody who turned up without
 // cooking still ate, and still gets a say.
 export async function setManualVoters(roundId: string, voters: number | null) {
-  const res = await supabase.rpc('set_manual_voters', { p_round_id: roundId, p_voters: voters })
+  const res = await guardedRpc('set_manual_voters', { p_round_id: roundId, p_voters: voters })
   return unwrap(res)
 }
 
 export async function getManualTally(roundId: string) {
-  const res = await supabase.rpc('get_manual_tally', { p_round_id: roundId })
+  const res = await guardedRpc('get_manual_tally', { p_round_id: roundId })
   return unwrap<ManualTallyRow[]>(res)
 }
 
 export async function setManualTally(roundId: string, briefId: string, place: number, voters: number) {
-  const res = await supabase.rpc('set_manual_tally', {
+  const res = await guardedRpc('set_manual_tally', {
     p_round_id: roundId,
     p_brief_id: briefId,
     p_place: place,
@@ -1992,14 +2029,14 @@ export async function setManualTally(roundId: string, briefId: string, place: nu
 }
 
 export async function closeManualVote(roundId: string) {
-  const res = await supabase.rpc('close_manual_vote', { p_round_id: roundId })
+  const res = await guardedRpc('close_manual_vote', { p_round_id: roundId })
   return unwrap(res)
 }
 
 export const MENU_LOCKED = 'MENU_LOCKED'
 
 export async function setSlotMode(roundId: string, mode: SlotMode) {
-  const res = await supabase.rpc('set_slot_mode', { p_round_id: roundId, p_mode: mode })
+  const res = await guardedRpc('set_slot_mode', { p_round_id: roundId, p_mode: mode })
   return unwrap(res)
 }
 
@@ -2013,7 +2050,7 @@ export interface MenuStatus {
 // enforced and never shown, so being one short produced a refusal instead
 // of a number.
 export async function getMenuStatus(roundId: string) {
-  const res = await supabase.rpc('get_menu_status', { p_round_id: roundId })
+  const res = await guardedRpc('get_menu_status', { p_round_id: roundId })
   const rows = unwrap<MenuStatus[]>(res)
   return rows[0] ?? null
 }
@@ -2024,12 +2061,12 @@ export const COURSE_IN_USE = 'COURSE_IN_USE'
 // about the round's phase, not about who you are, and RLS can only answer
 // the second question (0027).
 export async function addCourse(roundId: string, course: Course) {
-  const res = await supabase.rpc('add_course', { p_round_id: roundId, p_course: course })
+  const res = await guardedRpc('add_course', { p_round_id: roundId, p_course: course })
   return unwrap<string>(res)
 }
 
 export async function removeCourse(roundId: string, slotId: string) {
-  const res = await supabase.rpc('remove_course', { p_round_id: roundId, p_slot_id: slotId })
+  const res = await guardedRpc('remove_course', { p_round_id: roundId, p_slot_id: slotId })
   return unwrap(res)
 }
 
@@ -2063,7 +2100,7 @@ export interface BoardMessage {
 }
 
 export async function getBoard(roundId: string) {
-  const res = await supabase.rpc('get_board', { p_round_id: roundId })
+  const res = await guardedRpc('get_board', { p_round_id: roundId })
   return unwrap<BoardMessage[]>(res)
 }
 
@@ -2077,7 +2114,7 @@ export async function postToBoard(
    *  else, and never a reply's own id: the fridge is one level deep. */
   parentId: string | null = null,
 ) {
-  const res = await supabase.rpc('post_to_board', {
+  const res = await guardedRpc('post_to_board', {
     p_round_id: roundId,
     p_template_id: templateId,
     p_slot_value: slotValue,
@@ -2099,30 +2136,30 @@ export const MENU_VISIBILITIES: MenuVisibility[] = ['HIDDEN', 'NAMES', 'HOST']
 export const MENU_NOT_SHARED = 'MENU_NOT_SHARED'
 
 export async function setMenuVisibility(roundId: string, value: MenuVisibility) {
-  const res = await supabase.rpc('set_menu_visibility', { p_round_id: roundId, p_value: value })
+  const res = await guardedRpc('set_menu_visibility', { p_round_id: roundId, p_value: value })
   return unwrap(res)
 }
 
 /** Course and dish name for what has already been sent. No author, no cook. */
 export async function getRoundDishes(roundId: string) {
-  const res = await supabase.rpc('get_round_dishes', { p_round_id: roundId })
+  const res = await guardedRpc('get_round_dishes', { p_round_id: roundId })
   return unwrap<{ course: Course; dish_name: string }[]>(res)
 }
 
 // How many board lines have appeared since you last opened the fridge. Your
 // own never count — nothing you just said is news to you (0034).
 export async function getBoardUnread(roundId: string) {
-  const res = await supabase.rpc('get_board_unread', { p_round_id: roundId })
+  const res = await guardedRpc('get_board_unread', { p_round_id: roundId })
   return unwrap<number>(res)
 }
 
 export async function markBoardRead(roundId: string) {
-  const res = await supabase.rpc('mark_board_read', { p_round_id: roundId })
+  const res = await guardedRpc('mark_board_read', { p_round_id: roundId })
   return unwrap(res)
 }
 
 export async function reportBoardMessage(messageId: string) {
-  const res = await supabase.rpc('report_board_message', { p_message_id: messageId })
+  const res = await guardedRpc('report_board_message', { p_message_id: messageId })
   return unwrap(res)
 }
 
@@ -2135,7 +2172,7 @@ export interface AllergenDish {
 }
 
 export async function getAllergenDishes(roundId: string) {
-  const res = await supabase.rpc('get_allergen_dishes', { p_round_id: roundId })
+  const res = await guardedRpc('get_allergen_dishes', { p_round_id: roundId })
   return unwrap<AllergenDish[]>(res)
 }
 
@@ -2169,21 +2206,21 @@ export interface FilRougeOption {
 }
 
 export async function listFilRouge() {
-  const res = await supabase.rpc('list_fil_rouge', {})
+  const res = await guardedRpc('list_fil_rouge', {})
   return unwrap<FilRougeOption[]>(res)
 }
 
 /** Next Sunday's selection, readable today — a hard week becomes a reason to
  *  come back rather than a disappointment. */
 export async function filRougeUpcoming() {
-  const res = await supabase.rpc('fil_rouge_upcoming', {})
+  const res = await guardedRpc('fil_rouge_upcoming', {})
   return unwrap<{ category: FilRougeCategory; code: string; group_code: string | null }[]>(res)
 }
 
 /** When the shelf turns over. Asked of the server rather than worked out here:
  *  the rule is midday in Paris, which is not a fixed offset from UTC. */
 export async function filRougeTurnsAt() {
-  const res = await supabase.rpc('fil_rouge_turns_at', { p_at: new Date().toISOString() })
+  const res = await guardedRpc('fil_rouge_turns_at', { p_at: new Date().toISOString() })
   return unwrap<string>(res)
 }
 
@@ -2198,7 +2235,7 @@ export interface FilRougePickOfTheWeek {
 }
 
 export async function filRougeEditorial() {
-  const res = await supabase.rpc('fil_rouge_editorial', {})
+  const res = await guardedRpc('fil_rouge_editorial', {})
   return unwrap<FilRougePickOfTheWeek[]>(res) ?? []
 }
 
@@ -2208,7 +2245,7 @@ export async function setFilRouge(
   code: string | null,
   scope: FilRougeScope = 'SHARED',
 ) {
-  const res = await supabase.rpc('set_fil_rouge', {
+  const res = await guardedRpc('set_fil_rouge', {
     p_round_id: roundId,
     p_category: category,
     p_code: code,
@@ -2221,7 +2258,7 @@ export async function setFilRouge(
  *  Informs, never refuses (0069) — the host is the only person who can still
  *  change it, so they are the person to tell. */
 export async function filRougeClash(roundId: string, category: FilRougeCategory, codes: string[]) {
-  const res = await supabase.rpc('fil_rouge_clash', {
+  const res = await guardedRpc('fil_rouge_clash', {
     p_round_id: roundId,
     p_category: category,
     p_codes: codes,
@@ -2251,7 +2288,7 @@ export interface RoundFilRouge {
 }
 
 export async function getFilRouge(roundId: string) {
-  const res = await supabase.rpc('get_fil_rouge', { p_round_id: roundId })
+  const res = await guardedRpc('get_fil_rouge', { p_round_id: roundId })
   const rows = unwrap<RoundFilRouge[]>(res)
   return rows?.[0] ?? null
 }

@@ -14,7 +14,6 @@
   "enableNotifications": true,
   "startUrl": "/",
   "iconUrl": "https://covertcook.netlify.app/pwa/pwa-512x512.png",
-  "maskableIconUrl": "https://covertcook.netlify.app/pwa/pwa-maskable-512x512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./upload.jks",

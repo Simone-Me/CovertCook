@@ -19,8 +19,13 @@
 // tap on it opens.
 
 import { clientsClaim } from 'workbox-core'
-import { precacheAndRoute, cleanupOutdatedCaches, type PrecacheEntry } from 'workbox-precaching'
-import { registerRoute } from 'workbox-routing'
+import {
+  createHandlerBoundToURL,
+  precacheAndRoute,
+  cleanupOutdatedCaches,
+  type PrecacheEntry,
+} from 'workbox-precaching'
+import { NavigationRoute, registerRoute } from 'workbox-routing'
 import { CacheFirst, NetworkFirst } from 'workbox-strategies'
 import { ExpirationPlugin } from 'workbox-expiration'
 
@@ -32,11 +37,21 @@ declare const self: ServiceWorkerGlobalScope & {
   __WB_MANIFEST: (string | PrecacheEntry)[]
 }
 
-self.skipWaiting()
+void self.skipWaiting()
 clientsClaim()
 
 cleanupOutdatedCaches()
 precacheAndRoute(self.__WB_MANIFEST)
+
+// Any page the app owns opens offline: the SPA shell comes from the precache
+// whatever the path (/rounds/abc, /join?code=...). Without it only '/' itself
+// answered offline, which is what PWABuilder's offline check and Play's TWA
+// review both test. The push-notification and Supabase paths are not pages.
+registerRoute(
+  new NavigationRoute(createHandlerBoundToURL('/index.html'), {
+    denylist: [/^\/rest\//, /^\/auth\//, /^\/functions\//, /^\/\.well-known\//],
+  }),
+)
 
 registerRoute(
   ({ url, request }) => url.pathname.startsWith('/rest/v1/') && request.method === 'GET',

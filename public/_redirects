@@ -4,7 +4,7 @@
 # already sent, in the Play listing and in installed PWAs' cached manifests.
 /pwa-192x192.png          /pwa/pwa-192x192.png          301
 /pwa-512x512.png          /pwa/pwa-512x512.png          301
-/pwa-maskable-512x512.png /pwa/pwa-maskable-512x512.png 301
+/pwa-maskable-512x512.png /pwa/pwa-512x512.png 301
 /favicon-32.png           /favicons/favicon-32.png      301
 /favicon-192.png          /favicons/favicon-192.png     301
 /apple-touch-icon.png     /favicons/apple-touch-icon.png 301

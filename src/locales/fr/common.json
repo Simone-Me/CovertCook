@@ -72,6 +72,10 @@
       "checking": "Vérification…",
       "free": "Libre — il est à vous.",
       "taken": "Déjà pris. Essayez-en un autre.",
+      "invalid": "Seulement les lettres a à z (sans accents), chiffres et - _ . sont autorisés, 2 caractères minimum.",
+      "reserved": "Ce nom ressemble à CovertCook ou à son équipe. Choisissez-en un autre.",
+      "offensive": "Ce nom n’est pas autorisé. Choisissez-en un autre.",
+      "rule": "Les noms sont en minuscules ; les espaces deviennent « - ».",
       "changeLater": "Le changer plus tard est prévu dans la version Crème.",
       "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
     },
@@ -941,6 +945,7 @@
     }
   },
   "errors": {
+    "profanity": "Ce texte contient une vulgarité (« {{word}} »). Merci de changer ce mot.",
     "generic": "Une erreur est survenue. Réessayez.",
     "notAuthenticated": "Vous devez être connecté.",
     "databaseBehind": {

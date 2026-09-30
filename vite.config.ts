@@ -121,7 +121,6 @@ export default defineConfig({
         icons: [
           { src: 'pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' },
           { src: 'pwa/pwa-512x512.png', sizes: '512x512', type: 'image/png' },
-          { src: 'pwa/pwa-maskable-512x512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       injectManifest: {
@@ -132,7 +131,7 @@ export default defineConfig({
         // flat: the recipe card, the shopping list, the dietary panel. These
         // are fetched when the grid opens and then cached at runtime (src/sw.ts),
         // which costs one load and nothing afterwards.
-        globIgnores: ['**/icons/allergy/*', '**/icons/diet/*'],
+        globIgnores: ['**/icons/allergy/*', '**/icons/diet/*', '**/screenshots/*'],
       },
     }),
   ],

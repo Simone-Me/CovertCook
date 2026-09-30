@@ -2,8 +2,6 @@ name: CI
 
 # Runs on every pull request and on main, so nothing reaches Netlify or Play
 # without lint, type-check and a production build having passed.
-# There is no test runner in the project yet: when one is added (vitest), put
-# `npm test` after the lint step and Sonar below will pick up its coverage.
 on:
   pull_request:
   push:
@@ -27,6 +25,8 @@ jobs:
       - run: npm ci
       - name: Lint (oxlint)
         run: npm run lint
+      - name: Tests (vitest)
+        run: npm test
       - name: Type-check and build
         run: npm run build
         env:

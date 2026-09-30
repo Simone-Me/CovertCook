@@ -10,6 +10,7 @@ import { ALLERGENS, DIETS, OTHER_CODE } from '../../lib/foodTags'
 import { PasswordField } from '../../components/PasswordField'
 import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/password'
 import { useAuth } from '../../lib/auth'
+import { finalName, nameProblem, normalizeName, type NameProblem } from '../../lib/displayName'
 import {
   completeSignup,
   displayNameAvailable,
@@ -21,7 +22,7 @@ import {
 // keystroke, short enough that the answer feels like part of typing.
 const NAME_CHECK_DEBOUNCE_MS = 400
 
-type NameState = 'idle' | 'checking' | 'free' | 'taken'
+type NameState = 'idle' | 'checking' | 'free' | 'taken' | NameProblem
 
 /**
  * Where you are in signing up. Three forms, and the mail confirmation between
@@ -78,9 +79,16 @@ export function SignUpPage() {
   // person has typed on, and complete_signup re-checks under the unique index
   // for the two people who pick the same name in the same second.
   useEffect(() => {
-    const name = displayName.trim()
+    const name = finalName(displayName)
     if (!name) {
       setNameState('idle')
+      return
+    }
+    // Refused here first so the person is told why; the server holds the same
+    // rules and is the one that counts.
+    const problem = nameProblem(name)
+    if (problem) {
+      setNameState(problem)
       return
     }
     setNameState('checking')
@@ -180,8 +188,8 @@ export function SignUpPage() {
     e.preventDefault()
     setError(null)
 
-    if (nameState === 'taken') {
-      setError(t('auth.name.taken'))
+    if (nameState !== 'free') {
+      setError(t(`auth.name.${nameState === 'idle' || nameState === 'checking' ? 'invalid' : nameState}`))
       return
     }
 
@@ -198,7 +206,7 @@ export function SignUpPage() {
     setSubmitting(true)
     try {
       await completeSignup({
-        displayName,
+        displayName: finalName(displayName),
         locale: i18n.language.startsWith('en') ? 'en' : 'fr',
         hasNoRestrictions: noneDeclared,
         dietaryEntries,
@@ -212,7 +220,13 @@ export function SignUpPage() {
       // longer exists. AuthProvider clears such sessions on load, but a tab
       // already open when the account vanished only finds out here. Say
       // what happened instead of forwarding Postgres's constraint name.
-      if (message.includes('display_name_taken')) {
+      const refused = (['reserved', 'offensive', 'invalid'] as const).find((k) =>
+        message.includes(`display_name_${k}`),
+      )
+      if (refused) {
+        setNameState(refused)
+        setError(t(`auth.name.${refused}`))
+      } else if (message.includes('display_name_taken')) {
         // Somebody took it between the check and the submit.
         setNameState('taken')
         setError(t('auth.name.taken'))
@@ -227,6 +241,7 @@ export function SignUpPage() {
   // Reusing the field-status colours the name check introduced: green when a
   // rule is met, red when it is actively wrong, silent while nothing has been
   // typed. Nobody should be told they are wrong before they have started.
+  const nameBad = nameState !== 'free' && nameState !== 'idle' && nameState !== 'checking'
   const passwordState = !password ? 'idle' : checkPassword(password).valid ? 'free' : 'taken'
   const confirmState = !passwordAgain ? 'idle' : password === passwordAgain ? 'free' : 'taken'
 
@@ -358,18 +373,21 @@ export function SignUpPage() {
               minLength={1}
               maxLength={60}
               value={displayName}
-              onChange={(e) => setDisplayName(e.target.value)}
-              className={nameState === 'free' ? 'is-free' : nameState === 'taken' ? 'is-taken' : ''}
-              aria-invalid={nameState === 'taken'}
+              onChange={(e) => setDisplayName(normalizeName(e.target.value))}
+              autoCapitalize="none"
+              autoCorrect="off"
+              spellCheck={false}
+              className={nameState === 'free' ? 'is-free' : nameBad ? 'is-taken' : ''}
+              aria-invalid={nameBad}
               aria-describedby="displayName-status"
             />
             {/* The border carries the answer, but never alone: colour is not
                 readable to everyone, and "taken" is the kind of thing a person
                 needs in words before they retype. */}
-            <p id="displayName-status" className={`field-status is-${nameState}`}>
+            <p id="displayName-status" className={`field-status is-${nameBad ? 'taken' : nameState}`}>
               {nameState !== 'idle' && t(`auth.name.${nameState}`)}
             </p>
-            <p className="muted small-italic">{t('auth.name.changeLater')}</p>
+            <p className="muted small-italic">{t('auth.name.rule')} {t('auth.name.changeLater')}</p>
           </div>
 
               <button
