@@ -525,7 +525,7 @@ export function ResultsScreen({ reached }: ScreenProps) {
         <div className="stack">
           <h2 style={{ margin: 0 }}>{t('album.title')}</h2>
           {photo ? (
-            <img className="album__photo" src="/mais.avif" alt="" />
+            <img className="album__photo" src="/fil-rouge/maize.avif" alt="" />
           ) : (
             <>
               <div className="album__pending" aria-hidden="true" />
@@ -576,7 +576,7 @@ export function ProfileScreen() {
           <span className="fold__aside">1</span>
         </summary>
         <div className="albumstrip">
-          <img className="albumprint" src="/mais.avif" alt="" />
+          <img className="albumprint" src="/fil-rouge/maize.avif" alt="" />
         </div>
       </details>
       <button type="button" data-tour="finish">
@@ -590,7 +590,7 @@ export function EndScreen({ onCreate, onHome }: { onCreate: () => void; onHome: 
   const { t } = useTranslation()
   return (
     <div className="stack sheet tour__end">
-      <img src="/pwa-maskable-white-borders.png" alt="" width={96} height={96} className="tour__end-face" />
+      <img src="/logos/hat-red-on-white.png" alt="" width={96} height={96} className="tour__end-face" />
       <h1>{t('tutorial.endTitle')}</h1>
       <p>{t('tutorial.endBody')}</p>
       <div className="row">

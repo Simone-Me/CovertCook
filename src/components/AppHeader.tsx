@@ -45,7 +45,7 @@ export function AppHeader() {
       <Link to="/" className="app-logo" aria-label={t('rounds.myRounds')}>
         <span className="app-logo__back" aria-hidden="true">←</span>
         {/* Decorative: the name is right beside it and says the same thing. */}
-        <img className="app-logo__mark" src="/logo.webp" alt="" aria-hidden="true" width={26} height={26} />
+        <img className="app-logo__mark" src="/logos/logo-mark.webp" alt="" aria-hidden="true" width={26} height={26} />
         <span className="app-logo__name">{t('app.name')}</span>
       </Link>
       {/* Between the way home and the way to yourself, because it is neither:

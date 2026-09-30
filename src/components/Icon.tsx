@@ -9,24 +9,24 @@
 // for. The 512px masters are in assets-src/icons/, out of the build, because
 // everything in public/ is precached by the service worker (DESIGN.md §4).
 const ICONS = {
-  chefs: 'chef',
-  myRecipe: 'recipe',
-  received: 'cooking',
+  chefs: 'chefs',
+  myRecipe: 'my-recipe',
+  received: 'received-dish',
   messages: 'chat',
-  fridge: 'mini_fridge',
-  chefWrote: 'message_alert',
-  allergies: 'allergy',
-  where: 'map',
-  hands: 'raise-hand',
+  fridge: 'fridge',
+  chefWrote: 'chef-wrote',
+  allergies: 'allergies',
+  where: 'where',
+  hands: 'hands',
   ballot: 'ballot',
-  pass: 'kitchen',
-  chain: 'diagram',
-  winner: 'chef_winner_result',
-  help: 'loupe_question',
+  pass: 'pass',
+  chain: 'chain',
+  winner: 'winner',
+  help: 'help',
   // The jar the table drops its coins into. The costs drawer wore the map pin
   // for a while, borrowed from the info drawer beside it — two envelopes with
   // the same mark, one of them about money.
-  costs: 'jar_money',
+  costs: 'costs',
   menu: 'menu',
 } as const
 
@@ -36,7 +36,7 @@ export function Icon({ name, size = 26 }: { name: IconName; size?: number }) {
   return (
     <img
       className="icon"
-      src={`/${ICONS[name]}.webp`}
+      src={`/icons/${ICONS[name]}.webp`}
       alt=""
       aria-hidden="true"
       // Inline, not just attributes: a stylesheet rule that stretched these to

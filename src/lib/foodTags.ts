@@ -72,5 +72,5 @@ export function isFoodCode(label: string): boolean {
 
 export function foodIconSrc(code: string): string | null {
   const found = BY_CODE.get(code)
-  return found ? `/${found.dir}/${found.tag.file}.webp` : null
+  return found ? `/icons/${found.dir}/${found.tag.file}.webp` : null
 }

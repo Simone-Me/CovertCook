@@ -25,7 +25,7 @@ export function FoodLabel({ label, stacked = false }: { label: string; stacked?:
   if (!isFoodCode(label)) {
     return (
       <span className={`food-label food-label--typed${stacked ? ' food-label--stacked' : ''}`}>
-        <img src="/allergy/other.webp" alt="" aria-hidden="true" loading="lazy" />
+        <img src="/icons/allergy/other.webp" alt="" aria-hidden="true" loading="lazy" />
         <em>{label}</em>
       </span>
     )

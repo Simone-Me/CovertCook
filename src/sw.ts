@@ -51,7 +51,7 @@ registerRoute(
 // than NetworkFirst: an icon of a peanut does not change, so once it is on the
 // device there is no reason to ask about it again.
 registerRoute(
-  ({ url }) => url.pathname.startsWith('/allergy/') || url.pathname.startsWith('/diet/'),
+  ({ url }) => url.pathname.startsWith('/icons/allergy/') || url.pathname.startsWith('/icons/diet/'),
   new CacheFirst({
     cacheName: 'covertcook-food-icons',
     plugins: [new ExpirationPlugin({ maxEntries: 60, maxAgeSeconds: 60 * 60 * 24 * 90 })],
@@ -85,8 +85,8 @@ self.addEventListener('push', (event) => {
   const title = payload.title ?? 'CovertCook'
   const options: NotificationOptions = {
     body: payload.body ?? '',
-    icon: '/pwa-192x192.png',
-    badge: '/favicon-192.png',
+    icon: '/pwa/pwa-192x192.png',
+    badge: '/favicons/favicon-192.png',
     // One tag per round-and-kind, so a second push about the same moment
     // replaces the first instead of stacking. Nobody needs to be told twice
     // that voting opened.

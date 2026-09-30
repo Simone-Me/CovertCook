@@ -719,7 +719,7 @@
   border: 1px solid #c9d6dc;
   border-radius: 6px;
   background:
-    url('/inside_fridge.webp') center / cover no-repeat,
+    url('/backgrounds/fridge-inside.webp') center / cover no-repeat,
     #e8f2f6;
 }
 

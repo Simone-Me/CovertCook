@@ -40,7 +40,7 @@ export function Coach({
   const { t } = useTranslation()
   return (
     <aside className={`coach${nudge ? ' coach--nudge' : ''}`} aria-live="polite" aria-label={t('tutorial.title')}>
-      <img className="coach__face" src="/pwa-maskable-white-borders.png" alt="" width={56} height={56} />
+      <img className="coach__face" src="/logos/hat-red-on-white.png" alt="" width={56} height={56} />
       <div className="coach__bubble">
         <p className="coach__say">{say}</p>
         <div className="coach__row">
