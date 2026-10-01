@@ -4,6 +4,8 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 
 import fr from '../locales/fr/common.json'
 import en from '../locales/en/common.json'
+import it from '../locales/it/common.json'
+import es from '../locales/es/common.json'
 
 // EN is the default locale. Every user-facing string lives in these
 // resource files, never inline in a component — that includes email
@@ -15,7 +17,7 @@ import en from '../locales/en/common.json'
 // back across locales itself, while get_message_templates does not, which
 // is why adding a third language needs more than a third JSON file. See
 // PRESENTATION.md, "Internationalisation".
-export const SUPPORTED_LOCALES = ['en', 'fr'] as const
+export const SUPPORTED_LOCALES = ['en', 'fr', 'it', 'es'] as const
 export type SupportedLocale = (typeof SUPPORTED_LOCALES)[number]
 
 i18n
@@ -25,6 +27,8 @@ i18n
     resources: {
       fr: { common: fr },
       en: { common: en },
+      it: { common: it },
+      es: { common: es },
     },
     fallbackLng: 'en',
     supportedLngs: SUPPORTED_LOCALES,

@@ -3,7 +3,7 @@
     "languageChange": "Change the language",
     "languageSearch": "Search for a language",
     "languageConfirm": "Switch to {{lang}}",
-    "languageNone": "No language by that name — this app is written in two so far.",
+    "languageNone": "No language by that name — this app is written in four.",
     "name": "CovertCook",
     "tagline": "One dinner, one secret recipe, one chain.",
     "language": "Language"
@@ -569,7 +569,7 @@
         "ask": "Can the menu be seen while it is being written?",
         "no": "No, it's the surprise",
         "noHint": "Nobody sees a dish before the dinner.",
-        "yes": "Yes, to avoid three tiramisùs",
+        "yes": "Yes, to avoid three tiramisù",
         "yesHint": "Dish names only — never who wrote them or who is cooking them.",
         "host": "Just me, to keep track",
         "hostHint": "You see the dishes sent; everyone else keeps the surprise."
@@ -621,7 +621,6 @@
     },
     "copyCodeShort": "code",
     "copyLinkShort": "link",
-    "chefCount": "{{count}} chef",
     "guestCount": "{{count}} guest",
     "guestCount_other": "{{count}} guests",
     "changes": {
@@ -993,7 +992,9 @@
     "noRestrictions": "Nothing listed. Add anything a cook would need to know.",
     "locale": {
       "en": "English",
-      "fr": "Français"
+      "fr": "Français",
+      "it": "Italiano",
+      "es": "Español"
     },
     "noneAllergy": "— no allergy declared",
     "noneDiet": "— no diet declared",

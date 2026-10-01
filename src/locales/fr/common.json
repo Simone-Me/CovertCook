@@ -3,7 +3,7 @@
     "languageChange": "Changer de langue",
     "languageSearch": "Chercher une langue",
     "languageConfirm": "Passer en {{lang}}",
-    "languageNone": "Aucune langue de ce nom — l’application en parle deux pour l’instant.",
+    "languageNone": "Aucune langue de ce nom — cette appli est écrite en quatre langues.",
     "name": "CovertCook",
     "tagline": "Un dîner, une recette secrète, une seule chaîne.",
     "language": "Langue"
@@ -569,7 +569,7 @@
         "ask": "Le menu se voit pendant qu’on écrit ?",
         "no": "Non, c’est la surprise",
         "noHint": "Personne ne voit un plat avant le dîner.",
-        "yes": "Oui, pour éviter trois tiramisùs",
+        "yes": "Oui, pour éviter trois tiramisù",
         "yesHint": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine.",
         "host": "Seulement moi, pour suivre",
         "hostHint": "Vous voyez les plats envoyés, les autres gardent la surprise."
@@ -621,7 +621,6 @@
     },
     "copyCodeShort": "code",
     "copyLinkShort": "lien",
-    "chefCount": "{{count}} chef",
     "guestCount": "{{count}} invité",
     "guestCount_other": "{{count}} invités",
     "changes": {
@@ -993,7 +992,9 @@
     "noRestrictions": "Rien pour l'instant. Ajoutez ce qu'un cuisinier doit savoir.",
     "locale": {
       "en": "English",
-      "fr": "Français"
+      "fr": "Français",
+      "it": "Italiano",
+      "es": "Español"
     },
     "noneAllergy": "— aucune allergie déclarée",
     "noneDiet": "— aucun régime déclaré",

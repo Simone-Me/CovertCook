@@ -46,7 +46,7 @@ export type AuthEmailAction =
   | 'email_change_current'
   | 'email_change_new'
 
-export type EmailLocale = 'en' | 'fr'
+export type EmailLocale = 'en' | 'fr' | 'it' | 'es'
 
 export interface AuthEmailInput {
   url: string
@@ -59,7 +59,7 @@ export interface AuthEmailInput {
 const DEFAULT_APP_URL = 'https://covertcook.netlify.app'
 
 // Shared furniture: the same in every mail, so it is written once.
-const CHROME = {
+const CHROME: Record<'en' | 'fr', { fallback: string; ignore: string; spam: string; signoff: string }> = {
   en: {
     fallback: 'If the button does nothing, paste this into your browser:',
     ignore:
@@ -76,7 +76,28 @@ const CHROME = {
       'Class\u00e9 en ind\u00e9sirable ? Le marquer \u00ab non ind\u00e9sirable \u00bb une fois suffit pour que le reste du courrier de votre d\u00eener arrive l\u00e0 o\u00f9 vous le trouverez.',
     signoff: '\u00c0 tout \u00e0 l\u2019heure au passe.',
   },
-} as const
+}
+
+// Italian and Spanish, kept apart from the two reference locales so a missing
+// string here can never break the English or French mail.
+const CHROME_EXTRA: Record<'it' | 'es', typeof CHROME.en> = {
+  it: {
+    fallback: 'Se il pulsante non fa nulla, incolla questo nel tuo browser:',
+    ignore:
+      'Se non eri tu, ignora questo messaggio. Non è stato creato nulla che questo link non crei, e scade da solo.',
+    spam:
+      'Finita nello spam? Segnarla una volta come «non spam» fa sì che il resto della posta della tua cena arrivi dove puoi trovarla.',
+    signoff: 'A tra poco al pass.',
+  },
+  es: {
+    fallback: 'Si el botón no hace nada, pega esto en tu navegador:',
+    ignore:
+      'Si no fuiste tú, ignora este mensaje. No se ha creado nada que este enlace no cree, y caduca solo.',
+    spam:
+      '¿Ha acabado en spam? Marcarlo una vez como «no es spam» hace que el resto del correo de tu cena llegue donde puedas encontrarlo.',
+    signoff: 'Hasta ahora en el pass.',
+  },
+}
 
 interface ActionCopy {
   subject: string
@@ -86,7 +107,7 @@ interface ActionCopy {
   button: string
 }
 
-const COPY: Record<AuthEmailAction, Record<EmailLocale, ActionCopy>> = {
+const COPY: Record<AuthEmailAction, Record<'en' | 'fr', ActionCopy>> = {
   signup: {
     en: {
       subject: 'Confirm your email \u2014 CovertCook',
@@ -214,6 +235,99 @@ const COPY: Record<AuthEmailAction, Record<EmailLocale, ActionCopy>> = {
   },
 }
 
+const CHANGE_IT: ActionCopy = {
+    subject: 'Conferma il tuo nuovo indirizzo — CovertCook',
+    preheader: 'Conferma il cambio e il nuovo indirizzo prende il posto.',
+    heading: 'Conferma il nuovo indirizzo',
+    lead:
+      'È stata fatta una richiesta per cambiare l’indirizzo di questo account CovertCook. Confermala qui; finché entrambi i lati non sono confermati, nulla cambia.',
+    button: 'Conferma il cambio',
+  }
+const CHANGE_ES: ActionCopy = {
+    subject: 'Confirma tu nueva dirección — CovertCook',
+    preheader: 'Confirma el cambio y la nueva dirección toma el relevo.',
+    heading: 'Confirma la nueva dirección',
+    lead:
+      'Se ha pedido cambiar la dirección de esta cuenta de CovertCook. Confírmalo aquí; hasta que ambos extremos estén confirmados, nada cambia.',
+    button: 'Confirmar el cambio',
+  }
+
+const COPY_EXTRA: Record<AuthEmailAction, Record<'it' | 'es', ActionCopy>> = {
+  signup: {
+    it: {
+      subject: 'Conferma la tua email — CovertCook',
+      preheader: 'Un link e il tuo posto a tavola diventa reale.',
+      heading: 'Un link e sei dentro',
+      lead:
+        'Qualcuno — supponiamo tu — sta creando un account CovertCook. Conferma questo indirizzo e il tuo posto a tavola diventa reale.',
+      button: 'Conferma la mia email',
+    },
+    es: {
+      subject: 'Confirma tu correo — CovertCook',
+      preheader: 'Un enlace y tu sitio en la mesa es real.',
+      heading: 'Un enlace y estás dentro',
+      lead:
+        'Alguien — suponemos que tú — está creando una cuenta de CovertCook. Confirma esta dirección y tu sitio en la mesa será real.',
+      button: 'Confirmar mi correo',
+    },
+  },
+  recovery: {
+    it: {
+      subject: 'Reimposta la tua password — CovertCook',
+      preheader: 'Una nuova password, e nient’altro cambia.',
+      heading: 'Scegli una nuova password',
+      lead:
+        'Qualcuno ha chiesto di reimpostare la password di questo indirizzo. Segui il link e scegline una nuova — le tue cene, le tue ricette e il tuo nome restano intatti in ogni caso.',
+      button: 'Imposta una nuova password',
+    },
+    es: {
+      subject: 'Restablece tu contraseña — CovertCook',
+      preheader: 'Una contraseña nueva, y nada más cambia.',
+      heading: 'Elige una contraseña nueva',
+      lead:
+        'Alguien ha pedido restablecer la contraseña de esta dirección. Sigue el enlace y elige una nueva — tus cenas, tus recetas y tu nombre quedan intactos en cualquier caso.',
+      button: 'Definir una contraseña nueva',
+    },
+  },
+  invite: {
+    it: {
+      subject: 'Sei invitato — CovertCook',
+      preheader: 'Ti è stato tenuto un posto.',
+      heading: 'Ti è stato tenuto un posto',
+      lead:
+        'Qualcuno ha creato un account CovertCook per questo indirizzo. Segui il link per reclamarlo e scegliere la tua password.',
+      button: 'Reclama il mio posto',
+    },
+    es: {
+      subject: 'Estás invitado — CovertCook',
+      preheader: 'Te han guardado un sitio.',
+      heading: 'Te han guardado un sitio',
+      lead:
+        'Alguien ha creado una cuenta de CovertCook para esta dirección. Sigue el enlace para reclamarla y elegir tu contraseña.',
+      button: 'Reclamar mi sitio',
+    },
+  },
+  magiclink: {
+    it: {
+      subject: 'Il tuo link di accesso — CovertCook',
+      preheader: 'Un link, senza password.',
+      heading: 'La tua entrata',
+      lead: 'Segui il link per accedere. Funziona una sola volta, e solo da questo messaggio.',
+      button: 'Accedi',
+    },
+    es: {
+      subject: 'Tu enlace de acceso — CovertCook',
+      preheader: 'Un enlace, sin contraseña.',
+      heading: 'Tu entrada',
+      lead: 'Sigue el enlace para iniciar sesión. Funciona una sola vez, y solo desde este mensaje.',
+      button: 'Iniciar sesión',
+    },
+  },
+  email_change: { it: CHANGE_IT, es: CHANGE_ES },
+  email_change_current: { it: CHANGE_IT, es: CHANGE_ES },
+  email_change_new: { it: CHANGE_IT, es: CHANGE_ES },
+}
+
 // CovertCook's palette (DESIGN.md §1), as literals because email has no
 // custom properties.
 const LINO = '#FFFCF6'
@@ -229,8 +343,8 @@ const MUTED = '#7A6E66'
 // edit rather than a second template to keep in sync.
 export function authEmail(action: AuthEmailAction, input: AuthEmailInput) {
   const locale: EmailLocale = input.locale ?? 'en'
-  const c = COPY[action][locale]
-  const x = CHROME[locale]
+  const c = locale === 'it' || locale === 'es' ? COPY_EXTRA[action][locale] : COPY[action][locale]
+  const x = locale === 'it' || locale === 'es' ? CHROME_EXTRA[locale] : CHROME[locale]
   const url = input.url
   const appUrl = (input.appUrl ?? DEFAULT_APP_URL).replace(/\/$/, '')
 

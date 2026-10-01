@@ -122,6 +122,52 @@ const COPY: Record<Kind, Record<'en' | 'fr', { title: string; body: string }>> =
   },
 }
 
+// Italian and Spanish, apart from the two reference locales: a missing line
+// here falls back to English instead of breaking the notification.
+const COPY_EXTRA: Record<Kind, Record<'it' | 'es', { title: string; body: string }>> = {
+  ASSIGNED: {
+    it: { title: 'Il tuo cuoco è stato scelto', body: 'Apri la busta e scrivi la sua ricetta.' },
+    es: { title: 'Tu cocinero ha sido elegido', body: 'Abre el sobre y escribe su receta.' },
+  },
+  BRIEF_RECEIVED: {
+    it: { title: 'La tua ricetta è arrivata', body: 'Qualcuno ha deciso cosa cucinerai.' },
+    es: { title: 'Tu receta ha llegado', body: 'Alguien ha decidido lo que vas a cocinar.' },
+  },
+  VOTING: {
+    it: { title: 'Il voto è aperto', body: 'Classifica i piatti prima che si sparecchi.' },
+    es: { title: 'La votación está abierta', body: 'Clasifica los platos antes de que recojan la mesa.' },
+  },
+  RESULTS: {
+    it: { title: 'I risultati sono arrivati', body: 'E anche il nome di chi ha scritto la tua ricetta.' },
+    es: { title: 'Los resultados ya están', body: 'Y también el nombre de quien escribió tu receta.' },
+  },
+  JOIN_REQUESTED: {
+    it: { title: 'Qualcuno è alla porta', body: '{round} — una richiesta aspetta la tua risposta.' },
+    es: { title: 'Alguien está en la puerta', body: '{round} — una solicitud espera tu respuesta.' },
+  },
+  JOIN_ARRIVED: {
+    it: { title: 'Un posto è stato preso', body: '{round} — la tavola si riempie.' },
+    es: { title: 'Se ha ocupado un sitio', body: '{round} — la mesa se va llenando.' },
+  },
+  JOIN_APPROVED: {
+    it: { title: 'Sei a tavola', body: '{round} — la tua richiesta è stata accettata.' },
+    es: { title: 'Estás en la mesa', body: '{round} — tu solicitud ha sido aceptada.' },
+  },
+  HOST_ALERT: {
+    it: { title: 'Qualcosa ti aspetta', body: '{round} — un avviso aspetta nella tua cena.' },
+    es: { title: 'Algo te espera', body: '{round} — hay una alerta esperando en tu cena.' },
+  },
+  TEST: {
+    it: { title: 'CovertCook — prova', body: 'Le notifiche funzionano su questo dispositivo. Non succede nulla in nessuna cena.' },
+    es: { title: 'CovertCook — prueba', body: 'Las notificaciones funcionan en este dispositivo. No pasa nada en ninguna cena.' },
+  },
+}
+
+function copyFor(kind: Kind, locale: string): { title: string; body: string } {
+  if (locale === 'it' || locale === 'es') return COPY_EXTRA[kind][locale]
+  return COPY[kind][locale === 'fr' ? 'fr' : 'en']
+}
+
 function fail(status: number, message: string) {
   return new Response(JSON.stringify({ error: message }), {
     status,
@@ -373,7 +419,7 @@ Deno.serve(async (req) => {
 
     await Promise.all(
       rows.map(async (row) => {
-        const copy = COPY[copyKind][row.locale === 'fr' ? 'fr' : 'en']
+        const copy = copyFor(copyKind, row.locale)
         try {
           await webpush.sendNotification(
             { endpoint: row.endpoint, keys: { p256dh: row.p256dh, auth: row.auth } },
