@@ -1,7 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Fold } from '../../components/Fold'
-import { ChoiceList } from '../../components/ChoiceList'
 import {
   countdownHidden,
   getTextSize,
@@ -21,15 +20,25 @@ export function DisplayPrefs() {
   return (
     <Fold title={t('display.title')} aside={t(`display.size.${size}`)}>
       <div className="stack card">
-        <ChoiceList
-          name="text-size"
-          value={size}
-          onChange={(v: string) => {
-            setSize(v as TextSize)
-            setTextSize(v as TextSize)
-          }}
-          options={SIZES.map((s) => ({ value: s, label: t(`display.size.${s}`) }))}
-        />
+        {/* A slider with three stops: the choice is a scale, not three
+            unrelated options. */}
+        <div className="stack">
+          <label htmlFor="text-size">{t(`display.size.${size}`)}</label>
+          <input
+            id="text-size"
+            type="range"
+            min={0}
+            max={SIZES.length - 1}
+            step={1}
+            value={SIZES.indexOf(size)}
+            onChange={(e) => {
+              const next = SIZES[Number(e.target.value)]
+              setSize(next)
+              setTextSize(next)
+            }}
+            aria-valuetext={t(`display.size.${size}`)}
+          />
+        </div>
         <label className="row">
           <input
             type="checkbox"

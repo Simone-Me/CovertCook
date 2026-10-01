@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams, useLocation, Link, Navigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
@@ -283,10 +283,7 @@ export function RoundSettingsPage() {
   return (
     <div className="stack sheet">
       <BackToTable />
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h1>{t('rounds.settings.title')}</h1>
-        <Link to={`/rounds/${roundId}`}>{t('actions.back')}</Link>
-      </div>
+      <h1>{t('rounds.settings.title')}</h1>
 
       {error && <div className="error">{error}</div>}
 

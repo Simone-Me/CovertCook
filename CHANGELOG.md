@@ -37,6 +37,10 @@ Phases 0–4 of `PRESENTATION.md` are done, including the board.
 function, `set_round_themes`; until it is applied, saving the pseudonym list or
 the cloth from a draft's settings fails.
 
+**`0099` (setup until the door opens) is written and NOT deployed.** One new
+function, `set_draft_setup`; until it is applied, saving the door, covert
+level, seats or recipe count from a draft's pass fails.
+
 **Next, in order:**
 
 1. **Free-text chat** alongside the templates — the length cap (280) and

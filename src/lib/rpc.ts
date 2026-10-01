@@ -101,6 +101,28 @@ export interface TableThemeOption {
 /** Raised by create_round when a theme is named that this account cannot use. */
 export const THEME_LOCKED = 'THEME_LOCKED'
 
+/** Door, covert level, seats and recipes per chef; only while a draft (0099). */
+export async function setDraftSetup(
+  roundId: string,
+  v: {
+    access: RoundAccess
+    anonymity: RoundAnonymity
+    requiresApproval: boolean
+    seats: number | null
+    recipes: number
+  },
+) {
+  const res = await guardedRpc('set_draft_setup', {
+    p_round_id: roundId,
+    p_access: v.access,
+    p_anonymity: v.anonymity,
+    p_requires_approval: v.requiresApproval,
+    p_max_players: v.seats,
+    p_recipes_per_brief: v.recipes,
+  })
+  return unwrap(res)
+}
+
 /** Change the pseudonym list and the cloth; only while the dinner is a draft (0098). */
 export async function setRoundThemes(roundId: string, nameTheme: NameTheme, tableTheme: TableTheme) {
   const res = await guardedRpc('set_round_themes', {

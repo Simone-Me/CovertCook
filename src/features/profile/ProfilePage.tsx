@@ -294,8 +294,6 @@ export function ProfilePage() {
         <LanguageSwitch onChange={(code) => onLocale(code as SupportedLocale)} />
       </div>
 
-      <DisplayPrefs />
-
       {/* A month out and a week out, and never in between. */}
       <ProEndingNotice />
 
@@ -318,6 +316,8 @@ export function ProfilePage() {
           <strong>{t('tutorial.profileLink')}</strong> — {t('tutorial.profileWhat')}
         </span>
       </Link>
+
+      <DisplayPrefs />
 
       {/* The two things you kept come first, and next to each other: these are
           the only sections of the profile somebody opens because they want to,
