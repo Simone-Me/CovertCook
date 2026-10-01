@@ -5,9 +5,9 @@ import './lib/i18n'
 import './index.css'
 import { AuthProvider } from './lib/auth'
 import App from './App.tsx'
-import { applyTextSize } from './lib/prefs'
+import { applyTextStep } from './lib/prefs'
 
-applyTextSize()
+applyTextStep()
 
 const queryClient = new QueryClient()
 

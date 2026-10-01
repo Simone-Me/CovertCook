@@ -316,14 +316,15 @@
       "title": "Invitations ({{count}})",
       "accept": "Accepter",
       "decline": "Refuser",
-      "invite": "Inviter un chef",
+      "invite": "Inviter un chef : pseudo ou e-mail",
       "inviteSent": "Invitation envoyée",
       "noSuchChef": "Aucun chef ne porte ce nom. Vérifiez l'orthographe — les noms d'utilisateur sont exactement comme leur propriétaire les a tapés.",
-      "inviteUsername": "Son nom d'utilisateur",
+      "inviteUsername": "Pseudo ou e-mail",
       "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
       "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant.",
       "alreadyHere": "Ce chef est déjà à cette table.",
-      "closed": "Les invitations sont fermées : les inscriptions sont closes."
+      "closed": "Les invitations sont fermées : les inscriptions sont closes.",
+      "inviteMaybe": "Si cette adresse a un compte, l'invitation est en route."
     },
     "pastRounds": "Dîners passés ({{count}})",
     "backToTable": "Retour à la table",
@@ -420,8 +421,14 @@
     },
     "guest": {
       "badge": "invité",
-      "toggle": "Je viens en invité",
-      "hint": "Je cuisine mon propre plat et je ne fais pas l'échange. À décider avant la fermeture de la porte."
+      "toggle": "Je ne veux pas cuisiner un plat choisi par quelqu'un d'autre. Je décide pour moi.",
+      "hint": "",
+      "askLabel": "Ne pas cuisiner le plat de quelqu'un d'autre ?",
+      "setupTitle": "Invités",
+      "allowed": "Invités acceptés",
+      "notAllowed": "Tout le monde cuisine",
+      "allowedHint": "Chacun peut venir en invité : il cuisine son propre plat et ne participe pas à l'échange.",
+      "notAllowedHint": "Chaque chef cuisine un plat choisi par quelqu'un d'autre. Pas d'invités."
     },
     "pass": {
       "title": "Le pass",
@@ -528,7 +535,7 @@
     "sharedMenu": {
       "title": "Déjà au menu",
       "nothingYet": "Rien n'a encore été envoyé.",
-      "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisùs à la même table.",
+      "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisù à la même table.",
       "label": "Le menu pendant l'écriture des recettes",
       "HIDDEN": "Garder la surprise",
       "HIDDENHint": "Personne ne voit un plat avant le dîner.",
@@ -536,7 +543,9 @@
       "NAMESHint": "Les convives voient les noms des plats envoyés, jamais qui. Évite deux fois le même plat.",
       "HOST": "Visible par l'Executive Chef seulement",
       "HOSTHint": "Vous suivez ce qui a été envoyé ; les convives gardent la surprise.",
-      "onlyYou": "Vous seul voyez ce menu."
+      "onlyYou": "Vous seul voyez ce menu.",
+      "waiting": "en attente de {{count}} recette",
+      "waiting_other": "en attente de {{count}} recettes"
     },
     "questions": {
       "step": "Question {{n}} sur {{total}}",
@@ -611,6 +620,15 @@
     "advanceError": {
       "tooFew": "Il faut au moins 3 chefs inscrits et approuvés pour fermer les inscriptions.",
       "slots": "Le menu compte {{courses}} plats pour {{chefs}} chefs : il en faut un par chef."
+    },
+    "copyCodeShort": "code",
+    "copyLinkShort": "lien",
+    "chefCount": "{{count}} chef",
+    "guestCount": "{{count}} invité",
+    "guestCount_other": "{{count}} invités",
+    "changes": {
+      "title": "Modifications",
+      "theme": "thème"
     }
   },
   "briefs": {
@@ -879,7 +897,8 @@
     "spliceTitle": "Insérer un arrivant tardif dans la chaîne",
     "applySplice": "Insérer",
     "spliceConfirm": "Tous les expéditeurs ont déjà soumis ; l'insertion remplace un plat déjà cuisiné. Continuer ?",
-    "open": "Voir qui cuisine pour qui"
+    "open": "Voir qui cuisine pour qui",
+    "guests": "Invités"
   },
   "alerts": {
     "title": "Alertes du Executive Chef",
@@ -1290,10 +1309,11 @@
     "title": "Affichage",
     "countdown": "Afficher le compte à rebours du dîner",
     "size": {
-      "small": "Petit texte",
-      "medium": "Texte moyen",
-      "large": "Grand texte"
-    }
+      "small": "Petit",
+      "medium": "Moyen",
+      "large": "Grand"
+    },
+    "textSize": "Taille du texte"
   },
   "push": {
     "title": "Notifications",

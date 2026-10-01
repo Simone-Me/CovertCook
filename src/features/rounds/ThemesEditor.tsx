@@ -15,11 +15,9 @@ import { ThemePicker } from './ThemePicker'
 
 /**
  * One of the dinner's two looks — the pseudonym list or the cloth — still the
- * host's to change while it is a draft, and offered in the pass for that
- * reason: it is the one place that says "only now". Two panels rather than
- * one, because they are two decisions. Offered only in DRAFT (0098): once the
- * door opens, guests have been dealt names from the list and the cloth is what
- * they have already seen.
+ * host's to change while it is a draft (0098). A choice applies the moment it
+ * is made, the way it does when a dinner is created: there is no Save to
+ * forget. Two panels rather than one, because they are two decisions.
  */
 export function ThemesEditor({
   roundId,
@@ -36,10 +34,7 @@ export function ThemesEditor({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const [name, setName] = useState<NameTheme>(nameTheme)
-  const [table, setTable] = useState<TableTheme>(tableTheme)
   const [error, setError] = useState<string | null>(null)
-  const [saved, setSaved] = useState(false)
 
   const { data: nameThemes } = useQuery({
     queryKey: ['themes', 'name'],
@@ -54,13 +49,11 @@ export function ThemesEditor({
   const { data: pro } = useQuery({ queryKey: ['pro', 'status'], queryFn: myProStatus, staleTime: 60 * 1000 })
   const freeUntil = pro?.window_open ? pro.window_until : null
 
-  async function onSave() {
+  async function apply(name: NameTheme, table: TableTheme) {
     setError(null)
-    setSaved(false)
     try {
       await setRoundThemes(roundId, name, table)
       await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
-      setSaved(true)
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''
       setError(raw === THEME_LOCKED ? t('themes.locked') : raw || t('errors.generic'))
@@ -68,7 +61,6 @@ export function ThemesEditor({
   }
 
   const picking = kind === 'name'
-  const changed = picking ? name !== nameTheme : table !== tableTheme
 
   return (
     <HostAction
@@ -84,8 +76,8 @@ export function ThemesEditor({
         <ThemePicker
           name="edit-name-theme"
           options={nameThemes}
-          value={name}
-          onChange={(code) => setName(code as NameTheme)}
+          value={nameTheme}
+          onChange={(code) => void apply(code as NameTheme, tableTheme)}
           labelKey="rounds.nameTheme"
           locale={locale}
           freeUntil={freeUntil}
@@ -94,17 +86,13 @@ export function ThemesEditor({
         <ThemePicker
           name="edit-table-theme"
           options={tableThemes}
-          value={table}
-          onChange={(code) => setTable(code as TableTheme)}
+          value={tableTheme}
+          onChange={(code) => void apply(nameTheme, code as TableTheme)}
           labelKey="rounds.tableTheme"
           locale={locale}
           freeUntil={freeUntil}
         />
       )}
-      <button type="button" onClick={onSave} disabled={!changed}>
-        {t('actions.save')}
-      </button>
-      {saved && <p className="muted">{t('rounds.settings.themesSaved')}</p>}
     </HostAction>
   )
 }

@@ -19,6 +19,7 @@ export function ChainCircle({
   cycle,
   youId,
   realNames = false,
+  guests,
 }: {
   cycle: ChainLink[]
   youId?: string
@@ -27,6 +28,8 @@ export function ChainCircle({
    *  (0073) — where a ring of code names would be a puzzle the reader has
    *  already been given the answer to. */
   realNames?: boolean
+  /** People at the table who are not in the ring: same dots, outside it. */
+  guests?: { id: string; secret: string; real: string | null }[]
 }) {
   const nameOf = (link: ChainLink, end: 'sender' | 'cook') =>
     (realNames
@@ -59,7 +62,7 @@ export function ChainCircle({
     <svg
       className="chainring"
       // Room outside the ring for two-line labels on every side.
-      viewBox={`-28 -10 ${size + 56} ${size + 20}`}
+      viewBox={`-28 -10 ${size + 56} ${size + 20 + (guests?.length ? 56 : 0)}`}
       role="img"
       aria-label={cycle.map((l) => `${nameOf(l, 'sender')} → ${nameOf(l, 'cook')}`).join('; ')}
     >
@@ -138,6 +141,31 @@ export function ChainCircle({
                 </>
               ) : (
                 link.sender_secret_name
+              )}
+            </text>
+          </g>
+        )
+      })}
+      {/* Guests: below the ring, unconnected — present, and not part of the
+          exchange. Same dot, same type as everybody else. */}
+      {guests?.map((g, i) => {
+        const gx = c + (i - (guests.length - 1) / 2) * 90
+        const gy = size + 24
+        return (
+          <g key={g.id}>
+            <circle cx={gx} cy={gy} r={nodeR} fill="var(--paper-solid)" stroke="var(--accent)" strokeWidth="1.6" />
+            <text x={gx} y={gy + 20} textAnchor="middle" dominantBaseline="middle" className="chainring__name">
+              {g.real ? (
+                <>
+                  <tspan x={gx} dy="-0.6em" className="chainring__secret">
+                    {g.secret}
+                  </tspan>
+                  <tspan x={gx} dy="1.25em">
+                    {g.real}
+                  </tspan>
+                </>
+              ) : (
+                g.secret
               )}
             </text>
           </g>

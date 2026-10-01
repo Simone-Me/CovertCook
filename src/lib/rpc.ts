@@ -116,6 +116,7 @@ export async function setDraftSetup(
     requiresApproval: boolean
     seats: number | null
     recipes: number
+    guestsAllowed: boolean
   },
 ) {
   const res = await guardedRpc('set_draft_setup', {
@@ -125,6 +126,7 @@ export async function setDraftSetup(
     p_requires_approval: v.requiresApproval,
     p_max_players: v.seats,
     p_recipes_per_brief: v.recipes,
+    p_guests_allowed: v.guestsAllowed,
   })
   return unwrap(res)
 }

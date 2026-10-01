@@ -3951,3 +3951,74 @@
   font-size: 13px;
   color: var(--text-muted);
 }
+
+/* Text size: nine notches, drawn. */
+.sizescale__words {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sizescale__words .is-on {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.sizescale__bar {
+  width: 100%;
+  margin: 0;
+}
+
+.sizescale__ticks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-top: -6px;
+}
+
+.sizescale__ticks span {
+  width: 2px;
+  height: 8px;
+  background: var(--env-edge);
+}
+
+.sizescale__ticks .is-on {
+  background: var(--accent);
+  height: 12px;
+}
+
+/* The guest question: a small bubble, not a banner. */
+.guest-ask {
+  align-items: flex-start;
+}
+
+.guest-ask__bubble {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--env-edge);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.guest-ask__bubble:hover,
+.guest-ask__bubble[aria-expanded='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.invite-label {
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.chainring__guests {
+  margin-top: 4px;
+}

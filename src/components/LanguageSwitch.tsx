@@ -39,7 +39,17 @@ type LangCode = (typeof LANGS)[number]['code']
  * is what `onChange` is for: the profile passes the writer, and the same
  * control then does both jobs.
  */
-export function LanguageSwitch({ onChange }: { onChange?: (code: LangCode) => void } = {}) {
+// HIDDEN FOR NOW. Looking for a language is not needed while there are two,
+// and Italian and Spanish are being added: the control comes back with them.
+// The browser's language is still detected and the profile still stores it.
+const SHOW_LANGUAGE_SWITCH = false
+
+export function LanguageSwitch(props: { onChange?: (code: LangCode) => void } = {}) {
+  if (!SHOW_LANGUAGE_SWITCH) return null
+  return <LanguageSwitchControl {...props} />
+}
+
+function LanguageSwitchControl({ onChange }: { onChange?: (code: LangCode) => void } = {}) {
   const { t, i18n } = useTranslation()
   const current: LangCode = i18n.language.startsWith('en') ? 'en' : 'fr'
 

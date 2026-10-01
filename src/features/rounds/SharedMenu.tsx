@@ -26,11 +26,14 @@ export function SharedMenu({
   roundId,
   shared,
   onlyYou = false,
+  expected,
 }: {
   roundId: string | undefined
   shared: boolean
   /** A HOST dinner, read by its host: say so, so nobody quotes it at the table. */
   onlyYou?: boolean
+  /** How many dishes the table will end up with: chefs plus guests. */
+  expected?: number
 }) {
   const { t } = useTranslation()
 
@@ -62,7 +65,18 @@ export function SharedMenu({
           ))}
         </ul>
       )}
-      <p className="menucard__note">{t('rounds.sharedMenu.why')}</p>
+      {/* The reason is for an empty menu. Once a dish is on it the table has
+          understood, and what is useful instead is how many are still to come. */}
+      {data.length === 0 ? (
+        <p className="menucard__note">{t('rounds.sharedMenu.why')}</p>
+      ) : (
+        expected !== undefined &&
+        expected > data.length && (
+          <p className="menucard__note">
+            <em>{t('rounds.sharedMenu.waiting', { count: expected - data.length })}</em>
+          </p>
+        )
+      )}
       {onlyYou && <p className="menucard__note">{t('rounds.sharedMenu.onlyYou')}</p>}
     </div>
   )

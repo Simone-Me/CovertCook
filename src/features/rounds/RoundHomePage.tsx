@@ -24,8 +24,7 @@ import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
 import { DinnerCountdown } from './DinnerCountdown'
 import { MenuPanel } from './MenuPanel'
-import { ThemesEditor } from './ThemesEditor'
-import { DraftSetup } from './DraftSetup'
+import { DraftChanges } from './DraftChanges'
 import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import { CostsPanel } from './CostsPanel'
@@ -91,6 +90,7 @@ export function RoundHomePage() {
   // sentence nobody scrolled back up to read.
   const [advanceError, setAdvanceError] = useState<string | null>(null)
   const [passHelp, setPassHelp] = useState(false)
+  const [guestHelp, setGuestHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -305,6 +305,7 @@ export function RoundHomePage() {
   const shareLink = `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE') ?? []
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
+  const guestCount = activeMembers.filter((m) => m.approved && m.is_guest).length
   const inChainIds = new Set(chainLinks?.flatMap((l) => [l.sender_member_id, l.cook_member_id]) ?? [])
   const missingFromChain = chainLinks
     ? activeMembers.filter((m) => m.approved && !m.is_guest && !inChainIds.has(m.id)).length
@@ -552,7 +553,9 @@ export function RoundHomePage() {
     try {
       await inviteMember(roundId, inviteName)
       setInviteName('')
-      setInviteNote(t('rounds.invitations.inviteSent'))
+      // An address gets the same answer whether or not an account has it, so
+      // the box cannot be used to ask who is registered (0101).
+      setInviteNote(t(inviteName.includes('@') ? 'rounds.invitations.inviteMaybe' : 'rounds.invitations.inviteSent'))
     } catch (err) {
       const message = err instanceof Error ? err.message : t('errors.generic')
       const known =
@@ -633,7 +636,9 @@ export function RoundHomePage() {
           </div>
           <FilRougeLine roundId={roundId} />
           <p className="muted" style={{ margin: '2px 0 0' }}>
-            {t('rounds.seatCount', { count: activeApprovedCount })}
+            {guestCount > 0
+              ? `${t('rounds.chefCount', { count: activeApprovedCount - guestCount })}, ${t('rounds.guestCount', { count: guestCount })}`
+              : t('rounds.seatCount', { count: activeApprovedCount })}
           </p>
           {ROUND_PHASE_ORDER.indexOf(round.status) >= 0 &&
             ROUND_PHASE_ORDER.indexOf(round.status) < ROUND_PHASE_ORDER.indexOf('DINNER') &&
@@ -706,7 +711,6 @@ export function RoundHomePage() {
                 worst way to be told. */}
             {accessAdmitsCode(round.access) && (
               <>
-                <label>{t('rounds.shareLink')}</label>
                 {/* Two buttons, because there are two things to hand somebody
                     and they are not interchangeable. A link opens the app on
                     the right screen with the code already in it — best by far,
@@ -715,15 +719,17 @@ export function RoundHomePage() {
                     into a phone that has the app already open. */}
                 <div className="row">
                   <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
-                  <CopyButton value={round.join_code} label={t('rounds.copyCode')} />
-                  <CopyButton value={shareLink} label={t('rounds.copyLink')} />
+                  <CopyButton value={round.join_code} label={`⧉ ${t('rounds.copyCodeShort')}`} />
+                  <CopyButton value={shareLink} label={`⧉ ${t('rounds.copyLinkShort')}`} />
                 </div>
               </>
             )}
 
             {accessAdmitsInvites(round.access) && (
               <>
-                <label htmlFor="invite-username">{t('rounds.invitations.invite')}</label>
+                <label htmlFor="invite-username" className="invite-label">
+                  <em>{t('rounds.invitations.invite')}</em>
+                </label>
                 <div className="stack" style={{ gap: 8 }}>
                   {/* A username, not an address (0071). The address was the one
                       thing about an account its owner never chose to show
@@ -819,39 +825,6 @@ export function RoundHomePage() {
             <p className="pass__empty" style={{ margin: 0 }}>
               <em>{t('rounds.pass.empty')}</em>
             </p>
-            {roundId && (
-              <DraftSetup
-                key={`${round.access}-${round.anonymity}-${round.max_players}-${round.recipes_per_brief}-${round.requires_approval}`}
-                roundId={roundId}
-                initial={{
-                  access: round.access,
-                  anonymity: round.anonymity,
-                  requiresApproval: round.requires_approval,
-                  seats: round.max_players,
-                  recipes: round.recipes_per_brief,
-                }}
-              />
-            )}
-            {/* The one moment these can still change: later, guests hold
-                names from the list and have seen the cloth. */}
-            {roundId && (
-              <>
-                <ThemesEditor
-                  roundId={roundId}
-                  kind="name"
-                  nameTheme={round.name_theme}
-                  tableTheme={round.table_theme}
-                  locale={profile?.locale ?? 'en'}
-                />
-                <ThemesEditor
-                  roundId={roundId}
-                  kind="table"
-                  nameTheme={round.name_theme}
-                  tableTheme={round.table_theme}
-                  locale={profile?.locale ?? 'en'}
-                />
-              </>
-            )}
             <hr className="pass__rule" />
             <div className="stack">
               <button
@@ -868,6 +841,12 @@ export function RoundHomePage() {
               )}
             </div>
           </>
+        )}
+
+        {/* Everything still changeable, under one roof, while the door is shut
+            or only just open. */}
+        {roundId && ['DRAFT', 'OPEN', 'LOCKED'].includes(round.status) && (
+          <DraftChanges round={round} locale={profile?.locale ?? 'en'} />
         )}
 
         {/* THE MENU IS COMPOSED AT ATTRIBUTION, and only there. Free or in
@@ -1269,29 +1248,42 @@ export function RoundHomePage() {
                   and this is the exception for the friend who wants the dinner
                   without it. Only while sign-ups are open; after the roulette
                   the role is fixed. */}
-              {!isHost && myMembership?.status === 'ACTIVE' && round.status === 'OPEN' && (
-                <label className="row guest-toggle">
-                  <input
-                    type="checkbox"
-                    style={{ width: 'auto' }}
-                    checked={!!myMembership.is_guest}
-                    onChange={async (e) => {
-                      if (!roundId) return
-                      setError(null)
-                      try {
-                        await setMyGuest(roundId, e.target.checked)
-                        await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
-                      } catch (err) {
-                        setError(err instanceof Error ? err.message : t('errors.generic'))
-                      }
-                    }}
-                  />
-                  <span>
-                    {t('rounds.guest.toggle')}
-                    <span className="muted"> — {t('rounds.guest.hint')}</span>
-                  </span>
-                </label>
-              )}
+              {!isHost &&
+                myMembership?.status === 'ACTIVE' &&
+                round.status === 'OPEN' &&
+                round.guests_allowed && (
+                  <div className="stack guest-ask">
+                    <button
+                      type="button"
+                      className="guest-ask__bubble"
+                      aria-expanded={guestHelp}
+                      aria-label={t('rounds.guest.askLabel')}
+                      onClick={() => setGuestHelp((v) => !v)}
+                    >
+                      ?
+                    </button>
+                    {guestHelp && (
+                      <label className="row guest-toggle">
+                        <input
+                          type="checkbox"
+                          style={{ width: 'auto' }}
+                          checked={!!myMembership.is_guest}
+                          onChange={async (e) => {
+                            if (!roundId) return
+                            setError(null)
+                            try {
+                              await setMyGuest(roundId, e.target.checked)
+                              await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
+                            } catch (err) {
+                              setError(err instanceof Error ? err.message : t('errors.generic'))
+                            }
+                          }}
+                        />
+                        <span>{t('rounds.guest.toggle')}</span>
+                      </label>
+                    )}
+                  </div>
+                )}
 
               {!isHost && myMembership?.status === 'ACTIVE' && !isFinished && (
                 <div className="stack leave-seat">
@@ -1344,7 +1336,12 @@ export function RoundHomePage() {
             onOpen={() => toggle('menu')}
           >
             {open === 'menu' && (
-              <SharedMenu roundId={roundId} shared onlyYou={round.menu_visibility === 'HOST'} />
+              <SharedMenu
+                roundId={roundId}
+                shared
+                onlyYou={round.menu_visibility === 'HOST'}
+                expected={activeApprovedCount}
+              />
             )}
           </Envelope>
         )}

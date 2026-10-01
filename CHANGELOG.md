@@ -43,6 +43,8 @@ level, seats or recipe count from a draft's pass fails.
 
 **`0100` (a guest at the table) is written, tested on the local stack and NOT deployed.** Adds `round_members.is_guest`, `pairings.is_self`, `set_my_guest`, and replaces `generate_assignment`, `get_chain`, `get_revealed_chain`, `get_my_assignment`, `remove_member` and `list_round_members` (its return type gains `is_guest`, so deploy it together with the client). `supabase/smoke_test_guest.sql` runs inside a transaction and rolls back.
 
+**`0101` (guests allowed, invite by e-mail) is written, tested on the local stack and NOT deployed.** Adds `rounds.guests_allowed`, replaces `set_draft_setup` (one more argument, so the old signature is dropped), `set_my_guest` and `invite_member`. An address gets the same answer whether or not an account has it.
+
 **Next, in order:**
 
 1. **Free-text chat** alongside the templates — the length cap (280) and

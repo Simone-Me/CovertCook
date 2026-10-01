@@ -316,14 +316,15 @@
       "title": "Invitations ({{count}})",
       "accept": "Accept",
       "decline": "Decline",
-      "invite": "Invite a chef",
+      "invite": "Invite a chef: username or email",
       "inviteSent": "Invitation sent",
       "noSuchChef": "No chef goes by that name. Check the spelling — usernames are exactly as their owner typed them.",
-      "inviteUsername": "Their username",
+      "inviteUsername": "Username or email",
       "notByInvitation": "This dinner is entered with the code. There is no guest list to add to.",
       "inviteHelp": "Their username, not their email — the name they picked when they signed up.",
       "alreadyHere": "That chef is already at this table.",
-      "closed": "Invitations are closed: sign-ups have ended."
+      "closed": "Invitations are closed: sign-ups have ended.",
+      "inviteMaybe": "If that address has an account, the invitation is on its way."
     },
     "pastRounds": "Past dinners ({{count}})",
     "backToTable": "Back to the table",
@@ -420,8 +421,14 @@
     },
     "guest": {
       "badge": "guest",
-      "toggle": "I'm coming as a guest",
-      "hint": "I cook my own dish and take no part in the swap. Decided before the door closes."
+      "toggle": "I don't want to cook a dish decided by someone else. I decide for myself.",
+      "hint": "",
+      "askLabel": "Not cooking someone else's dish?",
+      "setupTitle": "Guests",
+      "allowed": "Guests allowed",
+      "notAllowed": "Everybody cooks",
+      "allowedHint": "Anyone may come as a guest: they cook their own dish and take no part in the swap.",
+      "notAllowedHint": "Every chef cooks a dish chosen by someone else. No guests."
     },
     "pass": {
       "title": "The pass",
@@ -528,7 +535,7 @@
     "sharedMenu": {
       "title": "Already on the menu",
       "nothingYet": "Nothing has been sent yet.",
-      "why": "Dish names only — never who wrote them or who is cooking them. It is here so the table does not end up with three tiramisùs.",
+      "why": "Dish names only — never who wrote them or who is cooking them. It is here so the table does not end up with three tiramisù.",
       "label": "The menu while recipes are written",
       "HIDDEN": "Keep the surprise",
       "HIDDENHint": "Nobody sees a dish before the dinner.",
@@ -536,7 +543,9 @@
       "NAMESHint": "Members see the names of the dishes sent, never who. Stops the same dish turning up twice.",
       "HOST": "Only the Executive Chef",
       "HOSTHint": "You keep track of what has been sent; the table keeps its surprise.",
-      "onlyYou": "Only you can see this menu."
+      "onlyYou": "Only you can see this menu.",
+      "waiting": "waiting for {{count}} recipe",
+      "waiting_other": "waiting for {{count}} recipes"
     },
     "questions": {
       "step": "Question {{n}} of {{total}}",
@@ -611,6 +620,15 @@
     "advanceError": {
       "tooFew": "You need at least 3 signed-up, approved chefs to close sign-ups.",
       "slots": "The menu has {{courses}} dishes for {{chefs}} chefs: it needs one per chef."
+    },
+    "copyCodeShort": "code",
+    "copyLinkShort": "link",
+    "chefCount": "{{count}} chef",
+    "guestCount": "{{count}} guest",
+    "guestCount_other": "{{count}} guests",
+    "changes": {
+      "title": "Changes",
+      "theme": "theme"
     }
   },
   "briefs": {
@@ -879,7 +897,8 @@
     "spliceTitle": "Add a late joiner into the chain",
     "applySplice": "Splice in",
     "spliceConfirm": "Every sender has already submitted; splicing replaces one already-cooked dish. Continue?",
-    "open": "See who cooks for whom"
+    "open": "See who cooks for whom",
+    "guests": "Guests"
   },
   "alerts": {
     "title": "Executive Chef alerts",
@@ -1290,10 +1309,11 @@
     "title": "Display",
     "countdown": "Show the countdown to the dinner",
     "size": {
-      "small": "Small text",
-      "medium": "Medium text",
-      "large": "Large text"
-    }
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    },
+    "textSize": "Text size"
   },
   "push": {
     "title": "Notifications",
