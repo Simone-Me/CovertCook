@@ -321,7 +321,6 @@
       "noSuchChef": "Aucun chef ne porte ce nom. Vérifiez l'orthographe — les noms d'utilisateur sont exactement comme leur propriétaire les a tapés.",
       "inviteUsername": "Pseudo ou e-mail",
       "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
-      "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant.",
       "alreadyHere": "Ce chef est déjà à cette table.",
       "closed": "Les invitations sont fermées : les inscriptions sont closes.",
       "inviteMaybe": "Si cette adresse a un compte, l'invitation est en route."
@@ -448,7 +447,6 @@
         "ARCHIVED": "Plus rien à faire",
         "CANCELLED": "Ce dîner a été annulé"
       },
-      "empty": "Vous pouvez régler ce dîner maintenant, si vous voulez — tout ce qui suit reste ouvert jusqu'à l'ouverture de la porte.",
       "whatIsItToggle": "Qu’est-ce que le passe ?",
       "advance": "Faire avancer le dîner",
       "go": {
@@ -627,9 +625,9 @@
     "guestCount": "{{count}} invité",
     "guestCount_other": "{{count}} invités",
     "changes": {
-      "title": "Modifications",
-      "theme": "thème"
-    }
+      "title": "Personnaliser l'événement"
+    },
+    "chefsInfo": "À propos de cette liste"
   },
   "briefs": {
     "editorTitle": "Le plat que vous demandez",

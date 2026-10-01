@@ -10,16 +10,15 @@ import { FilRougePanel } from './FilRougePanel'
  * roof: "Changes". Folded, because most visits to the pass are not about this.
  *
  * What is on offer follows the phase. The looks, the door and the guests are
- * settled while the dinner is a draft (0098–0101): once people are in, they
- * have been dealt names and have seen the cloth. The theme stays open until the
- * roulette deals.
+ * settled while the dinner is a draft (0098–0101), and the theme with them:
+ * once the door opens, people have been dealt names and have seen the cloth.
  */
 export function DraftChanges({ round, locale }: { round: RoundRow; locale: string }) {
   const { t } = useTranslation()
   const draft = round.status === 'DRAFT'
 
   return (
-    <HostAction title={t('rounds.changes.title')} aside={draft ? undefined : t('rounds.changes.theme')}>
+    <HostAction title={t('rounds.changes.title')}>
       {draft && (
         <>
           <ThemesEditor

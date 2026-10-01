@@ -463,9 +463,13 @@
 /* Sections inside the pass. Short lines, a rule between them, and anything
    that needs a paragraph folded behind its own summary — a wall of prose
    above the dinner is read by nobody. */
+.pass {
+  position: relative;
+}
+
 .pass > * + * {
   padding-top: 10px;
-  border-top: 1px dashed var(--env-edge);
+  border-top: 1px solid var(--env-edge);
 }
 
 .pass__note > summary {
@@ -2453,7 +2457,7 @@
 
 .pass__rule {
   border: 0;
-  border-top: 1px dashed var(--piega, var(--border));
+  border-top: 1px solid var(--piega, var(--border));
   margin: 10px 0 2px;
 }
 
@@ -4021,4 +4025,32 @@
 
 .chainring__guests {
   margin-top: 4px;
+}
+
+/* The question mark in the corner of a letter. */
+.infocorner__btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--env-edge);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.infocorner__btn:hover,
+.infocorner__btn[aria-expanded='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.infocorner__text {
+  padding-right: 30px;
 }

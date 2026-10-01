@@ -25,6 +25,7 @@ import { HostPass, PassNote } from './HostAction'
 import { DinnerCountdown } from './DinnerCountdown'
 import { MenuPanel } from './MenuPanel'
 import { DraftChanges } from './DraftChanges'
+import { InfoCorner } from '../../components/InfoCorner'
 import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import { CostsPanel } from './CostsPanel'
@@ -89,8 +90,6 @@ export function RoundHomePage() {
   // Said beside the button that caused it: at the top of the page it was a
   // sentence nobody scrolled back up to read.
   const [advanceError, setAdvanceError] = useState<string | null>(null)
-  const [passHelp, setPassHelp] = useState(false)
-  const [guestHelp, setGuestHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
@@ -311,10 +310,16 @@ export function RoundHomePage() {
     ? activeMembers.filter((m) => m.approved && !m.is_guest && !inChainIds.has(m.id)).length
     : 0
 
+  const chefLine =
+    guestCount > 0
+      ? `${t('rounds.chefCount', { count: activeApprovedCount - guestCount })}, ${t('rounds.guestCount', { count: guestCount })}`
+      : t('rounds.chefCount', { count: activeApprovedCount })
   const rosterMeta = hostName
-    ? `${t('rounds.chefCount', { count: activeApprovedCount })} — ${t('rounds.executiveChef')} : ${hostName}`
-    : t('rounds.chefCount', { count: activeApprovedCount })
+    ? `${chefLine} — ${t('rounds.executiveChef')} : ${hostName}`
+    : chefLine
   const pendingCount = pendingMembers?.length ?? 0
+  const canBeGuest =
+    !isHost && myMembership?.status === 'ACTIVE' && round.status === 'OPEN' && round.guests_allowed
 
   // While the door is open the server sends no names but your own (0032), so
   // the list is seats rather than people. Everyone is uncovered at the same
@@ -636,9 +641,7 @@ export function RoundHomePage() {
           </div>
           <FilRougeLine roundId={roundId} />
           <p className="muted" style={{ margin: '2px 0 0' }}>
-            {guestCount > 0
-              ? `${t('rounds.chefCount', { count: activeApprovedCount - guestCount })}, ${t('rounds.guestCount', { count: guestCount })}`
-              : t('rounds.seatCount', { count: activeApprovedCount })}
+            {t('rounds.seatCount', { count: activeApprovedCount })}
           </p>
           {ROUND_PHASE_ORDER.indexOf(round.status) >= 0 &&
             ROUND_PHASE_ORDER.indexOf(round.status) < ROUND_PHASE_ORDER.indexOf('DINNER') &&
@@ -752,7 +755,6 @@ export function RoundHomePage() {
                     {t('actions.add')}
                   </button>
                 </div>
-                <p className="muted" style={{ margin: 0 }}>{t('rounds.invitations.inviteHelp')}</p>
               </>
             )}
             {inviteNote && <p className="muted">{inviteNote}</p>}
@@ -815,37 +817,17 @@ export function RoundHomePage() {
             every later phase was telling them something they already knew
             about a door they had shut themselves — that guidance moved to
             settings, where somebody actually goes looking for it. */}
+        {/* What the pass is, behind a question mark in the corner: worth
+            reading once and never again. */}
         {round.status === 'DRAFT' && (
-          <>
-            {/* An empty pass in DRAFT was a blank space above a paragraph
-                explaining what the pass is, and the two read as one thing. The
-                word says the state, the rule below separates it, and the
-                explanation is behind the question mark — because it is worth
-                reading once and never again. */}
-            <p className="pass__empty" style={{ margin: 0 }}>
-              <em>{t('rounds.pass.empty')}</em>
-            </p>
-            <hr className="pass__rule" />
-            <div className="stack">
-              <button
-                type="button"
-                className="pass__help"
-                aria-expanded={passHelp}
-                onClick={() => setPassHelp((v) => !v)}
-              >
-                <Icon name="help" size={18} />
-                <span>{t('rounds.pass.whatIsItToggle')}</span>
-              </button>
-              {passHelp && (
-                <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
-              )}
-            </div>
-          </>
+          <InfoCorner label={t('rounds.pass.whatIsItToggle')}>
+            <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
+          </InfoCorner>
         )}
 
         {/* Everything still changeable, under one roof, while the door is shut
             or only just open. */}
-        {roundId && ['DRAFT', 'OPEN', 'LOCKED'].includes(round.status) && (
+        {roundId && round.status === 'DRAFT' && (
           <DraftChanges round={round} locale={profile?.locale ?? 'en'} />
         )}
 
@@ -1161,6 +1143,34 @@ export function RoundHomePage() {
         >
           {open === 'chefs' && (
             <div className="stack">
+              {(rosterCovered || canBeGuest) && (
+                <InfoCorner label={t('rounds.chefsInfo')}>
+                  {rosterCovered && <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>}
+                  {/* The guest option, deliberately plain: a question in the
+                      corner, not a banner. Only while sign-ups are open; after
+                      the roulette the role is fixed. */}
+                  {canBeGuest && (
+                    <label className="row guest-toggle">
+                      <input
+                        type="checkbox"
+                        style={{ width: 'auto' }}
+                        checked={!!myMembership?.is_guest}
+                        onChange={async (e) => {
+                          if (!roundId) return
+                          setError(null)
+                          try {
+                            await setMyGuest(roundId, e.target.checked)
+                            await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
+                          } catch (err) {
+                            setError(err instanceof Error ? err.message : t('errors.generic'))
+                          }
+                        }}
+                      />
+                      <span>{t('rounds.guest.toggle')}</span>
+                    </label>
+                  )}
+                </InfoCorner>
+              )}
               {activeMembers.map((m) => {
                 // Pending members show their real name — approving a
                 // pseudonym is approving nobody (0015). Once approved they
@@ -1232,10 +1242,6 @@ export function RoundHomePage() {
                 </InlineConfirm>
               )}
 
-              {rosterCovered && (
-                <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>
-              )}
-
               {/* Your own way out, at the bottom of the roster because that is
                   where you are looking at who is in the room. What it does
                   depends entirely on when you press it, and the words change
@@ -1243,48 +1249,6 @@ export function RoundHomePage() {
                   simply go; once the lottery has run, three other people's
                   evening is built on your pairing, so it becomes a request the
                   Executive Chef answers. */}
-              {/* Quiet on purpose: a line at the bottom of the roster, not a
-                  question put to everyone who arrives. The game is the exchange,
-                  and this is the exception for the friend who wants the dinner
-                  without it. Only while sign-ups are open; after the roulette
-                  the role is fixed. */}
-              {!isHost &&
-                myMembership?.status === 'ACTIVE' &&
-                round.status === 'OPEN' &&
-                round.guests_allowed && (
-                  <div className="stack guest-ask">
-                    <button
-                      type="button"
-                      className="guest-ask__bubble"
-                      aria-expanded={guestHelp}
-                      aria-label={t('rounds.guest.askLabel')}
-                      onClick={() => setGuestHelp((v) => !v)}
-                    >
-                      ?
-                    </button>
-                    {guestHelp && (
-                      <label className="row guest-toggle">
-                        <input
-                          type="checkbox"
-                          style={{ width: 'auto' }}
-                          checked={!!myMembership.is_guest}
-                          onChange={async (e) => {
-                            if (!roundId) return
-                            setError(null)
-                            try {
-                              await setMyGuest(roundId, e.target.checked)
-                              await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
-                            } catch (err) {
-                              setError(err instanceof Error ? err.message : t('errors.generic'))
-                            }
-                          }}
-                        />
-                        <span>{t('rounds.guest.toggle')}</span>
-                      </label>
-                    )}
-                  </div>
-                )}
-
               {!isHost && myMembership?.status === 'ACTIVE' && !isFinished && (
                 <div className="stack leave-seat">
                   {leaveAsked ? (

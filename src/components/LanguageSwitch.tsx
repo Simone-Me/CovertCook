@@ -14,7 +14,11 @@ import { TurnBack } from './TurnBack'
 const LANGS = [
   { code: 'fr', label: 'Français', search: 'francais french français fr' },
   { code: 'en', label: 'English', search: 'english anglais en' },
+  { code: 'it', label: 'Italiano', search: 'italiano italian italien it' },
+  { code: 'es', label: 'Español', search: 'espanol español spanish espagnol es' },
 ] as const
+
+const SHOW_LANGUAGE_SEARCH = false
 
 type LangCode = (typeof LANGS)[number]['code']
 
@@ -39,19 +43,10 @@ type LangCode = (typeof LANGS)[number]['code']
  * is what `onChange` is for: the profile passes the writer, and the same
  * control then does both jobs.
  */
-// HIDDEN FOR NOW. Looking for a language is not needed while there are two,
-// and Italian and Spanish are being added: the control comes back with them.
-// The browser's language is still detected and the profile still stores it.
-const SHOW_LANGUAGE_SWITCH = false
-
-export function LanguageSwitch(props: { onChange?: (code: LangCode) => void } = {}) {
-  if (!SHOW_LANGUAGE_SWITCH) return null
-  return <LanguageSwitchControl {...props} />
-}
-
-function LanguageSwitchControl({ onChange }: { onChange?: (code: LangCode) => void } = {}) {
+export function LanguageSwitch({ onChange }: { onChange?: (code: LangCode) => void } = {}) {
   const { t, i18n } = useTranslation()
-  const current: LangCode = i18n.language.startsWith('en') ? 'en' : 'fr'
+  const lang = i18n.language.slice(0, 2)
+  const current: LangCode = LANGS.some((l) => l.code === lang) ? (lang as LangCode) : 'en'
 
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -92,13 +87,17 @@ function LanguageSwitchControl({ onChange }: { onChange?: (code: LangCode) => vo
 
       {open && (
         <div className="langswitch__body">
-          <input
-            type="search"
-            value={query}
-            placeholder={t('app.languageSearch')}
-            aria-label={t('app.languageSearch')}
-            onChange={(e) => setQuery(e.target.value)}
-          />
+          {/* The search box is kept in the code and hidden: four languages fit
+              on the screen. It comes back with the fifth. */}
+          {SHOW_LANGUAGE_SEARCH && (
+            <input
+              type="search"
+              value={query}
+              placeholder={t('app.languageSearch')}
+              aria-label={t('app.languageSearch')}
+              onChange={(e) => setQuery(e.target.value)}
+            />
+          )}
 
           <div className="langswitch__list">
             {found.map((lang) => (

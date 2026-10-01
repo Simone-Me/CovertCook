@@ -321,7 +321,6 @@
       "noSuchChef": "No chef goes by that name. Check the spelling — usernames are exactly as their owner typed them.",
       "inviteUsername": "Username or email",
       "notByInvitation": "This dinner is entered with the code. There is no guest list to add to.",
-      "inviteHelp": "Their username, not their email — the name they picked when they signed up.",
       "alreadyHere": "That chef is already at this table.",
       "closed": "Invitations are closed: sign-ups have ended.",
       "inviteMaybe": "If that address has an account, the invitation is on its way."
@@ -448,7 +447,6 @@
         "ARCHIVED": "Nothing left to do",
         "CANCELLED": "This dinner was called off"
       },
-      "empty": "You can set this dinner up now, if you like — everything below is open until the door opens.",
       "whatIsItToggle": "What is the pass?",
       "advance": "Move the dinner on",
       "go": {
@@ -627,9 +625,9 @@
     "guestCount": "{{count}} guest",
     "guestCount_other": "{{count}} guests",
     "changes": {
-      "title": "Changes",
-      "theme": "theme"
-    }
+      "title": "Personalise the event"
+    },
+    "chefsInfo": "About this list"
   },
   "briefs": {
     "editorTitle": "The dish you are asking for",
