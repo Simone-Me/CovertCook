@@ -1,5 +1,5 @@
+import { useRef, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
-import type { ReactNode } from 'react'
 import type { RoundStatus } from '../../lib/rpc'
 import { Icon } from '../../components/Icon'
 
@@ -53,15 +53,20 @@ export function HostAction({
 export function HostPass({
   status,
   waiting,
+  help,
   children,
 }: {
   status: RoundStatus
   waiting: boolean
+  /** What the pass is, behind a question mark in the corner of the letter. */
+  help?: ReactNode
   children: ReactNode
 }) {
   const { t } = useTranslation()
+  const [helpOpen, setHelpOpen] = useState(false)
+  const ref = useRef<HTMLDetailsElement>(null)
   return (
-    <details className={`env env--pass tilt-2${waiting ? ' is-waiting' : ''}`} open={waiting}>
+    <details ref={ref} className={`env env--pass tilt-2${waiting ? ' is-waiting' : ''}`} open={waiting}>
       <summary className="env__face">
         <span className="env__ico" aria-hidden="true">
           <Icon name="pass" size={26} />
@@ -77,8 +82,31 @@ export function HostPass({
             <Icon name="chefWrote" size={18} />
           </span>
         )}
+        {help && (
+          <button
+            type="button"
+            className="infocorner__btn"
+            aria-expanded={helpOpen}
+            aria-label={t('rounds.pass.whatIsItToggle')}
+            title={t('rounds.pass.whatIsItToggle')}
+            onClick={(e) => {
+              // It lives inside the summary, so it must not also toggle the
+              // letter — but opening the explanation has to show it.
+              e.preventDefault()
+              e.stopPropagation()
+              const next = !helpOpen
+              setHelpOpen(next)
+              if (next && ref.current) ref.current.open = true
+            }}
+          >
+            ?
+          </button>
+        )}
       </summary>
-      <div className="stack pass">{children}</div>
+      <div className="stack pass">
+        {help && helpOpen && <div className="infocorner__text stack">{help}</div>}
+        {children}
+      </div>
     </details>
   )
 }

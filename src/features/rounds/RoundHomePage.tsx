@@ -697,7 +697,11 @@ export function RoundHomePage() {
             that are up right now. It opens by itself when the round is
             actually blocked on them. */}
         {isHost && (
-          <HostPass status={round.status} waiting={passWaiting}>
+          <HostPass
+            status={round.status}
+            waiting={passWaiting}
+            help={<p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>}
+          >
 
         {/* Not in DRAFT: a code handed out before the door is open produces
             people knocking at a dinner that does not accept them yet
@@ -817,14 +821,6 @@ export function RoundHomePage() {
             every later phase was telling them something they already knew
             about a door they had shut themselves — that guidance moved to
             settings, where somebody actually goes looking for it. */}
-        {/* What the pass is, behind a question mark in the corner: worth
-            reading once and never again. */}
-        {round.status === 'DRAFT' && (
-          <InfoCorner label={t('rounds.pass.whatIsItToggle')}>
-            <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
-          </InfoCorner>
-        )}
-
         {/* Everything still changeable, under one roof, while the door is shut
             or only just open. */}
         {roundId && round.status === 'DRAFT' && (
@@ -1182,8 +1178,11 @@ export function RoundHomePage() {
                 const name =
                   pendingById.get(m.id)?.real_name ?? m.display_name ?? m.secret_name
                 return (
-                <div key={m.id} className="row" style={{ justifyContent: 'space-between' }}>
-                  <span>
+                <div key={m.id} className="row" style={{ flexWrap: 'wrap' }}>
+                  {isHost && m.approved && m.role !== 'HOST' && (
+                    <RemoveChef assigned={assigned} onRemove={(mode) => onRemove(m.id, mode)} />
+                  )}
+                  <span style={{ flex: 1 }}>
                     {/* Everyone in the list is a pseudonym, including you —
                         so without a mark there is no way to tell which
                         stranger you are. A wine ring, the same trace the
@@ -1214,9 +1213,6 @@ export function RoundHomePage() {
                         {t('actions.reject')}
                       </button>
                     </div>
-                  )}
-                  {isHost && m.approved && m.role !== 'HOST' && (
-                    <RemoveChef assigned={assigned} onRemove={(mode) => onRemove(m.id, mode)} />
                   )}
                 </div>
                 )

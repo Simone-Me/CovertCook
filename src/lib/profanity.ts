@@ -1,7 +1,11 @@
 // Vulgarity check for everything a person types freely: names, dinner titles,
 // recipes, chat, notes.
 //
-// Two libraries, because neither covers enough alone:
+// Two libraries, because neither covers enough alone. (Italian and Spanish
+// were checked against @2toad/profanity and profanease and neither is safe to
+// import wholesale into a cooking app: their lists are the same machine-made
+// set, and carry "biga", "battere", "finocchio", "pisello", "perro", "hueso",
+// "nueces". Only the plainly abusive words were taken, by hand, into EXTRA.)
 //   * `obscenity` — English, and good at the evasions (f.u.c.k, fuuuck, fvck).
 //   * `leo-profanity` — English, French and Russian word lists. It has no
 //     Spanish despite asking for it (it silently falls back to English), and
@@ -25,11 +29,19 @@ const EXTRA: Record<string, string[]> = {
     'troia', 'troie', 'coglione', 'coglioni', 'minchia', 'figa', 'culo', 'bastardo', 'bastarda',
     'frocio', 'finocchio', 'negro', 'porcodio', 'diocane', 'porcamadonna', 'zoccola', 'mignotta',
     'pompino', 'sborra', 'scopare', 'ricchione', 'handicappato', 'mongoloide',
+    // Vetted from the @2toad/profanity and profanease lists (see below).
+    'baldracca', 'bagascia', 'battona', 'bocchinara', 'cagata', 'cazzata', 'cazzone', 'chiavata',
+    'culattone', 'culattina', 'fregna', 'froscio', 'leccaculo', 'merdata', 'merdoso', 'minchione',
+    'nerchia', 'patonza', 'pirla', 'rincoglionire', 'rompiballe', 'rompipalle', 'sborrata',
+    'sborrone', 'scopata', 'stronzata', 'terrone', 'imbecille', 'recchione', 'cretino', 'deficiente',
   ],
   es: [
     'puta', 'puto', 'putas', 'mierda', 'coño', 'joder', 'jodete', 'cabron', 'cabrona', 'pendejo',
     'pendeja', 'gilipollas', 'polla', 'verga', 'pinche', 'marica', 'maricon', 'zorra', 'chingar',
     'chingada', 'hijoputa', 'culero', 'mamon',
+    'putas', 'mierdas', 'cabrones', 'pendejos', 'maricas', 'maricones', 'mamada', 'follada', 'follar',
+    'jodido', 'capullo', 'capulla', 'cojones', 'cojon', 'gilipollas', 'soplapollas', 'subnormal',
+    'imbecil', 'idiota', 'estupido', 'estupida', 'chupavergas', 'hdp', 'putada', 'puteria',
   ],
   de: [
     'scheisse', 'scheiße', 'arschloch', 'fotze', 'wichser', 'hurensohn', 'hure', 'schlampe',
@@ -47,7 +59,7 @@ const EXTRA: Record<string, string[]> = {
 }
 
 // Rude somewhere, innocent on a menu.
-const KITCHEN_OK = new Set(['con', 'cul', 'bite', 'butt', 'tit', 'tits', 'cock', 'pinche', 'polla', 'fick'])
+const KITCHEN_OK = new Set(['con', 'cul', 'bite', 'butt', 'tit', 'tits', 'cock', 'pinche', 'polla', 'fick', 'finocchio'])
 
 const LEET: Record<string, string> = { '0': 'o', '1': 'i', '3': 'e', '4': 'a', '5': 's', '7': 't', '@': 'a', $: 's', '!': 'i' }
 

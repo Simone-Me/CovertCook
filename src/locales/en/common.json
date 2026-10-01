@@ -626,7 +626,9 @@
     "changes": {
       "title": "Personalise the event"
     },
-    "chefsInfo": "About this list"
+    "chefsInfo": "About this list",
+    "removeConfirmButton": "Confirm removal",
+    "removeFinal": "Removing a chef is final. It cannot be undone from here."
   },
   "briefs": {
     "editorTitle": "The dish you are asking for",

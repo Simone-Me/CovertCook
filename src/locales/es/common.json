@@ -627,7 +627,9 @@
     "changes": {
       "title": "Personaliza el evento"
     },
-    "chefsInfo": "Sobre esta lista"
+    "chefsInfo": "Sobre esta lista",
+    "removeConfirmButton": "Confirmar la retirada",
+    "removeFinal": "Retirar a un chef es definitivo. No se puede deshacer desde aquí."
   },
   "briefs": {
     "editorTitle": "El plato que estás pidiendo",

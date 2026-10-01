@@ -626,7 +626,9 @@
     "changes": {
       "title": "Personnaliser l'événement"
     },
-    "chefsInfo": "À propos de cette liste"
+    "chefsInfo": "À propos de cette liste",
+    "removeConfirmButton": "Confirmer le retrait",
+    "removeFinal": "Retirer un chef est définitif. Cela ne peut pas être annulé d’ici."
   },
   "briefs": {
     "editorTitle": "Le plat que vous demandez",
