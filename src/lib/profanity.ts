@@ -77,6 +77,13 @@ function dictionary(): Set<string> {
 
 const english = new RegExpMatcher({ ...englishDataset.build(), ...englishRecommendedTransformers })
 
+/** Drops trailing ! @ $ - a loop, because the regex form backtracks badly. */
+function stripTrailingMarks(token: string): string {
+  let end = token.length
+  while (end > 0 && '!@$'.includes(token[end - 1])) end--
+  return token.slice(0, end)
+}
+
 /**
  * The first vulgar word in `text`, as typed, or null.
  * Whole words only; see the header for why.
@@ -89,7 +96,7 @@ export function findProfanity(text: string): string | null {
   const tokens = text.split(/[^\p{L}\p{N}@$!]+/u).filter(Boolean)
   for (const token of tokens) {
     const folded = plain(unleet(token)).replace(/[^\p{L}]/gu, '')
-    if (folded.length >= 3 && dict.has(folded)) return token.replace(/[!@$]+$/u, '') || token
+    if (folded.length >= 3 && dict.has(folded)) return stripTrailingMarks(token) || token
   }
 
   // Spaced-out evasions ("f u c k") are left to obscenity, below.

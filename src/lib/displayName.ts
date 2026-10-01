@@ -21,7 +21,10 @@ export function normalizeName(raw: string): string {
 
 /** As stored: the same, plus no trailing '-'. */
 export function finalName(raw: string): string {
-  return normalizeName(raw).replace(/-+$/, '')
+  const name = normalizeName(raw)
+  let end = name.length
+  while (end > 0 && name[end - 1] === '-') end--
+  return name.slice(0, end)
 }
 
 // Words nobody but us may be called, matched against the whole name.
