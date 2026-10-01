@@ -10,6 +10,7 @@ import { ChoiceList } from '../../components/ChoiceList'
 import { FilRougePicker } from './FilRougePicker'
 import { useFilRougeLabel } from '../../lib/filRouge'
 import { PhaseMenu } from './PhaseMenu'
+import { ThemesEditor } from './ThemesEditor'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
   accessAdmitsCode,
@@ -476,7 +477,9 @@ export function RoundSettingsPage() {
             <dt>{t('rounds.nameTheme.label')}</dt>
             <dd>
               {t(`rounds.nameTheme.${round.name_theme}`)}
-              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
+              <span className="fixed-note">
+                {round.status === 'DRAFT' ? t('rounds.settings.changeableInDraft') : t('rounds.settings.fixedAtCreation')}
+              </span>
             </dd>
 
             {/* The one thing here that is genuinely for sale, and it is a
@@ -487,7 +490,9 @@ export function RoundSettingsPage() {
             <dt>{t('rounds.settings.tableTheme')}</dt>
             <dd>
               {t(`rounds.tableTheme.${round.table_theme}`, { defaultValue: round.table_theme })}
-              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
+              <span className="fixed-note">
+                {round.status === 'DRAFT' ? t('rounds.settings.changeableInDraft') : t('rounds.settings.fixedAtCreation')}
+              </span>
             </dd>
 
             <dt>{t('rounds.settings.dinerInfo')}</dt>
@@ -503,6 +508,15 @@ export function RoundSettingsPage() {
           </div>
         </div>
       </Fold>
+
+      {round.status === 'DRAFT' && round.host_id === profile?.id && (
+        <ThemesEditor
+          roundId={round.id}
+          nameTheme={round.name_theme}
+          tableTheme={round.table_theme}
+          locale={profile?.locale ?? 'en'}
+        />
+      )}
 
       <Fold title={t('rounds.settings.dinerInfo')}>
         {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}

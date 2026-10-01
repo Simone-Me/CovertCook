@@ -8,7 +8,7 @@ import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { MyWarnings } from './MyWarnings'
-import { fromCents, roundDeletesAt } from '../../lib/rpc'
+import { fromCents, getChain, roundDeletesAt } from '../../lib/rpc'
 import { tableThemeClass } from '../../lib/themes'
 import { Envelope } from './Envelope'
 import { SharedMenu } from './SharedMenu'
@@ -109,6 +109,19 @@ export function RoundHomePage() {
     queryKey: ['rounds', roundId, 'dietary-panel'],
     enabled: !!roundId,
     queryFn: () => getDietaryPanel(roundId as string),
+  })
+
+  // Only a head-count of who is in nobody's loop; the names never leave the
+  // chain page, behind its reveal.
+  const { data: chainLinks } = useQuery({
+    queryKey: ['rounds', roundId, 'chain-count'],
+    enabled:
+      !!roundId &&
+      !!round &&
+      round.host_id === profile?.id &&
+      ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED') &&
+      ROUND_PHASE_ORDER.indexOf(round.status) < ROUND_PHASE_ORDER.indexOf('RESULTS'),
+    queryFn: () => getChain(roundId as string),
   })
 
   // Your own recipe, not the table's tally. The envelope used to read
@@ -290,6 +303,10 @@ export function RoundHomePage() {
   const shareLink = `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE') ?? []
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
+  const inChainIds = new Set(chainLinks?.flatMap((l) => [l.sender_member_id, l.cook_member_id]) ?? [])
+  const missingFromChain = chainLinks
+    ? activeMembers.filter((m) => m.approved && !inChainIds.has(m.id)).length
+    : 0
 
   const rosterMeta = hostName
     ? `${t('rounds.chefCount', { count: activeApprovedCount })} — ${t('rounds.executiveChef')} : ${hostName}`
@@ -741,6 +758,16 @@ export function RoundHomePage() {
             <span>
               <strong>{t('chain.title')}</strong> — {t('chain.open')}
             </span>
+          </Link>
+        )}
+
+        {/* Said on the pass, without opening the chain: somebody who arrived
+            after the roulette is seated but is in nobody's loop. Only a
+            count — names stay behind the reveal. */}
+        {assigned && missingFromChain > 0 && (
+          <Link to={`/rounds/${roundId}/chain`} className="pass__link pass__link--alert">
+            <Icon name="chain" size={22} />
+            <span>{t('chain.missing', { count: missingFromChain })}</span>
           </Link>
         )}
 
@@ -1235,6 +1262,26 @@ export function RoundHomePage() {
           )}
         </Envelope>
 
+        {/* The dishes already sent, by name and never by who. Only on a dinner
+            that shows its menu — to everybody (NAMES) or to the Executive Chef
+            alone (HOST, drawn in the pass's colour) — and only while there is a menu being written: before
+            the roulette there are no dishes, after the dinner the results page
+            has the whole menu. A hidden menu has no envelope at all. */}
+        {menuShown && (
+          <Envelope
+            icon={<Icon name="menu" />}
+            name={t('rounds.drawers.menu')}
+            meta={t('rounds.drawers.menuMeta')}
+            tilt={3}
+            hostOnly={round.menu_visibility === 'HOST'}
+            onOpen={() => toggle('menu')}
+          >
+            {open === 'menu' && (
+              <SharedMenu roundId={roundId} shared onlyYou={round.menu_visibility === 'HOST'} />
+            )}
+          </Envelope>
+        )}
+
         {/* ---- The two heavy screens: these take over rather than expand ---- */}
         <Envelope
           icon={<Icon name="myRecipe" />}
@@ -1296,25 +1343,6 @@ export function RoundHomePage() {
         )}
         {round.voting_mode === 'DISABLED' && resultsOpen && (
           <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
-        )}
-
-        {/* The dishes already sent, by name and never by who. Only on a dinner
-            that shows its menu — to everybody (NAMES) or to the Executive Chef
-            alone (HOST) — and only while there is a menu being written: before
-            the roulette there are no dishes, after the dinner the results page
-            has the whole menu. A hidden menu has no envelope at all. */}
-        {menuShown && (
-          <Envelope
-            icon={<Icon name="menu" />}
-            name={t('rounds.drawers.menu')}
-            meta={t('rounds.drawers.menuMeta')}
-            tilt={3}
-            onOpen={() => toggle('menu')}
-          >
-            {open === 'menu' && (
-              <SharedMenu roundId={roundId} shared onlyYou={round.menu_visibility === 'HOST'} />
-            )}
-          </Envelope>
         )}
 
         {/* The count on the flap, and nothing at all when it is zero: a badge

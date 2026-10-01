@@ -25,6 +25,9 @@ export function ChainPage() {
   const { data: round, isLoading: roundLoading } = useRound(roundId)
   const { data: members } = useRoundMembers(roundId)
   const [revealed, setRevealed] = useState(false)
+  // The pass: one person is authorised to look, and says so, before the
+  // button that shows every pairing is even offered.
+  const [authorised, setAuthorised] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const { data: chain, isLoading: chainLoading } = useQuery({
@@ -99,9 +102,19 @@ export function ChainPage() {
       {!revealed ? (
         <div className="card stack">
           <p className="muted">{t('chain.spoilerWarning')}</p>
-          <button type="button" onClick={() => setRevealed(true)}>
-            {t('chain.reveal')}
-          </button>
+          {!authorised ? (
+            <div className="chainpass stack">
+              <strong>{t('chain.passTitle')}</strong>
+              <span>{t('chain.passBody')}</span>
+              <button type="button" onClick={() => setAuthorised(true)}>
+                {t('chain.passAuthorise')}
+              </button>
+            </div>
+          ) : (
+            <button type="button" onClick={() => setRevealed(true)}>
+              {t('chain.reveal')}
+            </button>
+          )}
         </div>
       ) : chainLoading ? (
         <p className="muted">…</p>
@@ -121,15 +134,20 @@ export function ChainPage() {
               {/* The same edges written out, kept because a name is easier to
                   copy from a line than from a diagram, and because a screen
                   reader gets a list rather than a picture. */}
-              <ol className="chainring__pairs">
+              <p className="chainring__path">
                 {cycle.map((link) => (
-                  <li key={link.sender_member_id}>
+                  <span key={link.sender_member_id}>
                     <ChainName secret={link.sender_secret_name} real={realNames ? link.sender_display_name : null} />
                     <span aria-hidden="true"> → </span>
-                    <ChainName secret={link.cook_secret_name} real={realNames ? link.cook_display_name : null} />
-                  </li>
+                  </span>
                 ))}
-              </ol>
+                {cycle[0] && (
+                  <ChainName
+                    secret={cycle[0].sender_secret_name}
+                    real={realNames ? cycle[0].sender_display_name : null}
+                  />
+                )}
+              </p>
             </div>
           ))}
         </div>

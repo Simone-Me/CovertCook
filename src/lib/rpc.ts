@@ -101,6 +101,16 @@ export interface TableThemeOption {
 /** Raised by create_round when a theme is named that this account cannot use. */
 export const THEME_LOCKED = 'THEME_LOCKED'
 
+/** Change the pseudonym list and the cloth; only while the dinner is a draft (0098). */
+export async function setRoundThemes(roundId: string, nameTheme: NameTheme, tableTheme: TableTheme) {
+  const res = await guardedRpc('set_round_themes', {
+    p_round_id: roundId,
+    p_name_theme: nameTheme,
+    p_table_theme: tableTheme,
+  })
+  return unwrap(res)
+}
+
 /** Raised by create_round when a free dinner asks for a PRO-only setting. */
 export const PRO_REQUIRED = 'PRO_REQUIRED'
 

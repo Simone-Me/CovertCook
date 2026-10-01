@@ -33,6 +33,10 @@ changed (the constraint refuses the value).
 
 Phases 0–4 of `PRESENTATION.md` are done, including the board.
 
+**`0098` (themes until the door opens) is written and NOT deployed.** One new
+function, `set_round_themes`; until it is applied, saving the pseudonym list or
+the cloth from a draft's settings fails.
+
 **Next, in order:**
 
 1. **Free-text chat** alongside the templates — the length cap (280) and

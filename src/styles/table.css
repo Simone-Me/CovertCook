@@ -304,6 +304,33 @@
   border-color: var(--env-edge);
 }
 
+.menu-slot-remove {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--env-edge);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.menu-slot-remove:hover,
+.menu-slot-remove:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Compose the menu sits inside the pass: one step lighter than the pass
+   itself instead of the white paper it used to be. */
+.pass .action-fold {
+  background: color-mix(in srgb, var(--pass-env) 45%, white);
+  border-color: var(--pass-edge);
+}
+
 .chef-remove-choice {
   padding: 5px 9px;
   font-size: 12px;
@@ -3878,4 +3905,39 @@
 .dinnercountdown {
   margin: 2px 0 0;
   font-size: 13px;
+}
+
+/* The chain written as one path: a → b → c → a. */
+.chainring__path {
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 4px;
+  font-size: 13px;
+}
+
+/* The pass in front of the reveal: the same blue-grey as the host's pass. */
+.chainpass {
+  padding: 12px;
+  border: 1px solid var(--pass-edge);
+  border-radius: 8px;
+  background: var(--pass-env);
+  color: var(--pass-ink);
+}
+
+.pass__link--alert {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* An envelope only the Executive Chef can read: the pass's own colours. */
+.env--hostonly {
+  background: var(--pass-env);
+  border-color: var(--pass-edge);
+}
+
+.env--hostonly .env__name,
+.env--hostonly .env__meta {
+  color: var(--pass-ink);
 }

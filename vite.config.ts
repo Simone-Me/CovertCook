@@ -117,6 +117,32 @@ export default defineConfig({
         // From the W3C-registered set, not free text: anything outside it is
         // ignored rather than shown.
         categories: ['food', 'lifestyle', 'social'],
+        // Held-icon shortcuts. A manifest shortcut is a fixed URL, so none can
+        // name a dish or a dinner: /go/* picks the next dinner when tapped, and
+        // the recipe book opens with its search box focused.
+        shortcuts: [
+          {
+            name: 'Recipe to cook',
+            short_name: 'My recipe',
+            description: 'The recipe you were sent for the next dinner',
+            url: '/go/recipe',
+            icons: [{ src: 'pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
+          },
+          {
+            name: 'Dinner messages',
+            short_name: 'Messages',
+            description: 'The messages of the next dinner',
+            url: '/go/messages',
+            icons: [{ src: 'pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
+          },
+          {
+            name: 'Recipe book',
+            short_name: 'Recipes',
+            description: 'Search the recipes you kept',
+            url: '/profile/recipes?search=1',
+            icons: [{ src: 'pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' }],
+          },
+        ],
         screenshots: manifestScreenshots(),
         icons: [
           { src: 'pwa/pwa-192x192.png', sizes: '192x192', type: 'image/png' },

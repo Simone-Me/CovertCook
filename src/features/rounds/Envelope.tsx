@@ -22,6 +22,7 @@ export function Envelope({
   to,
   onOpen,
   tilt = 1,
+  hostOnly = false,
   children,
 }: {
   icon: ReactNode
@@ -32,6 +33,8 @@ export function Envelope({
   to?: string
   onOpen?: () => void
   tilt?: 1 | 2 | 3 | 4
+  /** Addressed to the Executive Chef alone: drawn in the colour of the pass. */
+  hostOnly?: boolean
   children?: ReactNode
 }) {
   const navigate = useNavigate()
@@ -41,7 +44,7 @@ export function Envelope({
     <div>
       <button
         type="button"
-        className={`env tilt-${tilt}`}
+        className={`env tilt-${tilt}${hostOnly ? ' env--hostonly' : ''}`}
         disabled={disabled}
         aria-expanded={children ? true : undefined}
         onClick={() => {

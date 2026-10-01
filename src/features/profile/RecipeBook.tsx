@@ -85,6 +85,8 @@ export function RecipeBook() {
       <div className="row">
         <input
           type="search"
+          // The home-screen shortcut lands here to look something up.
+          autoFocus={new URLSearchParams(window.location.search).has('search')}
           value={query}
           placeholder={t('book.search')}
           onChange={(e) => setQuery(e.target.value)}
