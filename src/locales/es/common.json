@@ -629,7 +629,8 @@
     },
     "chefsInfo": "Sobre esta lista",
     "removeConfirmButton": "Confirmar la retirada",
-    "removeFinal": "Retirar a un chef es definitivo. No se puede deshacer desde aquí."
+    "removeFinal": "Retirar a un chef es definitivo. No se puede deshacer desde aquí.",
+    "removeHint": "Toca una banana para dejar salir a un chef."
   },
   "briefs": {
     "editorTitle": "El plato que estás pidiendo",

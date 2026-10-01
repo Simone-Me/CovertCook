@@ -8,7 +8,16 @@ import { useState, type ReactNode } from 'react'
  * The corner is the nearest positioned ancestor — `.letter` and `.pass` both
  * are — so the mark sits on the paper itself.
  */
-export function InfoCorner({ label, children }: { label: string; children: ReactNode }) {
+export function InfoCorner({
+  label,
+  children,
+  onOpenChange,
+}: {
+  label: string
+  children: ReactNode
+  /** Told when the explanation opens or closes, for a caller that shows more while it is open. */
+  onOpenChange?: (open: boolean) => void
+}) {
   const [open, setOpen] = useState(false)
   return (
     <>
@@ -18,7 +27,10 @@ export function InfoCorner({ label, children }: { label: string; children: React
         aria-expanded={open}
         aria-label={label}
         title={label}
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => {
+          setOpen(!open)
+          onOpenChange?.(!open)
+        }}
       >
         ?
       </button>

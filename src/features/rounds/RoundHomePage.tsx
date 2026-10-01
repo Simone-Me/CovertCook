@@ -91,6 +91,8 @@ export function RoundHomePage() {
   // sentence nobody scrolled back up to read.
   const [advanceError, setAdvanceError] = useState<string | null>(null)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
+  // The bananas appear only once the Executive Chef has asked for them.
+  const [removeMode, setRemoveMode] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [inviteName, setInviteName] = useState('')
@@ -1139,8 +1141,12 @@ export function RoundHomePage() {
         >
           {open === 'chefs' && (
             <div className="stack">
-              {(rosterCovered || canBeGuest) && (
-                <InfoCorner label={t('rounds.chefsInfo')}>
+              {(rosterCovered || canBeGuest || isHost) && (
+                <InfoCorner label={t('rounds.chefsInfo')} onOpenChange={setRemoveMode}>
+                  {/* The Executive Chef always has the mark: it is where the
+                      bananas are switched on, so a removal is never one stray
+                      tap away. */}
+                  {isHost && <p className="muted" style={{ margin: 0 }}>{t('rounds.removeHint')}</p>}
                   {rosterCovered && <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>}
                   {/* The guest option, deliberately plain: a question in the
                       corner, not a banner. Only while sign-ups are open; after
@@ -1179,7 +1185,7 @@ export function RoundHomePage() {
                   pendingById.get(m.id)?.real_name ?? m.display_name ?? m.secret_name
                 return (
                 <div key={m.id} className="row" style={{ flexWrap: 'wrap' }}>
-                  {isHost && m.approved && m.role !== 'HOST' && (
+                  {isHost && removeMode && m.approved && m.role !== 'HOST' && (
                     <RemoveChef assigned={assigned} onRemove={(mode) => onRemove(m.id, mode)} />
                   )}
                   <span style={{ flex: 1 }}>

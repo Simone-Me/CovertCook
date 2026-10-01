@@ -628,7 +628,8 @@
     },
     "chefsInfo": "About this list",
     "removeConfirmButton": "Confirm removal",
-    "removeFinal": "Removing a chef is final. It cannot be undone from here."
+    "removeFinal": "Removing a chef is final. It cannot be undone from here.",
+    "removeHint": "Tap a banana to let a chef out."
   },
   "briefs": {
     "editorTitle": "The dish you are asking for",

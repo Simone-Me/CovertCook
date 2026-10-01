@@ -629,7 +629,8 @@
     },
     "chefsInfo": "Su questa lista",
     "removeConfirmButton": "Conferma la rimozione",
-    "removeFinal": "Rimuovere uno chef è definitivo. Da qui non si può annullare."
+    "removeFinal": "Rimuovere uno chef è definitivo. Da qui non si può annullare.",
+    "removeHint": "Tocca una banana per far uscire uno chef."
   },
   "briefs": {
     "editorTitle": "Il piatto che stai chiedendo",

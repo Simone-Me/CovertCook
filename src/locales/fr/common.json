@@ -628,7 +628,8 @@
     },
     "chefsInfo": "À propos de cette liste",
     "removeConfirmButton": "Confirmer le retrait",
-    "removeFinal": "Retirer un chef est définitif. Cela ne peut pas être annulé d’ici."
+    "removeFinal": "Retirer un chef est définitif. Cela ne peut pas être annulé d’ici.",
+    "removeHint": "Touchez une banane pour faire sortir un chef."
   },
   "briefs": {
     "editorTitle": "Le plat que vous demandez",
