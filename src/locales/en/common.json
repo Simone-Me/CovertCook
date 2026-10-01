@@ -3,7 +3,7 @@
     "languageChange": "Change the language",
     "languageSearch": "Search for a language",
     "languageConfirm": "Switch to {{lang}}",
-    "languageNone": "No language by that name — this app is written in two so far.",
+    "languageNone": "No language by that name — this app is written in four.",
     "name": "CovertCook",
     "tagline": "One dinner, one secret recipe, one chain.",
     "language": "Language"
@@ -293,6 +293,8 @@
       "overview": "This dinner at a glance",
       "overviewHelp": "What was chosen when the dinner was created, and what can still be changed.",
       "setupKind": "Setup",
+      "changeableInDraft": "Can be changed in the pass, until the door opens",
+      "themesSaved": "Saved.",
       "fixedAtCreation": "chosen at creation, fixed",
       "fixedNow": "no longer changeable",
       "changeableNow": "changeable now",
@@ -314,14 +316,14 @@
       "title": "Invitations ({{count}})",
       "accept": "Accept",
       "decline": "Decline",
-      "invite": "Invite a chef",
+      "invite": "Invite a chef: username or email",
       "inviteSent": "Invitation sent",
       "noSuchChef": "No chef goes by that name. Check the spelling — usernames are exactly as their owner typed them.",
-      "inviteUsername": "Their username",
+      "inviteUsername": "Username or email",
       "notByInvitation": "This dinner is entered with the code. There is no guest list to add to.",
-      "inviteHelp": "Their username, not their email — the name they picked when they signed up.",
       "alreadyHere": "That chef is already at this table.",
-      "closed": "Invitations are closed: sign-ups have ended."
+      "closed": "Invitations are closed: sign-ups have ended.",
+      "inviteMaybe": "If that address has an account, the invitation is on its way."
     },
     "pastRounds": "Past dinners ({{count}})",
     "backToTable": "Back to the table",
@@ -365,7 +367,6 @@
     "confirmJoin": "You were invited to a dinner with this code. Join it?",
     "confirmJoinYes": "Yes, join this dinner",
     "confirmJoinChange": "Use a different code",
-    "waitingForCaptcha": "Checking you are human…",
     "lateJoinerWarning": "Sign-ups are closed and the chain is set. You can still add someone — the chain is opened at one point to fit them in — but everyone around that point gets a different partner than the one they had.",
     "executiveChef": "Executive Chef",
     "pendingJoinBanner": "Your invitation is being held — dinner code",
@@ -377,12 +378,7 @@
       "PREVIOUSLY_LEFT": "You left this dinner. Ask the Executive Chef to add you back.",
       "WAS_REMOVED": "The Executive Chef removed you from this dinner.",
       "ROUND_FULL": "This dinner is full.",
-      "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner.",
-      "TURNSTILE_SECRET_KEY is not configured": "The bot check is half configured on this deployment: the app is sending a real captcha token and the server has no key to check it against. Either set TURNSTILE_SECRET_KEY on the functions, or clear VITE_TURNSTILE_SITE_KEY so both sides use the development bypass.",
-      "turnstile verification failed": "The bot check refused this attempt. Reload the page and try the code again.",
-      "token and purpose are required": "The bot check never produced a token. Reload the page — and if it keeps happening, VITE_TURNSTILE_SITE_KEY is set to something Cloudflare does not recognise.",
-      "TURNSTILE_NO_TICKET": "The bot check answered without a ticket. Reload the page and try again.",
-      "CAPTCHA_REQUIRED": "This deployment asks for a bot check and the page did not provide one. Reload and try again."
+      "BLOCKED_AT_THIS_TABLE": "You cannot take a seat at this dinner."
     },
     "chainChoice": {
       "intro": "The chain is already built. Taking a link out leaves two loose ends — decide what happens to them.",
@@ -416,6 +412,17 @@
       "stillFilling": "Courses so far: {{courses}}. They only have to match the number of chefs once sign-ups close.",
       "composedAtLock": "Which courses gets decided once sign-ups close — there has to be exactly one per chef, and until then that number is still moving."
     },
+    "guest": {
+      "badge": "guest",
+      "toggle": "I don't want to cook a dish decided by someone else. I decide for myself.",
+      "hint": "",
+      "askLabel": "Not cooking someone else's dish?",
+      "setupTitle": "Guests",
+      "allowed": "Guests allowed",
+      "notAllowed": "Everybody cooks",
+      "allowedHint": "Anyone may come as a guest: they cook their own dish and take no part in the swap.",
+      "notAllowedHint": "Every chef cooks a dish chosen by someone else. No guests."
+    },
     "pass": {
       "title": "The pass",
       "nothing": "Nothing needs you right now.",
@@ -434,7 +441,6 @@
         "ARCHIVED": "Nothing left to do",
         "CANCELLED": "This dinner was called off"
       },
-      "empty": "empty",
       "whatIsItToggle": "What is the pass?",
       "advance": "Move the dinner on",
       "go": {
@@ -521,7 +527,7 @@
     "sharedMenu": {
       "title": "Already on the menu",
       "nothingYet": "Nothing has been sent yet.",
-      "why": "Dish names only — never who wrote them or who is cooking them. It is here so the table does not end up with three tiramisùs.",
+      "why": "Dish names only — never who wrote them or who is cooking them. It is here so the table does not end up with three tiramisù.",
       "label": "The menu while recipes are written",
       "HIDDEN": "Keep the surprise",
       "HIDDENHint": "Nobody sees a dish before the dinner.",
@@ -529,7 +535,9 @@
       "NAMESHint": "Members see the names of the dishes sent, never who. Stops the same dish turning up twice.",
       "HOST": "Only the Executive Chef",
       "HOSTHint": "You keep track of what has been sent; the table keeps its surprise.",
-      "onlyYou": "Only you can see this menu."
+      "onlyYou": "Only you can see this menu.",
+      "waiting": "waiting for {{count}} recipe",
+      "waiting_other": "waiting for {{count}} recipes"
     },
     "questions": {
       "step": "Question {{n}} of {{total}}",
@@ -555,7 +563,7 @@
         "ask": "Can the menu be seen while it is being written?",
         "no": "No, it's the surprise",
         "noHint": "Nobody sees a dish before the dinner.",
-        "yes": "Yes, to avoid three tiramisùs",
+        "yes": "Yes, to avoid three tiramisù",
         "yesHint": "Dish names only — never who wrote them or who is cooking them.",
         "host": "Just me, to keep track",
         "hostHint": "You see the dishes sent; everyone else keeps the surprise."
@@ -604,7 +612,18 @@
     "advanceError": {
       "tooFew": "You need at least 3 signed-up, approved chefs to close sign-ups.",
       "slots": "The menu has {{courses}} dishes for {{chefs}} chefs: it needs one per chef."
-    }
+    },
+    "copyCodeShort": "code",
+    "copyLinkShort": "link",
+    "guestCount": "{{count}} guest",
+    "guestCount_other": "{{count}} guests",
+    "changes": {
+      "title": "Personalise the event"
+    },
+    "chefsInfo": "About this list",
+    "removeConfirmButton": "Confirm removal",
+    "removeFinal": "Removing a chef is final. It cannot be undone from here.",
+    "removeHint": "Tap a banana to let a chef out."
   },
   "briefs": {
     "editorTitle": "The dish you are asking for",
@@ -858,6 +877,10 @@
     "title": "Chain",
     "spoilerWarning": "This reveals every pairing in the round. Only open this once you're ready to know.",
     "reveal": "Reveal the chain",
+    "passTitle": "Pass — one person only",
+    "passBody": "Only the Executive Chef is authorised to read the chain. Make sure nobody else can see this screen.",
+    "missing_one": "{{count}} chef is not in the chain yet — splice them in",
+    "missing_other": "{{count}} chefs are not in the chain yet — splice them in",
     "multipleCycles": "This assignment has split into {{count}} separate loops (a manual swap can do this) — everyone is still assigned exactly once.",
     "cycleTitle": "Loop {{index}}",
     "loopsBackTo": "loops back to {{name}}",
@@ -868,7 +891,8 @@
     "spliceTitle": "Add a late joiner into the chain",
     "applySplice": "Splice in",
     "spliceConfirm": "Every sender has already submitted; splicing replaces one already-cooked dish. Continue?",
-    "open": "See who cooks for whom"
+    "open": "See who cooks for whom",
+    "guests": "Guests"
   },
   "alerts": {
     "title": "Executive Chef alerts",
@@ -965,7 +989,9 @@
     "noRestrictions": "Nothing listed. Add anything a cook would need to know.",
     "locale": {
       "en": "English",
-      "fr": "Français"
+      "fr": "Français",
+      "it": "Italiano",
+      "es": "Español"
     },
     "noneAllergy": "— no allergy declared",
     "noneDiet": "— no diet declared",
@@ -1274,6 +1300,16 @@
       ]
     },
     "help": "Help & contact"
+  },
+  "display": {
+    "title": "Display",
+    "countdown": "Show the countdown to the dinner",
+    "size": {
+      "small": "Small",
+      "medium": "Medium",
+      "large": "Large"
+    },
+    "textSize": "Text size"
   },
   "push": {
     "title": "Notifications",

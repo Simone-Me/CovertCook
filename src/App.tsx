@@ -18,6 +18,7 @@ import { AlbumPage, RecipesPage } from './features/profile/KeptPages'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
 import { CustomRoundPage } from './features/rounds/CustomRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
+import { GoToNextDinner } from './features/rounds/GoToNextDinner'
 import { RoundHomePage } from './features/rounds/RoundHomePage'
 import { RoundSettingsPage } from './features/rounds/RoundSettingsPage'
 import { ChainPage } from './features/rounds/ChainPage'
@@ -102,6 +103,14 @@ function AppRoutes() {
           element={
             <RequireAuth>
               <ProfilePage />
+            </RequireAuth>
+          }
+        />
+        <Route
+          path="/go/:target"
+          element={
+            <RequireAuth>
+              <GoToNextDinner />
             </RequireAuth>
           }
         />

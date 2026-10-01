@@ -101,6 +101,46 @@ export interface TableThemeOption {
 /** Raised by create_round when a theme is named that this account cannot use. */
 export const THEME_LOCKED = 'THEME_LOCKED'
 
+/** Declare yourself a guest, or take it back; only while sign-ups are open (0100). */
+export async function setMyGuest(roundId: string, guest: boolean) {
+  const res = await guardedRpc('set_my_guest', { p_round_id: roundId, p_guest: guest })
+  return unwrap(res)
+}
+
+/** Door, covert level, seats and recipes per chef; only while a draft (0099). */
+export async function setDraftSetup(
+  roundId: string,
+  v: {
+    access: RoundAccess
+    anonymity: RoundAnonymity
+    requiresApproval: boolean
+    seats: number | null
+    recipes: number
+    guestsAllowed: boolean
+  },
+) {
+  const res = await guardedRpc('set_draft_setup', {
+    p_round_id: roundId,
+    p_access: v.access,
+    p_anonymity: v.anonymity,
+    p_requires_approval: v.requiresApproval,
+    p_max_players: v.seats,
+    p_recipes_per_brief: v.recipes,
+    p_guests_allowed: v.guestsAllowed,
+  })
+  return unwrap(res)
+}
+
+/** Change the pseudonym list and the cloth; only while the dinner is a draft (0098). */
+export async function setRoundThemes(roundId: string, nameTheme: NameTheme, tableTheme: TableTheme) {
+  const res = await guardedRpc('set_round_themes', {
+    p_round_id: roundId,
+    p_name_theme: nameTheme,
+    p_table_theme: tableTheme,
+  })
+  return unwrap(res)
+}
+
 /** Raised by create_round when a free dinner asks for a PRO-only setting. */
 export const PRO_REQUIRED = 'PRO_REQUIRED'
 
@@ -661,14 +701,8 @@ export function previousPhaseFor(status: RoundStatus, votingEnabled: boolean): R
   return neighbourPhase(status, votingEnabled, -1)
 }
 
-// The ticket is null on a deployment with no captcha configured (0063), where
-// `join_round` asks for none — and where the Edge Function that mints them is
-// not called at all.
-export async function joinRound(input: { code: string; turnstileTicket: string | null }) {
-  const res = await guardedRpc('join_round', {
-    p_code: input.code,
-    p_turnstile_ticket: input.turnstileTicket,
-  })
+export async function joinRound(input: { code: string }) {
+  const res = await guardedRpc('join_round', { p_code: input.code })
   return unwrap<string>(res) // round_members id
 }
 

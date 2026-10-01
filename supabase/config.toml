@@ -210,18 +210,8 @@ token_verifications = 30
 # Number of Web3 logins that can be made in a 5 minute interval per IP address.
 web3 = 30
 
-# Configure one of the supported captcha providers: `hcaptcha`, `turnstile`.
-# Gates Supabase Auth's own sign-up/sign-in/password-reset forms (§12.17).
-# This is separate from the turnstile_tickets table in migration 0003,
-# which gates our own join_round RPC — GoTrue's built-in captcha only
-# covers GoTrue's own endpoints, not custom RPCs.
-# Edge Functions. Both of these are called by something that is not a
-# signed-in user, so neither can sit behind the default JWT gate:
-# verify-turnstile runs before an account exists, and send-email is called by
-# GoTrue itself with a webhook signature instead of a token.
-[functions.verify-turnstile]
-verify_jwt = false
-
+# Edge Functions. send-email is called by GoTrue itself with a webhook
+# signature instead of a token, so it cannot sit behind the default JWT gate.
 [functions.send-email]
 verify_jwt = false
 
@@ -229,11 +219,6 @@ verify_jwt = false
 # browser and the caller's identity is the whole authorisation check.
 [functions.send-push]
 verify_jwt = true
-
-[auth.captcha]
-enabled = false # flip to true once a real Turnstile secret is set below
-provider = "turnstile"
-secret = "env(TURNSTILE_SECRET_KEY)"
 
 [auth.email]
 # Allow/disallow new user signups via email to your project.
@@ -354,7 +339,7 @@ skip_nonce_check = false
 email_optional = false
 
 # Allow Solana wallet holders to sign in to your project via the Sign in with Solana (SIWS, EIP-4361) standard.
-# You can configure "web3" rate limit in the [auth.rate_limit] section and set up [auth.captcha] if self-hosting.
+# You can configure "web3" rate limit in the [auth.rate_limit] section.
 [auth.web3.solana]
 enabled = false
 

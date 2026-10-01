@@ -19,58 +19,61 @@ export function RemoveChef({
   const { t } = useTranslation()
   const [open, setOpen] = useState(false)
 
-  if (!open) {
-    return (
+  // The banana is only the offer. What it opens is the confirmation, and the
+  // confirmation says it is final — a removal cannot be taken back from here.
+  return (
+    <>
       <button
         type="button"
-        className="chef-remove"
+        className="menu-slot-remove"
         title={t('rounds.remove')}
         aria-label={t('rounds.remove')}
-        onClick={() => setOpen(true)}
+        aria-expanded={open}
+        onClick={() => setOpen((v) => !v)}
       >
         🍌
       </button>
-    )
-  }
 
-  // Before a chain exists the two modes are indistinguishable, so offering
-  // both would be a choice without a difference.
-  if (!assigned) {
-    return (
-      <div className="row">
-        <button type="button" className="secondary chef-remove-choice" onClick={() => onRemove('COLLAPSE')}>
-          {t('rounds.remove')}
-        </button>
-        <button type="button" className="chef-remove" aria-label={t('actions.cancel')} onClick={() => setOpen(false)}>
-          ✕
-        </button>
-      </div>
-    )
-  }
+      {open && !assigned && (
+        <div className="chef-remove-panel stack">
+          <p className="muted" style={{ margin: 0 }}>{t('rounds.removeFinal')}</p>
+          <div className="row">
+            <button type="button" onClick={() => onRemove('COLLAPSE')}>
+              {t('rounds.removeConfirmButton')}
+            </button>
+            <button type="button" className="secondary" onClick={() => setOpen(false)}>
+              {t('actions.cancel')}
+            </button>
+          </div>
+        </div>
+      )}
 
-  // Once the roulette has run there IS a chain, and removing a link from it
-  // is a decision about the chain rather than about the roster. Shown as a
-  // chain, because "collapse" and "leave" mean nothing until you can see
-  // what each one does to the people either side.
-  return (
-    <div className="chain-choice stack">
-      <p className="muted" style={{ margin: 0 }}>{t('rounds.chainChoice.intro')}</p>
+      {/* Once the roulette has run there IS a chain, and removing a link from
+          it is a decision about the chain rather than about the roster. Shown
+          as a chain, because "collapse" and "leave" mean nothing until you can
+          see what each one does to the people either side. */}
+      {open && assigned && (
+        <div className="chef-remove-panel chain-choice stack">
+          <p className="muted" style={{ margin: 0 }}>{t('rounds.chainChoice.intro')}</p>
 
-      <button type="button" className="secondary chain-option" onClick={() => onRemove('COLLAPSE')}>
-        <strong>{t('rounds.removeCollapse')}</strong>
-        <code className="chain-figure">A → B → D → E</code>
-        <span className="muted">{t('rounds.chainChoice.collapse')}</span>
-      </button>
+          <button type="button" className="secondary chain-option" onClick={() => onRemove('COLLAPSE')}>
+            <strong>{t('rounds.removeCollapse')}</strong>
+            <code className="chain-figure">A → B → D → E</code>
+            <span className="muted">{t('rounds.chainChoice.collapse')}</span>
+          </button>
 
-      <button type="button" className="secondary chain-option" onClick={() => onRemove('LEAVE')}>
-        <strong>{t('rounds.removeLeave')}</strong>
-        <code className="chain-figure">A → B → ✕ &nbsp; D → E</code>
-        <span className="muted">{t('rounds.chainChoice.leave')}</span>
-      </button>
+          <button type="button" className="secondary chain-option" onClick={() => onRemove('LEAVE')}>
+            <strong>{t('rounds.removeLeave')}</strong>
+            <code className="chain-figure">A → B → ✕ &nbsp; D → E</code>
+            <span className="muted">{t('rounds.chainChoice.leave')}</span>
+          </button>
 
-      <button type="button" className="secondary chef-remove-choice" onClick={() => setOpen(false)}>
-        {t('actions.cancel')}
-      </button>
-    </div>
+          <p className="muted" style={{ margin: 0 }}>{t('rounds.removeFinal')}</p>
+          <button type="button" className="secondary chef-remove-choice" onClick={() => setOpen(false)}>
+            {t('actions.cancel')}
+          </button>
+        </div>
+      )}
+    </>
   )
 }

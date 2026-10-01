@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { Fold } from '../../components/Fold'
+import { HostAction } from './HostAction'
 import { ChoiceList } from '../../components/ChoiceList'
 
 // Kept in step with rounds_max_players_sane (0020). Three is where a chain
@@ -32,12 +33,15 @@ export function DoorRules({
   onSeats,
   requiresApproval,
   onRequiresApproval,
+  inPass = false,
 }: {
   /** Null means no cap. */
   seats: number | null
   onSeats: (seats: number | null) => void
   requiresApproval: boolean
   onRequiresApproval: (value: boolean) => void
+  /** Drawn like the other panels of the pass instead of like a creation fold. */
+  inPass?: boolean
 }) {
   const { t } = useTranslation()
   const position = seats ?? NO_LIMIT
@@ -48,8 +52,10 @@ export function DoorRules({
     t(requiresApproval ? 'rounds.door.APPROVE' : 'rounds.door.FREE'),
   ].join(' · ')
 
+  const Wrap = inPass ? HostAction : Fold
+
   return (
-    <Fold title={t('rounds.door.label')} aside={answer}>
+    <Wrap title={t('rounds.door.label')} aside={answer}>
       <div className="stack">
         <label htmlFor="seats">{t('rounds.maxPlayers')}</label>
 
@@ -101,6 +107,6 @@ export function DoorRules({
           }))}
         />
       </div>
-    </Fold>
+    </Wrap>
   )
 }

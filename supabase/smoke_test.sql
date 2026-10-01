@@ -39,19 +39,15 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 
 select join_code from rounds where id = :'round_id'::uuid \gset
 
--- need a turnstile ticket per join (edge function would normally insert this)
 reset role;
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t3 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000000002');
-select join_round(:'join_code', :'t1'::uuid);
+select join_round(:'join_code');
 select _as('00000000-0000-0000-0000-000000000003');
-select join_round(:'join_code', :'t2'::uuid);
+select join_round(:'join_code');
 select _as('00000000-0000-0000-0000-000000000004');
-select join_round(:'join_code', :'t3'::uuid);
+select join_round(:'join_code');
 
 \echo '--- round_members ---'
 table round_members;

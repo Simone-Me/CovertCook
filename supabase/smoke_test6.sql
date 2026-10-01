@@ -55,11 +55,10 @@ select advance_phase(:'spy_id'::uuid, 'OPEN');
 
 reset role;
 select join_code as spy_code from rounds where id = :'spy_id'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'spy_code') returning id as st1 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000000402');
-select join_round(:'spy_code', :'st1'::uuid);
+select join_round(:'spy_code');
 
 \echo '--- host sees both members by real name (expect Quinn + Rosa) ---'
 select _as('00000000-0000-0000-0000-000000000401');

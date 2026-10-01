@@ -37,17 +37,14 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 
 reset role;
 select join_code from rounds where id = :'round_id'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t3 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000000302');
-select join_round(:'join_code', :'t1'::uuid);
+select join_round(:'join_code');
 select _as('00000000-0000-0000-0000-000000000303');
-select join_round(:'join_code', :'t2'::uuid);
+select join_round(:'join_code');
 select _as('00000000-0000-0000-0000-000000000304');
-select join_round(:'join_code', :'t3'::uuid);
+select join_round(:'join_code');
 
 select _as('00000000-0000-0000-0000-000000000301');
 select advance_phase(:'round_id'::uuid, 'LOCKED');
@@ -114,17 +111,14 @@ select advance_phase(:'r2'::uuid, 'OPEN');
 
 reset role;
 select join_code as c2 from rounds where id = :'r2'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'c2') returning id as u1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'c2') returning id as u2 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'c2') returning id as u3 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000000302');
-select join_round(:'c2', :'u1'::uuid);
+select join_round(:'c2');
 select _as('00000000-0000-0000-0000-000000000303');
-select join_round(:'c2', :'u2'::uuid);
+select join_round(:'c2');
 select _as('00000000-0000-0000-0000-000000000304');
-select join_round(:'c2', :'u3'::uuid);
+select join_round(:'c2');
 
 select _as('00000000-0000-0000-0000-000000000301');
 select advance_phase(:'r2'::uuid, 'LOCKED');

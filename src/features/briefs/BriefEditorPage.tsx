@@ -552,7 +552,7 @@ export function BriefEditorPage() {
                 {!editingClosed && (
                   <button
                     type="button"
-                    className="chef-remove"
+                    className="menu-slot-remove"
                     aria-label={t('actions.remove')}
                     onClick={() => setIngredients((prev) => prev.filter((_, idx) => idx !== i))}
                   >

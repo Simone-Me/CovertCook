@@ -44,14 +44,12 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 
 reset role;
 select join_code from rounds where id = :'round_id'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000000802');
-select join_round(:'join_code', :'t1'::uuid);
+select join_round(:'join_code');
 select _as('00000000-0000-0000-0000-000000000803');
-select join_round(:'join_code', :'t2'::uuid);
+select join_round(:'join_code');
 
 select _as('00000000-0000-0000-0000-000000000801');
 select advance_phase(:'round_id'::uuid, 'LOCKED');

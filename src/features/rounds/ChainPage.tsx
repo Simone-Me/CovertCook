@@ -54,10 +54,16 @@ export function ChainPage() {
   const nameOf = (m: { display_name: string | null; secret_name: string | null }) =>
     (realNames ? m.display_name : null) ?? m.secret_name
 
-  const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved) ?? []
+  const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved && !m.is_guest) ?? []
   const inChain = new Set(chain?.flatMap((l) => [l.sender_member_id, l.cook_member_id]) ?? [])
   const notInChain = activeMembers.filter((m) => !inChain.has(m.id))
   const cycles = chain ? walkCycles(chain) : []
+  // At the table but outside the exchange: shown apart, never in the ring.
+  const guests = (members?.filter((m) => m.status === 'ACTIVE' && m.approved && m.is_guest) ?? []).map((m) => ({
+    id: m.id,
+    secret: m.secret_name ?? '',
+    real: realNames ? m.display_name : null,
+  }))
 
   async function onSwap(e: React.FormEvent) {
     e.preventDefault()
@@ -99,6 +105,10 @@ export function ChainPage() {
       {!revealed ? (
         <div className="card stack">
           <p className="muted">{t('chain.spoilerWarning')}</p>
+          <div className="chainpass stack">
+            <strong>{t('chain.passTitle')}</strong>
+            <span>{t('chain.passBody')}</span>
+          </div>
           <button type="button" onClick={() => setRevealed(true)}>
             {t('chain.reveal')}
           </button>
@@ -107,6 +117,13 @@ export function ChainPage() {
         <p className="muted">…</p>
       ) : (
         <div className="stack">
+          {cycles.length === 0 && guests.length > 0 && (
+            <p className="chainring__path">
+              {guests.map((g) => (
+                <ChainName key={g.id} secret={g.secret} real={g.real} />
+              ))}
+            </p>
+          )}
           {cycles.length > 1 && <p className="muted">{t('chain.multipleCycles', { count: cycles.length })}</p>}
           {cycles.map((cycle, ci) => (
             <div key={cycle[0]?.sender_member_id ?? ci} className="stack">
@@ -116,20 +133,33 @@ export function ChainPage() {
                   arrow points at the person that chef cooks for, and the fact
                   that it closes is visible rather than asserted at the bottom
                   of a list. */}
-              <ChainCircle cycle={cycle} realNames={realNames} />
+              <ChainCircle cycle={cycle} realNames={realNames} guests={ci === 0 ? guests : undefined} />
 
               {/* The same edges written out, kept because a name is easier to
                   copy from a line than from a diagram, and because a screen
                   reader gets a list rather than a picture. */}
-              <ol className="chainring__pairs">
+              <p className="chainring__path">
                 {cycle.map((link) => (
-                  <li key={link.sender_member_id}>
+                  <span key={link.sender_member_id}>
                     <ChainName secret={link.sender_secret_name} real={realNames ? link.sender_display_name : null} />
                     <span aria-hidden="true"> → </span>
-                    <ChainName secret={link.cook_secret_name} real={realNames ? link.cook_display_name : null} />
-                  </li>
+                  </span>
                 ))}
-              </ol>
+                {cycle[0] && (
+                  <ChainName
+                    secret={cycle[0].sender_secret_name}
+                    real={realNames ? cycle[0].sender_display_name : null}
+                  />
+                )}
+              </p>
+              {ci === 0 && guests.length > 0 && (
+                <p className="chainring__path chainring__guests">
+                  <span className="muted">{t('chain.guests')}</span>
+                  {guests.map((g) => (
+                    <ChainName key={g.id} secret={g.secret} real={g.real} />
+                  ))}
+                </p>
+              )}
             </div>
           ))}
         </div>

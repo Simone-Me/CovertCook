@@ -111,7 +111,8 @@ Deno.serve(async (req) => {
   // Set by the client at sign-up (options.data.locale). Absent for anything
   // created before that shipped, and for accounts made from the dashboard.
   const metaLocale = payload.user.user_metadata?.locale
-  const locale: EmailLocale = metaLocale === 'fr' ? 'fr' : 'en'
+  const locale: EmailLocale =
+    metaLocale === 'fr' || metaLocale === 'it' || metaLocale === 'es' ? metaLocale : 'en'
 
   // Where the logo is fetched from. Falls back to the template's own default,
   // so a missing secret costs nothing.

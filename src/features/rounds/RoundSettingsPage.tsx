@@ -1,14 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { useNavigate, useParams, useLocation, Link, Navigate } from 'react-router-dom'
+import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { useRound, useRoundMembers } from './hooks'
 import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
 import { ChoiceList } from '../../components/ChoiceList'
-import { FilRougePicker } from './FilRougePicker'
-import { useFilRougeLabel } from '../../lib/filRouge'
 import { PhaseMenu } from './PhaseMenu'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
@@ -25,15 +23,9 @@ import {
   removeSlot,
   COURSES,
   type Course,
-  filRougeClash,
   setMenuVisibility,
   type MenuVisibility,
   MENU_VISIBILITIES,
-  getFilRouge,
-  setFilRouge,
-  FIL_ROUGE_FROZEN,
-  type FilRougeCategory,
-  type FilRougeScope,
 } from '../../lib/rpc'
 
 const COMMON_TIMEZONES = [
@@ -115,52 +107,6 @@ export function RoundSettingsPage() {
     enabled: !!roundId && round?.slot_mode === 'CATEGORIES',
     queryFn: () => getSlots(roundId as string),
   })
-
-  // Le fil rouge, changeable right up until the roulette deals it. Held here
-  // rather than read straight from the round because the picker is a draft
-  // until it is saved — and because the allergen warning has to be shown for
-  // what is ABOUT to be chosen, not for what already is.
-  const [thread, setThread] = useState<{
-    category: FilRougeCategory | null
-    code: string | null
-    scope: FilRougeScope
-  } | null>(null)
-  const [threadClash, setThreadClash] = useState<string[]>([])
-  const [threadSaved, setThreadSaved] = useState(false)
-  const filRougeLabel = useFilRougeLabel()
-
-  const { data: currentThread } = useQuery({
-    queryKey: ['rounds', roundId, 'fil-rouge'],
-    enabled: !!roundId,
-    queryFn: () => getFilRouge(roundId as string),
-  })
-
-  async function saveThread() {
-    if (!thread) return
-    setError(null)
-    setThreadSaved(false)
-    try {
-      await setFilRouge(
-        roundId as string,
-        thread.category,
-        thread.scope === 'SHARED' ? thread.code : null,
-        thread.scope,
-      )
-      // Told, not refused (0069): the dinner is shared, so the one person who
-      // can still change the thread is the one who hears about the collision.
-      if (thread.category) {
-        const codes = thread.scope === 'SHARED' && thread.code ? [thread.code] : []
-        setThreadClash(codes.length ? await filRougeClash(roundId as string, thread.category, codes) : [])
-      } else {
-        setThreadClash([])
-      }
-      setThreadSaved(true)
-      await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
-    } catch (err) {
-      const raw = err instanceof Error ? err.message : ''
-      setError(raw === FIL_ROUGE_FROZEN ? t('filRouge.frozen') : raw || t('errors.generic'))
-    }
-  }
 
   if (isLoading || !round) return <p className="muted">…</p>
 
@@ -283,12 +229,19 @@ export function RoundSettingsPage() {
   return (
     <div className="stack sheet">
       <BackToTable />
-      <div className="row" style={{ justifyContent: 'space-between' }}>
-        <h1>{t('rounds.settings.title')}</h1>
-        <Link to={`/rounds/${roundId}`}>{t('actions.back')}</Link>
-      </div>
+      <h1>{t('rounds.settings.title')}</h1>
 
       {error && <div className="error">{error}</div>}
+
+      {/* The phase comes first and is always open: where the dinner is, is
+          the one thing every other section depends on. */}
+      <PhaseMenu
+        status={round.status}
+        votingEnabled={round.voting_enabled}
+        previousPhase={previousPhase}
+        stepping={stepping}
+        onStepBack={onStepBack}
+      />
 
       {/* Mirrors the panel on the round page. Filling the table is a thing
           a host comes back to, and they don't always come back the same
@@ -344,56 +297,6 @@ export function RoundSettingsPage() {
           back weeks later had no way to remember whether they had turned
           voting off, or whether they were the one approving people — and no
           way to tell which of it is still changeable. */}
-      {/* The thread, for as long as it can still move. Frozen the moment the
-          roulette deals — people write against it, so it cannot change under
-          them — which is why the panel disappears rather than refusing. */}
-      {preAssignment && (
-        <Fold
-          title={t('filRouge.label')}
-          aside={
-            currentThread?.category
-              ? // A sealed one has no name to print — the server is withholding
-                // it from the host too, until the roulette runs (0089).
-                currentThread.sealed
-                ? t('filRouge.compass')
-                : currentThread.scope === 'PER_COOK' || !currentThread.code
-                  ? t(`filRouge.category.${currentThread.category}`)
-                  : filRougeLabel(currentThread.category, currentThread.code)
-              : t('filRouge.none')
-          }
-        >
-          <div className="card stack">
-            <p className="muted">{t('filRouge.explain')}</p>
-            <FilRougePicker
-              category={(thread ?? currentThread)?.category ?? null}
-              code={(thread ?? currentThread)?.code ?? null}
-              scope={(thread ?? currentThread)?.scope ?? 'SHARED'}
-              onChange={(next) => {
-                setThread(next)
-                setThreadSaved(false)
-                setThreadClash([])
-              }}
-            />
-            {threadClash.length > 0 && (
-              <p className="notice">
-                {t('filRouge.clash', {
-                  items: threadClash
-                    .map((c) =>
-                      t(`food.allergen.${c}`, {
-                        defaultValue: t(`food.diet.${c}`, { defaultValue: c }),
-                      }),
-                    )
-                    .join(', '),
-                })}
-              </p>
-            )}
-            {threadSaved && <p className="muted">{t('filRouge.saved')}</p>}
-            <button type="button" onClick={saveThread} disabled={!thread}>
-              {t('actions.save')}
-            </button>
-          </div>
-        </Fold>
-      )}
 
       {/* Reversible, and therefore not a creation-time decision: turning it on
           reveals names that are public at the end of the evening anyway, and
@@ -425,84 +328,6 @@ export function RoundSettingsPage() {
           </div>
         </Fold>
       )}
-
-      <Fold title={t('rounds.settings.overview')} hint={t('rounds.settings.overviewHelp')}>
-        <div className="card">
-          <dl className="info">
-            <dt>{t('rounds.settings.setupKind')}</dt>
-            <dd>{isClassic ? t('rounds.setup.classic') : t('rounds.setup.custom')}</dd>
-
-            <dt>{t('rounds.access.label')}</dt>
-            <dd>
-              {t(`rounds.access.${round.access}`)}
-              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
-            </dd>
-
-            <dt>{t('rounds.anonymity.label')}</dt>
-            <dd>
-              {t(`rounds.anonymity.${round.anonymity}`)}
-              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
-            </dd>
-
-            <dt>{t('rounds.voting.label')}</dt>
-            <dd>
-              {t(`rounds.voting.${round.voting_mode}`)}
-              {/* MANUAL arrived with 0040 and never got a line here, so the
-                  row printed its own key. The note underneath is the rule
-                  rather than a live state: the method is settled when the vote
-                  opens, and stays changeable until somebody has actually voted
-                  (0043, 0045) — which is a thing worth knowing before the
-                  evening, not a status to look up during it. */}
-              {/* One note now, because there is one rule: the method moves in
-                  either direction until somebody has voted (0078). "No voting
-                  cannot be turned on later" was true and is not any more. */}
-              <span className="fixed-note">{t('rounds.voting.chosenWhenOpening')}</span>
-            </dd>
-
-            <dt>{t('rounds.slotMode.label')}</dt>
-            <dd>
-              {t(`rounds.slotMode.${round.slot_mode}`)}
-              <span className="fixed-note">
-                {preAssignment ? t('rounds.settings.changeableInGame') : t('rounds.settings.fixedNow')}
-              </span>
-            </dd>
-
-            <dt>{t('rounds.requiresApproval')}</dt>
-            <dd>{round.requires_approval ? t('rounds.settings.yes') : t('rounds.settings.no')}</dd>
-
-            <dt>{t('rounds.maxPlayers')}</dt>
-            <dd>{round.max_players ?? t('rounds.settings.noLimit')}</dd>
-
-            <dt>{t('rounds.nameTheme.label')}</dt>
-            <dd>
-              {t(`rounds.nameTheme.${round.name_theme}`)}
-              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
-            </dd>
-
-            {/* The one thing here that is genuinely for sale, and it is a
-                look — said next to everything that isn't, so the difference is
-                visible rather than asserted. It stopped being a promise in
-                0072: the cloth this dinner is laid on is a choice that was
-                made, so the row prints the choice. */}
-            <dt>{t('rounds.settings.tableTheme')}</dt>
-            <dd>
-              {t(`rounds.tableTheme.${round.table_theme}`, { defaultValue: round.table_theme })}
-              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
-            </dd>
-
-            <dt>{t('rounds.settings.dinerInfo')}</dt>
-            <dd>{detailsLocked ? t('rounds.settings.fixedNow') : t('rounds.settings.changeableNow')}</dd>
-          </dl>
-
-          {/* Pro is flavour, never access. Saying so where the switched-off
-              options live is the only place a host would ask the question. */}
-          <div className="profree">
-            <p className="profree__head">{t('pro.title')}</p>
-            <p className="profree__free">{t('pro.freeForever')}</p>
-            <p className="profree__what">{t('pro.what')}</p>
-          </div>
-        </div>
-      </Fold>
 
       <Fold title={t('rounds.settings.dinerInfo')}>
         {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}
@@ -580,16 +405,6 @@ export function RoundSettingsPage() {
         </form>
       </Fold>
 
-      <Fold title={t('rounds.settings.phaseControl')} defaultOpen>
-        <PhaseMenu
-          status={round.status}
-          votingEnabled={round.voting_enabled}
-          previousPhase={previousPhase}
-          stepping={stepping}
-          onStepBack={onStepBack}
-        />
-      </Fold>
-
       <Fold title={t('rounds.settings.exclusions')} hint={t('rounds.settings.exclusionsHelp')}>
         <div className="stack card">
         {exclusions?.length === 0 && <p className="muted">{t('rounds.settings.noExclusions')}</p>}
@@ -664,6 +479,88 @@ export function RoundSettingsPage() {
           </div>
         </Fold>
       )}
+
+      <Fold title={t('rounds.settings.overview')} hint={t('rounds.settings.overviewHelp')}>
+        <div className="card">
+          <dl className="info">
+            <dt>{t('rounds.settings.setupKind')}</dt>
+            <dd>{isClassic ? t('rounds.setup.classic') : t('rounds.setup.custom')}</dd>
+
+            <dt>{t('rounds.access.label')}</dt>
+            <dd>
+              {t(`rounds.access.${round.access}`)}
+              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
+            </dd>
+
+            <dt>{t('rounds.anonymity.label')}</dt>
+            <dd>
+              {t(`rounds.anonymity.${round.anonymity}`)}
+              <span className="fixed-note">{t('rounds.settings.fixedAtCreation')}</span>
+            </dd>
+
+            <dt>{t('rounds.voting.label')}</dt>
+            <dd>
+              {t(`rounds.voting.${round.voting_mode}`)}
+              {/* MANUAL arrived with 0040 and never got a line here, so the
+                  row printed its own key. The note underneath is the rule
+                  rather than a live state: the method is settled when the vote
+                  opens, and stays changeable until somebody has actually voted
+                  (0043, 0045) — which is a thing worth knowing before the
+                  evening, not a status to look up during it. */}
+              {/* One note now, because there is one rule: the method moves in
+                  either direction until somebody has voted (0078). "No voting
+                  cannot be turned on later" was true and is not any more. */}
+              <span className="fixed-note">{t('rounds.voting.chosenWhenOpening')}</span>
+            </dd>
+
+            <dt>{t('rounds.slotMode.label')}</dt>
+            <dd>
+              {t(`rounds.slotMode.${round.slot_mode}`)}
+              <span className="fixed-note">
+                {preAssignment ? t('rounds.settings.changeableInGame') : t('rounds.settings.fixedNow')}
+              </span>
+            </dd>
+
+            <dt>{t('rounds.requiresApproval')}</dt>
+            <dd>{round.requires_approval ? t('rounds.settings.yes') : t('rounds.settings.no')}</dd>
+
+            <dt>{t('rounds.maxPlayers')}</dt>
+            <dd>{round.max_players ?? t('rounds.settings.noLimit')}</dd>
+
+            <dt>{t('rounds.nameTheme.label')}</dt>
+            <dd>
+              {t(`rounds.nameTheme.${round.name_theme}`)}
+              <span className="fixed-note">
+                {round.status === 'DRAFT' ? t('rounds.settings.changeableInDraft') : t('rounds.settings.fixedAtCreation')}
+              </span>
+            </dd>
+
+            {/* The one thing here that is genuinely for sale, and it is a
+                look — said next to everything that isn't, so the difference is
+                visible rather than asserted. It stopped being a promise in
+                0072: the cloth this dinner is laid on is a choice that was
+                made, so the row prints the choice. */}
+            <dt>{t('rounds.settings.tableTheme')}</dt>
+            <dd>
+              {t(`rounds.tableTheme.${round.table_theme}`, { defaultValue: round.table_theme })}
+              <span className="fixed-note">
+                {round.status === 'DRAFT' ? t('rounds.settings.changeableInDraft') : t('rounds.settings.fixedAtCreation')}
+              </span>
+            </dd>
+
+            <dt>{t('rounds.settings.dinerInfo')}</dt>
+            <dd>{detailsLocked ? t('rounds.settings.fixedNow') : t('rounds.settings.changeableNow')}</dd>
+          </dl>
+
+          {/* Pro is flavour, never access. Saying so where the switched-off
+              options live is the only place a host would ask the question. */}
+          <div className="profree">
+            <p className="profree__head">{t('pro.title')}</p>
+            <p className="profree__free">{t('pro.freeForever')}</p>
+            <p className="profree__what">{t('pro.what')}</p>
+          </div>
+        </div>
+      </Fold>
 
       {canCancel && (
         <Fold title={t('rounds.settings.dangerZone')}>

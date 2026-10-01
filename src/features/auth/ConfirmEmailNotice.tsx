@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { supabase } from '../../lib/supabase'
-import { Turnstile } from '../../components/Turnstile'
 
 const COOLDOWN_SECONDS = 120
 
@@ -18,20 +17,12 @@ const COOLDOWN_SECONDS = 120
  * as spam, and every extra copy makes the inbox harder to search, not easier.
  * The countdown starts filled in, because the first mail has just gone out.
  *
- * It carries its own captcha. Every other call into GoTrue — sign-up, sign-in,
- * password reset — passes a token, and `/resend` is gated by exactly the same
- * project setting: with captcha protection on, a resend without one is refused
- * before any mail is attempted, which looks from the outside like the button
- * doing nothing at all. The sign-up token cannot be reused here: Turnstile
- * tokens are single-use and were spent by the sign-up call itself, so this
- * screen solves its own.
  */
 export function ConfirmEmailNotice({ email }: { email: string }) {
   const { t } = useTranslation()
   const [left, setLeft] = useState(COOLDOWN_SECONDS)
   const [sending, setSending] = useState(false)
   const [sentAgain, setSentAgain] = useState(false)
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
 
   useEffect(() => {
@@ -50,7 +41,6 @@ export function ConfirmEmailNotice({ email }: { email: string }) {
       // whatever the project's Site URL happens to be.
       options: {
         emailRedirectTo: `${import.meta.env.VITE_APP_BASE_URL}/`,
-        ...(captchaToken ? { captchaToken } : {}),
       },
     })
     setSending(false)
@@ -84,8 +74,6 @@ export function ConfirmEmailNotice({ email }: { email: string }) {
 
       {error && <div className="error">{error}</div>}
       {sentAgain && !error && <p className="muted">{t('auth.confirm.sentAgain')}</p>}
-
-      <Turnstile onVerify={setCaptchaToken} />
 
       <div className="row">
         <button type="button" disabled={sending || left > 0} onClick={onResend}>

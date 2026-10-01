@@ -3,7 +3,7 @@
     "languageChange": "Changer de langue",
     "languageSearch": "Chercher une langue",
     "languageConfirm": "Passer en {{lang}}",
-    "languageNone": "Aucune langue de ce nom — l’application en parle deux pour l’instant.",
+    "languageNone": "Aucune langue de ce nom — cette appli est écrite en quatre langues.",
     "name": "CovertCook",
     "tagline": "Un dîner, une recette secrète, une seule chaîne.",
     "language": "Langue"
@@ -293,6 +293,8 @@
       "overview": "Ce dîner en un coup d'œil",
       "overviewHelp": "Ce qui a été choisi à la création, et ce qui peut encore changer.",
       "setupKind": "Configuration",
+      "changeableInDraft": "Modifiable au pass, jusqu'à l'ouverture de la porte",
+      "themesSaved": "Enregistré.",
       "fixedAtCreation": "choisi à la création, figé",
       "fixedNow": "non modifiable",
       "changeableNow": "modifiable maintenant",
@@ -314,14 +316,14 @@
       "title": "Invitations ({{count}})",
       "accept": "Accepter",
       "decline": "Refuser",
-      "invite": "Inviter un chef",
+      "invite": "Inviter un chef : pseudo ou e-mail",
       "inviteSent": "Invitation envoyée",
       "noSuchChef": "Aucun chef ne porte ce nom. Vérifiez l'orthographe — les noms d'utilisateur sont exactement comme leur propriétaire les a tapés.",
-      "inviteUsername": "Son nom d'utilisateur",
+      "inviteUsername": "Pseudo ou e-mail",
       "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
-      "inviteHelp": "Son nom d'utilisateur, pas son e-mail — le nom qu'il a choisi en s'inscrivant.",
       "alreadyHere": "Ce chef est déjà à cette table.",
-      "closed": "Les invitations sont fermées : les inscriptions sont closes."
+      "closed": "Les invitations sont fermées : les inscriptions sont closes.",
+      "inviteMaybe": "Si cette adresse a un compte, l'invitation est en route."
     },
     "pastRounds": "Dîners passés ({{count}})",
     "backToTable": "Retour à la table",
@@ -365,7 +367,6 @@
     "confirmJoin": "Vous avez été invité à un dîner avec ce code. Le rejoindre ?",
     "confirmJoinYes": "Oui, rejoindre ce dîner",
     "confirmJoinChange": "Utiliser un autre code",
-    "waitingForCaptcha": "Vérification en cours…",
     "lateJoinerWarning": "Les inscriptions sont closes et la chaîne est faite. Vous pouvez encore ajouter quelqu'un — la chaîne est ouverte en un point pour l'insérer — mais les chefs autour de ce point changent de partenaire.",
     "executiveChef": "Executive Chef",
     "pendingJoinBanner": "Votre invitation est gardée — code du dîner",
@@ -377,12 +378,7 @@
       "PREVIOUSLY_LEFT": "Vous avez quitté ce dîner. Demandez à l'Executive Chef de vous rajouter.",
       "WAS_REMOVED": "L'Executive Chef vous a retiré de ce dîner.",
       "ROUND_FULL": "Ce dîner est complet.",
-      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner.",
-      "TURNSTILE_SECRET_KEY is not configured": "Le contrôle anti-robot est à moitié configuré sur ce déploiement : l’app envoie un vrai jeton et le serveur n’a aucune clé pour le vérifier. Définissez TURNSTILE_SECRET_KEY sur les fonctions, ou videz VITE_TURNSTILE_SITE_KEY pour que les deux côtés passent par le contournement de développement.",
-      "turnstile verification failed": "Le contrôle anti-robot a refusé cette tentative. Rechargez la page et réessayez le code.",
-      "token and purpose are required": "Le contrôle anti-robot n’a produit aucun jeton. Rechargez la page — et si cela persiste, VITE_TURNSTILE_SITE_KEY vaut quelque chose que Cloudflare ne reconnaît pas.",
-      "TURNSTILE_NO_TICKET": "Le contrôle anti-robot a répondu sans billet. Rechargez la page et réessayez.",
-      "CAPTCHA_REQUIRED": "Ce déploiement demande un contrôle anti-robot et la page n’en a pas fourni. Rechargez et réessayez."
+      "BLOCKED_AT_THIS_TABLE": "Vous ne pouvez pas prendre place à ce dîner."
     },
     "chainChoice": {
       "intro": "La chaîne est déjà faite. Retirer un maillon laisse deux extrémités libres — décidez ce qu'elles deviennent.",
@@ -416,6 +412,17 @@
       "stillFilling": "Plats pour l’instant : {{courses}}. Ils ne doivent égaler le nombre de chefs qu’une fois les inscriptions fermées.",
       "composedAtLock": "Quels plats se décide une fois les inscriptions fermées — il en faut exactement un par chef, et jusque-là ce nombre bouge encore."
     },
+    "guest": {
+      "badge": "invité",
+      "toggle": "Je ne veux pas cuisiner un plat choisi par quelqu'un d'autre. Je décide pour moi.",
+      "hint": "",
+      "askLabel": "Ne pas cuisiner le plat de quelqu'un d'autre ?",
+      "setupTitle": "Invités",
+      "allowed": "Invités acceptés",
+      "notAllowed": "Tout le monde cuisine",
+      "allowedHint": "Chacun peut venir en invité : il cuisine son propre plat et ne participe pas à l'échange.",
+      "notAllowedHint": "Chaque chef cuisine un plat choisi par quelqu'un d'autre. Pas d'invités."
+    },
     "pass": {
       "title": "Le pass",
       "nothing": "Rien ne vous attend pour le moment.",
@@ -434,7 +441,6 @@
         "ARCHIVED": "Plus rien à faire",
         "CANCELLED": "Ce dîner a été annulé"
       },
-      "empty": "vide",
       "whatIsItToggle": "Qu’est-ce que le passe ?",
       "advance": "Faire avancer le dîner",
       "go": {
@@ -521,7 +527,7 @@
     "sharedMenu": {
       "title": "Déjà au menu",
       "nothingYet": "Rien n'a encore été envoyé.",
-      "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisùs à la même table.",
+      "why": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine. C'est là pour éviter trois tiramisù à la même table.",
       "label": "Le menu pendant l'écriture des recettes",
       "HIDDEN": "Garder la surprise",
       "HIDDENHint": "Personne ne voit un plat avant le dîner.",
@@ -529,7 +535,9 @@
       "NAMESHint": "Les convives voient les noms des plats envoyés, jamais qui. Évite deux fois le même plat.",
       "HOST": "Visible par l'Executive Chef seulement",
       "HOSTHint": "Vous suivez ce qui a été envoyé ; les convives gardent la surprise.",
-      "onlyYou": "Vous seul voyez ce menu."
+      "onlyYou": "Vous seul voyez ce menu.",
+      "waiting": "en attente de {{count}} recette",
+      "waiting_other": "en attente de {{count}} recettes"
     },
     "questions": {
       "step": "Question {{n}} sur {{total}}",
@@ -555,7 +563,7 @@
         "ask": "Le menu se voit pendant qu’on écrit ?",
         "no": "Non, c’est la surprise",
         "noHint": "Personne ne voit un plat avant le dîner.",
-        "yes": "Oui, pour éviter trois tiramisùs",
+        "yes": "Oui, pour éviter trois tiramisù",
         "yesHint": "Les noms des plats seulement — jamais qui les a écrits ni qui les cuisine.",
         "host": "Seulement moi, pour suivre",
         "hostHint": "Vous voyez les plats envoyés, les autres gardent la surprise."
@@ -604,7 +612,18 @@
     "advanceError": {
       "tooFew": "Il faut au moins 3 chefs inscrits et approuvés pour fermer les inscriptions.",
       "slots": "Le menu compte {{courses}} plats pour {{chefs}} chefs : il en faut un par chef."
-    }
+    },
+    "copyCodeShort": "code",
+    "copyLinkShort": "lien",
+    "guestCount": "{{count}} invité",
+    "guestCount_other": "{{count}} invités",
+    "changes": {
+      "title": "Personnaliser l'événement"
+    },
+    "chefsInfo": "À propos de cette liste",
+    "removeConfirmButton": "Confirmer le retrait",
+    "removeFinal": "Retirer un chef est définitif. Cela ne peut pas être annulé d’ici.",
+    "removeHint": "Touchez une banane pour faire sortir un chef."
   },
   "briefs": {
     "editorTitle": "Le plat que vous demandez",
@@ -858,6 +877,10 @@
     "title": "Chaîne",
     "spoilerWarning": "Ceci révèle toutes les attributions du dîner. N'ouvrez que si vous êtes prêt à savoir.",
     "reveal": "Révéler la chaîne",
+    "passTitle": "Le pass — une seule personne",
+    "passBody": "Seul le chef exécutif est autorisé à lire la chaîne. Vérifiez que personne d'autre ne voit cet écran.",
+    "missing_one": "{{count}} chef n'est pas encore dans la chaîne — insérez-le",
+    "missing_other": "{{count}} chefs ne sont pas encore dans la chaîne — insérez-les",
     "multipleCycles": "Cette attribution s'est divisée en {{count}} boucles distinctes (un échange manuel peut faire ça) — tout le monde reste attribué exactement une fois.",
     "cycleTitle": "Boucle {{index}}",
     "loopsBackTo": "boucle vers {{name}}",
@@ -868,7 +891,8 @@
     "spliceTitle": "Insérer un arrivant tardif dans la chaîne",
     "applySplice": "Insérer",
     "spliceConfirm": "Tous les expéditeurs ont déjà soumis ; l'insertion remplace un plat déjà cuisiné. Continuer ?",
-    "open": "Voir qui cuisine pour qui"
+    "open": "Voir qui cuisine pour qui",
+    "guests": "Invités"
   },
   "alerts": {
     "title": "Alertes du Executive Chef",
@@ -965,7 +989,9 @@
     "noRestrictions": "Rien pour l'instant. Ajoutez ce qu'un cuisinier doit savoir.",
     "locale": {
       "en": "English",
-      "fr": "Français"
+      "fr": "Français",
+      "it": "Italiano",
+      "es": "Español"
     },
     "noneAllergy": "— aucune allergie déclarée",
     "noneDiet": "— aucun régime déclaré",
@@ -1274,6 +1300,16 @@
       ]
     },
     "help": "Aide et contact"
+  },
+  "display": {
+    "title": "Affichage",
+    "countdown": "Afficher le compte à rebours du dîner",
+    "size": {
+      "small": "Petit",
+      "medium": "Moyen",
+      "large": "Grand"
+    },
+    "textSize": "Taille du texte"
   },
   "push": {
     "title": "Notifications",

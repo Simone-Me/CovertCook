@@ -5,6 +5,9 @@ import './lib/i18n'
 import './index.css'
 import { AuthProvider } from './lib/auth'
 import App from './App.tsx'
+import { applyTextStep } from './lib/prefs'
+
+applyTextStep()
 
 const queryClient = new QueryClient()
 

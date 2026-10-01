@@ -3,7 +3,6 @@ import { useTranslation } from 'react-i18next'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { Turnstile } from '../../components/Turnstile'
 import { PasswordField } from '../../components/PasswordField'
 import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/password'
 
@@ -29,7 +28,6 @@ export function ResetPasswordPage() {
   )
 
   const [email, setEmail] = useState('')
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [sent, setSent] = useState(false)
   const [submitting, setSubmitting] = useState(false)
 
@@ -53,7 +51,6 @@ export function ResetPasswordPage() {
     // the actual outcome.
     await supabase.auth.resetPasswordForEmail(email, {
       redirectTo: `${import.meta.env.VITE_APP_BASE_URL}/reset`,
-      captchaToken: captchaToken ?? undefined,
     })
     setSubmitting(false)
     setSent(true)
@@ -148,7 +145,6 @@ export function ResetPasswordPage() {
             <label htmlFor="email">{t('auth.email')}</label>
             <input id="email" type="email" required value={email} onChange={(e) => setEmail(e.target.value)} />
           </div>
-          <Turnstile onVerify={setCaptchaToken} />
           <button type="submit" disabled={submitting}>
             {t('auth.resetPassword')}
           </button>

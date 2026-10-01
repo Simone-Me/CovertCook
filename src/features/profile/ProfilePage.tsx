@@ -6,6 +6,7 @@ import { Fold } from '../../components/Fold'
 import { FoodLabel } from '../../components/FoodLabel'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
+import { DisplayPrefs } from './DisplayPrefs'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { RecipesFold } from './RecipeBook'
 import { BlockedList } from './BlockedList'
@@ -315,6 +316,8 @@ export function ProfilePage() {
           <strong>{t('tutorial.profileLink')}</strong> — {t('tutorial.profileWhat')}
         </span>
       </Link>
+
+      <DisplayPrefs />
 
       {/* The two things you kept come first, and next to each other: these are
           the only sections of the profile somebody opens because they want to,

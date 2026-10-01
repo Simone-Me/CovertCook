@@ -38,24 +38,20 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 
 reset role;
 select join_code from rounds where id = :'round_id'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t3 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t4 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000000102');
-select join_round(:'join_code', :'t1'::uuid) as frank_member_id \gset
+select join_round(:'join_code') as frank_member_id \gset
 select _as('00000000-0000-0000-0000-000000000103');
-select join_round(:'join_code', :'t2'::uuid) as grace_member_id \gset
+select join_round(:'join_code') as grace_member_id \gset
 
 -- Heidi and Ivan join now, during OPEN (join_round only works then), but
 -- the host will only approve+splice them in later, one at a time, to set
 -- up legitimate splice_member scenarios after assignment already exists.
 select _as('00000000-0000-0000-0000-000000000104');
-select join_round(:'join_code', :'t3'::uuid) as heidi_member_id \gset
+select join_round(:'join_code') as heidi_member_id \gset
 select _as('00000000-0000-0000-0000-000000000105');
-select join_round(:'join_code', :'t4'::uuid) as ivan_member_id \gset
+select join_round(:'join_code') as ivan_member_id \gset
 
 select _as('00000000-0000-0000-0000-000000000101');
 select approve_member(:'round_id'::uuid, :'frank_member_id'::uuid);

@@ -140,8 +140,6 @@ under 2026-08-24 (4).
   or `unsafe-eval` for scripts, `frame-ancestors 'none'`, HSTS, nosniff, a
   referrer policy (join codes travel in query strings), and a Permissions
   Policy denying hardware the app never uses.
-- **Captcha before sign-up and before joining**, verified server-side; the
-  Turnstile secret never leaves the Edge Function.
 - **Sensitive tables are unreachable except through RPCs.** `manual_tally` has
   RLS on and no policies and no grants, so it can only be touched by the
   `SECURITY DEFINER` functions that own it.
@@ -153,16 +151,9 @@ see below) · Supabase (Postgres + Auth + Edge Functions + pg_cron) · Resend
 (transactional email) · GitHub Actions (keep-alive, backup only — Netlify owns
 the frontend build/deploy).
 
-Cloudflare Turnstile is **wired but not in use**: `app_settings.captcha_required`
-is false (`0063`), no site key is set, and with the flag off the frontend never
-calls the verify function and `join_round` asks for no ticket. So no third party
-sees a sign-up today. Everything needed to switch it on is still here — see
-"Bot protection" below — and until somebody does, this list is what actually
-runs, which is also what `/legal/privacy` has to say.
-
 See `.env.example` for the public frontend config and
-`supabase/functions/*` for where secrets (service role key, Turnstile
-secret, Resend key) actually live — never in the frontend bundle.
+`supabase/functions/*` for where secrets (service role key, Resend key)
+actually live — never in the frontend bundle.
 
 ---
 
@@ -183,7 +174,6 @@ env vars — not GitHub's. Site configuration → Environment variables:
 | `VITE_SUPABASE_URL` | Supabase → Project Settings → API | Public |
 | `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | The anon/publishable key — intentionally public, same as it is in the frontend bundle |
 | `VITE_APP_BASE_URL` | `https://covertcook.netlify.app` | The deployed origin, until a real domain is bought. **Not** `localhost` — that's the local-dev-only value in `.env.local` |
-| `VITE_TURNSTILE_SITE_KEY` | Cloudflare Turnstile dashboard | **Optional, and unset today.** Bot protection is off by default since `0063`: `app_settings.captcha_required` is false, so the frontend never renders a widget and nothing is verified. Setting this key alone changes nothing — set it, set `TURNSTILE_SECRET_KEY` on the function, and flip the flag, in that order and in one sitting. A site key with the flag off collects tokens nothing checks, and the privacy policy would then name a processor that is not processing anything |
 | `VITE_VAPID_PUBLIC_KEY` | `npx web-push generate-vapid-keys` | Public by design. Empty is a valid state: the notifications switch reports itself unavailable instead of failing when pressed |
 
 `public/_redirects` (`/*  /index.html  200`) is what makes client-side
@@ -530,7 +520,7 @@ docker logs supabase_edge_runtime_covertcook --tail 50
 Three lines together mean one specific thing, and it is not what it looks like:
 
 ```
-serving the request with supabase/functions/verify-turnstile
+serving the request with supabase/functions/send-email
 wall clock duration warning: isolate: …
 early termination has been triggered: isolate: …
 ```
@@ -541,10 +531,8 @@ Edge Function fetches its imports on every cold start, so one
 `import … from 'https://esm.sh/…'` makes that function depend on the container
 being able to reach a package registry — and on a machine where it cannot
 (restricted Docker networking, a proxy, a firewall, no internet) the isolate
-hangs on the import until the runtime kills it. `verify-turnstile` therefore has
-**no imports at all**: it makes one INSERT, and one INSERT does not need a
-client library. `send-push` and `send-email` keep theirs, because they genuinely
-need them and neither stands between somebody and a seat at a table.
+hangs on the import until the runtime kills it. `send-push` and `send-email` keep their imports, because they genuinely need
+them, and neither stands between somebody and a seat at a table.
 
 To see what a database actually has, ask the CLI rather than guessing:
 
@@ -602,18 +590,10 @@ photograph, and what the delegation picker is careful not to say — whose bucke
 the one thing in the set that needs a running local stack rather than a bare
 Postgres, `smoke_test12.sql` the twenty-one-day deletion (`0061`, `0062`) —
 where the *survivors* are the point, not the deletion: it proves the book and
-the album still hold everything after the dinner they came from is gone — plus
-joining with and without a captcha (`0063`), and `smoke_test13.sql` the canned
+the album still hold everything after the dinner they came from is gone — and
+`smoke_test13.sql` the canned
 phrases arriving in the reader's language (`0064`) and the cost settlement
 summing to exactly zero (`0065`).
-
-**They cover less of the join path than they appear to.** Every one of
-them seeds its `turnstile_tickets` row by hand as the postgres superuser
-before calling `join_round`, so the `verify-turnstile` Edge Function is
-never exercised — which is exactly how a permission bug that made joining
-impossible survived six green runs (see `CHANGELOG.md` 2026-08-22 (5)).
-Anything that only works through an Edge Function needs driving in a
-browser, not in SQL.
 
 **They are not all independent, and getting this wrong looks like a test
 failure.** `smoke_test2.sql` is literally part 2 of `smoke_test.sql` — it
@@ -992,16 +972,3 @@ both directions, because a test affordance that outlives the test is a hole.
 - Allergy/diet matching is exact-string, not semantic: a diet like
   "vegan" needs every conflicting ingredient added by hand as its own tag,
   until a proper label→tags mapping exists.
-- ~~Bot protection (Turnstile) has a dev-only bypass~~ — **removed in `0063`.**
-  It was never really a dev-only bypass: with no `TURNSTILE_SECRET_KEY` set, the
-  edge function accepted a placeholder token the frontend had invented, from
-  anybody, in production as readily as on a laptop. What made it look necessary
-  was that joining a dinner went through that function *even with no captcha to
-  verify* — so a local stack whose edge runtime was not up answered `503` and
-  nobody could take a seat.
-  The question now lives in the database: `app_settings.captcha_required`,
-  false by default. With it false the frontend never calls the function and
-  `join_round` asks for no ticket; with it true a real token is verified
-  against a real secret and a missing ticket is refused. **Turn it on in the
-  same breath as setting the keys** — a site key with the flag off collects
-  tokens nothing checks.

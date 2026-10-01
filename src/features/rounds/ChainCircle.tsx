@@ -19,6 +19,7 @@ export function ChainCircle({
   cycle,
   youId,
   realNames = false,
+  guests,
 }: {
   cycle: ChainLink[]
   youId?: string
@@ -27,6 +28,8 @@ export function ChainCircle({
    *  (0073) — where a ring of code names would be a puzzle the reader has
    *  already been given the answer to. */
   realNames?: boolean
+  /** People at the table who are not in the ring: same dots, outside it. */
+  guests?: { id: string; secret: string; real: string | null }[]
 }) {
   const nameOf = (link: ChainLink, end: 'sender' | 'cook') =>
     (realNames
@@ -55,11 +58,38 @@ export function ChainCircle({
   // clear air — an arrow touching its node reads as a smudge.
   const pad = Math.min(0.34, (Math.PI * 2) / n / 3.2)
 
+  // Where the guests go: the four diagonals (NE, SE, SW, NW), outside the
+  // ring. A diagonal is free when none of the ring's own people is within 30°
+  // of it; the rest scatter like stars a little further out. The ring itself
+  // keeps its size — the box grows only by a margin.
+  const memberAngles = Array.from({ length: n }, (_, i) => angle(i))
+  const nearest = (a: number) =>
+    Math.min(...memberAngles.map((m) => Math.abs(Math.atan2(Math.sin(a - m), Math.cos(a - m)))))
+  const diagonals = [-Math.PI / 4, Math.PI / 4, (3 * Math.PI) / 4, (-3 * Math.PI) / 4]
+  const free = diagonals.filter((a) => nearest(a) > Math.PI / 6)
+  const guestR = r + 52
+  const guestSpots = (guests ?? []).map((g, i) => {
+    let x: number
+    let y: number
+    if (i < free.length) {
+      x = c + guestR * Math.cos(free[i])
+      y = c + guestR * Math.sin(free[i])
+    } else {
+      // Stars: the golden angle spreads them without a pattern.
+      const k = i - free.length
+      const a = -Math.PI / 2 + 0.6 + k * 2.399963
+      const rr = guestR + 12 + (k % 3) * 14
+      x = c + rr * Math.cos(a)
+      y = c + rr * Math.sin(a)
+    }
+    return { ...g, x, y, side: x < c ? -1 : 1 }
+  })
+
   return (
     <svg
       className="chainring"
       // Room outside the ring for two-line labels on every side.
-      viewBox={`-28 -10 ${size + 56} ${size + 20}`}
+      viewBox={guests?.length ? `-40 -16 ${size + 80} ${size + 32}` : `-28 -10 ${size + 56} ${size + 20}`}
       role="img"
       aria-label={cycle.map((l) => `${nameOf(l, 'sender')} → ${nameOf(l, 'cook')}`).join('; ')}
     >
@@ -143,6 +173,35 @@ export function ChainCircle({
           </g>
         )
       })}
+      {/* Guests: outside the ring, unconnected — present, and not part of the
+          exchange. Same dot, same type as everybody else. They take the free
+          compass points first (N, NE, E…) and, when those are taken by the
+          ring's own labels, scatter like stars further out. */}
+      {guestSpots.map((g) => (
+        <g key={g.id}>
+          <circle cx={g.x} cy={g.y} r={nodeR} fill="var(--paper-solid)" stroke="var(--accent)" strokeWidth="1.6" />
+          <text
+            x={g.x + g.side * 12}
+            y={g.y}
+            textAnchor={g.side < 0 ? 'end' : 'start'}
+            dominantBaseline="middle"
+            className="chainring__name"
+          >
+            {g.real ? (
+              <>
+                <tspan x={g.x + g.side * 12} dy="-0.6em" className="chainring__secret">
+                  {g.secret}
+                </tspan>
+                <tspan x={g.x + g.side * 12} dy="1.25em">
+                  {g.real}
+                </tspan>
+              </>
+            ) : (
+              g.secret
+            )}
+          </text>
+        </g>
+      ))}
     </svg>
   )
 }

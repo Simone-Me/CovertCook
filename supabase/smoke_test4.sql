@@ -31,15 +31,13 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 
 reset role;
 select join_code from rounds where id = :'round_id'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
 set role authenticated;
 
 \echo '=== two players request a seat; neither is approved yet ==='
 select _as('00000000-0000-0000-0000-000000000202');
-select join_round(:'join_code', :'t1'::uuid) as karl_member_id \gset
+select join_round(:'join_code') as karl_member_id \gset
 select _as('00000000-0000-0000-0000-000000000203');
-select join_round(:'join_code', :'t2'::uuid) as lena_member_id \gset
+select join_round(:'join_code') as lena_member_id \gset
 
 \echo '=== the point of the fix: pending profiles are unreadable as a plain read ==='
 \echo '--- expect 0: profiles_select_co_members needs BOTH sides approved ---'

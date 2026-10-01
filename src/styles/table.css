@@ -304,6 +304,33 @@
   border-color: var(--env-edge);
 }
 
+.menu-slot-remove {
+  flex: none;
+  width: 26px;
+  height: 26px;
+  padding: 0;
+  border: 1px solid var(--env-edge);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.menu-slot-remove:hover,
+.menu-slot-remove:focus-visible {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+/* Compose the menu sits inside the pass: one step lighter than the pass
+   itself instead of the white paper it used to be. */
+.pass .action-fold {
+  background: color-mix(in srgb, var(--pass-env) 45%, white);
+  border-color: var(--pass-edge);
+}
+
 .chef-remove-choice {
   padding: 5px 9px;
   font-size: 12px;
@@ -436,9 +463,12 @@
 /* Sections inside the pass. Short lines, a rule between them, and anything
    that needs a paragraph folded behind its own summary — a wall of prose
    above the dinner is read by nobody. */
+.pass {
+  position: relative;
+}
+
 .pass > * + * {
   padding-top: 10px;
-  border-top: 1px dashed var(--env-edge);
 }
 
 .pass__note > summary {
@@ -2426,7 +2456,7 @@
 
 .pass__rule {
   border: 0;
-  border-top: 1px dashed var(--piega, var(--border));
+  border-top: 0;
   margin: 10px 0 2px;
 }
 
@@ -3878,4 +3908,159 @@
 .dinnercountdown {
   margin: 2px 0 0;
   font-size: 13px;
+}
+
+/* The chain written as one path: a → b → c → a. */
+.chainring__path {
+  margin: 8px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px 4px;
+  font-size: 13px;
+}
+
+/* The pass in front of the reveal: the same blue-grey as the host's pass. */
+.chainpass {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  padding: 12px;
+  border: 1px solid var(--pass-edge);
+  border-radius: 8px;
+  background: var(--pass-env);
+  color: var(--pass-ink);
+}
+
+.pass__link--alert {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+/* An envelope only the Executive Chef can read: the pass's own colours. */
+.env--hostonly {
+  background: var(--pass-env);
+  border-color: var(--pass-edge);
+}
+
+.env--hostonly .env__name,
+.env--hostonly .env__meta {
+  color: var(--pass-ink);
+}
+
+/* The choice in force, to the right of a fold's title — the /custom pattern. */
+.action-fold__aside {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+/* Text size: nine notches, drawn. */
+.sizescale__words {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.sizescale__words .is-on {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.sizescale__bar {
+  width: 100%;
+  margin: 0;
+}
+
+.sizescale__ticks {
+  display: flex;
+  justify-content: space-between;
+  padding: 0 8px;
+  margin-top: -6px;
+}
+
+.sizescale__ticks span {
+  width: 2px;
+  height: 8px;
+  background: var(--env-edge);
+}
+
+.sizescale__ticks .is-on {
+  background: var(--accent);
+  height: 12px;
+}
+
+/* The guest question: a small bubble, not a banner. */
+.guest-ask {
+  align-items: flex-start;
+}
+
+.guest-ask__bubble {
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--env-edge);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.guest-ask__bubble:hover,
+.guest-ask__bubble[aria-expanded='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.invite-label {
+  font-size: 12px;
+  text-transform: none;
+  letter-spacing: 0;
+}
+
+.chainring__guests {
+  margin-top: 4px;
+}
+
+/* The question mark in the corner of a letter. */
+.infocorner__btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1px solid var(--env-edge);
+  border-radius: 50%;
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  font-size: 12px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 1;
+}
+
+.infocorner__btn:hover,
+.infocorner__btn[aria-expanded='true'] {
+  color: var(--accent);
+  border-color: var(--accent);
+}
+
+.infocorner__text {
+  padding-right: 30px;
+}
+
+/* The confirmation under a roster row takes the whole row. */
+.chef-remove-panel {
+  flex: 0 0 100%;
+  order: 10;
+}
+
+/* The question mark sits on the pass's own face. */
+.env--pass .env__face {
+  position: relative;
 }

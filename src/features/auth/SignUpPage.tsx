@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
+import { SUPPORTED_LOCALES } from '../../lib/i18n'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { useNavigate, Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { ConfirmEmailNotice } from './ConfirmEmailNotice'
-import { Turnstile } from '../../components/Turnstile'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE } from '../../lib/foodTags'
 import { PasswordField } from '../../components/PasswordField'
@@ -52,7 +52,6 @@ export function SignUpPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordAgain, setPasswordAgain] = useState('')
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -143,8 +142,7 @@ export function SignUpPage() {
         emailRedirectTo: `${import.meta.env.VITE_APP_BASE_URL}/`,
         // The confirmation mail is rendered before a profile exists, so the
         // only place the send-email hook can learn a language is here.
-        data: { locale: i18n.language.startsWith('en') ? 'en' : 'fr' },
-        ...(captchaToken ? { captchaToken } : {}),
+        data: { locale: (SUPPORTED_LOCALES.find((l) => i18n.language.startsWith(l)) ?? 'en') },
       },
     })
     setSubmitting(false)
@@ -207,7 +205,7 @@ export function SignUpPage() {
     try {
       await completeSignup({
         displayName: finalName(displayName),
-        locale: i18n.language.startsWith('en') ? 'en' : 'fr',
+        locale: (SUPPORTED_LOCALES.find((l) => i18n.language.startsWith(l)) ?? 'en'),
         hasNoRestrictions: noneDeclared,
         dietaryEntries,
       })
@@ -494,7 +492,6 @@ export function SignUpPage() {
           <span>{t('auth.acceptAllergies')}</span>
         </label>
 
-        <Turnstile onVerify={setCaptchaToken} />
         <button
           type="submit"
           disabled={

@@ -8,7 +8,7 @@ import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { MyWarnings } from './MyWarnings'
-import { fromCents, roundDeletesAt } from '../../lib/rpc'
+import { fromCents, getChain, roundDeletesAt, setMyGuest } from '../../lib/rpc'
 import { tableThemeClass } from '../../lib/themes'
 import { Envelope } from './Envelope'
 import { SharedMenu } from './SharedMenu'
@@ -24,6 +24,8 @@ import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
 import { DinnerCountdown } from './DinnerCountdown'
 import { MenuPanel } from './MenuPanel'
+import { DraftChanges } from './DraftChanges'
+import { InfoCorner } from '../../components/InfoCorner'
 import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import { CostsPanel } from './CostsPanel'
@@ -88,8 +90,9 @@ export function RoundHomePage() {
   // Said beside the button that caused it: at the top of the page it was a
   // sentence nobody scrolled back up to read.
   const [advanceError, setAdvanceError] = useState<string | null>(null)
-  const [passHelp, setPassHelp] = useState(false)
   const [leaveConfirm, setLeaveConfirm] = useState(false)
+  // The bananas appear only once the Executive Chef has asked for them.
+  const [removeMode, setRemoveMode] = useState(false)
   const [leaveBusy, setLeaveBusy] = useState(false)
   const [generating, setGenerating] = useState(false)
   const [inviteName, setInviteName] = useState('')
@@ -109,6 +112,19 @@ export function RoundHomePage() {
     queryKey: ['rounds', roundId, 'dietary-panel'],
     enabled: !!roundId,
     queryFn: () => getDietaryPanel(roundId as string),
+  })
+
+  // Only a head-count of who is in nobody's loop; the names never leave the
+  // chain page, behind its reveal.
+  const { data: chainLinks } = useQuery({
+    queryKey: ['rounds', roundId, 'chain-count'],
+    enabled:
+      !!roundId &&
+      !!round &&
+      round.host_id === profile?.id &&
+      ROUND_PHASE_ORDER.indexOf(round.status) >= ROUND_PHASE_ORDER.indexOf('ASSIGNED') &&
+      ROUND_PHASE_ORDER.indexOf(round.status) < ROUND_PHASE_ORDER.indexOf('RESULTS'),
+    queryFn: () => getChain(roundId as string),
   })
 
   // Your own recipe, not the table's tally. The envelope used to read
@@ -290,11 +306,22 @@ export function RoundHomePage() {
   const shareLink = `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`
   const activeMembers = members?.filter((m) => m.status === 'ACTIVE') ?? []
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
+  const guestCount = activeMembers.filter((m) => m.approved && m.is_guest).length
+  const inChainIds = new Set(chainLinks?.flatMap((l) => [l.sender_member_id, l.cook_member_id]) ?? [])
+  const missingFromChain = chainLinks
+    ? activeMembers.filter((m) => m.approved && !m.is_guest && !inChainIds.has(m.id)).length
+    : 0
 
+  const chefLine =
+    guestCount > 0
+      ? `${t('rounds.chefCount', { count: activeApprovedCount - guestCount })}, ${t('rounds.guestCount', { count: guestCount })}`
+      : t('rounds.chefCount', { count: activeApprovedCount })
   const rosterMeta = hostName
-    ? `${t('rounds.chefCount', { count: activeApprovedCount })} — ${t('rounds.executiveChef')} : ${hostName}`
-    : t('rounds.chefCount', { count: activeApprovedCount })
+    ? `${chefLine} — ${t('rounds.executiveChef')} : ${hostName}`
+    : chefLine
   const pendingCount = pendingMembers?.length ?? 0
+  const canBeGuest =
+    !isHost && myMembership?.status === 'ACTIVE' && round.status === 'OPEN' && round.guests_allowed
 
   // While the door is open the server sends no names but your own (0032), so
   // the list is seats rather than people. Everyone is uncovered at the same
@@ -533,7 +560,9 @@ export function RoundHomePage() {
     try {
       await inviteMember(roundId, inviteName)
       setInviteName('')
-      setInviteNote(t('rounds.invitations.inviteSent'))
+      // An address gets the same answer whether or not an account has it, so
+      // the box cannot be used to ask who is registered (0101).
+      setInviteNote(t(inviteName.includes('@') ? 'rounds.invitations.inviteMaybe' : 'rounds.invitations.inviteSent'))
     } catch (err) {
       const message = err instanceof Error ? err.message : t('errors.generic')
       const known =
@@ -616,7 +645,9 @@ export function RoundHomePage() {
           <p className="muted" style={{ margin: '2px 0 0' }}>
             {t('rounds.seatCount', { count: activeApprovedCount })}
           </p>
-          {(round.status === 'ASSIGNED' || round.status === 'BRIEFS_CLOSED') && round.dinner_at && (
+          {ROUND_PHASE_ORDER.indexOf(round.status) >= 0 &&
+            ROUND_PHASE_ORDER.indexOf(round.status) < ROUND_PHASE_ORDER.indexOf('DINNER') &&
+            round.dinner_at && (
             <DinnerCountdown at={round.dinner_at} />
           )}
         </div>
@@ -668,7 +699,11 @@ export function RoundHomePage() {
             that are up right now. It opens by itself when the round is
             actually blocked on them. */}
         {isHost && (
-          <HostPass status={round.status} waiting={passWaiting}>
+          <HostPass
+            status={round.status}
+            waiting={passWaiting}
+            help={<p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>}
+          >
 
         {/* Not in DRAFT: a code handed out before the door is open produces
             people knocking at a dinner that does not accept them yet
@@ -685,7 +720,6 @@ export function RoundHomePage() {
                 worst way to be told. */}
             {accessAdmitsCode(round.access) && (
               <>
-                <label>{t('rounds.shareLink')}</label>
                 {/* Two buttons, because there are two things to hand somebody
                     and they are not interchangeable. A link opens the app on
                     the right screen with the code already in it — best by far,
@@ -694,15 +728,17 @@ export function RoundHomePage() {
                     into a phone that has the app already open. */}
                 <div className="row">
                   <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
-                  <CopyButton value={round.join_code} label={t('rounds.copyCode')} />
-                  <CopyButton value={shareLink} label={t('rounds.copyLink')} />
+                  <CopyButton value={round.join_code} label={`⧉ ${t('rounds.copyCodeShort')}`} />
+                  <CopyButton value={shareLink} label={`⧉ ${t('rounds.copyLinkShort')}`} />
                 </div>
               </>
             )}
 
             {accessAdmitsInvites(round.access) && (
               <>
-                <label htmlFor="invite-username">{t('rounds.invitations.invite')}</label>
+                <label htmlFor="invite-username" className="invite-label">
+                  <em>{t('rounds.invitations.invite')}</em>
+                </label>
                 <div className="stack" style={{ gap: 8 }}>
                   {/* A username, not an address (0071). The address was the one
                       thing about an account its owner never chose to show
@@ -725,7 +761,6 @@ export function RoundHomePage() {
                     {t('actions.add')}
                   </button>
                 </div>
-                <p className="muted" style={{ margin: 0 }}>{t('rounds.invitations.inviteHelp')}</p>
               </>
             )}
             {inviteNote && <p className="muted">{inviteNote}</p>}
@@ -741,6 +776,16 @@ export function RoundHomePage() {
             <span>
               <strong>{t('chain.title')}</strong> — {t('chain.open')}
             </span>
+          </Link>
+        )}
+
+        {/* Said on the pass, without opening the chain: somebody who arrived
+            after the roulette is seated but is in nobody's loop. Only a
+            count — names stay behind the reveal. */}
+        {assigned && missingFromChain > 0 && (
+          <Link to={`/rounds/${roundId}/chain`} className="pass__link pass__link--alert">
+            <Icon name="chain" size={22} />
+            <span>{t('chain.missing', { count: missingFromChain })}</span>
           </Link>
         )}
 
@@ -778,32 +823,10 @@ export function RoundHomePage() {
             every later phase was telling them something they already knew
             about a door they had shut themselves — that guidance moved to
             settings, where somebody actually goes looking for it. */}
-        {round.status === 'DRAFT' && (
-          <>
-            {/* An empty pass in DRAFT was a blank space above a paragraph
-                explaining what the pass is, and the two read as one thing. The
-                word says the state, the rule below separates it, and the
-                explanation is behind the question mark — because it is worth
-                reading once and never again. */}
-            <p className="pass__empty" style={{ margin: 0 }}>
-              <em>{t('rounds.pass.empty')}</em>
-            </p>
-            <hr className="pass__rule" />
-            <div className="stack">
-              <button
-                type="button"
-                className="pass__help"
-                aria-expanded={passHelp}
-                onClick={() => setPassHelp((v) => !v)}
-              >
-                <Icon name="help" size={18} />
-                <span>{t('rounds.pass.whatIsItToggle')}</span>
-              </button>
-              {passHelp && (
-                <p className="muted" style={{ margin: 0 }}>{t('rounds.pass.explain')}</p>
-              )}
-            </div>
-          </>
+        {/* Everything still changeable, under one roof, while the door is shut
+            or only just open. */}
+        {roundId && round.status === 'DRAFT' && (
+          <DraftChanges round={round} locale={profile?.locale ?? 'en'} />
         )}
 
         {/* THE MENU IS COMPOSED AT ATTRIBUTION, and only there. Free or in
@@ -1118,6 +1141,38 @@ export function RoundHomePage() {
         >
           {open === 'chefs' && (
             <div className="stack">
+              {(rosterCovered || canBeGuest || isHost) && (
+                <InfoCorner label={t('rounds.chefsInfo')} onOpenChange={setRemoveMode}>
+                  {/* The Executive Chef always has the mark: it is where the
+                      bananas are switched on, so a removal is never one stray
+                      tap away. */}
+                  {isHost && <p className="muted" style={{ margin: 0 }}>{t('rounds.removeHint')}</p>}
+                  {rosterCovered && <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>}
+                  {/* The guest option, deliberately plain: a question in the
+                      corner, not a banner. Only while sign-ups are open; after
+                      the roulette the role is fixed. */}
+                  {canBeGuest && (
+                    <label className="row guest-toggle">
+                      <input
+                        type="checkbox"
+                        style={{ width: 'auto' }}
+                        checked={!!myMembership?.is_guest}
+                        onChange={async (e) => {
+                          if (!roundId) return
+                          setError(null)
+                          try {
+                            await setMyGuest(roundId, e.target.checked)
+                            await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
+                          } catch (err) {
+                            setError(err instanceof Error ? err.message : t('errors.generic'))
+                          }
+                        }}
+                      />
+                      <span>{t('rounds.guest.toggle')}</span>
+                    </label>
+                  )}
+                </InfoCorner>
+              )}
               {activeMembers.map((m) => {
                 // Pending members show their real name — approving a
                 // pseudonym is approving nobody (0015). Once approved they
@@ -1129,8 +1184,11 @@ export function RoundHomePage() {
                 const name =
                   pendingById.get(m.id)?.real_name ?? m.display_name ?? m.secret_name
                 return (
-                <div key={m.id} className="row" style={{ justifyContent: 'space-between' }}>
-                  <span>
+                <div key={m.id} className="row" style={{ flexWrap: 'wrap' }}>
+                  {isHost && removeMode && m.approved && m.role !== 'HOST' && (
+                    <RemoveChef assigned={assigned} onRemove={(mode) => onRemove(m.id, mode)} />
+                  )}
+                  <span style={{ flex: 1 }}>
                     {/* Everyone in the list is a pseudonym, including you —
                         so without a mark there is no way to tell which
                         stranger you are. A wine ring, the same trace the
@@ -1150,6 +1208,7 @@ export function RoundHomePage() {
                       <span className="redact">{t('rounds.chefCovered')}</span>
                     )}
                     {!m.approved && <span className="badge"> {t('rounds.pendingApproval')}</span>}
+                    {m.is_guest && <span className="badge"> {t('rounds.guest.badge')}</span>}
                   </span>
                   {isHost && !m.approved && (
                     <div className="row">
@@ -1160,9 +1219,6 @@ export function RoundHomePage() {
                         {t('actions.reject')}
                       </button>
                     </div>
-                  )}
-                  {isHost && m.approved && m.role !== 'HOST' && (
-                    <RemoveChef assigned={assigned} onRemove={(mode) => onRemove(m.id, mode)} />
                   )}
                 </div>
                 )
@@ -1186,10 +1242,6 @@ export function RoundHomePage() {
                 >
                   <p className="confirmbox__why">{t('rounds.removeDishConfirm')}</p>
                 </InlineConfirm>
-              )}
-
-              {rosterCovered && (
-                <p className="muted" style={{ margin: 0 }}>{t('rounds.rosterCovered')}</p>
               )}
 
               {/* Your own way out, at the bottom of the roster because that is
@@ -1235,6 +1287,31 @@ export function RoundHomePage() {
           )}
         </Envelope>
 
+        {/* The dishes already sent, by name and never by who. Only on a dinner
+            that shows its menu — to everybody (NAMES) or to the Executive Chef
+            alone (HOST, drawn in the pass's colour) — and only while there is a menu being written: before
+            the roulette there are no dishes, after the dinner the results page
+            has the whole menu. A hidden menu has no envelope at all. */}
+        {menuShown && (
+          <Envelope
+            icon={<Icon name="menu" />}
+            name={t('rounds.drawers.menu')}
+            meta={t('rounds.drawers.menuMeta')}
+            tilt={3}
+            hostOnly={round.menu_visibility === 'HOST'}
+            onOpen={() => toggle('menu')}
+          >
+            {open === 'menu' && (
+              <SharedMenu
+                roundId={roundId}
+                shared
+                onlyYou={round.menu_visibility === 'HOST'}
+                expected={activeApprovedCount}
+              />
+            )}
+          </Envelope>
+        )}
+
         {/* ---- The two heavy screens: these take over rather than expand ---- */}
         <Envelope
           icon={<Icon name="myRecipe" />}
@@ -1249,6 +1326,7 @@ export function RoundHomePage() {
           tilt={2}
         />
 
+        {!myMembership?.is_guest && (
         <Envelope
           icon={<Icon name="received" />}
           name={t('rounds.drawers.received')}
@@ -1257,6 +1335,7 @@ export function RoundHomePage() {
           to={`/rounds/${roundId}/recipe`}
           tilt={3}
         />
+        )}
 
         <Envelope
           icon={<Icon name="messages" />}
@@ -1296,25 +1375,6 @@ export function RoundHomePage() {
         )}
         {round.voting_mode === 'DISABLED' && resultsOpen && (
           <Envelope icon={<Icon name="winner" />} name={t('rounds.drawers.results')} to={`/rounds/${roundId}/results`} tilt={1} />
-        )}
-
-        {/* The dishes already sent, by name and never by who. Only on a dinner
-            that shows its menu — to everybody (NAMES) or to the Executive Chef
-            alone (HOST) — and only while there is a menu being written: before
-            the roulette there are no dishes, after the dinner the results page
-            has the whole menu. A hidden menu has no envelope at all. */}
-        {menuShown && (
-          <Envelope
-            icon={<Icon name="menu" />}
-            name={t('rounds.drawers.menu')}
-            meta={t('rounds.drawers.menuMeta')}
-            tilt={3}
-            onOpen={() => toggle('menu')}
-          >
-            {open === 'menu' && (
-              <SharedMenu roundId={roundId} shared onlyYou={round.menu_visibility === 'HOST'} />
-            )}
-          </Envelope>
         )}
 
         {/* The count on the flap, and nothing at all when it is zero: a badge

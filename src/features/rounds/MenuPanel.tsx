@@ -82,7 +82,10 @@ export function MenuPanel({
       refresh()
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''
-      if (raw === COURSE_IN_USE && onBlocked) onBlocked()
+      if (raw === COURSE_IN_USE && onBlocked) {
+        onBlocked()
+        return
+      }
       const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
       setError(known || raw || t('errors.generic'))
     }
@@ -92,8 +95,11 @@ export function MenuPanel({
   // roulette has already dealt it, so undo the roulette and deal again. Safe
   // because clear_assignment refuses once anybody has written (0037) — this
   // can only ever throw away a shuffle.
-  async function forceChange(discardBriefs = false) {
-    const target = discardBriefs ? discardAsk : blocked
+  async function forceChange(
+    discardBriefs = false,
+    direct?: { slotId: string; course: Course },
+  ) {
+    const target = direct ?? (discardBriefs ? discardAsk : blocked)
     if (!target) return
     const { slotId, course } = target
     setBlocked(null)
@@ -118,6 +124,29 @@ export function MenuPanel({
     }
   }
 
+  // A pairing on a course is only the roulette's shuffle until somebody
+  // writes: at LOCKED no recipe can exist yet, so refusing the edit with
+  // "somebody is already cooking that course" blocked the host for nothing.
+  // Clear the shuffle and carry the edit out; the host deals again after.
+  // Recipes already written still go through the explicit discard ask.
+  async function removeSlot(slotId: string) {
+    setError(null)
+    try {
+      try {
+        await removeCourse(roundId, slotId)
+      } catch (err) {
+        if ((err instanceof Error ? err.message : '') !== COURSE_IN_USE) throw err
+        await clearAssignment(roundId, false)
+        await removeCourse(roundId, slotId)
+      }
+      refresh()
+    } catch (err) {
+      const raw = err instanceof Error ? err.message : ''
+      const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
+      setError(known || raw || t('errors.generic'))
+    }
+  }
+
   const courses = menu?.courses ?? 0
   const seats = menu?.seats ?? 0
   const balanced = courses === seats
@@ -127,6 +156,7 @@ export function MenuPanel({
   return (
     <HostAction
       title={t('rounds.menu.title')}
+      aside={slotMode === 'CATEGORIES' ? t('rounds.menu.composed') : t('rounds.menu.free')}
       waiting={counting && slotMode === 'CATEGORIES' && !balanced}
     >
       {/* An error with no way out is a dead end: the arrow stayed armed, the
@@ -258,9 +288,9 @@ export function MenuPanel({
                   />
                   <button
                     type="button"
-                    className="chef-remove"
+                    className="menu-slot-remove"
                     aria-label={t('actions.remove')}
-                    onClick={() => run(() => removeCourse(roundId, slot.id))}
+                    onClick={() => removeSlot(slot.id)}
                   >
                     🍌
                   </button>
@@ -288,7 +318,10 @@ export function MenuPanel({
                         await changeCourse(roundId, slotId, newCourse)
                         setSwapping(null)
                       },
-                      () => setBlocked({ slotId, course: newCourse }),
+                      () => {
+                        // Nobody has written: undo the shuffle and change.
+                        void forceChange(false, { slotId, course: newCourse })
+                      },
                     )
                   } else {
                     await addCourse(roundId, newCourse)
