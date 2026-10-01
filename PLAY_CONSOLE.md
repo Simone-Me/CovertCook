@@ -126,7 +126,7 @@ final — entonces se come juntos, se clasifican los platos y se revela la caden
 | **COVID-19 contact tracing / status** | No |
 | **Government app** | No |
 | **Financial features** | None. No payments, loans or crypto. |
-| **Health apps** | The app is **not** a health app (no medical features, no Health Connect). It does hold allergy and diet information, which is declared in Data safety, below. |
+| **Health apps** | The app is **not** a health app (no medical features, no Health Connect): tick **only** "My app does not have any health features". Ticking any health feature (e.g. nutrition, medical) makes Play require an **organisation** account and the review is rejected under "Play Console Requirements". The allergy and diet information is declared in Data safety, below — that is where it belongs. |
 | **Advertising ID** | Not used |
 | **Account deletion** (required) | In-app path: *Profile → Deleting your account* (thirty-day delay, cancellable). Web URL: the Help page above, which explains it and gives the contact address. |
 | **User-generated content** | Yes. Reporting: phrases and photographs can be reported. Blocking: by seat. Policy: `/legal/moderation`. Contact in the footer. |
