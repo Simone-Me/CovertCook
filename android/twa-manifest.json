@@ -19,8 +19,8 @@
     "path": "./upload.jks",
     "alias": "upload"
   },
-  "appVersionName": "2.0.0",
-  "appVersionCode": 2,
+  "appVersionName": "2.1",
+  "appVersionCode": 4,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
   "webManifestUrl": "https://covertcook.netlify.app/manifest.webmanifest",
@@ -33,11 +33,11 @@
   "isChromeOSOnly": false,
   "isMetaQuest": false,
   "fullScopeUrl": "https://covertcook.netlify.app/",
-  "minSdkVersion": 23,
+  "minSdkVersion": 24,
   "orientation": "any",
   "fingerprints": [],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "displayOverride": [],
-  "appVersion": "2.0.0"
+  "appVersion": "2.1"
 }
