@@ -21,7 +21,7 @@ import { VitePWA } from 'vite-plugin-pwa'
  * repository otherwise. Neither is required: a build with no git and no CI
  * still ships, with just the number.
  */
-const BASELINE = 101
+const BASELINE = 167
 
 function git(cmd: string): string {
   return execSync(`git ${cmd}`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
