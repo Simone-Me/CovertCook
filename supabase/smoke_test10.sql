@@ -45,14 +45,12 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 
 reset role;
 select join_code from rounds where id = :'round_id'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000001002');
-select join_round(:'join_code', :'t1'::uuid);
+select join_round(:'join_code');
 select _as('00000000-0000-0000-0000-000000001003');
-select join_round(:'join_code', :'t2'::uuid);
+select join_round(:'join_code');
 
 select _as('00000000-0000-0000-0000-000000001001');
 select advance_phase(:'round_id'::uuid, 'LOCKED');
@@ -180,7 +178,6 @@ select create_round('Jonas Dinner', 'CODE', 'ANONYMOUS', 'FREE', null, null, 'Eu
 select advance_phase(:'jonas_round'::uuid, 'OPEN');
 reset role;
 select join_code as jonas_code from rounds where id = :'jonas_round'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'jonas_code') returning id as t3 \gset
 set role authenticated;
 select _as('00000000-0000-0000-0000-000000001002');
 select _refusal(format('select join_round(%L, %L::uuid)', :'jonas_code', :'t3'));

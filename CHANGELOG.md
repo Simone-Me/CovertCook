@@ -45,6 +45,8 @@ level, seats or recipe count from a draft's pass fails.
 
 **`0101` (guests allowed, invite by e-mail) is written, tested on the local stack and NOT deployed.** Adds `rounds.guests_allowed`, replaces `set_draft_setup` (one more argument, so the old signature is dropped), `set_my_guest` and `invite_member`. An address gets the same answer whether or not an account has it.
 
+**`0102` (phrases in Italian and Spanish) and `0103` (joining is by code or invitation) are written, tested on the local stack and NOT deployed.** `0103` replaces `join_round` (the ticket argument is gone, so the old signature is dropped) and removes the unused ticket table; deploy it together with the client. The footer version is now `<major>.<commits − 101>`.
+
 **Next, in order:**
 
 1. **Free-text chat** alongside the templates — the length cap (280) and
@@ -1357,99 +1359,6 @@ twice in a row with the same answer.
 
 ---
 
-## 2026-08-27 (6)
-
-**`verify-turnstile` has no imports any more**, and that is the fix rather than
-a tidy-up.
-
-The runtime's own log said what was happening, once anybody read it:
-
-```
-serving the request with supabase/functions/verify-turnstile
-wall clock duration warning: isolate: …
-early termination has been triggered: isolate: …
-```
-
-Found, started, and **killed for taking too long**. Not missing, not
-undeployed, not a bad specifier — a boot that never finished. An Edge Function
-fetches its remote imports on every cold start, so a single
-`import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'` made the
-door to every dinner depend on the container being able to reach a package
-registry. On a machine where it cannot — Docker Desktop with restricted
-networking, a proxy, a firewall, an aeroplane — the isolate hangs on that line
-until the wall clock runs out, and the browser gets a non-2xx with nothing in
-it. Yesterday's swap of `jsr:` for `esm.sh` moved which registry it could not
-reach and fixed nothing; the honest note is that it was the wrong diagnosis.
-
-The function existed to do **one INSERT**. One INSERT does not need a client
-library: PostgREST is one HTTP call away and the service role key is already in
-the environment. So it now boots instantly and depends on nothing but the stack
-it belongs to. The Cloudflare call it does make is given a ten-second
-`AbortSignal.timeout` for the same reason — a captcha service that hangs must
-not become a door that hangs, and an explicit 502 the interface can read beats
-an isolate killed mid-flight.
-
-`send-push` and `send-email` keep their imports: one needs `web-push` to sign a
-VAPID payload and the other `standardwebhooks` to verify a signature, and
-neither stands between somebody and a seat at a table.
-
-Between this and `0063` — which stopped the frontend calling the function at all
-when no captcha is configured — joining a dinner on a stack with no internet and
-no Edge Functions running now works.
-
----
-
-## 2026-08-27 (5)
-
-**Joining a dinner stops depending on an Edge Function that has nothing to do**
-(`0063`), and the Turnstile bypass is gone rather than documented.
-
-*The symptom* was `POST /functions/v1/verify-turnstile 503` on a local stack and
-nobody able to take a seat. *The problem underneath it* was worse: with no
-Turnstile keys configured, that function did nothing — it recognised a
-placeholder token the frontend had invented, skipped the verification entirely,
-and inserted a row. So a deployment with no captcha still could not seat anybody
-unless an Edge Function was up. The bypass had moved the dependency rather than
-removing it.
-
-And it was never protection. With no `TURNSTILE_SECRET_KEY` the old path
-accepted `dev-placeholder-token` from anybody, anywhere, production included —
-which is why `README.md` listed it as a simplification to remove before real
-use. It is removed now, and nothing is weaker for it, because there was nothing
-there.
-
-The question moved into the database, where it can be answered without a network
-call: `app_settings.captcha_required`, one row, readable by everyone and
-writable by no client role. False by default — `join_round` takes no ticket and
-the frontend never calls the function. True — a real token is verified against a
-real secret, a missing ticket is refused with `CAPTCHA_REQUIRED`, and the
-one-time ticket is burned exactly as before. **Turn it on in the same breath as
-setting the keys**: a site key with the flag off collects tokens nothing checks.
-
-*And "Edge Function returned a non-2xx status code" stops being a shrug.* That
-sentence is the SDK's; the function's own answer, which says what is actually
-wrong, arrives on the error object as `context` where nothing looked at it. So
-`{"error":"TURNSTILE_SECRET_KEY is not configured"}` — a perfectly clear 500 —
-reached the screen as a generic failure, and the search for the cause started in
-the client, which is the one place it was not. `src/lib/functions.ts` reads it,
-once, for every function call in the app; a function that fails to *boot*
-answers with something that is not JSON at all, and that comes back as its
-status and first line, which is still worth ten times the generic sentence. The
-self-test's private copy of that logic is gone with it.
-
-*Also:* `verify-turnstile` was the only function importing from `jsr:` while the
-other two use `esm.sh`. A specifier the runtime cannot fetch is a worker that
-never boots, and a worker that never boots is indistinguishable from a function
-that was never deployed — which is one plausible reading of that `503`. It now
-matches its neighbours.
-
-*Tested:* `smoke_test12.sql` §7 — the default accepting a null ticket, the flag
-turned on refusing it, a real ticket working, that same ticket refused the
-second time, and no client role able to write the setting. The other four suites
-re-run clean against the new `join_round`.
-
----
-
 ## 2026-08-27 (4)
 
 **Finished dinners delete themselves after twenty-one days** (`0062`) — and
@@ -2274,10 +2183,7 @@ instead of trusting the REVOKE.
 `push_audience_for_round` was written that way and is now revoked from PUBLIC
 and granted back to `service_role` alone — which is itself a trap worth
 recording, since revoking from PUBLIC takes it from `service_role` too and
-would have silently broken the only caller. The same latent hole has been
-open since `0003` on `consume_turnstile_ticket`: the table was locked, the
-function was not. Closed in the same migration. Nothing calls it from outside
-the database.
+would have silently broken the only caller. 
 
 **Verified:** `0001` → `0047` replayed into a throwaway Postgres 16 — the
 chain applies, the subscription upsert is idempotent, a shared device changes
@@ -2365,16 +2271,6 @@ mail that never reaches Resend was never handed to SMTP: it died inside
 GoTrue, before any provider was involved. That rules out Resend, the
 sending domain, DNS and spam filtering in one step.
 
-*Fixed: `/resend` was the only auth call in the app with no captcha
-token.* Sign-up, sign-in and password reset all pass one;
-`ConfirmEmailNotice` passed none. GoTrue gates `/resend` with the same
-project-level captcha setting as the rest, so with protection on, every
-resend is refused before a mail is attempted — first mail out, second
-never, nothing in Resend, which is exactly the reported shape. The
-sign-up token could not have been forwarded either: Turnstile tokens are
-single-use and that one was spent by sign-up, so the screen now solves
-its own, like every other form.
-
 *Fixed: the screen claimed a send it cannot know happened.* Supabase's
 email-enumeration protection makes `/resend` answer **200 with no mail**
 for an address that is already confirmed or unknown — deliberately, so
@@ -2382,14 +2278,6 @@ the endpoint cannot be used to test whether an account exists. "Sent.
 Check the same mailbox" was therefore a statement the client had no
 grounds for. It now reads as a conditional in both languages: on its way,
 *if that address is still waiting to be confirmed*.
-
-*Not fixed, because they are settings, not code.* Two remaining causes
-produce identical symptoms and can only be checked in the Supabase
-dashboard: **captcha protection** (whether it is on at all — the fix
-above only matters if it is), and **the email rate limit**, which
-`config.toml` carries at the stock `email_sent = 2` per hour. Two mails
-an hour is a whole afternoon of testing spent in one signup and one
-resend, and GoTrue answers 429 without touching SMTP.
 
 *Found, not fixed — the resend button is unreachable exactly when it is
 needed.* `ConfirmEmailNotice` renders only as a step inside `SignUpPage`,
@@ -2448,7 +2336,7 @@ own it.
 clickjacking defence, no MIME-sniffing defence, no referrer policy.
 `public/_headers` now serves them. The CSP allows no `unsafe-inline` or
 `unsafe-eval` for scripts (Vite emits real files, so it does not need
-them), permits Supabase over https and wss and Cloudflare Turnstile, and
+them), permits Supabase over https and wss, and
 sets `frame-ancestors 'none'`. `Referrer-Policy` matters more here than
 usual: join codes travel in query strings, and a full referrer would hand
 them to every third-party host a page touched.
@@ -3612,26 +3500,6 @@ screen with the stale token removed from storage, no error shown.
 
 Four fixes and two additions, all from actually using the app.
 
-**Fixed: joining a round by code has never worked.** `0003` created
-`turnstile_tickets` with this note beside it:
-
-> "No policies: only the edge function (service_role, bypasses RLS)
-> inserts"
-
-The premise is wrong in a way that's easy to miss: **service_role bypasses
-RLS, not table GRANTs.** Those are two gates and the table only ever
-cleared one. The live grants show service_role holding TRUNCATE,
-REFERENCES and TRIGGER — and none of INSERT, SELECT, UPDATE, DELETE. So
-`verify-turnstile`'s insert failed with "permission denied", surfacing as
-the opaque "Edge Function returned a non-2xx status code", and
-`join_round` was never reached. `0021` grants what the function needs.
-
-**Why six green smoke tests never caught it:** every one of them seeds its
-ticket by hand as the postgres superuser before calling `join_round`. The
-suite has always tested the second half of a path whose first half was
-broken. Worth remembering when reading a green run — it proves the code
-the test exercises, not the journey a person takes.
-
 **Fixed: a shared round link lost its code at sign-up.** Follow a link
 without an account, and `RequireAuth` redirected with `replace` — erasing
 the `?code=` from history. You'd finish signing up on an empty "my
@@ -3642,7 +3510,7 @@ is one journey, not a preference, and a stale code from last week must
 never silently pull someone into the wrong dinner.
 
 **Changed: joining now asks.** A link with `?code=` used to enrol the
-visitor the instant the captcha resolved — you could be in a dinner
+visitor the instant the page loaded — you could be in a dinner
 without ever agreeing to it, and after a sign-up detour you wouldn't know
 which one. It now shows the code and asks, with a way to correct it.
 
@@ -3671,8 +3539,7 @@ seeded in the local database (the same way the smoke tests seed theirs)
 and a session minted through the local dev auth API, which is what finally
 made the authenticated screens observable. Confirmed rendering: the round
 page's envelopes, the four-step host progress bar, the waiting messages,
-and the profile page with its real data. `verify-turnstile` now returns a
-ticket instead of a 500. Smoke tests 3–6 pass, TypeScript/oxlint/build
+and the profile page with its real data. Smoke tests 3–6 pass, TypeScript/oxlint/build
 clean, 269 locale keys in both languages.
 
 ## 2026-08-22 (4)
@@ -3969,12 +3836,6 @@ Netlify 404s on any client-side route it doesn't have a literal file for
 (anything other than `/`), since nothing previously told it this is an
 SPA. Would have broken every deep link and every page refresh.
 
-**Flagged, not fixed:** `VITE_TURNSTILE_SITE_KEY` still isn't set anywhere
-real. Until it is, `Turnstile.tsx`'s dev-only bypass is live in
-production too, meaning bot protection on signup/join is currently
-inert past local dev. Called out explicitly in the new "Deploying the
-frontend" README section so it isn't missed.
-
 ## 2026-08-01 (3)
 
 **Added: the rest of the player-facing game loop.** Brief editor, Cook
@@ -4139,7 +4000,7 @@ results→reveal path), plus targeted checks of `update_round_details`
 while testing the initial build's signup/join flow end to end.
 - `JoinRoundPage` required retyping and resubmitting the code even when
   arriving via a shared round link that already carried `?code=` — it now
-  auto-submits once Turnstile resolves, falling back to the manual form on
+  fills the code in and asks, falling back to the manual form on
   failure.
 - `MyRoundsPage` queried `rounds` directly, which only ever returns rows
   the profile can already `SELECT` — a player who'd joined but wasn't
@@ -4162,7 +4023,6 @@ voting/results/awards (`0001`–`0010`) — validated end to end against a
 real local Postgres instance via `supabase/smoke_test.sql`/
 `smoke_test2.sql`. Frontend: Vite/React/TS scaffold, auth screens (sign up
 with a mandatory dietary step, sign in, password reset), round create/
-join/roster/approval, round-switcher header, i18n (FR/EN), PWA config, and
-the `verify-turnstile` Edge Function. GitHub Actions: deploy (later
+join/roster/approval, round-switcher header, i18n (FR/EN), and PWA config. GitHub Actions: deploy (later
 replaced by Netlify's own Git integration — see 2026-08-01 (4)),
 keep-alive ping, nightly backup.

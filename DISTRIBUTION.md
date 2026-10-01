@@ -42,12 +42,11 @@ Nothing below can be skipped by choosing a different route.
 | Blocker | Why a store forces it | Where it stands |
 |---|---|---|
 | ~~Production database is behind~~ | The app has to actually work when a reviewer opens it. | **Done — `0015`→`0045` deployed 2026-08-24** |
-| **Turnstile dev bypass** | A placeholder token that disables bot protection cannot ship to a public listing. | Known, `README.md` "Known simplifications" |
 | **Own domain** | Play's TWA verifies ownership via `/.well-known/assetlinks.json`; both stores want a support URL and a privacy URL that look like a product, not `*.netlify.app`. | **Deferred on purpose.** The file now ships at `public/.well-known/assetlinks.json` against the Netlify origin, which Play accepts. The cost of the deferral is exact and known: a TWA pins its origin, so moving to a real domain later means a new AAB, not a redirect |
 | **Privacy policy + terms at public URLs** | Mandatory for both stores, and they must match what the app really collects. | **Reconciled with the code, 2026-09-14.** The drafts described an app that predated the album and web push: photographs, the push endpoint, the Article 6 bases, where the disks physically are, and the thirty-day deletion window were all missing or wrong. They now say what `rpc.ts`, `photo.ts`, `push.ts` and `0049` actually do — which is the coherence the Data Safety form is checked against |
 | **Legal review** | The drafts have never been read by a lawyer, and the app collects **allergy and dietary data** — GDPR Article 9 special category. Both stores make you declare this. | **Open, and deliberately postponed** until the app has users worth the fee. What was buyable for free — that the text matches the code — has been done; what a lawyer is actually for, the residual risk of holding Article 9 data at all, has not |
 | **In-app account deletion** | Google Play requires an in-app path *and* a web URL to request deletion. Apple guideline 5.1.1(v) requires deletion from inside the app. Not "email us". | **Built (`0049`)** — anonymise in place, thirty days, cancellable. What is left is the public request URL for people who have not installed the app |
-| **Outbound email** | A password reset or an invite that silently fails is a review rejection and a support burden. | Blocked on a provider key |
+| **Outbound email** | A password reset or an invite that silently fails is a review rejection and a support burden. | **Done** — Resend sends the confirmation and password-reset mail (`send-email`) |
 | **Real icons + store assets** | Icons at every size, a 512×512 store icon, a feature graphic, screenshots per device class. | Placeholders |
 | **UGC obligations** | The moment free-text chat opens, both stores require: a way to **report** content, a way to **block** a user, published moderation terms, and a contact. Canned templates today = safe. Free-text = this is required *before* it ships. | **Done ahead of it (`0059`, `0060`)** — report on phrases and photographs, block by seat, moderation policy at `/legal/moderation`, contact in the footer. Free-text chat can now ship without owing anything |
 
@@ -313,8 +312,8 @@ are part-time-evenings estimates, and the calendar is longer than the
 effort wherever someone else is in the loop.
 
 **Phase 0 — make it real (2–4 weeks).** ~~Deploy the migrations~~ (done,
-2026-08-24). Buy the domain, point Netlify at it. Wire the email provider.
-Remove the Turnstile bypass. Build **account deletion** (§10 — the largest
+2026-08-24). Buy the domain, point Netlify at it.
+Build **account deletion** (§10 — the largest
 remaining item, and a schema change). Run the legal pages past somebody
 qualified. Draw the real icons.
 *Gate: a stranger can sign up, run a dinner, and delete their account.*
@@ -369,12 +368,9 @@ that map, read off the migrations, plus the design it implies.
 | `invites` | A nullable **`email` column**, legacy since in-app invitations (`0019`) replaced it | Identifying, probably dead |
 | `round_invitations` | `profile_id`, `invited_by` — cascades on profile delete | Pseudonymous |
 | `audit_log` | `actor_id` and a free-form `payload jsonb` | **Unknown until audited** — a jsonb blob cannot be declared honestly to a store without reading what goes into it |
-| `turnstile_tickets` | `subject`, which can be an email. Rows expire after 10 minutes but **nothing deletes them** | Identifying, and accumulating |
 
-Two of those rows are jobs in themselves: **audit what `audit_log.payload`
-actually carries** before writing any privacy label, and **give
-`turnstile_tickets` a cleanup** — an expiry that no job enforces is a
-retention policy that doesn't exist.
+One of those rows is a job in itself: **audit what `audit_log.payload`
+actually carries** before writing any privacy label.
 
 ### The blocker: deleting a user is currently impossible
 
@@ -457,8 +453,7 @@ row in place, and it is what makes the dashboard's own Delete user work.
   and if so, does deleting it leave a tombstone in the thread?
 
 Effort, estimated: **3–5 days** for the RPC, the schema touch-ups, the
-settings screen and the web endpoint, plus the audit of `audit_log.payload`
-and the turnstile cleanup. It is the largest single item left in §1.
+settings screen and the web endpoint, plus the audit of `audit_log.payload`. It is the largest single item left in §1.
 
 ## 9. The short version
 

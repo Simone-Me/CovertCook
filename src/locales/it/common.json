@@ -367,7 +367,6 @@
     "confirmJoin": "Sei stato invitato a una cena con questo codice. Vuoi entrare?",
     "confirmJoinYes": "Sì, unisciti a questa cena",
     "confirmJoinChange": "Usa un codice diverso",
-    "waitingForCaptcha": "Verifico che tu sia umano…",
     "lateJoinerWarning": "Le iscrizioni sono chiuse e la catena è fissata. Puoi comunque aggiungere qualcuno — la catena viene aperta in un punto per inserirlo — ma chi sta attorno a quel punto riceve un partner diverso da quello che aveva.",
     "executiveChef": "Executive Chef",
     "pendingJoinBanner": "Il tuo invito è in attesa — codice della cena",
@@ -379,12 +378,7 @@
       "PREVIOUSLY_LEFT": "Hai lasciato questa cena. Chiedi all'Executive Chef di riaggiungerti.",
       "WAS_REMOVED": "L'Executive Chef ti ha rimosso da questa cena.",
       "ROUND_FULL": "Questa cena è al completo.",
-      "BLOCKED_AT_THIS_TABLE": "Non puoi prendere posto a questa cena.",
-      "TURNSTILE_SECRET_KEY is not configured": "Il controllo anti-bot è configurato a metà in questa installazione: l'app invia un vero token captcha e il server non ha una chiave con cui verificarlo. Imposta TURNSTILE_SECRET_KEY sulle funzioni, oppure svuota VITE_TURNSTILE_SITE_KEY così entrambi usano il bypass di sviluppo.",
-      "turnstile verification failed": "Il controllo anti-bot ha rifiutato questo tentativo. Ricarica la pagina e riprova con il codice.",
-      "token and purpose are required": "Il controllo anti-bot non ha prodotto un token. Ricarica la pagina — e se continua, VITE_TURNSTILE_SITE_KEY è impostato su qualcosa che Cloudflare non riconosce.",
-      "TURNSTILE_NO_TICKET": "Il controllo anti-bot ha risposto senza un biglietto. Ricarica la pagina e riprova.",
-      "CAPTCHA_REQUIRED": "Questa installazione richiede un controllo anti-bot e la pagina non l'ha fornito. Ricarica e riprova."
+      "BLOCKED_AT_THIS_TABLE": "Non puoi prendere posto a questa cena."
     },
     "chainChoice": {
       "intro": "La catena è già costruita. Togliere un anello lascia due estremità libere — decidi cosa farne.",

@@ -6,7 +6,7 @@ import { supabase } from './supabase'
  * `supabase.functions.invoke` reports every non-2xx as one sentence — "Edge
  * Function returned a non-2xx status code" — and hands the actual response
  * back on the error object as `context`, where nothing looks at it. So a
- * function that answered `{"error":"TURNSTILE_SECRET_KEY is not configured"}`
+ * function that answered `{"error":"RESEND_API_KEY is not configured"}`
  * with a perfectly clear 500 arrives at the screen as a shrug, and the search
  * for the cause starts in the client, which is the one place it is not.
  *

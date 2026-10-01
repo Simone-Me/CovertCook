@@ -40,14 +40,12 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 
 reset role;
 select join_code from rounds where id = :'round_id'::uuid \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
 set role authenticated;
 
 select _as('00000000-0000-0000-0000-000000001202');
-select join_round(:'join_code', :'t1'::uuid);
+select join_round(:'join_code');
 select _as('00000000-0000-0000-0000-000000001203');
-select join_round(:'join_code', :'t2'::uuid);
+select join_round(:'join_code');
 
 select _as('00000000-0000-0000-0000-000000001201');
 select advance_phase(:'round_id'::uuid, 'LOCKED');
@@ -267,10 +265,9 @@ select _refusal(format('select join_round(%L, null)', :'door_code'));
 
 \echo '--- with a real ticket it works again, and the ticket is burned ---'
 reset role;
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'door_code') returning id as tk \gset
 set role authenticated;
 select _as('00000000-0000-0000-0000-000000001203');
-select join_round(:'door_code', :'tk'::uuid) is not null as took_a_seat_with_a_ticket;
+select join_round(:'door_code') is not null as took_a_seat_with_a_ticket;
 
 \echo '--- and a used ticket is not a second seat: expect a refusal ---'
 select _refusal(format('select join_round(%L, %L::uuid)', :'door_code', :'tk'));

@@ -29,16 +29,12 @@ select advance_phase(:'round_id'::uuid, 'OPEN');
 select join_code from rounds where id = :'round_id'::uuid \gset
 
 reset role;
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t1 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t2 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t3 \gset
-insert into turnstile_tickets (purpose, subject) values ('JOIN_ROUND', :'join_code') returning id as t4 \gset
 set role authenticated;
 
-select _as('00000000-0000-0000-0000-0000000000a2'); select join_round(:'join_code', :'t1'::uuid);
-select _as('00000000-0000-0000-0000-0000000000a3'); select join_round(:'join_code', :'t2'::uuid);
-select _as('00000000-0000-0000-0000-0000000000a4'); select join_round(:'join_code', :'t3'::uuid);
-select _as('00000000-0000-0000-0000-0000000000a5'); select join_round(:'join_code', :'t4'::uuid);
+select _as('00000000-0000-0000-0000-0000000000a2'); select join_round(:'join_code');
+select _as('00000000-0000-0000-0000-0000000000a3'); select join_round(:'join_code');
+select _as('00000000-0000-0000-0000-0000000000a4'); select join_round(:'join_code');
+select _as('00000000-0000-0000-0000-0000000000a5'); select join_round(:'join_code');
 
 \echo '--- the host cannot be a guest (expect GUEST_NOT_HOST) ---'
 select _as('00000000-0000-0000-0000-0000000000a1');

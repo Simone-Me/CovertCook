@@ -701,14 +701,8 @@ export function previousPhaseFor(status: RoundStatus, votingEnabled: boolean): R
   return neighbourPhase(status, votingEnabled, -1)
 }
 
-// The ticket is null on a deployment with no captcha configured (0063), where
-// `join_round` asks for none — and where the Edge Function that mints them is
-// not called at all.
-export async function joinRound(input: { code: string; turnstileTicket: string | null }) {
-  const res = await guardedRpc('join_round', {
-    p_code: input.code,
-    p_turnstile_ticket: input.turnstileTicket,
-  })
+export async function joinRound(input: { code: string }) {
+  const res = await guardedRpc('join_round', { p_code: input.code })
   return unwrap<string>(res) // round_members id
 }
 

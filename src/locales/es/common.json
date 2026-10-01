@@ -367,7 +367,6 @@
     "confirmJoin": "Te han invitado a una cena con este código. ¿Quieres unirte?",
     "confirmJoinYes": "Sí, unirme a esta cena",
     "confirmJoinChange": "Usar otro código",
-    "waitingForCaptcha": "Comprobando que eres humano…",
     "lateJoinerWarning": "Las inscripciones están cerradas y la cadena está fijada. Aun así puedes añadir a alguien — la cadena se abre en un punto para insertarlo — pero quienes están alrededor de ese punto reciben una pareja distinta de la que tenían.",
     "executiveChef": "Executive Chef",
     "pendingJoinBanner": "Tu invitación está en espera — código de la cena",
@@ -379,12 +378,7 @@
       "PREVIOUSLY_LEFT": "Dejaste esta cena. Pídele al Executive Chef que te vuelva a añadir.",
       "WAS_REMOVED": "El Executive Chef te ha retirado de esta cena.",
       "ROUND_FULL": "Esta cena está completa.",
-      "BLOCKED_AT_THIS_TABLE": "No puedes tomar sitio en esta cena.",
-      "TURNSTILE_SECRET_KEY is not configured": "La comprobación anti-bot está configurada a medias en este despliegue: la app envía un token captcha real y el servidor no tiene clave con la que comprobarlo. O bien define TURNSTILE_SECRET_KEY en las funciones, o vacía VITE_TURNSTILE_SITE_KEY para que ambos usen el bypass de desarrollo.",
-      "turnstile verification failed": "La comprobación anti-bot ha rechazado este intento. Recarga la página e inténtalo de nuevo con el código.",
-      "token and purpose are required": "La comprobación anti-bot no produjo ningún token. Recarga la página — y si sigue pasando, VITE_TURNSTILE_SITE_KEY tiene un valor que Cloudflare no reconoce.",
-      "TURNSTILE_NO_TICKET": "La comprobación anti-bot respondió sin un ticket. Recarga la página e inténtalo de nuevo.",
-      "CAPTCHA_REQUIRED": "Este despliegue pide una comprobación anti-bot y la página no la proporcionó. Recarga e inténtalo de nuevo."
+      "BLOCKED_AT_THIS_TABLE": "No puedes tomar sitio en esta cena."
     },
     "chainChoice": {
       "intro": "La cadena ya está construida. Quitar un eslabón deja dos extremos sueltos — decide qué hacer con ellos.",

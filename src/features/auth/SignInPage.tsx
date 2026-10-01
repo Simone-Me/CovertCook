@@ -3,14 +3,12 @@ import { useTranslation } from 'react-i18next'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
-import { Turnstile } from '../../components/Turnstile'
 import { PasswordField } from '../../components/PasswordField'
 
 export function SignInPage() {
   const { t } = useTranslation()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [captchaToken, setCaptchaToken] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
 
@@ -21,7 +19,6 @@ export function SignInPage() {
     const { error } = await supabase.auth.signInWithPassword({
       email,
       password,
-      options: captchaToken ? { captchaToken } : undefined,
     })
     setSubmitting(false)
     if (error) setError(error.message)
@@ -52,7 +49,6 @@ export function SignInPage() {
           onChange={setPassword}
           autoComplete="current-password"
         />
-        <Turnstile onVerify={setCaptchaToken} />
         <button type="submit" disabled={submitting}>
           {t('auth.signIn')}
         </button>

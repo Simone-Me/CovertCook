@@ -7,31 +7,49 @@ import { VitePWA } from 'vite-plugin-pwa'
 /**
  * What version is running, decided at build time.
  *
- * NOT a commit count. `git rev-list --count HEAD` is the obvious idea and it
- * lies on every CI: Netlify clones shallow, so the count is the clone depth
- * rather than the history, and it can go *down* between builds. A semver from
- * package.json plus the commit that produced the build is stable everywhere
- * and answers the only question a version in a footer is ever asked — "is what
- * I am looking at the build with the fix in it?".
+ * The number is `<major>.<commits since the 2.0 baseline>`: the major comes from
+ * package.json and the second part is the commit count minus BASELINE, so every
+ * commit on main is a new, ordered version and the footer answers "is this the
+ * build with the fix in it?" at a glance. Plus the commit that produced it.
+ *
+ * THE COUNT HAS TO COME FROM FULL HISTORY. A shallow clone reports its own
+ * depth instead, and the number would then go *down* between builds — so a
+ * shallow checkout is deepened first, and if that is not possible the version
+ * falls back to package.json's own semver rather than printing a wrong count.
  *
  * The sha comes from Netlify's COMMIT_REF when it is there, and from the local
  * repository otherwise. Neither is required: a build with no git and no CI
  * still ships, with just the number.
  */
+const BASELINE = 101
+
+function git(cmd: string): string {
+  return execSync(`git ${cmd}`, { stdio: ['ignore', 'pipe', 'ignore'] }).toString().trim()
+}
+
 function appVersion(): string {
   const pkg = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'))
   const fromCi = process.env.COMMIT_REF
   let sha = fromCi ? fromCi.slice(0, 7) : ''
-  if (!sha) {
-    try {
-      sha = execSync('git rev-parse --short HEAD', { stdio: ['ignore', 'pipe', 'ignore'] })
-        .toString()
-        .trim()
-    } catch {
-      sha = ''
+  let version = `v${pkg.version}`
+  try {
+    if (git('rev-parse --is-shallow-repository') === 'true') {
+      try {
+        git('fetch --unshallow --quiet')
+      } catch {
+        // No remote to deepen from: keep the package version.
+      }
     }
+    if (git('rev-parse --is-shallow-repository') !== 'true') {
+      const commits = Number(git('rev-list --count HEAD'))
+      const major = String(pkg.version).split('.')[0]
+      if (Number.isInteger(commits) && commits > BASELINE) version = `v${major}.${commits - BASELINE}`
+    }
+    if (!sha) sha = git('rev-parse --short HEAD')
+  } catch {
+    // Not a git checkout.
   }
-  return sha ? `v${pkg.version} · ${sha}` : `v${pkg.version}`
+  return sha ? `${version} · ${sha}` : version
 }
 
 
