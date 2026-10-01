@@ -1,8 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { countdownHidden } from '../../lib/prefs'
 
 /**
- * How long until the dinner itself, while the recipes are being written.
+ * How long until the dinner itself, from the first draft until the dinner. It can be switched off in the profile.
  *
  * One quiet line under the dinner's name: it is there so a cook who opens the
  * table knows how many evenings they have left to shop and practise, not to
@@ -17,6 +18,8 @@ export function DinnerCountdown({ at }: { at: string }) {
     const id = setInterval(() => setNow(Date.now()), 60_000)
     return () => clearInterval(id)
   }, [])
+
+  if (countdownHidden()) return null
 
   const left = new Date(at).getTime() - now
   if (!(left > 0)) return null

@@ -3943,3 +3943,11 @@
 .env--hostonly .env__meta {
   color: var(--pass-ink);
 }
+
+/* The choice in force, to the right of a fold's title — the /custom pattern. */
+.action-fold__aside {
+  margin-left: auto;
+  font-weight: 400;
+  font-size: 13px;
+  color: var(--text-muted);
+}

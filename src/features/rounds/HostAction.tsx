@@ -13,18 +13,24 @@ import { Icon } from '../../components/Icon'
 // never stops asking is something people learn to ignore.
 export function HostAction({
   title,
+  aside,
   waiting = false,
   defaultOpen = false,
   children,
 }: {
   title: string
+  /** The choice currently in force, shown beside the title like /custom does. */
+  aside?: string
   waiting?: boolean
   defaultOpen?: boolean
   children: ReactNode
 }) {
   return (
     <details className={`paper action-fold${waiting ? ' action-fold--waiting' : ''}`} open={defaultOpen || waiting}>
-      <summary>{title}</summary>
+      <summary>
+        {title}
+        {aside && <span className="action-fold__aside">{aside}</span>}
+      </summary>
       <div className="stack">{children}</div>
     </details>
   )

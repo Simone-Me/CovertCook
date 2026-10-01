@@ -156,6 +156,7 @@ export function MenuPanel({
   return (
     <HostAction
       title={t('rounds.menu.title')}
+      aside={slotMode === 'CATEGORIES' ? t('rounds.menu.composed') : t('rounds.menu.free')}
       waiting={counting && slotMode === 'CATEGORIES' && !balanced}
     >
       {/* An error with no way out is a dead end: the arrow stayed armed, the

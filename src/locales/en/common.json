@@ -436,7 +436,7 @@
         "ARCHIVED": "Nothing left to do",
         "CANCELLED": "This dinner was called off"
       },
-      "empty": "empty",
+      "empty": "You can set this dinner up now, if you like — everything below is open until the door opens.",
       "whatIsItToggle": "What is the pass?",
       "advance": "Move the dinner on",
       "go": {
@@ -1280,6 +1280,15 @@
       ]
     },
     "help": "Help & contact"
+  },
+  "display": {
+    "title": "Display",
+    "countdown": "Show the countdown to the dinner",
+    "size": {
+      "small": "Small text",
+      "medium": "Medium text",
+      "large": "Large text"
+    }
   },
   "push": {
     "title": "Notifications",

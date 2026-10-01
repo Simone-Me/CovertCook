@@ -71,7 +71,14 @@ export function ThemesEditor({
   const changed = picking ? name !== nameTheme : table !== tableTheme
 
   return (
-    <HostAction title={t(picking ? 'rounds.group.pseudonym' : 'rounds.group.design')}>
+    <HostAction
+      title={t(picking ? 'rounds.group.pseudonym' : 'rounds.group.design')}
+      aside={
+        picking
+          ? t(`rounds.nameTheme.${nameTheme}`, { defaultValue: nameTheme })
+          : t(`rounds.tableTheme.${tableTheme}`, { defaultValue: tableTheme })
+      }
+    >
       {error && <div className="error">{error}</div>}
       {picking ? (
         <ThemePicker

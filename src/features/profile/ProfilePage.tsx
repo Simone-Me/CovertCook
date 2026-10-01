@@ -6,6 +6,7 @@ import { Fold } from '../../components/Fold'
 import { FoodLabel } from '../../components/FoodLabel'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE, isFoodCode } from '../../lib/foodTags'
+import { DisplayPrefs } from './DisplayPrefs'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { RecipesFold } from './RecipeBook'
 import { BlockedList } from './BlockedList'
@@ -292,6 +293,8 @@ export function ProfilePage() {
             behind a click. */}
         <LanguageSwitch onChange={(code) => onLocale(code as SupportedLocale)} />
       </div>
+
+      <DisplayPrefs />
 
       {/* A month out and a week out, and never in between. */}
       <ProEndingNotice />

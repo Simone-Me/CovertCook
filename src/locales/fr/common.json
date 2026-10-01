@@ -436,7 +436,7 @@
         "ARCHIVED": "Plus rien à faire",
         "CANCELLED": "Ce dîner a été annulé"
       },
-      "empty": "vide",
+      "empty": "Vous pouvez régler ce dîner maintenant, si vous voulez — tout ce qui suit reste ouvert jusqu'à l'ouverture de la porte.",
       "whatIsItToggle": "Qu’est-ce que le passe ?",
       "advance": "Faire avancer le dîner",
       "go": {
@@ -1280,6 +1280,15 @@
       ]
     },
     "help": "Aide et contact"
+  },
+  "display": {
+    "title": "Affichage",
+    "countdown": "Afficher le compte à rebours du dîner",
+    "size": {
+      "small": "Petit texte",
+      "medium": "Texte moyen",
+      "large": "Grand texte"
+    }
   },
   "push": {
     "title": "Notifications",

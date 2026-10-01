@@ -634,7 +634,9 @@ export function RoundHomePage() {
           <p className="muted" style={{ margin: '2px 0 0' }}>
             {t('rounds.seatCount', { count: activeApprovedCount })}
           </p>
-          {(round.status === 'ASSIGNED' || round.status === 'BRIEFS_CLOSED') && round.dinner_at && (
+          {ROUND_PHASE_ORDER.indexOf(round.status) >= 0 &&
+            ROUND_PHASE_ORDER.indexOf(round.status) < ROUND_PHASE_ORDER.indexOf('DINNER') &&
+            round.dinner_at && (
             <DinnerCountdown at={round.dinner_at} />
           )}
         </div>
@@ -813,6 +815,9 @@ export function RoundHomePage() {
                 word says the state, the rule below separates it, and the
                 explanation is behind the question mark — because it is worth
                 reading once and never again. */}
+            <p className="pass__empty" style={{ margin: 0 }}>
+              <em>{t('rounds.pass.empty')}</em>
+            </p>
             {/* The one moment these can still change: later, guests hold
                 names from the list and have seen the cloth. */}
             {roundId && (
@@ -833,9 +838,6 @@ export function RoundHomePage() {
                 />
               </>
             )}
-            <p className="pass__empty" style={{ margin: 0 }}>
-              <em>{t('rounds.pass.empty')}</em>
-            </p>
             <hr className="pass__rule" />
             <div className="stack">
               <button
