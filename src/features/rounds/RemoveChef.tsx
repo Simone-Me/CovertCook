@@ -23,7 +23,7 @@ export function RemoveChef({
     return (
       <button
         type="button"
-        className="chef-remove"
+        className="menu-slot-remove"
         title={t('rounds.remove')}
         aria-label={t('rounds.remove')}
         onClick={() => setOpen(true)}
@@ -41,7 +41,7 @@ export function RemoveChef({
         <button type="button" className="secondary chef-remove-choice" onClick={() => onRemove('COLLAPSE')}>
           {t('rounds.remove')}
         </button>
-        <button type="button" className="chef-remove" aria-label={t('actions.cancel')} onClick={() => setOpen(false)}>
+        <button type="button" className="menu-slot-remove" aria-label={t('actions.cancel')} onClick={() => setOpen(false)}>
           ✕
         </button>
       </div>

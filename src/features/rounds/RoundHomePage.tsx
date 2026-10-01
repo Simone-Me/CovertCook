@@ -24,6 +24,7 @@ import { RemoveChef } from './RemoveChef'
 import { HostPass, PassNote } from './HostAction'
 import { DinnerCountdown } from './DinnerCountdown'
 import { MenuPanel } from './MenuPanel'
+import { ThemesEditor } from './ThemesEditor'
 import { VoteCountdown } from '../vote/VoteCountdown'
 import { DietaryPanelGrid } from './DietaryPanelGrid'
 import { CostsPanel } from './CostsPanel'
@@ -812,6 +813,26 @@ export function RoundHomePage() {
                 word says the state, the rule below separates it, and the
                 explanation is behind the question mark — because it is worth
                 reading once and never again. */}
+            {/* The one moment these can still change: later, guests hold
+                names from the list and have seen the cloth. */}
+            {roundId && (
+              <>
+                <ThemesEditor
+                  roundId={roundId}
+                  kind="name"
+                  nameTheme={round.name_theme}
+                  tableTheme={round.table_theme}
+                  locale={profile?.locale ?? 'en'}
+                />
+                <ThemesEditor
+                  roundId={roundId}
+                  kind="table"
+                  nameTheme={round.name_theme}
+                  tableTheme={round.table_theme}
+                  locale={profile?.locale ?? 'en'}
+                />
+              </>
+            )}
             <p className="pass__empty" style={{ margin: 0 }}>
               <em>{t('rounds.pass.empty')}</em>
             </p>

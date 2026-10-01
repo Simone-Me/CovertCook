@@ -25,9 +25,6 @@ export function ChainPage() {
   const { data: round, isLoading: roundLoading } = useRound(roundId)
   const { data: members } = useRoundMembers(roundId)
   const [revealed, setRevealed] = useState(false)
-  // The pass: one person is authorised to look, and says so, before the
-  // button that shows every pairing is even offered.
-  const [authorised, setAuthorised] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const { data: chain, isLoading: chainLoading } = useQuery({
@@ -102,19 +99,13 @@ export function ChainPage() {
       {!revealed ? (
         <div className="card stack">
           <p className="muted">{t('chain.spoilerWarning')}</p>
-          {!authorised ? (
-            <div className="chainpass stack">
-              <strong>{t('chain.passTitle')}</strong>
-              <span>{t('chain.passBody')}</span>
-              <button type="button" onClick={() => setAuthorised(true)}>
-                {t('chain.passAuthorise')}
-              </button>
-            </div>
-          ) : (
-            <button type="button" onClick={() => setRevealed(true)}>
-              {t('chain.reveal')}
-            </button>
-          )}
+          <div className="chainpass stack">
+            <strong>{t('chain.passTitle')}</strong>
+            <span>{t('chain.passBody')}</span>
+          </div>
+          <button type="button" onClick={() => setRevealed(true)}>
+            {t('chain.reveal')}
+          </button>
         </div>
       ) : chainLoading ? (
         <p className="muted">…</p>

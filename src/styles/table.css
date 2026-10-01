@@ -313,7 +313,7 @@
   border-radius: 50%;
   background: var(--bg-elevated);
   color: var(--text-muted);
-  font-size: 16px;
+  font-size: 14px;
   line-height: 1;
   cursor: pointer;
 }
@@ -3919,6 +3919,8 @@
 
 /* The pass in front of the reveal: the same blue-grey as the host's pass. */
 .chainpass {
+  min-width: 0;
+  overflow-wrap: anywhere;
   padding: 12px;
   border: 1px solid var(--pass-edge);
   border-radius: 8px;

@@ -291,7 +291,7 @@ export function MenuPanel({
                     aria-label={t('actions.remove')}
                     onClick={() => removeSlot(slot.id)}
                   >
-                    ×
+                    🍌
                   </button>
                 </span>
               </div>

@@ -10,7 +10,6 @@ import { ChoiceList } from '../../components/ChoiceList'
 import { FilRougePicker } from './FilRougePicker'
 import { useFilRougeLabel } from '../../lib/filRouge'
 import { PhaseMenu } from './PhaseMenu'
-import { ThemesEditor } from './ThemesEditor'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
   accessAdmitsCode,
@@ -291,6 +290,16 @@ export function RoundSettingsPage() {
 
       {error && <div className="error">{error}</div>}
 
+      {/* The phase comes first and is always open: where the dinner is, is
+          the one thing every other section depends on. */}
+      <PhaseMenu
+        status={round.status}
+        votingEnabled={round.voting_enabled}
+        previousPhase={previousPhase}
+        stepping={stepping}
+        onStepBack={onStepBack}
+      />
+
       {/* Mirrors the panel on the round page. Filling the table is a thing
           a host comes back to, and they don't always come back the same
           way — so it lives in both places they'd look. */}
@@ -427,6 +436,157 @@ export function RoundSettingsPage() {
         </Fold>
       )}
 
+      <Fold title={t('rounds.settings.dinerInfo')}>
+        {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}
+        <form onSubmit={onSaveDetails} className="stack card">
+        <div>
+          <label htmlFor="city">{t('rounds.settings.city')}</label>
+          {/* Its own field because it is the one line the round page shows
+              on the closed envelope — a guest checking which town this is
+              shouldn't have to open anything (0034). */}
+          <input
+            id="city"
+            disabled={detailsLocked}
+            value={city ?? round.city ?? ''}
+            onChange={(e) => setCity(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="location">{t('rounds.settings.location')}</label>
+          <input
+            id="location"
+            disabled={detailsLocked}
+            value={location ?? round.location ?? ''}
+            onChange={(e) => setLocation(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="dinnerAt">{t('rounds.settings.dinnerAt')}</label>
+          <input
+            id="dinnerAt"
+            type="datetime-local"
+            disabled={detailsLocked}
+            value={dinnerAt ?? toLocalInputValue(round.dinner_at)}
+            onChange={(e) => setDinnerAt(e.target.value)}
+          />
+        </div>
+
+        <div>
+          <label htmlFor="timezone">{t('rounds.settings.timezone')}</label>
+          <select
+            id="timezone"
+            disabled={detailsLocked}
+            value={timezone ?? round.timezone}
+            onChange={(e) => setTimezone(e.target.value)}
+          >
+            {COMMON_TIMEZONES.includes(round.timezone) ? null : <option value={round.timezone}>{round.timezone}</option>}
+            {COMMON_TIMEZONES.map((tz) => (
+              <option key={tz} value={tz}>
+                {tz}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div>
+          <label htmlFor="notes">{t('rounds.settings.notes')}</label>
+          <textarea
+            id="notes"
+            rows={3}
+            disabled={detailsLocked}
+            placeholder={t('rounds.settings.notesPlaceholder')}
+            value={notes ?? round.notes ?? ''}
+            onChange={(e) => setNotes(e.target.value)}
+            maxLength={500}
+          />
+        </div>
+
+        {!detailsLocked && (
+          <button type="submit" disabled={saving}>
+            {t('actions.save')}
+          </button>
+        )}
+        {saved && <p className="muted">{t('rounds.settings.saved')}</p>}
+        </form>
+      </Fold>
+
+      <Fold title={t('rounds.settings.exclusions')} hint={t('rounds.settings.exclusionsHelp')}>
+        <div className="stack card">
+        {exclusions?.length === 0 && <p className="muted">{t('rounds.settings.noExclusions')}</p>}
+        {exclusions?.map((ex) => (
+          <div key={ex.id} className="row" style={{ justifyContent: 'space-between' }}>
+            <span>
+              {memberName(ex.member_a)} ↔ {memberName(ex.member_b)}
+            </span>
+            {preAssignment && (
+              <button type="button" className="secondary" onClick={() => onRemoveExclusion(ex.id)}>
+                {t('actions.remove')}
+              </button>
+            )}
+          </div>
+        ))}
+        {preAssignment && (
+          <form onSubmit={onAddExclusion} className="row">
+            <select value={exclusionA} onChange={(e) => setExclusionA(e.target.value)}>
+              <option value="">—</option>
+              {people?.map((p) => (
+                <option key={p.member_id} value={p.member_id}>
+                  {p.display_name}
+                </option>
+              ))}
+            </select>
+            <select value={exclusionB} onChange={(e) => setExclusionB(e.target.value)}>
+              <option value="">—</option>
+              {people?.map((p) => (
+                <option key={p.member_id} value={p.member_id}>
+                  {p.display_name}
+                </option>
+              ))}
+            </select>
+            <button type="submit" disabled={!exclusionA || !exclusionB || exclusionA === exclusionB}>
+              {t('actions.add')}
+            </button>
+          </form>
+        )}
+        </div>
+      </Fold>
+
+      {round.slot_mode === 'CATEGORIES' && (
+        <Fold
+          title={t('rounds.settings.courses')}
+          hint={t('rounds.settings.coursesHelp', { count: activeApprovedCount })}
+        >
+          <div className="stack card">
+            {slots?.map((slot) => (
+              <div key={slot.id} className="row" style={{ justifyContent: 'space-between' }}>
+                <span>{t(`briefs.courseOption.${slot.course}`)}</span>
+                {preAssignment && (
+                  <button type="button" className="secondary" onClick={() => onRemoveSlot(slot.id)}>
+                    {t('actions.remove')}
+                  </button>
+                )}
+              </div>
+            ))}
+            {preAssignment && (
+              <div className="row">
+                <select value={newSlotCourse} onChange={(e) => setNewSlotCourse(e.target.value as Course)}>
+                  {COURSES.map((c) => (
+                    <option key={c} value={c}>
+                      {t(`briefs.courseOption.${c}`)}
+                    </option>
+                  ))}
+                </select>
+                <button type="button" onClick={onAddSlot}>
+                  {t('actions.add')}
+                </button>
+              </div>
+            )}
+          </div>
+        </Fold>
+      )}
+
       <Fold title={t('rounds.settings.overview')} hint={t('rounds.settings.overviewHelp')}>
         <div className="card">
           <dl className="info">
@@ -508,176 +668,6 @@ export function RoundSettingsPage() {
           </div>
         </div>
       </Fold>
-
-      {round.status === 'DRAFT' && round.host_id === profile?.id && (
-        <ThemesEditor
-          roundId={round.id}
-          nameTheme={round.name_theme}
-          tableTheme={round.table_theme}
-          locale={profile?.locale ?? 'en'}
-        />
-      )}
-
-      <Fold title={t('rounds.settings.dinerInfo')}>
-        {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}
-        <form onSubmit={onSaveDetails} className="stack card">
-        <div>
-          <label htmlFor="city">{t('rounds.settings.city')}</label>
-          {/* Its own field because it is the one line the round page shows
-              on the closed envelope — a guest checking which town this is
-              shouldn't have to open anything (0034). */}
-          <input
-            id="city"
-            disabled={detailsLocked}
-            value={city ?? round.city ?? ''}
-            onChange={(e) => setCity(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="location">{t('rounds.settings.location')}</label>
-          <input
-            id="location"
-            disabled={detailsLocked}
-            value={location ?? round.location ?? ''}
-            onChange={(e) => setLocation(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="dinnerAt">{t('rounds.settings.dinnerAt')}</label>
-          <input
-            id="dinnerAt"
-            type="datetime-local"
-            disabled={detailsLocked}
-            value={dinnerAt ?? toLocalInputValue(round.dinner_at)}
-            onChange={(e) => setDinnerAt(e.target.value)}
-          />
-        </div>
-
-        <div>
-          <label htmlFor="timezone">{t('rounds.settings.timezone')}</label>
-          <select
-            id="timezone"
-            disabled={detailsLocked}
-            value={timezone ?? round.timezone}
-            onChange={(e) => setTimezone(e.target.value)}
-          >
-            {COMMON_TIMEZONES.includes(round.timezone) ? null : <option value={round.timezone}>{round.timezone}</option>}
-            {COMMON_TIMEZONES.map((tz) => (
-              <option key={tz} value={tz}>
-                {tz}
-              </option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="notes">{t('rounds.settings.notes')}</label>
-          <textarea
-            id="notes"
-            rows={3}
-            disabled={detailsLocked}
-            placeholder={t('rounds.settings.notesPlaceholder')}
-            value={notes ?? round.notes ?? ''}
-            onChange={(e) => setNotes(e.target.value)}
-            maxLength={500}
-          />
-        </div>
-
-        {!detailsLocked && (
-          <button type="submit" disabled={saving}>
-            {t('actions.save')}
-          </button>
-        )}
-        {saved && <p className="muted">{t('rounds.settings.saved')}</p>}
-        </form>
-      </Fold>
-
-      <Fold title={t('rounds.settings.phaseControl')} defaultOpen>
-        <PhaseMenu
-          status={round.status}
-          votingEnabled={round.voting_enabled}
-          previousPhase={previousPhase}
-          stepping={stepping}
-          onStepBack={onStepBack}
-        />
-      </Fold>
-
-      <Fold title={t('rounds.settings.exclusions')} hint={t('rounds.settings.exclusionsHelp')}>
-        <div className="stack card">
-        {exclusions?.length === 0 && <p className="muted">{t('rounds.settings.noExclusions')}</p>}
-        {exclusions?.map((ex) => (
-          <div key={ex.id} className="row" style={{ justifyContent: 'space-between' }}>
-            <span>
-              {memberName(ex.member_a)} ↔ {memberName(ex.member_b)}
-            </span>
-            {preAssignment && (
-              <button type="button" className="secondary" onClick={() => onRemoveExclusion(ex.id)}>
-                {t('actions.remove')}
-              </button>
-            )}
-          </div>
-        ))}
-        {preAssignment && (
-          <form onSubmit={onAddExclusion} className="row">
-            <select value={exclusionA} onChange={(e) => setExclusionA(e.target.value)}>
-              <option value="">—</option>
-              {people?.map((p) => (
-                <option key={p.member_id} value={p.member_id}>
-                  {p.display_name}
-                </option>
-              ))}
-            </select>
-            <select value={exclusionB} onChange={(e) => setExclusionB(e.target.value)}>
-              <option value="">—</option>
-              {people?.map((p) => (
-                <option key={p.member_id} value={p.member_id}>
-                  {p.display_name}
-                </option>
-              ))}
-            </select>
-            <button type="submit" disabled={!exclusionA || !exclusionB || exclusionA === exclusionB}>
-              {t('actions.add')}
-            </button>
-          </form>
-        )}
-        </div>
-      </Fold>
-
-      {round.slot_mode === 'CATEGORIES' && (
-        <Fold
-          title={t('rounds.settings.courses')}
-          hint={t('rounds.settings.coursesHelp', { count: activeApprovedCount })}
-        >
-          <div className="stack card">
-            {slots?.map((slot) => (
-              <div key={slot.id} className="row" style={{ justifyContent: 'space-between' }}>
-                <span>{t(`briefs.courseOption.${slot.course}`)}</span>
-                {preAssignment && (
-                  <button type="button" className="secondary" onClick={() => onRemoveSlot(slot.id)}>
-                    {t('actions.remove')}
-                  </button>
-                )}
-              </div>
-            ))}
-            {preAssignment && (
-              <div className="row">
-                <select value={newSlotCourse} onChange={(e) => setNewSlotCourse(e.target.value as Course)}>
-                  {COURSES.map((c) => (
-                    <option key={c} value={c}>
-                      {t(`briefs.courseOption.${c}`)}
-                    </option>
-                  ))}
-                </select>
-                <button type="button" onClick={onAddSlot}>
-                  {t('actions.add')}
-                </button>
-              </div>
-            )}
-          </div>
-        </Fold>
-      )}
 
       {canCancel && (
         <Fold title={t('rounds.settings.dangerZone')}>

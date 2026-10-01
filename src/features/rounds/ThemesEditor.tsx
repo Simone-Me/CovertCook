@@ -10,21 +10,26 @@ import {
   type NameTheme,
   type TableTheme,
 } from '../../lib/rpc'
-import { Fold } from '../../components/Fold'
+import { HostAction } from './HostAction'
 import { ThemePicker } from './ThemePicker'
 
 /**
- * The dinner's two looks, still the host's to change while it is a draft.
- * Offered only in DRAFT (0098): once the door opens, guests have been dealt
- * names from the list and the cloth is what they have already seen.
+ * One of the dinner's two looks — the pseudonym list or the cloth — still the
+ * host's to change while it is a draft, and offered in the pass for that
+ * reason: it is the one place that says "only now". Two panels rather than
+ * one, because they are two decisions. Offered only in DRAFT (0098): once the
+ * door opens, guests have been dealt names from the list and the cloth is what
+ * they have already seen.
  */
 export function ThemesEditor({
   roundId,
+  kind,
   nameTheme,
   tableTheme,
   locale,
 }: {
   roundId: string
+  kind: 'name' | 'table'
   nameTheme: NameTheme
   tableTheme: TableTheme
   locale: string
@@ -62,11 +67,13 @@ export function ThemesEditor({
     }
   }
 
+  const picking = kind === 'name'
+  const changed = picking ? name !== nameTheme : table !== tableTheme
+
   return (
-    <Fold title={t('rounds.group.theme')}>
-      <div className="stack">
-        <p className="muted">{t('rounds.group.themeHint')}</p>
-        {error && <div className="error">{error}</div>}
+    <HostAction title={t(picking ? 'rounds.group.pseudonym' : 'rounds.group.design')}>
+      {error && <div className="error">{error}</div>}
+      {picking ? (
         <ThemePicker
           name="edit-name-theme"
           options={nameThemes}
@@ -76,6 +83,7 @@ export function ThemesEditor({
           locale={locale}
           freeUntil={freeUntil}
         />
+      ) : (
         <ThemePicker
           name="edit-table-theme"
           options={tableThemes}
@@ -85,11 +93,11 @@ export function ThemesEditor({
           locale={locale}
           freeUntil={freeUntil}
         />
-        <button type="button" onClick={onSave} disabled={name === nameTheme && table === tableTheme}>
-          {t('actions.save')}
-        </button>
-        {saved && <p className="muted">{t('rounds.settings.themesSaved')}</p>}
-      </div>
-    </Fold>
+      )}
+      <button type="button" onClick={onSave} disabled={!changed}>
+        {t('actions.save')}
+      </button>
+      {saved && <p className="muted">{t('rounds.settings.themesSaved')}</p>}
+    </HostAction>
   )
 }
