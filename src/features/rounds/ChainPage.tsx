@@ -54,7 +54,7 @@ export function ChainPage() {
   const nameOf = (m: { display_name: string | null; secret_name: string | null }) =>
     (realNames ? m.display_name : null) ?? m.secret_name
 
-  const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved) ?? []
+  const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved && !m.is_guest) ?? []
   const inChain = new Set(chain?.flatMap((l) => [l.sender_member_id, l.cook_member_id]) ?? [])
   const notInChain = activeMembers.filter((m) => !inChain.has(m.id))
   const cycles = chain ? walkCycles(chain) : []

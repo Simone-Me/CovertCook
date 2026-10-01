@@ -418,6 +418,11 @@
       "stillFilling": "Plats pour l’instant : {{courses}}. Ils ne doivent égaler le nombre de chefs qu’une fois les inscriptions fermées.",
       "composedAtLock": "Quels plats se décide une fois les inscriptions fermées — il en faut exactement un par chef, et jusque-là ce nombre bouge encore."
     },
+    "guest": {
+      "badge": "invité",
+      "toggle": "Je viens en invité",
+      "hint": "Je cuisine mon propre plat et je ne fais pas l'échange. À décider avant la fermeture de la porte."
+    },
     "pass": {
       "title": "Le pass",
       "nothing": "Rien ne vous attend pour le moment.",

@@ -101,6 +101,12 @@ export interface TableThemeOption {
 /** Raised by create_round when a theme is named that this account cannot use. */
 export const THEME_LOCKED = 'THEME_LOCKED'
 
+/** Declare yourself a guest, or take it back; only while sign-ups are open (0100). */
+export async function setMyGuest(roundId: string, guest: boolean) {
+  const res = await guardedRpc('set_my_guest', { p_round_id: roundId, p_guest: guest })
+  return unwrap(res)
+}
+
 /** Door, covert level, seats and recipes per chef; only while a draft (0099). */
 export async function setDraftSetup(
   roundId: string,

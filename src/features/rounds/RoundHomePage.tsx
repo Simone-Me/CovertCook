@@ -8,7 +8,7 @@ import { useRound, useRoundMembers } from './hooks'
 import { RoundProgress } from './RoundProgress'
 import { TableProps } from './TableProps'
 import { MyWarnings } from './MyWarnings'
-import { fromCents, getChain, roundDeletesAt } from '../../lib/rpc'
+import { fromCents, getChain, roundDeletesAt, setMyGuest } from '../../lib/rpc'
 import { tableThemeClass } from '../../lib/themes'
 import { Envelope } from './Envelope'
 import { SharedMenu } from './SharedMenu'
@@ -307,7 +307,7 @@ export function RoundHomePage() {
   const activeApprovedCount = activeMembers.filter((m) => m.approved).length
   const inChainIds = new Set(chainLinks?.flatMap((l) => [l.sender_member_id, l.cook_member_id]) ?? [])
   const missingFromChain = chainLinks
-    ? activeMembers.filter((m) => m.approved && !inChainIds.has(m.id)).length
+    ? activeMembers.filter((m) => m.approved && !m.is_guest && !inChainIds.has(m.id)).length
     : 0
 
   const rosterMeta = hostName
@@ -1214,6 +1214,7 @@ export function RoundHomePage() {
                       <span className="redact">{t('rounds.chefCovered')}</span>
                     )}
                     {!m.approved && <span className="badge"> {t('rounds.pendingApproval')}</span>}
+                    {m.is_guest && <span className="badge"> {t('rounds.guest.badge')}</span>}
                   </span>
                   {isHost && !m.approved && (
                     <div className="row">
@@ -1263,6 +1264,35 @@ export function RoundHomePage() {
                   simply go; once the lottery has run, three other people's
                   evening is built on your pairing, so it becomes a request the
                   Executive Chef answers. */}
+              {/* Quiet on purpose: a line at the bottom of the roster, not a
+                  question put to everyone who arrives. The game is the exchange,
+                  and this is the exception for the friend who wants the dinner
+                  without it. Only while sign-ups are open; after the roulette
+                  the role is fixed. */}
+              {!isHost && myMembership?.status === 'ACTIVE' && round.status === 'OPEN' && (
+                <label className="row guest-toggle">
+                  <input
+                    type="checkbox"
+                    style={{ width: 'auto' }}
+                    checked={!!myMembership.is_guest}
+                    onChange={async (e) => {
+                      if (!roundId) return
+                      setError(null)
+                      try {
+                        await setMyGuest(roundId, e.target.checked)
+                        await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'members'] })
+                      } catch (err) {
+                        setError(err instanceof Error ? err.message : t('errors.generic'))
+                      }
+                    }}
+                  />
+                  <span>
+                    {t('rounds.guest.toggle')}
+                    <span className="muted"> — {t('rounds.guest.hint')}</span>
+                  </span>
+                </label>
+              )}
+
               {!isHost && myMembership?.status === 'ACTIVE' && !isFinished && (
                 <div className="stack leave-seat">
                   {leaveAsked ? (
@@ -1333,6 +1363,7 @@ export function RoundHomePage() {
           tilt={2}
         />
 
+        {!myMembership?.is_guest && (
         <Envelope
           icon={<Icon name="received" />}
           name={t('rounds.drawers.received')}
@@ -1341,6 +1372,7 @@ export function RoundHomePage() {
           to={`/rounds/${roundId}/recipe`}
           tilt={3}
         />
+        )}
 
         <Envelope
           icon={<Icon name="messages" />}

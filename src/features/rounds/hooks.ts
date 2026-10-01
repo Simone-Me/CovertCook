@@ -174,6 +174,8 @@ export interface RoundMemberRow {
   /** Set when this player has asked to be let out of a round whose chain
    *  already exists (0050). Visible only to them and to the host. */
   removal_requested_at: string | null
+  /** Comes to the dinner and cooks their own dish, outside the chain (0100). */
+  is_guest: boolean
 }
 
 export function useRoundMembers(roundId: string | undefined) {

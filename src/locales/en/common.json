@@ -418,6 +418,11 @@
       "stillFilling": "Courses so far: {{courses}}. They only have to match the number of chefs once sign-ups close.",
       "composedAtLock": "Which courses gets decided once sign-ups close — there has to be exactly one per chef, and until then that number is still moving."
     },
+    "guest": {
+      "badge": "guest",
+      "toggle": "I'm coming as a guest",
+      "hint": "I cook my own dish and take no part in the swap. Decided before the door closes."
+    },
     "pass": {
       "title": "The pass",
       "nothing": "Nothing needs you right now.",
