@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth'
 import { PasswordField } from '../../components/PasswordField'
 import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/password'
 
@@ -19,13 +20,24 @@ import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/pa
  * before this component mounted, as `type=recovery` still sitting in the hash.
  * Both are checked, because missing it means showing somebody the request form
  * for the third time.
+ *
+ * That session is NOT a sign-in. Until the new password is saved the rest of
+ * the app treats it as nobody (`recovering` in lib/auth.tsx): the header shows
+ * no name and every guarded route sends it back here.
  */
 export function ResetPasswordPage() {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const { recovering, finishRecovery } = useAuth()
   const [mode, setMode] = useState<'request' | 'set'>(
-    window.location.hash.includes('type=recovery') ? 'set' : 'request',
+    recovering || window.location.hash.includes('type=recovery') ? 'set' : 'request',
   )
+
+  // A reset left half-done is picked up where it stopped: reopening the app
+  // with the recovery session still on the device lands here, on the form.
+  useEffect(() => {
+    if (recovering) setMode('set')
+  }, [recovering])
 
   const [email, setEmail] = useState('')
   const [sent, setSent] = useState(false)
@@ -80,6 +92,8 @@ export function ResetPasswordPage() {
       setError(err.message)
       return
     }
+    // Only now is the session a real sign-in.
+    finishRecovery()
     setDone(true)
   }
 
@@ -151,9 +165,20 @@ export function ResetPasswordPage() {
         </form>
       )}
 
-      <p className="muted">
-        <Link to="/signin">{t('auth.signIn')}</Link>
-      </p>
+      {!done && (
+        <p className="muted">
+          {/* Walking away from a reset that was not finished drops the
+              recovery session, so it cannot be picked up later as a sign-in. */}
+          <Link
+            to="/signin"
+            onClick={() => {
+              if (recovering) void supabase.auth.signOut()
+            }}
+          >
+            {t('auth.signIn')}
+          </Link>
+        </p>
+      )}
     </div>
   )
 }
