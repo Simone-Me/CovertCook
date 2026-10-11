@@ -173,7 +173,7 @@ env vars — not GitHub's. Site configuration → Environment variables:
 |---|---|---|
 | `VITE_SUPABASE_URL` | Supabase → Project Settings → API | Public |
 | `VITE_SUPABASE_ANON_KEY` | Supabase → Project Settings → API | The anon/publishable key — intentionally public, same as it is in the frontend bundle |
-| `VITE_APP_BASE_URL` | `https://covertcook.netlify.app` | The deployed origin, until a real domain is bought. **Not** `localhost` — that's the local-dev-only value in `.env.local` |
+| `VITE_APP_BASE_URL` | `https://covertcook.fr` | The deployed origin. **Not** `localhost` — that's the local-dev-only value in `.env.local` |
 | `VITE_VAPID_PUBLIC_KEY` | `npx web-push generate-vapid-keys` | Public by design. Empty is a valid state: the notifications switch reports itself unavailable instead of failing when pressed |
 
 `public/_redirects` (`/*  /index.html  200`) is what makes client-side
@@ -198,15 +198,17 @@ still set to `http://localhost:5173` is therefore the whole explanation for a
 confirmation link that opens nothing: the template is innocent, and pasting a
 different one changes nothing.
 
-Fix all three together, or the symptom moves rather than goes. Until a real
-domain is bought, all three are the Netlify origin:
+Fix all three together, or the symptom moves rather than goes. All three are
+the real domain:
 
-1. Netlify → `VITE_APP_BASE_URL` = `https://covertcook.netlify.app`
-2. Supabase → **Site URL** = `https://covertcook.netlify.app`
-3. Supabase → **Redirect URLs** = `https://covertcook.netlify.app/**`
+1. Netlify → `VITE_APP_BASE_URL` = `https://covertcook.fr`
+2. Supabase → **Site URL** = `https://covertcook.fr`
+3. Supabase → **Redirect URLs** = `https://covertcook.fr/**` (keep
+   `https://covertcook.netlify.app/**` alongside it for a while: links in
+   mails sent before the move still point there, and `public/_redirects`
+   forwards them to the same path on `covertcook.fr`)
 
-When the domain does arrive, these three change together and in that order —
-a mismatch between them is silent, and shows up only as a link that opens the
+A mismatch between them is silent, and shows up only as a link that opens the
 wrong place.
 
 ### Which mail is sent by whom

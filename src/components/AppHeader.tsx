@@ -15,7 +15,10 @@ import { myOpenAlerts } from '../lib/rpc'
 // gets validated against.
 export function AppHeader() {
   const { t } = useTranslation()
-  const { session, profile } = useAuth()
+  const { session: realSession, profile, recovering } = useAuth()
+  // A reset link's session is not a way into the account until the new
+  // password is saved (src/lib/recovery.ts): no name, no profile, no bell.
+  const session = recovering ? null : realSession
 
   // The in-app half of telling the host (0059). A push is for the phone in a
   // pocket; this is for the app already open, where an alert should not have to

@@ -2,7 +2,7 @@
 
 This folder builds the Google Play artefact. It contains **no application
 code** and never will: a Trusted Web Activity is a browser with the address
-bar taken off, pointed at `https://covertcook.netlify.app`. Everything people
+bar taken off, pointed at `https://covertcook.fr`. Everything people
 see is the same React app Netlify already serves, which is why a change to the
 product ships without anybody touching this folder or Play.
 
@@ -42,7 +42,7 @@ Play identifies an app by it forever.
 ```
 npm i -g @bubblewrap/cli
 cd android
-bubblewrap init --manifest=https://covertcook.netlify.app/manifest.webmanifest
+bubblewrap init --manifest=https://covertcook.fr/manifest.webmanifest
 bubblewrap build
 ```
 

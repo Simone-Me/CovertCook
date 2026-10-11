@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 import type { Session } from '@supabase/supabase-js'
 import { supabase } from './supabase'
+import { clearRecoveryPending, markRecoveryPending, recoveryPending } from './recovery'
 
 export interface Profile {
   id: string
@@ -21,6 +22,12 @@ interface AuthState {
   // (auth.users created, complete_signup RPC not yet called) — the app must
   // route these users to the dietary step before anything else.
   needsSignupCompletion: boolean
+  // true while the session came from a reset link and no new password has
+  // been saved yet — it may only be used on /reset (see recovery.ts).
+  recovering: boolean
+  // Called once the new password is saved, or when a real sign-in replaces
+  // the recovery session.
+  finishRecovery: () => void
   refreshProfile: () => Promise<void>
 }
 
@@ -30,6 +37,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [profile, setProfile] = useState<Profile | null>(null)
   const [loading, setLoading] = useState(true)
+  const [recovering, setRecovering] = useState(recoveryPending)
 
   async function loadProfile(uid: string) {
     const { data } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
@@ -58,6 +66,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     supabase.auth.getSession().then(async ({ data }) => {
+      // A reset link that never produced a session (expired, already used)
+      // leaves nothing to restrict; don't let its flag catch the next
+      // account created on this device.
+      if (!data.session) {
+        clearRecoveryPending()
+        setRecovering(false)
+      }
       if (data.session && (await discardGhostSession())) {
         setLoading(false)
         return
@@ -67,7 +82,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     })
 
-    const { data: sub } = supabase.auth.onAuthStateChange(async (_event, newSession) => {
+    const { data: sub } = supabase.auth.onAuthStateChange(async (event, newSession) => {
+      if (event === 'PASSWORD_RECOVERY') {
+        markRecoveryPending()
+        setRecovering(true)
+      } else if (event === 'SIGNED_OUT') {
+        clearRecoveryPending()
+        setRecovering(false)
+      }
       setSession(newSession)
       if (newSession) {
         await loadProfile(newSession.user.id)
@@ -84,6 +106,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     profile,
     loading,
     needsSignupCompletion: !!session && !profile,
+    recovering: !!session && recovering,
+    finishRecovery: () => {
+      clearRecoveryPending()
+      setRecovering(false)
+    },
     refreshProfile: async () => {
       if (session) await loadProfile(session.user.id)
     },

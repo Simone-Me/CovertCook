@@ -3,10 +3,13 @@ import { useTranslation } from 'react-i18next'
 import { LanguageSwitch } from '../../components/LanguageSwitch'
 import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../lib/auth'
 import { PasswordField } from '../../components/PasswordField'
+import { GoogleButton } from '../../components/GoogleButton'
 
 export function SignInPage() {
   const { t } = useTranslation()
+  const { finishRecovery } = useAuth()
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -21,7 +24,13 @@ export function SignInPage() {
       password,
     })
     setSubmitting(false)
-    if (error) setError(error.message)
+    if (error) {
+      setError(error.message)
+      return
+    }
+    // Signing in with a password proves what the reset link never did; a
+    // half-finished reset left on this device no longer applies.
+    finishRecovery()
   }
 
   return (
@@ -29,6 +38,7 @@ export function SignInPage() {
       <LanguageSwitch />
       <h1>{t('auth.signIn')}</h1>
       {error && <div className="error">{error}</div>}
+      <GoogleButton />
       <form onSubmit={onSubmit} className="stack">
         <div>
           <label htmlFor="email">{t('auth.email')}</label>

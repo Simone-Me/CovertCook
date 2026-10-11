@@ -33,10 +33,15 @@ import { ProPage } from './features/pro/ProPage'
 import { TutorialPage } from './features/tutorial/TutorialPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
-  const { session, profile, loading, needsSignupCompletion } = useAuth()
+  const { session, profile, loading, needsSignupCompletion, recovering } = useAuth()
   const location = useLocation()
 
   if (loading) return null
+
+  // A reset link signs the person in, but that session is only good for
+  // choosing a new password — not for the rounds, the profile or anything
+  // else behind this guard. Send it back until the password is saved.
+  if (recovering) return <Navigate to="/reset" replace />
 
   // Last chance to keep the invitation. These redirects use `replace`, so
   // the ?code= that brought someone here is about to be erased from
@@ -56,7 +61,7 @@ function RequireAuth({ children }: { children: ReactNode }) {
 }
 
 function AppRoutes() {
-  const { session, needsSignupCompletion } = useAuth()
+  const { session, needsSignupCompletion, recovering } = useAuth()
   const location = useLocation()
 
   return (
@@ -75,10 +80,18 @@ function AppRoutes() {
             cannot sign in — or has not installed the app — can still read how
             to have their account deleted. */}
         <Route path="/help" element={<HelpPage />} />
-        <Route path="/signin" element={session ? <Navigate to="/" replace /> : <SignInPage />} />
+        <Route path="/signin" element={session && !recovering ? <Navigate to="/" replace /> : <SignInPage />} />
         <Route
           path="/signup"
-          element={session && !needsSignupCompletion ? <Navigate to="/" replace /> : <SignUpPage />}
+          element={
+            recovering ? (
+              <Navigate to="/reset" replace />
+            ) : session && !needsSignupCompletion ? (
+              <Navigate to="/" replace />
+            ) : (
+              <SignUpPage />
+            )
+          }
         />
         <Route path="/reset" element={<ResetPasswordPage />} />
         <Route

@@ -80,7 +80,10 @@
       "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
     },
     "passwordLabel": "Mot de passe",
-    "step": "Étape {{n}} sur {{total}}"
+    "step": "Étape {{n}} sur {{total}}",
+    "withGoogle": "Continuer avec Google",
+    "or": "ou avec votre e-mail",
+    "consentFirst": "Avant votre profil : deux choses à accepter."
   },
   "dietary": {
     "title": "Vos restrictions alimentaires",

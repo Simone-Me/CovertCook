@@ -80,7 +80,10 @@
       "whatItIs": "Questo è il tuo vero nome, fuori dal gioco — come ti riconoscono gli amici e come un capo sa chi chiede di entrare. Non ti chiamano mai così a una cena: ogni cena ti assegna un nome segreto tutto suo."
     },
     "passwordLabel": "Password",
-    "step": "Passo {{n}} di {{total}}"
+    "step": "Passo {{n}} di {{total}}",
+    "withGoogle": "Continua con Google",
+    "or": "oppure con la tua email",
+    "consentFirst": "Prima del profilo: due cose da accettare."
   },
   "dietary": {
     "title": "Le tue restrizioni alimentari",

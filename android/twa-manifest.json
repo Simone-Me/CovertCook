@@ -1,6 +1,6 @@
 {
   "packageId": "com.opus35.covertcook",
-  "host": "covertcook.netlify.app",
+  "host": "covertcook.fr",
   "name": "CovertCook",
   "launcherName": "CovertCook",
   "display": "standalone",
@@ -13,17 +13,17 @@
   "backgroundColor": "#FFFCF6",
   "enableNotifications": true,
   "startUrl": "/",
-  "iconUrl": "https://covertcook.netlify.app/pwa/pwa-512x512.png",
+  "iconUrl": "https://covertcook.fr/pwa/pwa-512x512.png",
   "splashScreenFadeOutDuration": 300,
   "signingKey": {
     "path": "./upload.jks",
     "alias": "upload"
   },
-  "appVersionName": "2.1",
-  "appVersionCode": 4,
+  "appVersionName": "2.2",
+  "appVersionCode": 5,
   "shortcuts": [],
   "generatorApp": "bubblewrap-cli",
-  "webManifestUrl": "https://covertcook.netlify.app/manifest.webmanifest",
+  "webManifestUrl": "https://covertcook.fr/manifest.webmanifest",
   "fallbackType": "customtabs",
   "features": {},
   "alphaDependencies": {
@@ -32,12 +32,12 @@
   "enableSiteSettingsShortcut": true,
   "isChromeOSOnly": false,
   "isMetaQuest": false,
-  "fullScopeUrl": "https://covertcook.netlify.app/",
+  "fullScopeUrl": "https://covertcook.fr/",
   "minSdkVersion": 24,
   "orientation": "any",
   "fingerprints": [],
   "additionalTrustedOrigins": [],
   "retainedBundles": [],
   "displayOverride": [],
-  "appVersion": "2.1"
+  "appVersion": "2.2"
 }

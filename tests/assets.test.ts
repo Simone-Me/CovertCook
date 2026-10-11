@@ -18,7 +18,7 @@ describe('static assets referenced from the code exist in public/', () => {
     /\.(tsx?|css|html)$/.test(f),
   )
   const ref = /["'(`](\/[\w./-]+\.(?:webp|avif|png|jpe?g|mp4|svg))/g
-  const url = /netlify\.app(\/[\w./-]+\.png)/g
+  const url = /covertcook\.fr(\/[\w./-]+\.png)/g
 
   it('every "/path/file.ext" literal and email image resolves', () => {
     const missing: string[] = []

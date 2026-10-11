@@ -1165,3 +1165,15 @@ button.tone-diet.secondary {
 .keptpage .album__menu {
   font-size: 17px;
 }
+
+/* "Continue with Google" — Google's own mark, on the app's secondary button. */
+.google-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+.auth-or {
+  text-align: center;
+  margin: 0;
+}

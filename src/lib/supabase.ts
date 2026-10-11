@@ -1,4 +1,8 @@
 import { createClient } from '@supabase/supabase-js'
+import { captureRecoveryFromUrl } from './recovery'
+
+// Before createClient, which consumes the reset link's hash (see recovery.ts).
+captureRecoveryFromUrl()
 
 // Only the anon key ever reaches this file — every request it makes is
 // RLS-enforced. The service_role key must never appear in frontend code;

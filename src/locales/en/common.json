@@ -80,7 +80,10 @@
       "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
     },
     "passwordLabel": "Password",
-    "step": "Step {{n}} of {{total}}"
+    "step": "Step {{n}} of {{total}}",
+    "withGoogle": "Continue with Google",
+    "or": "or with your email",
+    "consentFirst": "Before your profile: two things to agree to."
   },
   "dietary": {
     "title": "Your dietary restrictions",
