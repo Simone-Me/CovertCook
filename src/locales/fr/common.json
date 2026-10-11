@@ -1309,7 +1309,6 @@
     },
     "help": "Aide et contact",
     "designBy": "Design par",
-    "iconsByJdz": "Icônes par",
     "faviconBy": "Favicon :"
   },
   "display": {
@@ -1975,5 +1974,28 @@
       }
     ],
     "honest": "Rien n'est encore calculé : plutôt que d'afficher des chiffres inventés, cette page attend qu'ils soient réels."
+  },
+  "admin": {
+    "open": "Admin : sélection de la semaine",
+    "week": {
+      "title": "Sélection de la semaine",
+      "lead": "Chaque dimanche la sélection change. Une ligne AUTO a été remplie par le tirage de la semaine ; choisissez une valeur (et une note si vous voulez) et enregistrez pour l'écrire vous-même.",
+      "allWritten": "Les {{count}} semaines affichées sont toutes écrites.",
+      "missingTotal_one": "{{count}} ligne est encore automatique sur les {{weeks}} prochaines semaines.",
+      "missingTotal_other": "{{count}} lignes sont encore automatiques sur les {{weeks}} prochaines semaines.",
+      "more": "Afficher 4 semaines de plus",
+      "thisWeek": "Cette semaine — {{date}}",
+      "weekOf": "Semaine du {{date}}",
+      "complete": "complète",
+      "missing_one": "{{count}} à écrire",
+      "missing_other": "{{count}} à écrire",
+      "written": "Écrite",
+      "auto": "Auto",
+      "notes": "Note (pourquoi celle-ci ?)",
+      "noteTitle": "Titre",
+      "noteBody": "Pourquoi celle-ci, cette semaine",
+      "save": "Enregistrer",
+      "backToAuto": "Revenir à l'auto"
+    }
   }
 }

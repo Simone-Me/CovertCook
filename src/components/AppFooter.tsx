@@ -37,13 +37,11 @@ export function AppFooter() {
         <a href="mailto:contact@covertcook.fr">{t('legal.contact')}</a>
       </p>
 
-      {/* Who made it look like this. The favicon is a free Flaticon icon,
-          and their licence is the condition for using it: the credit stays
-          on every screen (assets-src/README.md). */}
+      {/* Who made it look like this — the app's logo included. The favicon is
+          a free Flaticon icon, and their licence is the condition for using
+          it: the credit stays on every screen (assets-src/README.md). */}
       <p className="app-foot__credit">
-        {t('legal.designBy')} Simone Melotti, Javier Diez Cerro · {t('legal.iconsByJdz')} Javier Diez Cerro (JDZ)
-        {' · '}
-        {t('legal.faviconBy')}{' '}
+        {t('legal.designBy')} Simone Melotti, Javier Diez Cerro · {t('legal.faviconBy')}{' '}
         <a href="https://www.flaticon.com/" target="_blank" rel="noopener noreferrer">
           Flaticon
         </a>

@@ -32,6 +32,7 @@ import { ManualTallyPage } from './features/vote/ManualTallyPage'
 import { ResultsPage } from './features/vote/ResultsPage'
 import { ProPage } from './features/pro/ProPage'
 import { SupportPage } from './features/support/SupportPage'
+import { AdminWeekPage } from './features/admin/AdminWeekPage'
 import { PRO_VISIBLE } from './lib/proVisible'
 import { TutorialPage } from './features/tutorial/TutorialPage'
 
@@ -205,6 +206,15 @@ function AppRoutes() {
               // not exist.
               <Navigate to="/support" replace />
             )
+          }
+        />
+        {/* Admins only; the page itself and every function behind it check. */}
+        <Route
+          path="/admin/week"
+          element={
+            <RequireAuth>
+              <AdminWeekPage />
+            </RequireAuth>
           }
         />
         {/* Outside the guard: asking for a coffee does not need an account. */}

@@ -1775,7 +1775,29 @@
   },
   "legal": {
     "designBy": "Design di",
-    "iconsByJdz": "Icone di",
     "faviconBy": "Favicon:"
+  },
+  "admin": {
+    "open": "Admin: scelta della settimana",
+    "week": {
+      "title": "Scelta della settimana",
+      "lead": "Ogni domenica la selezione cambia. Una riga AUTO è stata riempita dall'estrazione settimanale; scegli un valore (e una nota se vuoi) e salva per scriverla tu.",
+      "allWritten": "Tutte le {{count}} settimane mostrate sono scritte.",
+      "missingTotal_one": "{{count}} riga è ancora automatica nelle prossime {{weeks}} settimane.",
+      "missingTotal_other": "{{count}} righe sono ancora automatiche nelle prossime {{weeks}} settimane.",
+      "more": "Mostra altre 4 settimane",
+      "thisWeek": "Questa settimana — {{date}}",
+      "weekOf": "Settimana di {{date}}",
+      "complete": "completa",
+      "missing_one": "{{count}} da scrivere",
+      "missing_other": "{{count}} da scrivere",
+      "written": "Scritta",
+      "auto": "Auto",
+      "notes": "Nota (perché questa?)",
+      "noteTitle": "Titolo",
+      "noteBody": "Perché questa, questa settimana",
+      "save": "Salva",
+      "backToAuto": "Torna all'auto"
+    }
   }
 }

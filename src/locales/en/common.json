@@ -1309,7 +1309,6 @@
     },
     "help": "Help & contact",
     "designBy": "Design by",
-    "iconsByJdz": "Icons by",
     "faviconBy": "Favicon:"
   },
   "display": {
@@ -1975,5 +1974,28 @@
       }
     ],
     "honest": "Nothing is calculated yet: rather than show made-up numbers, this page waits until they are real."
+  },
+  "admin": {
+    "open": "Admin: pick of the week",
+    "week": {
+      "title": "Pick of the week",
+      "lead": "Every Sunday the selection changes. A line marked AUTO was filled by the weekly draw; choose a value (and a note if you like) and save to write it yourself.",
+      "allWritten": "All {{count}} weeks shown are written.",
+      "missingTotal_one": "{{count}} line is still automatic across the next {{weeks}} weeks.",
+      "missingTotal_other": "{{count}} lines are still automatic across the next {{weeks}} weeks.",
+      "more": "Show 4 more weeks",
+      "thisWeek": "This week — {{date}}",
+      "weekOf": "Week of {{date}}",
+      "complete": "complete",
+      "missing_one": "{{count}} to write",
+      "missing_other": "{{count}} to write",
+      "written": "Written",
+      "auto": "Auto",
+      "notes": "Note (why this one?)",
+      "noteTitle": "Title",
+      "noteBody": "Why this one, this week",
+      "save": "Save",
+      "backToAuto": "Back to auto"
+    }
   }
 }

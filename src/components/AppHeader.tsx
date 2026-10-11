@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../lib/auth'
-import { myOpenAlerts } from '../lib/rpc'
+import { isAppAdmin, myOpenAlerts } from '../lib/rpc'
 
 // The round switcher that used to live here is gone. It solved a problem
 // this product doesn't have: people run one dinner at a time, and every
@@ -34,6 +34,15 @@ export function AppHeader() {
     queryFn: myOpenAlerts,
     refetchInterval: 60_000,
     refetchOnWindowFocus: true,
+  })
+
+  // The admin's own door (0108), beside the bell. Asked once per session;
+  // for everybody who is not an admin it answers false and draws nothing.
+  const { data: admin } = useQuery({
+    queryKey: ['is-app-admin', session?.user.id],
+    enabled: !!session,
+    queryFn: isAppAdmin,
+    staleTime: 30 * 60 * 1000,
   })
 
   const waiting = (alerts ?? []).reduce((total, round) => total + round.open_alerts, 0)
@@ -78,6 +87,11 @@ export function AppHeader() {
             <span className="alert-pip__count">0</span>
           </span>
         ))}
+      {session && admin && (
+        <Link to="/admin/week" className="alert-pip is-admin" aria-label={t('admin.open')} title={t('admin.open')}>
+          <span aria-hidden="true">🛠</span>
+        </Link>
+      )}
       {session && (
         <Link to="/profile" className="badge" style={{ textDecoration: 'none' }}>
           {profile?.display_name ?? t('profile.title')}
