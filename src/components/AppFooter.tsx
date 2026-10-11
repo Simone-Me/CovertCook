@@ -37,15 +37,18 @@ export function AppFooter() {
         <a href="mailto:contact@covertcook.fr">{t('legal.contact')}</a>
       </p>
 
+      {/* Who made it look like this. */}
+      <p className="app-foot__credit">
+        {t('legal.designBy')} Simone Melotti, Javier Diez Cerro · {t('legal.iconsFaviconBy')} JDZ
+      </p>
+
+      {/* Kept while any Flaticon tile is still shipped: their licence is the
+          condition for using them (assets-src/README.md). */}
       <p className="app-foot__credit">
         {t('legal.iconsBy')}{' '}
         <a href="https://www.flaticon.com/" target="_blank" rel="noopener noreferrer">
           Flaticon
         </a>
-      </p>
-
-      <p className="app-foot__credit">
-        covertcook.fr — {t('legal.by')} Simone Melotti
       </p>
     </footer>
   )

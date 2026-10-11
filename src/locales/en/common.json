@@ -1112,9 +1112,8 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "contact": "Contact",
-    "iconsBy": "Icons by",
+    "iconsBy": "Additional icons by",
     "soon": "This page is not written yet. It has to exist before CovertCook takes any money — see ROADMAP.md.",
-    "company": "Company",
     "updated": "Last updated",
     "termsDoc": {
       "title": "Terms of use",
@@ -1309,7 +1308,9 @@
         }
       ]
     },
-    "help": "Help & contact"
+    "help": "Help & contact",
+    "designBy": "Design by",
+    "iconsFaviconBy": "Icons and favicon by"
   },
   "display": {
     "title": "Display",

@@ -1772,5 +1772,10 @@
       }
     ],
     "honest": "Aún no se calcula nada: en lugar de mostrar cifras inventadas, esta página espera a que sean reales."
+  },
+  "legal": {
+    "designBy": "Diseño de",
+    "iconsFaviconBy": "Iconos y favicon de",
+    "iconsBy": "Iconos adicionales de"
   }
 }

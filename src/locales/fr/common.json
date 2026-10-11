@@ -1112,9 +1112,8 @@
     "terms": "Conditions",
     "privacy": "Confidentialité",
     "contact": "Contact",
-    "iconsBy": "Icônes par",
+    "iconsBy": "Icônes complémentaires par",
     "soon": "Cette page n'est pas encore écrite. Elle devra exister avant que CovertCook accepte le moindre paiement — voir ROADMAP.md.",
-    "company": "Société",
     "updated": "Dernière mise à jour",
     "termsDoc": {
       "title": "Conditions d'utilisation",
@@ -1309,7 +1308,9 @@
         }
       ]
     },
-    "help": "Aide et contact"
+    "help": "Aide et contact",
+    "designBy": "Design par",
+    "iconsFaviconBy": "Icônes et favicon par"
   },
   "display": {
     "title": "Affichage",
