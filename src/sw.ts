@@ -49,7 +49,16 @@ precacheAndRoute(self.__WB_MANIFEST)
 // review both test. The push-notification and Supabase paths are not pages.
 registerRoute(
   new NavigationRoute(createHandlerBoundToURL('/index.html'), {
-    denylist: [/^\/rest\//, /^\/auth\//, /^\/functions\//, /^\/\.well-known\//],
+    // A file name is not a page either. Without the last pattern, typing an
+    // image's address into a browser that has the app installed got the app
+    // instead of the image — which made a working logo look broken.
+    denylist: [
+      /^\/rest\//,
+      /^\/auth\//,
+      /^\/functions\//,
+      /^\/\.well-known\//,
+      /\.(?:png|jpe?g|webp|avif|svg|ico|json|webmanifest|txt|xml)(?:\?.*)?$/i,
+    ],
   }),
 )
 
