@@ -8,6 +8,7 @@ import { ConfirmEmailNotice } from './ConfirmEmailNotice'
 import { FoodTagGrid } from '../../components/FoodTagGrid'
 import { ALLERGENS, DIETS, OTHER_CODE } from '../../lib/foodTags'
 import { PasswordField } from '../../components/PasswordField'
+import { GoogleButton } from '../../components/GoogleButton'
 import { checkPassword, LONG_ENOUGH_ALONE, MIN_WITH_CLASSES } from '../../lib/password'
 import { useAuth } from '../../lib/auth'
 import { finalName, nameProblem, normalizeName, type NameProblem } from '../../lib/displayName'
@@ -49,6 +50,13 @@ export function SignUpPage() {
   const [step, setStep] = useState<'account' | 'confirm-email' | 'dietary'>(
     session && needsSignupCompletion ? 'dietary' : 'account',
   )
+  // Arriving already signed in but with no profile means the account step,
+  // and the two consents on it, happened somewhere else or not at all: an
+  // email confirmed from another page load, or — the case that matters — a
+  // brand-new Google account, which never saw this form. Consent is asked
+  // here instead, before anything about food is collected. Fixed at mount so
+  // the boxes do not vanish the moment they are ticked.
+  const [askConsentHere] = useState(() => !!session && needsSignupCompletion)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [passwordAgain, setPasswordAgain] = useState('')
@@ -157,6 +165,8 @@ export function SignUpPage() {
   // paranoia, it is what stops a state change on the last page from letting an
   // unanswered question through.
   function validateFood(): string | null {
+    if (askConsentHere && !acceptedTerms) return t('auth.mustAcceptTerms')
+    if (askConsentHere && !acceptedAllergies) return t('auth.mustAcceptAllergies')
     if (hasAllergies === null || hasDiet === null) return t('food.answerBoth')
     // Saying yes and then choosing nothing is the one answer that means
     // neither thing: it is not "no", and it records nothing a cook can use.
@@ -262,6 +272,38 @@ export function SignUpPage() {
         <form onSubmit={onDietarySubmit} className="stack">
           {profileStep === 'food' ? (
             <>
+
+          {askConsentHere && (
+            <fieldset className="ask">
+              <legend>{t('auth.consentFirst')}</legend>
+              <label className="row">
+                <input
+                  type="checkbox"
+                  style={{ width: 'auto' }}
+                  checked={acceptedTerms}
+                  onChange={(e) => setAcceptedTerms(e.target.checked)}
+                />
+                <span>
+                  <Trans
+                    i18nKey="auth.acceptTerms"
+                    components={{
+                      terms: <Link to="/legal/terms" target="_blank" />,
+                      privacy: <Link to="/legal/privacy" target="_blank" />,
+                    }}
+                  />
+                </span>
+              </label>
+              <label className="row signup__allergy">
+                <input
+                  type="checkbox"
+                  style={{ width: 'auto' }}
+                  checked={acceptedAllergies}
+                  onChange={(e) => setAcceptedAllergies(e.target.checked)}
+                />
+                <span>{t('auth.acceptAllergies')}</span>
+              </label>
+            </fieldset>
+          )}
 
           {/* Two questions, in pictures. The form they replace asked somebody
               to type their own allergens: whatever spelling came to mind, in
@@ -414,6 +456,9 @@ export function SignUpPage() {
       <Steps n={1} />
       <h1>{t('auth.signUp')}</h1>
       {error && <div className="error">{error}</div>}
+      {/* Google asks no password and confirms the address itself; the
+          consents are asked on the next page instead (askConsentHere). */}
+      <GoogleButton />
       <form onSubmit={onAccountSubmit} className="stack">
         <div>
           <label htmlFor="email">{t('auth.email')}</label>

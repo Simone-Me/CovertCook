@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom'
 import { supabase } from '../../lib/supabase'
 import { useAuth } from '../../lib/auth'
 import { PasswordField } from '../../components/PasswordField'
+import { GoogleButton } from '../../components/GoogleButton'
 
 export function SignInPage() {
   const { t } = useTranslation()
@@ -37,6 +38,7 @@ export function SignInPage() {
       <LanguageSwitch />
       <h1>{t('auth.signIn')}</h1>
       {error && <div className="error">{error}</div>}
+      <GoogleButton />
       <form onSubmit={onSubmit} className="stack">
         <div>
           <label htmlFor="email">{t('auth.email')}</label>

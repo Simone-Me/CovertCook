@@ -80,7 +80,10 @@
       "whatItIs": "Este es tu nombre real, fuera del juego — cómo te reconocen tus amigos y cómo sabe un anfitrión quién pide entrar. Nunca te llaman así en una cena: cada cena te asigna su propio nombre secreto."
     },
     "passwordLabel": "Contraseña",
-    "step": "Paso {{n}} de {{total}}"
+    "step": "Paso {{n}} de {{total}}",
+    "withGoogle": "Continuar con Google",
+    "or": "o con tu correo",
+    "consentFirst": "Antes de tu perfil: dos cosas que aceptar."
   },
   "dietary": {
     "title": "Tus restricciones alimentarias",
