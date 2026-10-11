@@ -629,6 +629,9 @@ export interface RoundInvitation {
   round_name: string
   accent_emoji: string
   invited_day: string
+  /** Null only if that account has since been deleted (0106). */
+  invited_by_name: string | null
+  host_name: string | null
 }
 
 // The round's name comes back with the invitation because an invitee is

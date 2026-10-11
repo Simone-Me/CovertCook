@@ -165,6 +165,15 @@ export function MyRoundsPage() {
                 <strong>
                   {inv.accent_emoji} {inv.round_name}
                 </strong>
+                {/* Who asked, and whose table it is — the two things that
+                    decide a yes. One line when they are the same person. */}
+                {inv.invited_by_name && (
+                  <span>
+                    {inv.host_name && inv.host_name !== inv.invited_by_name
+                      ? t('rounds.invitations.fromAndHost', { from: inv.invited_by_name, host: inv.host_name })
+                      : t('rounds.invitations.from', { from: inv.invited_by_name })}
+                  </span>
+                )}
                 <span className="muted">{inv.invited_day}</span>
                 <div className="row">
                   <button type="button" disabled={busy} onClick={() => onRespond(inv.invitation_id, true)}>

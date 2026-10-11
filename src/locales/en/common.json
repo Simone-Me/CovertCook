@@ -326,7 +326,9 @@
       "notByInvitation": "This dinner is entered with the code. There is no guest list to add to.",
       "alreadyHere": "That chef is already at this table.",
       "closed": "Invitations are closed: sign-ups have ended.",
-      "inviteMaybe": "If that address has an account, the invitation is on its way."
+      "inviteMaybe": "If that address has an account, the invitation is on its way.",
+      "from": "Invited by {{from}}",
+      "fromAndHost": "Invited by {{from}} · {{host}}’s table"
     },
     "pastRounds": "Past dinners ({{count}})",
     "backToTable": "Back to the table",
@@ -682,8 +684,8 @@
     "procedurePlaceholder": "How to make it. However you like.",
     "state": {
       "blank": "○ Not written",
-      "draft": "◐ Draft saved",
-      "sent": "● Sent to your cook"
+      "draft": "✏️ Draft saved",
+      "sent": "✓ Sent to your cook"
     },
     "assignedCourse": "The roulette gave you: {{course}}",
     "freeChoice": "Free choice — any dish you like.",
@@ -744,6 +746,12 @@
       "thisIsIt": "This is the one you are cooking.",
       "cookThisOne": "Cook this one instead",
       "closed": "The dinner has moved on — the dish is settled now."
+    },
+    "autosave": {
+      "pending": "✏️ Saving draft…",
+      "saved": "✏️ Draft saved",
+      "local": "✏️ Draft kept on this phone — it will be sent up when the connection is back",
+      "sent": "✓ Sent to your cook"
     }
   },
   "chat": {

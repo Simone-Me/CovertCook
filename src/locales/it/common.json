@@ -326,7 +326,9 @@
       "notByInvitation": "A questa cena si entra con il codice. Non c'è nessuna lista di invitati da compilare.",
       "alreadyHere": "Quello chef è già a questa tavola.",
       "closed": "Gli inviti sono chiusi: le iscrizioni sono terminate.",
-      "inviteMaybe": "Se quell'indirizzo ha un account, l'invito è in arrivo."
+      "inviteMaybe": "Se quell'indirizzo ha un account, l'invito è in arrivo.",
+      "from": "Invito da {{from}}",
+      "fromAndHost": "Invito da {{from}} · tavola di {{host}}"
     },
     "pastRounds": "Cene passate ({{count}})",
     "backToTable": "Torna alla tavola",
@@ -683,8 +685,8 @@
     "procedurePlaceholder": "Come si prepara. Come preferisci.",
     "state": {
       "blank": "○ Non scritta",
-      "draft": "◐ Bozza salvata",
-      "sent": "● Inviata al tuo cuoco"
+      "draft": "✏️ Bozza salvata",
+      "sent": "✓ Inviata al tuo cuoco"
     },
     "assignedCourse": "La roulette ti ha dato: {{course}}",
     "freeChoice": "Scelta libera — qualsiasi piatto ti piaccia.",
@@ -745,6 +747,12 @@
       "thisIsIt": "È quella che stai cucinando.",
       "cookThisOne": "Cucina invece questa",
       "closed": "La cena è andata avanti — il piatto ormai è deciso."
+    },
+    "autosave": {
+      "pending": "✏️ Salvataggio bozza…",
+      "saved": "✏️ Bozza salvata",
+      "local": "✏️ Bozza tenuta su questo telefono — verrà inviata appena torna la connessione",
+      "sent": "✓ Inviata al tuo cuoco"
     }
   },
   "chat": {

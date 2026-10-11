@@ -53,7 +53,9 @@ export interface RoundSetup {
 /** The dinner this app is about, with nothing decided: a covered table, one
  *  recipe each, a code to share, and a vote at the end. */
 export const DEFAULT_SETUP: RoundSetup = {
-  access: 'CODE',
+  // Both doors open by default: the code for the group chat, invitations for
+  // the friend who is not in it. Either can still be shut in the setup.
+  access: 'CODE_AND_INVITE',
   anonymity: 'ANONYMOUS',
   requiresApproval: true,
   // No cap unless the host sets one in the long form: a proposed dinner

@@ -326,7 +326,9 @@
       "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
       "alreadyHere": "Ce chef est déjà à cette table.",
       "closed": "Les invitations sont fermées : les inscriptions sont closes.",
-      "inviteMaybe": "Si cette adresse a un compte, l'invitation est en route."
+      "inviteMaybe": "Si cette adresse a un compte, l'invitation est en route.",
+      "from": "Invité·e par {{from}}",
+      "fromAndHost": "Invité·e par {{from}} · table de {{host}}"
     },
     "pastRounds": "Dîners passés ({{count}})",
     "backToTable": "Retour à la table",
@@ -682,8 +684,8 @@
     "procedurePlaceholder": "La façon de faire. Comme vous voulez.",
     "state": {
       "blank": "○ Pas écrite",
-      "draft": "◐ Brouillon enregistré",
-      "sent": "● Envoyée à votre cuisinier"
+      "draft": "✏️ Brouillon enregistré",
+      "sent": "✓ Envoyée à votre cuisinier"
     },
     "assignedCourse": "La roulette vous a donné : {{course}}",
     "freeChoice": "Choix libre — le plat que vous voulez.",
@@ -744,6 +746,12 @@
       "thisIsIt": "C’est celle que vous cuisinez.",
       "cookThisOne": "Cuisiner celle-ci à la place",
       "closed": "Le dîner a avancé — le plat est fixé."
+    },
+    "autosave": {
+      "pending": "✏️ Enregistrement du brouillon…",
+      "saved": "✏️ Brouillon enregistré",
+      "local": "✏️ Brouillon gardé sur ce téléphone — il sera envoyé dès que la connexion revient",
+      "sent": "✓ Envoyée à votre cuisinier"
     }
   },
   "chat": {

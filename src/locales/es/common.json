@@ -326,7 +326,9 @@
       "notByInvitation": "A esta cena se entra con el código. No hay lista de invitados que rellenar.",
       "alreadyHere": "Ese chef ya está en esta mesa.",
       "closed": "Las invitaciones están cerradas: las inscripciones han terminado.",
-      "inviteMaybe": "Si esa dirección tiene una cuenta, la invitación está en camino."
+      "inviteMaybe": "Si esa dirección tiene una cuenta, la invitación está en camino.",
+      "from": "Te invita {{from}}",
+      "fromAndHost": "Te invita {{from}} · mesa de {{host}}"
     },
     "pastRounds": "Cenas pasadas ({{count}})",
     "backToTable": "Volver a la mesa",
@@ -683,8 +685,8 @@
     "procedurePlaceholder": "Cómo se prepara. Como prefieras.",
     "state": {
       "blank": "○ Sin escribir",
-      "draft": "◐ Borrador guardado",
-      "sent": "● Enviada a tu cocinero"
+      "draft": "✏️ Borrador guardado",
+      "sent": "✓ Enviada a tu cocinero"
     },
     "assignedCourse": "La ruleta te ha dado: {{course}}",
     "freeChoice": "Elección libre — cualquier plato que te guste.",
@@ -745,6 +747,12 @@
       "thisIsIt": "Es la que estás cocinando.",
       "cookThisOne": "Cocina esta en su lugar",
       "closed": "La cena ha avanzado — el plato ya está decidido."
+    },
+    "autosave": {
+      "pending": "✏️ Guardando borrador…",
+      "saved": "✏️ Borrador guardado",
+      "local": "✏️ Borrador guardado en este teléfono — se enviará cuando vuelva la conexión",
+      "sent": "✓ Enviada a tu cocinero"
     }
   },
   "chat": {

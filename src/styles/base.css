@@ -1177,3 +1177,14 @@ button.tone-diet.secondary {
   text-align: center;
   margin: 0;
 }
+
+/* The recipe editor's autosave line: pencil while a draft, tick once sent. */
+.autosave {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.autosave.is-sent {
+  color: var(--ok);
+  font-weight: 600;
+}

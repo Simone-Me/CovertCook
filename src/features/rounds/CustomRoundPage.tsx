@@ -46,7 +46,7 @@ const VOTING_ORDER: VotingMode[] = ['MANUAL', 'LIVE', 'TIMED', 'DISABLED']
 // Cheapest commitment first in both: a code you can hand to anyone, then a
 // guest list, then both. Undercover is the game as designed, and the two that
 // give identity away follow it.
-const ACCESS_ORDER: RoundAccess[] = ['CODE', 'INVITE', 'CODE_AND_INVITE']
+const ACCESS_ORDER: RoundAccess[] = ['CODE_AND_INVITE', 'CODE', 'INVITE']
 const ANONYMITY_ORDER: RoundAnonymity[] = ['ANONYMOUS', 'SPY', 'OPEN']
 
 // One is the game. Two and three are the same game with room to be kind to

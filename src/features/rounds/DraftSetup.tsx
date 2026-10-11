@@ -12,7 +12,7 @@ import { ChoiceList } from '../../components/ChoiceList'
 import { HostAction } from './HostAction'
 import { DoorRules } from './DoorRules'
 
-const ACCESS_ORDER: RoundAccess[] = ['CODE', 'INVITE', 'CODE_AND_INVITE']
+const ACCESS_ORDER: RoundAccess[] = ['CODE_AND_INVITE', 'CODE', 'INVITE']
 const ANONYMITY_ORDER: RoundAnonymity[] = ['ANONYMOUS', 'SPY', 'OPEN']
 const RECIPE_COUNTS = [1, 2, 3]
 
