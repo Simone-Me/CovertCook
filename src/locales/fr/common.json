@@ -76,7 +76,7 @@
       "reserved": "Ce nom ressemble à CovertCook ou à son équipe. Choisissez-en un autre.",
       "offensive": "Ce nom n’est pas autorisé. Choisissez-en un autre.",
       "rule": "Les noms sont en minuscules ; les espaces deviennent « - ».",
-      "changeLater": "Le changer plus tard est prévu dans la version Crème.",
+      "changeLater": "Pouvoir le changer plus tard est prévu.",
       "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
     },
     "passwordLabel": "Mot de passe",
@@ -1615,15 +1615,15 @@
     "free": "Gratuit",
     "notYet": "Pas encore à vous — rien ne s'achète dans l'application pour l'instant, alors celui-ci attend.",
     "locked": "Ce thème n'est pas débloqué sur ce compte.",
-    "paused": "De retour à l’atelier. Elle est en train d’être redessinée : personne ne peut encore dresser une table avec — même avec Crème. Elle reviendra sur cette étagère une fois finie.",
+    "paused": "De retour à l’atelier. Elle est en train d’être redessinée : personne ne peut encore dresser une table avec. Elle reviendra sur cette étagère une fois finie.",
     "pausedTag": "À l’atelier"
   },
   "filRouge": {
     "freeKind": "Gratuit, en entier, pour toujours — ce type n’est jamais Crème.",
     "week": {
       "title": "La sélection de la semaine",
-      "hint": "Un thème de chaque type, choisi à la main — gratuit pour tout le monde jusqu’à dimanche, avec ou sans Crème. La raison de chacun est écrite dessous.",
-      "hintPerCook": "Un thème de chaque type, choisi à la main et gratuit jusqu’à dimanche. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
+      "hint": "Un thème de chaque type, choisi à la main cette semaine. La raison de chacun est écrite dessous.",
+      "hintPerCook": "Un thème de chaque type, choisi à la main cette semaine. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
       "take": "Prendre celui-là",
       "taken": "Pris — c’est le thème du dîner"
     },
@@ -1790,8 +1790,8 @@
       {
         "q": "Est-ce que c'est payant ?",
         "a": [
-          "Non. Dîners illimités, autant de convives que vous voulez, et tout ce qui change la façon de jouer est gratuit et le restera.",
-          "Crème est la partie payante et ne vend que l'allure d'une soirée : nappes, listes de pseudonymes, soirées à thème, plus d'une recette par brief. Rien là-dedans ne donne à quelqu'un une meilleure partie qu'à son voisin. C'est un seul prix pour tout, 5 € par an, et un dîner porte le Crème de son organisateur — une table n'est donc jamais coupée en deux. Rien n'est encore réellement achetable."
+          "Non. Dîners illimités, autant de convives que vous voulez, tous les thèmes et toutes les options — tout est gratuit, pour tout le monde.",
+          "Si vous voulez aider à ce que cela dure, une page « Offrez-nous un café » se trouve dans votre profil. Une contribution est un don : elle ne débloque rien, puisque tout est déjà ouvert."
         ]
       },
       {

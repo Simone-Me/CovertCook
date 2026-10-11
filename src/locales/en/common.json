@@ -76,7 +76,7 @@
       "reserved": "That name looks like CovertCook or its team. Pick another.",
       "offensive": "That name is not allowed. Pick another.",
       "rule": "Names are lowercase; spaces become “-”.",
-      "changeLater": "Changing it later is planned as part of Crème.",
+      "changeLater": "Changing it later is planned.",
       "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
     },
     "passwordLabel": "Password",
@@ -1615,15 +1615,15 @@
     "free": "Free",
     "notYet": "Not yours yet — nothing can be bought in the app at the moment, so this one is waiting.",
     "locked": "That theme is not unlocked on this account.",
-    "paused": "Back in the workshop. It is being redrawn, so nobody can lay a table with it yet — not even with Crème. It will come back on this shelf when it is finished.",
+    "paused": "Back in the workshop. It is being redrawn, so nobody can lay a table with it yet. It will come back on this shelf when it is finished.",
     "pausedTag": "In the workshop"
   },
   "filRouge": {
     "freeKind": "Free, all of it, for ever — this kind is never Crème.",
     "week": {
       "title": "This week's selection",
-      "hint": "One theme of every kind, chosen by hand — free for everybody until Sunday, whether or not you have Crème. The reason for each is written under it.",
-      "hintPerCook": "One theme of every kind, chosen by hand and free until Sunday. They are a single value each, so a table takes one between them — they are not dealt one per cook.",
+      "hint": "One theme of every kind, chosen by hand this week. The reason for each is written under it.",
+      "hintPerCook": "One theme of every kind, chosen by hand this week. They are a single value each, so a table takes one between them — they are not dealt one per cook.",
       "take": "Take this one",
       "taken": "Taken — this is the dinner's theme"
     },
@@ -1790,8 +1790,8 @@
       {
         "q": "Does it cost anything?",
         "a": [
-          "No. Unlimited dinners, any number of guests, and every feature that changes how the game is played is free and stays free.",
-          "Crème is the paid side and it sells only how an evening looks and feels — tablecloths, pseudonym sets, themed evenings, more than one recipe per brief. Nothing in it makes anybody's game better than their neighbour's. It is one price for everything, €5 for a year, and a dinner carries its host's Crème, so a table is never split into paying and non-paying guests. Nothing can actually be bought yet."
+          "No. Unlimited dinners, any number of guests, every theme and every option — all of it is free, for everybody.",
+          "If you would like to help keep it that way, there is a “Buy us a coffee” page in your profile. A contribution is a gift: it unlocks nothing, because everything is already open."
         ]
       },
       {

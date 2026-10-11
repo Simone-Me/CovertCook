@@ -76,7 +76,7 @@
       "reserved": "Quel nome somiglia a CovertCook o al suo team. Scegline un altro.",
       "offensive": "Quel nome non è ammesso. Scegline un altro.",
       "rule": "I nomi sono in minuscolo; gli spazi diventano «-».",
-      "changeLater": "Poterlo cambiare in seguito è previsto con Crème.",
+      "changeLater": "Poterlo cambiare in seguito è previsto.",
       "whatItIs": "Questo è il tuo vero nome, fuori dal gioco — come ti riconoscono gli amici e come un capo sa chi chiede di entrare. Non ti chiamano mai così a una cena: ogni cena ti assegna un nome segreto tutto suo."
     },
     "passwordLabel": "Password",
@@ -1413,15 +1413,15 @@
     "free": "Gratis",
     "notYet": "Non ancora tuo — al momento non si può comprare nulla nell'app, quindi questo resta in attesa.",
     "locked": "Quel tema non è sbloccato su questo account.",
-    "paused": "Tornata in laboratorio. Viene ridisegnata, quindi per ora nessuno può apparecchiare con essa — nemmeno con Crème. Tornerà su questo scaffale quando sarà finita.",
+    "paused": "Tornata in laboratorio. Viene ridisegnata, quindi per ora nessuno può apparecchiare con essa. Tornerà su questo scaffale quando sarà finita.",
     "pausedTag": "In laboratorio"
   },
   "filRouge": {
     "freeKind": "Gratis, tutto, per sempre — questo tipo non è mai Crème.",
     "week": {
       "title": "La selezione di questa settimana",
-      "hint": "Un tema per ogni tipo, scelto a mano — gratis per tutti fino a domenica, che tu abbia Crème o no. Il motivo di ciascuno è scritto sotto.",
-      "hintPerCook": "Un tema per ogni tipo, scelto a mano e gratis fino a domenica. Sono un unico valore ciascuno, quindi una tavola ne prende uno tra loro — non vengono distribuiti uno per cuoco.",
+      "hint": "Un tema per ogni tipo, scelto a mano questa settimana. Il motivo di ciascuno è scritto sotto.",
+      "hintPerCook": "Un tema per ogni tipo, scelto a mano questa settimana. Sono un unico valore ciascuno, quindi una tavola ne prende uno tra loro — non vengono distribuiti uno per cuoco.",
       "take": "Prendi questo",
       "taken": "Scelto — è il tema della cena"
     },
@@ -1588,8 +1588,8 @@
       {
         "q": "Costa qualcosa?",
         "a": [
-          "No. Cene illimitate, qualsiasi numero di ospiti, e ogni funzione che cambia il modo di giocare è gratis e resta gratis.",
-          "Crème è il lato a pagamento e vende solo l'aspetto e il feeling di una serata — tovaglie, set di pseudonimi, serate a tema, più di una ricetta per scheda. Nulla in esso rende il gioco di qualcuno migliore di quello del vicino. È un unico prezzo per tutto, 5 € l'anno, e una cena porta con sé il Crème del suo capo, quindi una tavola non viene mai divisa tra ospiti paganti e non paganti. Per ora non si può ancora comprare nulla."
+          "No. Cene illimitate, qualsiasi numero di ospiti, ogni tema e ogni opzione — tutto è gratis, per tutti.",
+          "Se vuoi aiutare a mantenerlo così, nel tuo profilo c’è la pagina «Offrici un caffè». Un contributo è un regalo: non sblocca nulla, perché tutto è già aperto."
         ]
       },
       {

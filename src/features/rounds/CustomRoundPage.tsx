@@ -154,7 +154,9 @@ export function CustomRoundPage() {
     queryFn: myProStatus,
     staleTime: 60 * 1000,
   })
-  const isPro = pro?.pro ?? false
+  // Everybody is Crème while it is hidden (0104): nothing on this form is
+  // drawn locked, even before the server has said so.
+  const isPro = !PRO_VISIBLE || (pro?.pro ?? false)
   // Set only while the free-for-all is on. Everything Crème is usable right now
   // and every Crème row still says so, with this date beside it — otherwise the
   // shelf looks like seven free cloths today and a theft in January.

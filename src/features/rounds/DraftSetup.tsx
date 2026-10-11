@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
@@ -40,7 +41,9 @@ export function DraftSetup({ roundId, initial }: { roundId: string; initial: Set
   const sent = useRef(JSON.stringify(initial))
 
   const { data: pro } = useQuery({ queryKey: ['pro', 'status'], queryFn: myProStatus, staleTime: 60 * 1000 })
-  const isPro = pro?.pro ?? false
+  // Everybody is Crème while it is hidden (0104): nothing on this form is
+  // drawn locked, even before the server has said so.
+  const isPro = !PRO_VISIBLE || (pro?.pro ?? false)
 
   useEffect(() => {
     const wanted = JSON.stringify(now)
