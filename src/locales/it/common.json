@@ -307,7 +307,9 @@
       "venueEditable": "Modificabile nelle impostazioni della cena",
       "venueHere": "modificali",
       "tableTheme": "Tema della tavola",
-      "changeableInGame": "modificabile durante la cena"
+      "changeableInGame": "modificabile durante la cena",
+      "changeInPass": "si cambia nel pass",
+      "noExclusionsShort": "nessuna"
     },
     "entryPoints": {
       "writeRecipe": "Scrivi la tua ricetta",
@@ -426,7 +428,8 @@
       "allowed": "Ospiti ammessi",
       "notAllowed": "Tutti cucinano",
       "allowedHint": "Chiunque può venire come ospite: cucina il proprio piatto e non partecipa allo scambio.",
-      "notAllowedHint": "Ogni chef cucina un piatto scelto da qualcun altro. Niente ospiti."
+      "notAllowedHint": "Ogni chef cucina un piatto scelto da qualcun altro. Niente ospiti.",
+      "label": "Ospiti"
     },
     "pass": {
       "title": "Il pass",

@@ -307,7 +307,9 @@
       "venueEditable": "Editable in the dinner settings",
       "venueHere": "change them",
       "tableTheme": "Table theme",
-      "changeableInGame": "changeable during the dinner"
+      "changeableInGame": "changeable during the dinner",
+      "changeInPass": "change it in the pass",
+      "noExclusionsShort": "none"
     },
     "entryPoints": {
       "writeRecipe": "Write your recipe",
@@ -426,7 +428,8 @@
       "allowed": "Guests allowed",
       "notAllowed": "Everybody cooks",
       "allowedHint": "Anyone may come as a guest: they cook their own dish and take no part in the swap.",
-      "notAllowedHint": "Every chef cooks a dish chosen by someone else. No guests."
+      "notAllowedHint": "Every chef cooks a dish chosen by someone else. No guests.",
+      "label": "Guests"
     },
     "pass": {
       "title": "The pass",

@@ -12,6 +12,8 @@ import { fromCents, getChain, roundDeletesAt, setMyGuest } from '../../lib/rpc'
 import { tableThemeClass } from '../../lib/themes'
 import { Envelope } from './Envelope'
 import { SharedMenu } from './SharedMenu'
+import { ExclusionsPanel } from './ExclusionsPanel'
+import { MenuVisibilityPanel } from './MenuVisibilityPanel'
 import { CutleryLink } from '../../components/CutleryLink'
 import { FilRougeLine } from './FilRougeLine'
 import { CopyButton } from '../../components/CopyButton'
@@ -838,6 +840,16 @@ export function RoundHomePage() {
         {round.status === 'LOCKED' && roundId && (
           <MenuPanel roundId={roundId} slotMode={round.slot_mode} status={round.status} />
         )}
+
+        {/* WHO MUST NOT COOK FOR WHOM, right before the spin: the roulette
+            is the only thing that reads it, so it is set where the roulette
+            is. Settings keep a read-only copy. */}
+        {round.status === 'LOCKED' && roundId && <ExclusionsPanel roundId={roundId} />}
+
+        {/* Who reads the dish names, asked while the recipes are being
+            prepared — from the menu step until the dinner itself. */}
+        {(round.status === 'LOCKED' || round.status === 'ASSIGNED' || round.status === 'BRIEFS_CLOSED') &&
+          roundId && <MenuVisibilityPanel roundId={roundId} value={round.menu_visibility} />}
 
         {/* A hand-counted dinner has no deadline, no progress count and no
             ballots to wait for — it has a person with a phone and a room. So

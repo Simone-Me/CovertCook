@@ -307,7 +307,9 @@
       "venueEditable": "Modifiable dans les paramètres du dîner",
       "venueHere": "les modifier",
       "tableTheme": "Thème de la table",
-      "changeableInGame": "modifiable pendant le dîner"
+      "changeableInGame": "modifiable pendant le dîner",
+      "changeInPass": "à modifier dans le passe",
+      "noExclusionsShort": "aucune"
     },
     "entryPoints": {
       "writeRecipe": "Écrire votre recette",
@@ -426,7 +428,8 @@
       "allowed": "Invités acceptés",
       "notAllowed": "Tout le monde cuisine",
       "allowedHint": "Chacun peut venir en invité : il cuisine son propre plat et ne participe pas à l'échange.",
-      "notAllowedHint": "Chaque chef cuisine un plat choisi par quelqu'un d'autre. Pas d'invités."
+      "notAllowedHint": "Chaque chef cuisine un plat choisi par quelqu'un d'autre. Pas d'invités.",
+      "label": "Invités"
     },
     "pass": {
       "title": "Le pass",
