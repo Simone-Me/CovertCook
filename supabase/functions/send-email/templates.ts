@@ -384,7 +384,7 @@ export function authEmail(action: AuthEmailAction, input: AuthEmailInput) {
                    style="background:${NAPPE};border-radius:10px;">
               <tr>
                 <td align="center" style="padding:8px;">
-                  <img src="${appUrl}/pwa-192x192.png" width="40" height="40" alt="CovertCook"
+                  <img src="${appUrl}/pwa/pwa-192x192.png" width="40" height="40" alt="CovertCook"
                        style="display:block;width:40px;height:40px;border:0;outline:none;
                               color:${LINO};font:700 13px Georgia,serif;">
                 </td>
