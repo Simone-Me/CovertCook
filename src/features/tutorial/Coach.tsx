@@ -10,18 +10,17 @@ import { useTranslation } from 'react-i18next'
  *
  * Three marks and no words: ⊗ in the corner leaves (on every step — a tour
  * you cannot walk out of is a tour people resent), ← walks back one, and →
- * goes on, landing exactly where the press it stands in for would have. The
- * words are still there for screen readers, as labels.
+ * goes on — but only on a step with nothing to press. Where the chef points at
+ * something, pressing it is the way on: the tour is there to be clicked
+ * through, so it offers no skip. Labels stay for screen readers.
  */
 export function Coach({
   say,
   step,
   total,
   canOk,
-  canSkip,
   nudge,
   onOk,
-  onSkip,
   onPrev,
   onExit,
 }: {
@@ -29,10 +28,8 @@ export function Coach({
   step: number
   total: number
   canOk: boolean
-  canSkip: boolean
   nudge: boolean
   onOk: () => void
-  onSkip: () => void
   /** Absent on the first step. The dinner is drawn from the step number, so
    *  going back is exactly the screen as it was. */
   onPrev?: () => void
@@ -70,16 +67,21 @@ export function Coach({
           <span className="coach__count" aria-hidden="true">
             {step}/{total}
           </span>
-          {(canOk || canSkip) && (
+          {/* Only on a step with nothing to press: everywhere else the way on
+              is the thing the chef is pointing at, which is the whole point
+              of the tour — so there is no skipping past it. */}
+          {canOk ? (
             <button
               type="button"
               className="coach__arrow"
-              onClick={canOk ? onOk : onSkip}
-              aria-label={t(canOk ? 'actions.ok' : 'tutorial.skip')}
-              title={t(canOk ? 'actions.ok' : 'tutorial.skip')}
+              onClick={onOk}
+              aria-label={t('actions.ok')}
+              title={t('actions.ok')}
             >
               →
             </button>
+          ) : (
+            <span className="coach__arrow-gap" aria-hidden="true" />
           )}
         </div>
       </div>

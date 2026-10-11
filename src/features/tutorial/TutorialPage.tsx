@@ -117,10 +117,8 @@ export function TutorialPage() {
           step={at + 1}
           total={STEPS.length - 1}
           canOk={!step.target}
-          canSkip={!!step.target}
           nudge={nudge}
           onOk={next}
-          onSkip={next}
           onPrev={at > 0 ? () => setAt((n) => n - 1) : undefined}
           onExit={() => navigate('/')}
         />

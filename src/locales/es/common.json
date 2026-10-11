@@ -500,9 +500,6 @@
     "copyCode": "Copiar el código",
     "copyLink": "Copiar el enlace",
     "rules": {
-      "liveTitle": "Modificable durante la cena",
-      "liveNote": "Elige algo ahora y piénsalo de nuevo después: platos y votación con la flecha ↺ en el pass, el menú en los ajustes de la cena.",
-      "settled": "Todo lo de estos tres queda decidido para toda la cena — por ti, ahora, y por nadie después. Lo que todavía se puede cambiar mientras transcurre está en el recuadro verde del final.",
       "liveMark": "Modificable durante la cena: la flecha ↺ en el pass vuelve a este."
     },
     "tableTheme": {
@@ -1778,7 +1775,7 @@
   },
   "legal": {
     "designBy": "Diseño de",
-    "iconsFaviconBy": "Iconos y favicon de",
-    "iconsBy": "Iconos adicionales de"
+    "iconsByJdz": "Iconos de",
+    "faviconBy": "Favicon:"
   }
 }

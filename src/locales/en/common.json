@@ -500,9 +500,6 @@
     "copyCode": "Copy the code",
     "copyLink": "Copy the link",
     "rules": {
-      "liveTitle": "Changeable during the dinner",
-      "liveNote": "Pick something now and think again later: courses and vote with the turning arrow ↺ on the pass, the menu in the dinner's settings.",
-      "settled": "Everything in these three is settled for the whole dinner — by you, now, and by nobody afterwards. What can still be changed while it runs is in the green box at the foot.",
       "liveMark": "Changeable during the dinner: the turning arrow ↺ on the pass comes back to this one."
     },
     "tableTheme": {
@@ -1115,7 +1112,6 @@
     "terms": "Terms",
     "privacy": "Privacy",
     "contact": "Contact",
-    "iconsBy": "Additional icons by",
     "soon": "This page is not written yet. It has to exist before CovertCook takes any money — see ROADMAP.md.",
     "updated": "Last updated",
     "termsDoc": {
@@ -1313,7 +1309,8 @@
     },
     "help": "Help & contact",
     "designBy": "Design by",
-    "iconsFaviconBy": "Icons and favicon by"
+    "iconsByJdz": "Icons by",
+    "faviconBy": "Favicon:"
   },
   "display": {
     "title": "Display",

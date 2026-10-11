@@ -228,8 +228,6 @@ export function CustomRoundPage() {
           <input id="name" required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
 
-        <p className="muted rules__warn">{t('rounds.rules.settled')}</p>
-
         <section className="rules rules--group">
           <header className="rules__head">
             <h2 className="rules__title">{t('rounds.group.chefs')}</h2>
@@ -473,10 +471,13 @@ export function CustomRoundPage() {
             later?" is the first question somebody has about a setting they are
             unsure of, and a box answers it before they have to read anything.
             The turning arrow ↺ on the pass is what comes back to them. */}
-        <section className="rules rules--live">
+        {/* Courses, the menu and the vote: a group like the other three,
+            named for what it is about. They can still be turned in the pass
+            during the dinner (the ↺ on each says so), which no longer needs a
+            paragraph of its own up here. */}
+        <section className="rules rules--group">
           <header className="rules__head">
-            <h2 className="rules__title">{t('rounds.rules.liveTitle')}</h2>
-            <p className="rules__note">{t('rounds.rules.liveNote')}</p>
+            <h2 className="rules__title">{t('rounds.group.menu')}</h2>
           </header>
 
             <Fold

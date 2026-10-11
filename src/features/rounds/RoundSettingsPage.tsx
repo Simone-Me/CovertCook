@@ -12,7 +12,6 @@ import { useFilRougeLabel } from '../../lib/filRouge'
 import { PhaseMenu } from './PhaseMenu'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
-  accessAdmitsCode,
   advancePhase,
   previousPhaseFor,
   updateRoundDetails,
@@ -178,54 +177,8 @@ export function RoundSettingsPage() {
         onStepBack={onStepBack}
       />
 
-      {/* Mirrors the panel on the round page. Filling the table is a thing
-          a host comes back to, and they don't always come back the same
-          way — so it lives in both places they'd look. */}
-      <Fold title={t('rounds.settings.filling')} defaultOpen={round.status === 'OPEN'}>
-        <div className="card stack">
-        {/* The code is only a way in while join_round will accept it, which is
-            only in OPEN. Showing it at every other phase invited the host to
-            hand out something that would be refused, and then to wonder why.
-            What replaces it is the actual route: reopen sign-ups first. */}
-        {/* An invitation-only dinner has no code to hand out — join_round
-            refuses it outright since 0071 — so printing one here would be
-            offering the host something the server will reject, and then
-            leaving them to wonder why their friend could not get in. */}
-        {!accessAdmitsCode(round.access) ? (
-          <p className="muted">{t('rounds.access.INVITEHint')}</p>
-        ) : round.status !== 'OPEN' ? (
-          <div className="howto">
-            <p className="howto__lead">{t('rounds.lateJoin.short')}</p>
-            <ol className="howto__steps">
-              {(t('rounds.lateJoin.steps', { returnObjects: true }) as string[]).map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-            <p className="howto__note is-good">{t('rounds.lateJoin.keeps')}</p>
-            <p className="howto__note">{t('rounds.lateJoin.pauses')}</p>
-            <p className="howto__note is-warn">{t('rounds.lateJoin.changes')}</p>
-          </div>
-        ) : (
-        <>
-        <label>{t('rounds.shareLink')}</label>
-        <div className="row">
-          <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
-          <button
-            type="button"
-            className="secondary"
-            onClick={() =>
-              navigator.clipboard.writeText(
-                `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`,
-              )
-            }
-          >
-            {t('actions.copy')}
-          </button>
-        </div>
-        </>
-        )}
-        </div>
-      </Fold>
+      {/* Filling the table lives in the pass, where it opens the dinner;
+          a second copy here only made two places to look. */}
 
       {/* What kind of dinner this is, in one place. The choices were made once
           in the creation form and then never shown again, so a host coming

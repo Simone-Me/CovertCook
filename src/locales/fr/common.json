@@ -500,9 +500,6 @@
     "copyCode": "Copier le code",
     "copyLink": "Copier le lien",
     "rules": {
-      "liveTitle": "Modifiable pendant le dîner",
-      "liveNote": "Choisissez maintenant et changez d’avis plus tard : les services et le vote avec la flèche qui tourne ↺ sur la passe, le menu dans les réglages du dîner.",
-      "settled": "Tout ce qui est dans ces trois groupes est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Ce qui peut encore bouger en cours de route est dans l’encadré vert, en bas.",
       "liveMark": "Modifiable pendant le dîner : la flèche qui tourne ↺ sur la passe revient sur celui-ci."
     },
     "tableTheme": {
@@ -1115,7 +1112,6 @@
     "terms": "Conditions",
     "privacy": "Confidentialité",
     "contact": "Contact",
-    "iconsBy": "Icônes complémentaires par",
     "soon": "Cette page n'est pas encore écrite. Elle devra exister avant que CovertCook accepte le moindre paiement — voir ROADMAP.md.",
     "updated": "Dernière mise à jour",
     "termsDoc": {
@@ -1313,7 +1309,8 @@
     },
     "help": "Aide et contact",
     "designBy": "Design par",
-    "iconsFaviconBy": "Icônes et favicon par"
+    "iconsByJdz": "Icônes par",
+    "faviconBy": "Favicon :"
   },
   "display": {
     "title": "Affichage",
