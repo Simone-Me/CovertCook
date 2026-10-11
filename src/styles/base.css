@@ -1188,3 +1188,17 @@ button.tone-diet.secondary {
   color: var(--ok);
   font-weight: 600;
 }
+
+/* "In development": a page or row announced before it is built. */
+.wip-chip {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px dashed var(--text-muted);
+  color: var(--text-muted);
+}

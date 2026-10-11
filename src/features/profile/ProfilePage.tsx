@@ -331,6 +331,15 @@ export function ProfilePage() {
         </span>
       </Link>
 
+      {/* Announced, not built: the page says so on its first line. */}
+      <Link to="/profile/footprint" className="pass__link">
+        <span aria-hidden="true">🌱</span>
+        <span>
+          <strong>{t('footprint.title')}</strong> — {t('footprint.row')}{' '}
+          <span className="wip-chip">{t('footprint.wip')}</span>
+        </span>
+      </Link>
+
       <DisplayPrefs />
 
       {/* The two things you kept come first, and next to each other: these are

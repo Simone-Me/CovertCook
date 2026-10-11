@@ -1751,5 +1751,26 @@
     "cta": "Contribuir",
     "soon": "La página para contribuir llegará pronto. Gracias por pensarlo.",
     "nothingChanges": "Una contribución es un regalo: no desbloquea nada ni cambia nada en la app. Todo el mundo ya lo tiene todo."
+  },
+  "footprint": {
+    "title": "Calcula tu consumo",
+    "row": "el CO₂ y los datos detrás de tus cenas",
+    "wip": "En desarrollo",
+    "lead": "Esta página mostrará lo que pesan tus cenas y tu uso de CovertCook — en CO₂ y en datos — para que puedas verlo, compararlo y reducirlo si quieres.",
+    "planned": [
+      {
+        "title": "En el plato",
+        "body": "Una estimación del CO₂ de los platos cocinados y comidos, a partir de sus ingredientes: carne, lácteos, productos fuera de temporada, distancia recorrida — dividida entre los comensales."
+      },
+      {
+        "title": "En la app",
+        "body": "Los datos movidos y guardados: fotos de los álbumes, recetas, mensajes — en megabytes, y la electricidad y el CO₂ que cuesta guardarlos y enviarlos."
+      },
+      {
+        "title": "En el tiempo",
+        "body": "Cena a cena y mes a mes, con referencias (un trayecto en coche, una película en streaming) para que las cifras signifiquen algo."
+      }
+    ],
+    "honest": "Aún no se calcula nada: en lugar de mostrar cifras inventadas, esta página espera a que sean reales."
   }
 }
