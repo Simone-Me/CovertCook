@@ -6,13 +6,17 @@
 https://covertcook.netlify.app/*  https://covertcook.fr/:splat  301!
 https://www.covertcook.fr/*       https://covertcook.fr/:splat  301!
 
-/*    /index.html   200
-
 # Icons moved into folders (public/ reorganised). Old URLs live on in emails
 # already sent, in the Play listing and in installed PWAs' cached manifests.
+# Above the SPA fallback: Netlify takes the first rule that matches, and these
+# files no longer exist, so below it they were answered with index.html — an
+# HTML page where a mail client expected the logo, i.e. a broken image.
 /pwa-192x192.png          /pwa/pwa-192x192.png          301
 /pwa-512x512.png          /pwa/pwa-512x512.png          301
 /pwa-maskable-512x512.png /pwa/pwa-512x512.png 301
 /favicon-32.png           /favicons/favicon-32.png      301
 /favicon-192.png          /favicons/favicon-192.png     301
 /apple-touch-icon.png     /favicons/apple-touch-icon.png 301
+
+# Everything else is a client-side route. Last, so it never shadows a rule above.
+/*    /index.html   200
