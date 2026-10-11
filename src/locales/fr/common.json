@@ -76,7 +76,7 @@
       "reserved": "Ce nom ressemble à CovertCook ou à son équipe. Choisissez-en un autre.",
       "offensive": "Ce nom n’est pas autorisé. Choisissez-en un autre.",
       "rule": "Les noms sont en minuscules ; les espaces deviennent « - ».",
-      "changeLater": "Le changer plus tard est prévu dans la version Crème.",
+      "changeLater": "Pouvoir le changer plus tard est prévu.",
       "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
     },
     "passwordLabel": "Mot de passe",
@@ -307,7 +307,9 @@
       "venueEditable": "Modifiable dans les paramètres du dîner",
       "venueHere": "les modifier",
       "tableTheme": "Thème de la table",
-      "changeableInGame": "modifiable pendant le dîner"
+      "changeableInGame": "modifiable pendant le dîner",
+      "changeInPass": "à modifier dans le passe",
+      "noExclusionsShort": "aucune"
     },
     "entryPoints": {
       "writeRecipe": "Écrire votre recette",
@@ -326,7 +328,9 @@
       "notByInvitation": "On entre dans ce dîner avec le code. Il n'y a pas de liste d'invités.",
       "alreadyHere": "Ce chef est déjà à cette table.",
       "closed": "Les invitations sont fermées : les inscriptions sont closes.",
-      "inviteMaybe": "Si cette adresse a un compte, l'invitation est en route."
+      "inviteMaybe": "Si cette adresse a un compte, l'invitation est en route.",
+      "from": "Invité·e par {{from}}",
+      "fromAndHost": "Invité·e par {{from}} · table de {{host}}"
     },
     "pastRounds": "Dîners passés ({{count}})",
     "backToTable": "Retour à la table",
@@ -424,7 +428,8 @@
       "allowed": "Invités acceptés",
       "notAllowed": "Tout le monde cuisine",
       "allowedHint": "Chacun peut venir en invité : il cuisine son propre plat et ne participe pas à l'échange.",
-      "notAllowedHint": "Chaque chef cuisine un plat choisi par quelqu'un d'autre. Pas d'invités."
+      "notAllowedHint": "Chaque chef cuisine un plat choisi par quelqu'un d'autre. Pas d'invités.",
+      "label": "Invités"
     },
     "pass": {
       "title": "Le pass",
@@ -495,9 +500,6 @@
     "copyCode": "Copier le code",
     "copyLink": "Copier le lien",
     "rules": {
-      "liveTitle": "Modifiable pendant le dîner",
-      "liveNote": "Choisissez maintenant et changez d’avis plus tard : les services et le vote avec la flèche qui tourne ↺ sur la passe, le menu dans les réglages du dîner.",
-      "settled": "Tout ce qui est dans ces trois groupes est fixé pour tout le dîner — par vous, maintenant, et par personne ensuite. Ce qui peut encore bouger en cours de route est dans l’encadré vert, en bas.",
       "liveMark": "Modifiable pendant le dîner : la flèche qui tourne ↺ sur la passe revient sur celui-ci."
     },
     "tableTheme": {
@@ -682,8 +684,8 @@
     "procedurePlaceholder": "La façon de faire. Comme vous voulez.",
     "state": {
       "blank": "○ Pas écrite",
-      "draft": "◐ Brouillon enregistré",
-      "sent": "● Envoyée à votre cuisinier"
+      "draft": "✏️ Brouillon enregistré",
+      "sent": "✓ Envoyée à votre cuisinier"
     },
     "assignedCourse": "La roulette vous a donné : {{course}}",
     "freeChoice": "Choix libre — le plat que vous voulez.",
@@ -744,6 +746,12 @@
       "thisIsIt": "C’est celle que vous cuisinez.",
       "cookThisOne": "Cuisiner celle-ci à la place",
       "closed": "Le dîner a avancé — le plat est fixé."
+    },
+    "autosave": {
+      "pending": "✏️ Enregistrement du brouillon…",
+      "saved": "✏️ Brouillon enregistré",
+      "local": "✏️ Brouillon gardé sur ce téléphone — il sera envoyé dès que la connexion revient",
+      "sent": "✓ Envoyée à votre cuisinier"
     }
   },
   "chat": {
@@ -1104,18 +1112,16 @@
     "terms": "Conditions",
     "privacy": "Confidentialité",
     "contact": "Contact",
-    "iconsBy": "Icônes par",
     "soon": "Cette page n'est pas encore écrite. Elle devra exister avant que CovertCook accepte le moindre paiement — voir ROADMAP.md.",
-    "company": "Société",
     "updated": "Dernière mise à jour",
     "termsDoc": {
       "title": "Conditions d'utilisation",
-      "updated": "2026-09-14",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Avec qui vous vous engagez",
           "body": [
-            "CovertCook est exploité par Opus35 (opus35.fr). Écrire à contact@opus35.fr permet de joindre une personne.",
+            "CovertCook est édité par Simone Melotti, à titre personnel — aucune société n'est derrière. Écrire à contact@covertcook.fr permet de joindre cette personne.",
             "Utiliser l'application vaut acceptation de ce qui est écrit ici. Si vous ne l'acceptez pas, ne l'utilisez pas — il n'existe pas de version où vous seriez engagé par un texte que vous n'avez jamais vu."
           ]
         },
@@ -1150,10 +1156,10 @@
           ]
         },
         {
-          "heading": "Gratuit, et payant",
+          "heading": "Gratuit, avec un pourboire",
           "body": [
-            "Toute la partie jeu est gratuite et le reste : dîners illimités, autant d'invités que vous voulez, toutes les fonctions qui changent la façon de jouer.",
-            "Une offre payante est prévue pour l'apparence seulement — nappes, soirées à thème. Rien n'est en vente aujourd'hui. Le moment venu, la TVA européenne et le droit de rétractation s'appliqueront, et ces conditions diront exactement comment avant le moindre paiement."
+            "Tout CovertCook est gratuit, pour tout le monde : dîners illimités, autant d'invités que voulu, tous les thèmes et toutes les fonctions.",
+            "Vous pouvez laisser une petite contribution volontaire pour qu'il le reste. C'est un don : il n'achète rien, ne débloque rien, et rien ne change dans l'application que vous donniez ou non. Il est traité par le service de paiement vers lequel vous êtes envoyé, selon ses propres conditions."
           ]
         },
         {
@@ -1174,12 +1180,12 @@
     },
     "privacyDoc": {
       "title": "Confidentialité",
-      "updated": "2026-09-14",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Qui détient vos données",
           "body": [
-            "Opus35 (opus35.fr) est le responsable de traitement. contact@opus35.fr permet de joindre une personne, et les questions sur vos données y trouvent réponse."
+            "CovertCook est édité par Simone Melotti, à titre personnel et non par une société ; Simone Melotti est le responsable de traitement pour tout ce que décrit cette page. contact@covertcook.fr permet de joindre une personne, et les questions sur vos données y trouvent réponse."
           ]
         },
         {
@@ -1240,7 +1246,7 @@
           "heading": "Ce que vous pouvez demander",
           "body": [
             "L'accès à ce que nous détenons, la rectification, l'effacement, une copie portable, et le droit de vous opposer au traitement ou de retirer votre consentement. Pour les données alimentaires, retirer son consentement revient à les supprimer, ce que vous pouvez faire vous-même.",
-            "Écrivez à contact@opus35.fr. Si la réponse ne vous satisfait pas, vous pouvez saisir la CNIL ou l'autorité de protection des données de votre pays."
+            "Écrivez à contact@covertcook.fr. Si la réponse ne vous satisfait pas, vous pouvez saisir la CNIL ou l'autorité de protection des données de votre pays."
           ]
         },
         {
@@ -1251,12 +1257,11 @@
         }
       ]
     },
-    "draftNote": "Un brouillon, écrit à partir de ce que fait réellement l'application. Il n'a pas été relu par un juriste, et il devra l'être avant que CovertCook facture quoi que ce soit — le panneau diététique contient des données de santé, et toute vente entraîne TVA européenne et droit de rétractation.",
     "by": "par",
     "moderation": "Modération",
     "moderationDoc": {
       "title": "Modération",
-      "updated": "2026-08-27",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Ce que ce texte couvre",
@@ -1296,13 +1301,15 @@
         {
           "heading": "Contester, et nous joindre",
           "body": [
-            "Un avertissement ou un retrait est la décision d’un hôte sur une soirée. Si vous la jugez injuste, écrivez à contact@opus35.fr en précisant le dîner ; le journal enregistre chaque acte de modération, y compris ceux où nous nous sommes trompés.",
+            "Un avertissement ou un retrait est la décision d’un hôte sur une soirée. Si vous la jugez injuste, écrivez à contact@covertcook.fr en précisant le dîner ; le journal enregistre chaque acte de modération, y compris ceux où nous nous sommes trompés.",
             "Tout ce qui est urgent — une menace, un mineur en danger, un contenu qui relève de la police plutôt que de nous — va à la même adresse, et est lu par une personne."
           ]
         }
       ]
     },
-    "help": "Aide et contact"
+    "help": "Aide et contact",
+    "designBy": "Design par",
+    "faviconBy": "Favicon :"
   },
   "display": {
     "title": "Affichage",
@@ -1608,15 +1615,15 @@
     "free": "Gratuit",
     "notYet": "Pas encore à vous — rien ne s'achète dans l'application pour l'instant, alors celui-ci attend.",
     "locked": "Ce thème n'est pas débloqué sur ce compte.",
-    "paused": "De retour à l’atelier. Elle est en train d’être redessinée : personne ne peut encore dresser une table avec — même avec Crème. Elle reviendra sur cette étagère une fois finie.",
+    "paused": "De retour à l’atelier. Elle est en train d’être redessinée : personne ne peut encore dresser une table avec. Elle reviendra sur cette étagère une fois finie.",
     "pausedTag": "À l’atelier"
   },
   "filRouge": {
     "freeKind": "Gratuit, en entier, pour toujours — ce type n’est jamais Crème.",
     "week": {
       "title": "La sélection de la semaine",
-      "hint": "Un thème de chaque type, choisi à la main — gratuit pour tout le monde jusqu’à dimanche, avec ou sans Crème. La raison de chacun est écrite dessous.",
-      "hintPerCook": "Un thème de chaque type, choisi à la main et gratuit jusqu’à dimanche. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
+      "hint": "Un thème de chaque type, choisi à la main cette semaine. La raison de chacun est écrite dessous.",
+      "hintPerCook": "Un thème de chaque type, choisi à la main cette semaine. C’est une seule valeur chacun : une table en prend un, ils ne se distribuent pas par cuisinier.",
       "take": "Prendre celui-là",
       "taken": "Pris — c’est le thème du dîner"
     },
@@ -1783,8 +1790,8 @@
       {
         "q": "Est-ce que c'est payant ?",
         "a": [
-          "Non. Dîners illimités, autant de convives que vous voulez, et tout ce qui change la façon de jouer est gratuit et le restera.",
-          "Crème est la partie payante et ne vend que l'allure d'une soirée : nappes, listes de pseudonymes, soirées à thème, plus d'une recette par brief. Rien là-dedans ne donne à quelqu'un une meilleure partie qu'à son voisin. C'est un seul prix pour tout, 5 € par an, et un dîner porte le Crème de son organisateur — une table n'est donc jamais coupée en deux. Rien n'est encore réellement achetable."
+          "Non. Dîners illimités, autant de convives que vous voulez, tous les thèmes et toutes les options — tout est gratuit, pour tout le monde.",
+          "Si vous voulez aider à ce que cela dure, une page « Offrez-nous un café » se trouve dans votre profil. Une contribution est un don : elle ne débloque rien, puisque tout est déjà ouvert."
         ]
       },
       {
@@ -1934,5 +1941,44 @@
     "points_other": "{{count}} pts",
     "finish": "Terminer la visite",
     "previous": "← Étape précédente"
-  }
+  },
+  "support": {
+    "row": "Offrez-nous un café",
+    "rowHint": "pour que CovertCook reste gratuit pour tous",
+    "title": "Garder CovertCook gratuit",
+    "body": [
+      "CovertCook est gratuit pour tout le monde, avec tous les thèmes et toutes les options ouverts. Pas de pub, pas de version payante, aucune donnée vendue.",
+      "Il est fait et tenu par une seule personne sur son temps libre, et les serveurs, le domaine et les e-mails coûtent un peu chaque mois. Si une soirée à votre table en valait la peine, une petite contribution — le prix d'un café — aide à le garder gratuit pour la table suivante."
+    ],
+    "cta": "Contribuer",
+    "soon": "La page de contribution arrive bientôt. Merci d'y avoir pensé.",
+    "nothingChanges": "Une contribution est un don : elle ne débloque rien et ne change rien dans l'application. Tout le monde a déjà tout."
+  },
+  "footprint": {
+    "title": "Calculez votre consommation"
+  },
+  "admin": {
+    "open": "Admin : sélection de la semaine",
+    "week": {
+      "title": "Sélection de la semaine",
+      "lead": "Chaque dimanche la sélection change. Une ligne AUTO a été remplie par le tirage de la semaine ; choisissez une valeur (et une note si vous voulez) et enregistrez pour l'écrire vous-même.",
+      "allWritten": "Les {{count}} semaines affichées sont toutes écrites.",
+      "missingTotal_one": "{{count}} ligne est encore automatique sur les {{weeks}} prochaines semaines.",
+      "missingTotal_other": "{{count}} lignes sont encore automatiques sur les {{weeks}} prochaines semaines.",
+      "more": "Afficher 4 semaines de plus",
+      "thisWeek": "Cette semaine — {{date}}",
+      "weekOf": "Semaine du {{date}}",
+      "complete": "complète",
+      "missing_one": "{{count}} à écrire",
+      "missing_other": "{{count}} à écrire",
+      "written": "Écrite",
+      "auto": "Auto",
+      "notes": "Note (pourquoi celle-ci ?)",
+      "noteTitle": "Titre",
+      "noteBody": "Pourquoi celle-ci, cette semaine",
+      "save": "Enregistrer",
+      "backToAuto": "Revenir à l'auto"
+    }
+  },
+  "wip": "En développement"
 }

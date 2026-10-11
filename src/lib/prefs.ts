@@ -40,7 +40,11 @@ export function sizeName(step: number): TextSizeName {
 }
 
 export function getTextStep(): number {
-  const n = Number(read(STEP_KEY))
+  // Nothing stored must mean the default. Number(null) is 0 — the smallest
+  // notch — which is how every new device used to start at "small".
+  const raw = read(STEP_KEY)
+  if (raw === null || raw.trim() === '') return DEFAULT_TEXT_STEP
+  const n = Number(raw)
   return Number.isInteger(n) && n >= 0 && n < TEXT_STEPS ? n : DEFAULT_TEXT_STEP
 }
 

@@ -63,14 +63,14 @@ export function HelpPage() {
         </p>
         <p className="muted">
           {t('help.delete.cannotSignIn')}{' '}
-          <a href="mailto:contact@opus35.fr">contact@opus35.fr</a>
+          <a href="mailto:contact@covertcook.fr">contact@covertcook.fr</a>
         </p>
       </section>
 
       <section className="legal__section">
         <h2>{t('help.contact.title')}</h2>
         <p>
-          {t('help.contact.body')} <a href="mailto:contact@opus35.fr">contact@opus35.fr</a>
+          {t('help.contact.body')} <a href="mailto:contact@covertcook.fr">contact@covertcook.fr</a>
         </p>
       </section>
     </div>

@@ -76,7 +76,7 @@
       "reserved": "Quel nome somiglia a CovertCook o al suo team. Scegline un altro.",
       "offensive": "Quel nome non è ammesso. Scegline un altro.",
       "rule": "I nomi sono in minuscolo; gli spazi diventano «-».",
-      "changeLater": "Poterlo cambiare in seguito è previsto con Crème.",
+      "changeLater": "Poterlo cambiare in seguito è previsto.",
       "whatItIs": "Questo è il tuo vero nome, fuori dal gioco — come ti riconoscono gli amici e come un capo sa chi chiede di entrare. Non ti chiamano mai così a una cena: ogni cena ti assegna un nome segreto tutto suo."
     },
     "passwordLabel": "Password",
@@ -307,7 +307,9 @@
       "venueEditable": "Modificabile nelle impostazioni della cena",
       "venueHere": "modificali",
       "tableTheme": "Tema della tavola",
-      "changeableInGame": "modificabile durante la cena"
+      "changeableInGame": "modificabile durante la cena",
+      "changeInPass": "si cambia nel pass",
+      "noExclusionsShort": "nessuna"
     },
     "entryPoints": {
       "writeRecipe": "Scrivi la tua ricetta",
@@ -326,7 +328,9 @@
       "notByInvitation": "A questa cena si entra con il codice. Non c'è nessuna lista di invitati da compilare.",
       "alreadyHere": "Quello chef è già a questa tavola.",
       "closed": "Gli inviti sono chiusi: le iscrizioni sono terminate.",
-      "inviteMaybe": "Se quell'indirizzo ha un account, l'invito è in arrivo."
+      "inviteMaybe": "Se quell'indirizzo ha un account, l'invito è in arrivo.",
+      "from": "Invito da {{from}}",
+      "fromAndHost": "Invito da {{from}} · tavola di {{host}}"
     },
     "pastRounds": "Cene passate ({{count}})",
     "backToTable": "Torna alla tavola",
@@ -424,7 +428,8 @@
       "allowed": "Ospiti ammessi",
       "notAllowed": "Tutti cucinano",
       "allowedHint": "Chiunque può venire come ospite: cucina il proprio piatto e non partecipa allo scambio.",
-      "notAllowedHint": "Ogni chef cucina un piatto scelto da qualcun altro. Niente ospiti."
+      "notAllowedHint": "Ogni chef cucina un piatto scelto da qualcun altro. Niente ospiti.",
+      "label": "Ospiti"
     },
     "pass": {
       "title": "Il pass",
@@ -495,9 +500,6 @@
     "copyCode": "Copia il codice",
     "copyLink": "Copia il link",
     "rules": {
-      "liveTitle": "Modificabile durante la cena",
-      "liveNote": "Scegli qualcosa ora e ripensaci dopo: portate e voto con la freccia ↺ nel pass, il menu nelle impostazioni della cena.",
-      "settled": "Tutto in questi tre è deciso per l'intera cena — da te, ora, e da nessuno dopo. Ciò che si può ancora cambiare mentre si svolge è nel riquadro verde in fondo.",
       "liveMark": "Modificabile durante la cena: la freccia ↺ nel pass ritorna su questo."
     },
     "tableTheme": {
@@ -683,8 +685,8 @@
     "procedurePlaceholder": "Come si prepara. Come preferisci.",
     "state": {
       "blank": "○ Non scritta",
-      "draft": "◐ Bozza salvata",
-      "sent": "● Inviata al tuo cuoco"
+      "draft": "✏️ Bozza salvata",
+      "sent": "✓ Inviata al tuo cuoco"
     },
     "assignedCourse": "La roulette ti ha dato: {{course}}",
     "freeChoice": "Scelta libera — qualsiasi piatto ti piaccia.",
@@ -745,6 +747,12 @@
       "thisIsIt": "È quella che stai cucinando.",
       "cookThisOne": "Cucina invece questa",
       "closed": "La cena è andata avanti — il piatto ormai è deciso."
+    },
+    "autosave": {
+      "pending": "✏️ Salvataggio bozza…",
+      "saved": "✏️ Bozza salvata",
+      "local": "✏️ Bozza tenuta su questo telefono — verrà inviata appena torna la connessione",
+      "sent": "✓ Inviata al tuo cuoco"
     }
   },
   "chat": {
@@ -1405,15 +1413,15 @@
     "free": "Gratis",
     "notYet": "Non ancora tuo — al momento non si può comprare nulla nell'app, quindi questo resta in attesa.",
     "locked": "Quel tema non è sbloccato su questo account.",
-    "paused": "Tornata in laboratorio. Viene ridisegnata, quindi per ora nessuno può apparecchiare con essa — nemmeno con Crème. Tornerà su questo scaffale quando sarà finita.",
+    "paused": "Tornata in laboratorio. Viene ridisegnata, quindi per ora nessuno può apparecchiare con essa. Tornerà su questo scaffale quando sarà finita.",
     "pausedTag": "In laboratorio"
   },
   "filRouge": {
     "freeKind": "Gratis, tutto, per sempre — questo tipo non è mai Crème.",
     "week": {
       "title": "La selezione di questa settimana",
-      "hint": "Un tema per ogni tipo, scelto a mano — gratis per tutti fino a domenica, che tu abbia Crème o no. Il motivo di ciascuno è scritto sotto.",
-      "hintPerCook": "Un tema per ogni tipo, scelto a mano e gratis fino a domenica. Sono un unico valore ciascuno, quindi una tavola ne prende uno tra loro — non vengono distribuiti uno per cuoco.",
+      "hint": "Un tema per ogni tipo, scelto a mano questa settimana. Il motivo di ciascuno è scritto sotto.",
+      "hintPerCook": "Un tema per ogni tipo, scelto a mano questa settimana. Sono un unico valore ciascuno, quindi una tavola ne prende uno tra loro — non vengono distribuiti uno per cuoco.",
       "take": "Prendi questo",
       "taken": "Scelto — è il tema della cena"
     },
@@ -1580,8 +1588,8 @@
       {
         "q": "Costa qualcosa?",
         "a": [
-          "No. Cene illimitate, qualsiasi numero di ospiti, e ogni funzione che cambia il modo di giocare è gratis e resta gratis.",
-          "Crème è il lato a pagamento e vende solo l'aspetto e il feeling di una serata — tovaglie, set di pseudonimi, serate a tema, più di una ricetta per scheda. Nulla in esso rende il gioco di qualcuno migliore di quello del vicino. È un unico prezzo per tutto, 5 € l'anno, e una cena porta con sé il Crème del suo capo, quindi una tavola non viene mai divisa tra ospiti paganti e non paganti. Per ora non si può ancora comprare nulla."
+          "No. Cene illimitate, qualsiasi numero di ospiti, ogni tema e ogni opzione — tutto è gratis, per tutti.",
+          "Se vuoi aiutare a mantenerlo così, nel tuo profilo c’è la pagina «Offrici un caffè». Un contributo è un regalo: non sblocca nulla, perché tutto è già aperto."
         ]
       },
       {
@@ -1731,5 +1739,48 @@
     "points_other": "{{count}} pt",
     "finish": "Concludi il tour",
     "previous": "← Passaggio precedente"
-  }
+  },
+  "support": {
+    "row": "Offrici un caffè",
+    "rowHint": "per tenere CovertCook gratuito per tutti",
+    "title": "Tieni CovertCook gratuito",
+    "body": [
+      "CovertCook è gratuito per tutti, con ogni tema e ogni opzione aperti. Niente pubblicità, niente versione a pagamento, nessun dato venduto.",
+      "È fatto e gestito da una sola persona nel tempo libero, e server, dominio ed email costano un po' ogni mese. Se una serata alla vostra tavola ne è valsa la pena, un piccolo contributo — il prezzo di un caffè — aiuta a tenerlo gratuito per la tavola successiva."
+    ],
+    "cta": "Contribuisci",
+    "soon": "La pagina per contribuire arriva presto. Grazie per averci pensato.",
+    "nothingChanges": "Un contributo è un regalo: non sblocca nulla e non cambia nulla nell'app. Tutti hanno già tutto."
+  },
+  "footprint": {
+    "title": "Calcola il tuo consumo"
+  },
+  "legal": {
+    "designBy": "Design di",
+    "faviconBy": "Favicon:"
+  },
+  "admin": {
+    "open": "Admin: scelta della settimana",
+    "week": {
+      "title": "Scelta della settimana",
+      "lead": "Ogni domenica la selezione cambia. Una riga AUTO è stata riempita dall'estrazione settimanale; scegli un valore (e una nota se vuoi) e salva per scriverla tu.",
+      "allWritten": "Tutte le {{count}} settimane mostrate sono scritte.",
+      "missingTotal_one": "{{count}} riga è ancora automatica nelle prossime {{weeks}} settimane.",
+      "missingTotal_other": "{{count}} righe sono ancora automatiche nelle prossime {{weeks}} settimane.",
+      "more": "Mostra altre 4 settimane",
+      "thisWeek": "Questa settimana — {{date}}",
+      "weekOf": "Settimana di {{date}}",
+      "complete": "completa",
+      "missing_one": "{{count}} da scrivere",
+      "missing_other": "{{count}} da scrivere",
+      "written": "Scritta",
+      "auto": "Auto",
+      "notes": "Nota (perché questa?)",
+      "noteTitle": "Titolo",
+      "noteBody": "Perché questa, questa settimana",
+      "save": "Salva",
+      "backToAuto": "Torna all'auto"
+    }
+  },
+  "wip": "In sviluppo"
 }

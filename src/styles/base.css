@@ -1177,3 +1177,28 @@ button.tone-diet.secondary {
   text-align: center;
   margin: 0;
 }
+
+/* The recipe editor's autosave line: pencil while a draft, tick once sent. */
+.autosave {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+.autosave.is-sent {
+  color: var(--ok);
+  font-weight: 600;
+}
+
+/* "In development": a page or row announced before it is built. */
+.wip-chip {
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 8px;
+  border-radius: 999px;
+  border: 1px dashed var(--text-muted);
+  color: var(--text-muted);
+}

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -45,7 +46,7 @@ const VOTING_ORDER: VotingMode[] = ['MANUAL', 'LIVE', 'TIMED', 'DISABLED']
 // Cheapest commitment first in both: a code you can hand to anyone, then a
 // guest list, then both. Undercover is the game as designed, and the two that
 // give identity away follow it.
-const ACCESS_ORDER: RoundAccess[] = ['CODE', 'INVITE', 'CODE_AND_INVITE']
+const ACCESS_ORDER: RoundAccess[] = ['CODE_AND_INVITE', 'CODE', 'INVITE']
 const ANONYMITY_ORDER: RoundAnonymity[] = ['ANONYMOUS', 'SPY', 'OPEN']
 
 // One is the game. Two and three are the same game with room to be kind to
@@ -153,7 +154,9 @@ export function CustomRoundPage() {
     queryFn: myProStatus,
     staleTime: 60 * 1000,
   })
-  const isPro = pro?.pro ?? false
+  // Everybody is Crème while it is hidden (0104): nothing on this form is
+  // drawn locked, even before the server has said so.
+  const isPro = !PRO_VISIBLE || (pro?.pro ?? false)
   // Set only while the free-for-all is on. Everything Crème is usable right now
   // and every Crème row still says so, with this date beside it — otherwise the
   // shelf looks like seven free cloths today and a theft in January.
@@ -224,8 +227,6 @@ export function CustomRoundPage() {
           <label htmlFor="name">{t('rounds.name')}</label>
           <input id="name" required maxLength={80} value={name} onChange={(e) => setName(e.target.value)} />
         </div>
-
-        <p className="muted rules__warn">{t('rounds.rules.settled')}</p>
 
         <section className="rules rules--group">
           <header className="rules__head">
@@ -386,7 +387,7 @@ export function CustomRoundPage() {
                 // these are usable, and a host who is never told they are
                 // a paid feature finds out by losing them.
                 tag:
-                  n > 1 ? (
+                  PRO_VISIBLE && n > 1 ? (
                     <>
                       <span className="shelf__tag shelf__tag--pro">{t('pro.badge')}</span>
                       {freeUntil && (
@@ -470,10 +471,13 @@ export function CustomRoundPage() {
             later?" is the first question somebody has about a setting they are
             unsure of, and a box answers it before they have to read anything.
             The turning arrow ↺ on the pass is what comes back to them. */}
-        <section className="rules rules--live">
+        {/* Courses, the menu and the vote: a group like the other three,
+            named for what it is about. They can still be turned in the pass
+            during the dinner (the ↺ on each says so), which no longer needs a
+            paragraph of its own up here. */}
+        <section className="rules rules--group">
           <header className="rules__head">
-            <h2 className="rules__title">{t('rounds.rules.liveTitle')}</h2>
-            <p className="rules__note">{t('rounds.rules.liveNote')}</p>
+            <h2 className="rules__title">{t('rounds.group.menu')}</h2>
           </header>
 
             <Fold
@@ -553,14 +557,16 @@ export function CustomRoundPage() {
         {/* What Crème is, in the same shape and the same words the account page
             uses (0075). One line, one chip, and it lights up when you touch
             it — a paragraph in a dashed box was a notice, and this is a door. */}
-        <Link to="/pro" className="pass__link">
-          <span className="pro-chip" aria-hidden="true">{t('pro.badge')}</span>
-          <span>
-            <strong>{t(isPro ? 'pro.status.on' : 'pro.status.off')}</strong>
-            {' — '}
-            {t('pro.seeWhatItOpens')}
-          </span>
-        </Link>
+        {PRO_VISIBLE && (
+          <Link to="/pro" className="pass__link">
+            <span className="pro-chip" aria-hidden="true">{t('pro.badge')}</span>
+            <span>
+              <strong>{t(isPro ? 'pro.status.on' : 'pro.status.off')}</strong>
+              {' — '}
+              {t('pro.seeWhatItOpens')}
+            </span>
+          </Link>
+        )}
 
         {/* KEEPING THIS TABLE. A host who has just spent four minutes deciding
             fifteen things is the one person who knows whether they will want

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { WipChip } from '../../components/WipChip'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router-dom'
@@ -426,7 +427,7 @@ export function Answer({
       onClick={onClick}
     >
       <span className="questions__label">{label}</span>
-      <span className="questions__hint">{hint}</span>
+      {soon ? <WipChip /> : <span className="questions__hint">{hint}</span>}
     </button>
   )
 }

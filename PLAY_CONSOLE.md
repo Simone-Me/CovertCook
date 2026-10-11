@@ -13,7 +13,7 @@ Public addresses used below (Netlify, until a domain exists):
 | Terms | `https://covertcook.fr/legal/terms` |
 | Moderation policy | `https://covertcook.fr/legal/moderation` |
 | Help, including how to delete an account | `https://covertcook.fr/help` |
-| Contact | `contact@opus35.fr` |
+| Contact | `contact@covertcook.fr` |
 
 ---
 
@@ -34,7 +34,7 @@ Public addresses used below (Netlify, until a domain exists):
 
 * **App name:** CovertCook
 * **Category:** Food & Drink  (alternative: Lifestyle)
-* **Contact e-mail:** contact@opus35.fr
+* **Contact e-mail:** contact@covertcook.fr
 * **Graphics needed:** icon 512×512 PNG · feature graphic 1024×500 · 2–8 phone
   screenshots (the manifest already ships some in `public/screenshots/`; Play
   wants real phone captures, 16:9 or 9:16, longest side ≤ 3840 px).

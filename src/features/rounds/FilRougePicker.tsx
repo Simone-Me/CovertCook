@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { Fold } from '../../components/Fold'
@@ -122,7 +123,9 @@ export function FilRougePicker({
     queryFn: myProStatus,
     staleTime: 60 * 1000,
   })
-  const isPro = pro?.pro ?? false
+  // Everybody is Crème while it is hidden (0104): nothing on this form is
+  // drawn locked, even before the server has said so.
+  const isPro = !PRO_VISIBLE || (pro?.pro ?? false)
 
   const { data: next } = useQuery({
     queryKey: ['fil-rouge', 'upcoming'],
@@ -375,7 +378,7 @@ export function FilRougePicker({
                 // A shut kind says so on the closed row, with the chip the
                 // rest of the app uses: the point of showing a locked shelf is
                 // that somebody can see what is on it and what opens it.
-                !openKind(kind) ? (
+                PRO_VISIBLE && !openKind(kind) ? (
                   <span className="pro-chip">{t('pro.badge')}</span>
                 ) : category !== kind ? undefined : rule === 'PER_COOK' ? (
                   t('filRouge.oneEach')
@@ -386,7 +389,7 @@ export function FilRougePicker({
                 )
               }
             >
-              {FREE_KINDS.includes(kind) && (
+              {PRO_VISIBLE && FREE_KINDS.includes(kind) && (
                 <p className="muted filfree">{t('filRouge.freeKind')}</p>
               )}
 

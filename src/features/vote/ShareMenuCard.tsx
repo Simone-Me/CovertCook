@@ -368,7 +368,7 @@ export function ShareMenuCard({
     // Small, and the only thing on the card that is an advert.
     ctx.fillStyle = 'rgba(46, 58, 64, 0.5)'
     ctx.font = '26px Georgia, serif'
-    ctx.fillText('CovertCook · opus35.fr', left, H - pad - 30)
+    ctx.fillText('CovertCook · covertcook.fr', left, H - pad - 30)
 
     // A canvas the photograph tainted cannot be exported at all, which would
     // turn the whole button into a no-op. Answered by drawing again without

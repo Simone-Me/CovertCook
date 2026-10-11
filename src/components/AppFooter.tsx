@@ -12,8 +12,8 @@ const YEAR = new Date().getFullYear()
  * ones that are missing say so: a dead link is worse than an honest gap, and
  * the moment money changes hands (ROADMAP §2) they stop being optional.
  *
- * The second is attribution. The icons are Flaticon's, and their licence asks
- * for credit wherever they appear. That is not a formality to bury — it is the
+ * The second is attribution. The favicon is Flaticon's, and their licence asks
+ * for credit wherever it appears. That is not a formality to bury — it is the
  * condition under which the app is allowed to use them at all, so it is stated
  * in plain words on every screen rather than hidden behind an About page
  * nobody opens.
@@ -34,21 +34,17 @@ export function AppFooter() {
         <Link to="/legal/terms">{t('legal.terms')}</Link>
         <Link to="/legal/privacy">{t('legal.privacy')}</Link>
         <Link to="/legal/moderation">{t('legal.moderation')}</Link>
-        <a href="mailto:contact@opus35.fr">{t('legal.contact')}</a>
+        <a href="mailto:contact@covertcook.fr">{t('legal.contact')}</a>
       </p>
 
+      {/* Who made it look like this — the app's logo included. The favicon is
+          a free Flaticon icon, and their licence is the condition for using
+          it: the credit stays on every screen (assets-src/README.md). */}
       <p className="app-foot__credit">
-        {t('legal.iconsBy')}{' '}
+        {t('legal.designBy')} Simone Melotti, Javier Diez Cerro · {t('legal.faviconBy')}{' '}
         <a href="https://www.flaticon.com/" target="_blank" rel="noopener noreferrer">
           Flaticon
         </a>
-      </p>
-
-      <p className="app-foot__credit">
-        <a href="https://opus35.fr" target="_blank" rel="noopener noreferrer">
-          Opus35.fr
-        </a>{' '}
-        {t('legal.company')} — {t('legal.by')} Simone Melotti
       </p>
     </footer>
   )

@@ -629,6 +629,9 @@ export interface RoundInvitation {
   round_name: string
   accent_emoji: string
   invited_day: string
+  /** Null only if that account has since been deleted (0106). */
+  invited_by_name: string | null
+  host_name: string | null
 }
 
 // The round's name comes back with the invitation because an invitee is
@@ -2367,4 +2370,50 @@ export async function saveSetup(profileId: string, name: string, setup: unknown)
 export async function deleteSavedSetup(id: string) {
   const { error } = await supabase.from('round_presets').delete().eq('id', id)
   if (error) throw error
+}
+
+// ---------------------------------------------------------------------------
+// Admin (0108). Only accounts in app_admins get anything back; the functions
+// refuse everybody else with NOT_ADMIN, so the client checks are courtesy.
+// ---------------------------------------------------------------------------
+
+export async function isAppAdmin() {
+  // Asked on every screen for every account, so it must never raise the
+  // schema-mismatch banner: a database without 0108 simply has no admins.
+  const { data, error } = await supabase.rpc('is_app_admin')
+  return !error && data === true
+}
+
+export type FilRougeNotes = Record<string, { title: string | null; body: string | null }>
+
+export interface AdminWeekRow {
+  week: number
+  /** The Sunday the week begins on, YYYY-MM-DD. */
+  starts_on: string
+  category: FilRougeCategory
+  code: string
+  /** Written by a person; false = the automatic draw (0107). */
+  authored: boolean
+  notes: FilRougeNotes
+}
+
+export async function adminFilRougeWeeks(count: number) {
+  const res = await guardedRpc('admin_fil_rouge_weeks', { p_count: count })
+  return unwrap<AdminWeekRow[]>(res) ?? []
+}
+
+/** A null code clears the week's pick for that kind back to the draw. */
+export async function adminSetFilRougePick(
+  week: number,
+  category: FilRougeCategory,
+  code: string | null,
+  notes: FilRougeNotes,
+) {
+  const res = await guardedRpc('admin_set_fil_rouge_pick', {
+    p_week: week,
+    p_category: category,
+    p_code: code,
+    p_notes: notes,
+  })
+  return unwrap(res)
 }

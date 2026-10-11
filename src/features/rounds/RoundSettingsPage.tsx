@@ -1,31 +1,22 @@
 import { useEffect, useState } from 'react'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
-import { useRound, useRoundMembers } from './hooks'
+import { useRound } from './hooks'
 import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
-import { ChoiceList } from '../../components/ChoiceList'
+import { ExclusionsList } from './ExclusionsPanel'
+import { useFilRougeLabel } from '../../lib/filRouge'
 import { PhaseMenu } from './PhaseMenu'
 import { InlineConfirm } from '../../components/InlineConfirm'
 import {
-  accessAdmitsCode,
   advancePhase,
   previousPhaseFor,
   updateRoundDetails,
-  getExclusionPairs,
-  listRoundPeople,
-  addExclusionPair,
-  removeExclusionPair,
   getSlots,
-  addSlot,
-  removeSlot,
-  COURSES,
-  type Course,
-  setMenuVisibility,
-  type MenuVisibility,
-  MENU_VISIBILITIES,
+  getFilRouge,
 } from '../../lib/rpc'
 
 const COMMON_TIMEZONES = [
@@ -69,7 +60,6 @@ export function RoundSettingsPage() {
     target.closest('details')?.setAttribute('open', '')
     target.scrollIntoView({ block: 'center' })
   }, [hash, round])
-  const { data: members } = useRoundMembers(roundId)
   const [location, setLocation] = useState<string | null>(null)
   const [city, setCity] = useState<string | null>(null)
   const [notes, setNotes] = useState<string | null>(null)
@@ -80,29 +70,14 @@ export function RoundSettingsPage() {
   const [saving, setSaving] = useState(false)
   const [stepping, setStepping] = useState(false)
   const [cancelling, setCancelling] = useState(false)
-  const [exclusionA, setExclusionA] = useState('')
-  const [exclusionB, setExclusionB] = useState('')
-  const [newSlotCourse, setNewSlotCourse] = useState<Course>('STARTER')
 
-  // Real names, host-only, from a function that never returns a pseudonym
-  // (0053). Naming the pair by pseudonym would have forced the host to work
-  // out which pseudonym is which person before they could exclude anybody —
-  // exactly the knowledge the anonymity exists to withhold.
-  const { data: people } = useQuery({
-    queryKey: ['rounds', roundId, 'people'],
-    // `enabled` cannot lean on isHost: that is derived after the early
-    // return, and a hook may not appear on some renders and not others. The
-    // function refuses non-hosts anyway.
+  const filRougeLabel = useFilRougeLabel()
+  const { data: filRouge } = useQuery({
+    queryKey: ['rounds', roundId, 'fil-rouge'],
     enabled: !!roundId,
-    queryFn: () => listRoundPeople(roundId as string),
+    queryFn: () => getFilRouge(roundId as string),
   })
-
-  const { data: exclusions, refetch: refetchExclusions } = useQuery({
-    queryKey: ['rounds', roundId, 'exclusion-pairs'],
-    enabled: !!roundId,
-    queryFn: () => getExclusionPairs(roundId as string),
-  })
-  const { data: slots, refetch: refetchSlots } = useQuery({
+  const { data: slots } = useQuery({
     queryKey: ['rounds', roundId, 'slots'],
     enabled: !!roundId && round?.slot_mode === 'CATEGORIES',
     queryFn: () => getSlots(roundId as string),
@@ -130,12 +105,6 @@ export function RoundSettingsPage() {
     round.anonymity === 'ANONYMOUS' &&
     round.voting_mode === 'LIVE' &&
     round.slot_mode === 'FREE'
-  const activeMembers = members?.filter((m) => m.status === 'ACTIVE' && m.approved) ?? []
-  const activeApprovedCount = activeMembers.length
-
-
-  const memberName = (id: string) =>
-    people?.find((p) => p.member_id === id)?.display_name ?? id
 
   async function onSaveDetails(e: React.FormEvent) {
     e.preventDefault()
@@ -179,41 +148,6 @@ export function RoundSettingsPage() {
     }
   }
 
-  async function onAddExclusion(e: React.FormEvent) {
-    e.preventDefault()
-    if (!roundId || !exclusionA || !exclusionB || exclusionA === exclusionB) return
-    setError(null)
-    try {
-      await addExclusionPair(roundId, exclusionA, exclusionB)
-      setExclusionA('')
-      setExclusionB('')
-      await refetchExclusions()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
-    }
-  }
-
-  async function onRemoveExclusion(id: string) {
-    await removeExclusionPair(id)
-    refetchExclusions()
-  }
-
-  async function onAddSlot() {
-    if (!roundId) return
-    setError(null)
-    try {
-      await addSlot(roundId, newSlotCourse)
-      await refetchSlots()
-    } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
-    }
-  }
-
-  async function onRemoveSlot(id: string) {
-    await removeSlot(id)
-    refetchSlots()
-  }
-
   async function onCancelRound() {
     if (!roundId) return
     setError(null)
@@ -243,91 +177,14 @@ export function RoundSettingsPage() {
         onStepBack={onStepBack}
       />
 
-      {/* Mirrors the panel on the round page. Filling the table is a thing
-          a host comes back to, and they don't always come back the same
-          way — so it lives in both places they'd look. */}
-      <Fold title={t('rounds.settings.filling')} defaultOpen={round.status === 'OPEN'}>
-        <div className="card stack">
-        {/* The code is only a way in while join_round will accept it, which is
-            only in OPEN. Showing it at every other phase invited the host to
-            hand out something that would be refused, and then to wonder why.
-            What replaces it is the actual route: reopen sign-ups first. */}
-        {/* An invitation-only dinner has no code to hand out — join_round
-            refuses it outright since 0071 — so printing one here would be
-            offering the host something the server will reject, and then
-            leaving them to wonder why their friend could not get in. */}
-        {!accessAdmitsCode(round.access) ? (
-          <p className="muted">{t('rounds.access.INVITEHint')}</p>
-        ) : round.status !== 'OPEN' ? (
-          <div className="howto">
-            <p className="howto__lead">{t('rounds.lateJoin.short')}</p>
-            <ol className="howto__steps">
-              {(t('rounds.lateJoin.steps', { returnObjects: true }) as string[]).map((step) => (
-                <li key={step}>{step}</li>
-              ))}
-            </ol>
-            <p className="howto__note is-good">{t('rounds.lateJoin.keeps')}</p>
-            <p className="howto__note">{t('rounds.lateJoin.pauses')}</p>
-            <p className="howto__note is-warn">{t('rounds.lateJoin.changes')}</p>
-          </div>
-        ) : (
-        <>
-        <label>{t('rounds.shareLink')}</label>
-        <div className="row">
-          <code style={{ fontSize: 18, letterSpacing: '0.08em' }}>{round.join_code}</code>
-          <button
-            type="button"
-            className="secondary"
-            onClick={() =>
-              navigator.clipboard.writeText(
-                `${import.meta.env.VITE_APP_BASE_URL}/join?code=${round.join_code}`,
-              )
-            }
-          >
-            {t('actions.copy')}
-          </button>
-        </div>
-        </>
-        )}
-        </div>
-      </Fold>
+      {/* Filling the table lives in the pass, where it opens the dinner;
+          a second copy here only made two places to look. */}
 
       {/* What kind of dinner this is, in one place. The choices were made once
           in the creation form and then never shown again, so a host coming
           back weeks later had no way to remember whether they had turned
           voting off, or whether they were the one approving people — and no
           way to tell which of it is still changeable. */}
-
-      {/* Reversible, and therefore not a creation-time decision: turning it on
-          reveals names that are public at the end of the evening anyway, and
-          turning it off takes back nothing anybody wrote against. */}
-      {!detailsLocked && (
-        <Fold
-          title={t('rounds.sharedMenu.label')}
-          aside={t(`rounds.sharedMenu.${round.menu_visibility}`)}
-        >
-          <div className="card stack">
-            <ChoiceList
-              name="menu-visibility"
-              value={round.menu_visibility}
-              onChange={async (v: string) => {
-                setError(null)
-                try {
-                  await setMenuVisibility(roundId as string, v as MenuVisibility)
-                  await queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
-                } catch (err) {
-                  setError(err instanceof Error ? err.message : t('errors.generic'))
-                }
-              }}
-              options={MENU_VISIBILITIES.map((v) => ({
-                value: v,
-                label: t(`rounds.sharedMenu.${v}`),
-                hint: t(`rounds.sharedMenu.${v}Hint`),
-              }))}
-            />
-          </div>
-        </Fold>
-      )}
 
       <Fold title={t('rounds.settings.dinerInfo')}>
         {detailsLocked && <p className="muted">{t('rounds.settings.detailsLockedNote')}</p>}
@@ -405,81 +262,6 @@ export function RoundSettingsPage() {
         </form>
       </Fold>
 
-      <Fold title={t('rounds.settings.exclusions')} hint={t('rounds.settings.exclusionsHelp')}>
-        <div className="stack card">
-        {exclusions?.length === 0 && <p className="muted">{t('rounds.settings.noExclusions')}</p>}
-        {exclusions?.map((ex) => (
-          <div key={ex.id} className="row" style={{ justifyContent: 'space-between' }}>
-            <span>
-              {memberName(ex.member_a)} ↔ {memberName(ex.member_b)}
-            </span>
-            {preAssignment && (
-              <button type="button" className="secondary" onClick={() => onRemoveExclusion(ex.id)}>
-                {t('actions.remove')}
-              </button>
-            )}
-          </div>
-        ))}
-        {preAssignment && (
-          <form onSubmit={onAddExclusion} className="row">
-            <select value={exclusionA} onChange={(e) => setExclusionA(e.target.value)}>
-              <option value="">—</option>
-              {people?.map((p) => (
-                <option key={p.member_id} value={p.member_id}>
-                  {p.display_name}
-                </option>
-              ))}
-            </select>
-            <select value={exclusionB} onChange={(e) => setExclusionB(e.target.value)}>
-              <option value="">—</option>
-              {people?.map((p) => (
-                <option key={p.member_id} value={p.member_id}>
-                  {p.display_name}
-                </option>
-              ))}
-            </select>
-            <button type="submit" disabled={!exclusionA || !exclusionB || exclusionA === exclusionB}>
-              {t('actions.add')}
-            </button>
-          </form>
-        )}
-        </div>
-      </Fold>
-
-      {round.slot_mode === 'CATEGORIES' && (
-        <Fold
-          title={t('rounds.settings.courses')}
-          hint={t('rounds.settings.coursesHelp', { count: activeApprovedCount })}
-        >
-          <div className="stack card">
-            {slots?.map((slot) => (
-              <div key={slot.id} className="row" style={{ justifyContent: 'space-between' }}>
-                <span>{t(`briefs.courseOption.${slot.course}`)}</span>
-                {preAssignment && (
-                  <button type="button" className="secondary" onClick={() => onRemoveSlot(slot.id)}>
-                    {t('actions.remove')}
-                  </button>
-                )}
-              </div>
-            ))}
-            {preAssignment && (
-              <div className="row">
-                <select value={newSlotCourse} onChange={(e) => setNewSlotCourse(e.target.value as Course)}>
-                  {COURSES.map((c) => (
-                    <option key={c} value={c}>
-                      {t(`briefs.courseOption.${c}`)}
-                    </option>
-                  ))}
-                </select>
-                <button type="button" onClick={onAddSlot}>
-                  {t('actions.add')}
-                </button>
-              </div>
-            )}
-          </div>
-        </Fold>
-      )}
-
       <Fold title={t('rounds.settings.overview')} hint={t('rounds.settings.overviewHelp')}>
         <div className="card">
           <dl className="info">
@@ -548,17 +330,73 @@ export function RoundSettingsPage() {
               </span>
             </dd>
 
+            <dt>{t('rounds.recipesPerBrief.label')}</dt>
+            <dd>{t('rounds.recipesPerBrief.count', { count: round.recipes_per_brief })}</dd>
+
+            <dt>{t('rounds.guest.label')}</dt>
+            <dd>{t(round.guests_allowed ? 'rounds.guest.allowed' : 'rounds.guest.notAllowed')}</dd>
+
+            <dt>{t('costs.label')}</dt>
+            <dd>
+              {round.cost_mode === 'NONE'
+                ? t('costs.mode.NONE')
+                : round.budget_per_head != null
+                  ? `${t('costs.mode.BUDGET')} · ${round.budget_per_head} ${round.currency}`
+                  : t('costs.mode.NO_BUDGET')}
+            </dd>
+
+            <dt>{t('filRouge.label')}</dt>
+            <dd>
+              {!filRouge?.category
+                ? t('filRouge.none')
+                : filRouge.sealed
+                  ? t('filRouge.compass')
+                  : filRouge.scope === 'PER_COOK' || !filRouge.code
+                    ? t(`filRouge.category.${filRouge.category}`)
+                    : filRougeLabel(filRouge.category, filRouge.code)}
+            </dd>
+
+            {round.slot_mode === 'CATEGORIES' && (
+              <>
+                <dt>{t('rounds.settings.courses')}</dt>
+                <dd>
+                  {slots?.length
+                    ? slots.map((slot) => t(`briefs.courseOption.${slot.course}`)).join(' · ')
+                    : '—'}
+                  {preAssignment && <span className="fixed-note">{t('rounds.settings.changeInPass')}</span>}
+                </dd>
+              </>
+            )}
+
+            {/* Set in the pass, right before the roulette; shown here so it can
+                be checked at any time. */}
+            <dt>{t('rounds.settings.exclusions')}</dt>
+            <dd>
+              {roundId && <ExclusionsList roundId={roundId} />}
+              {preAssignment && <span className="fixed-note">{t('rounds.settings.changeInPass')}</span>}
+            </dd>
+
+            <dt>{t('rounds.sharedMenu.label')}</dt>
+            <dd>
+              {t(`rounds.sharedMenu.${round.menu_visibility}`)}
+              {['LOCKED', 'ASSIGNED', 'BRIEFS_CLOSED'].includes(round.status) && (
+                <span className="fixed-note">{t('rounds.settings.changeInPass')}</span>
+              )}
+            </dd>
+
             <dt>{t('rounds.settings.dinerInfo')}</dt>
             <dd>{detailsLocked ? t('rounds.settings.fixedNow') : t('rounds.settings.changeableNow')}</dd>
           </dl>
 
           {/* Pro is flavour, never access. Saying so where the switched-off
               options live is the only place a host would ask the question. */}
-          <div className="profree">
-            <p className="profree__head">{t('pro.title')}</p>
-            <p className="profree__free">{t('pro.freeForever')}</p>
-            <p className="profree__what">{t('pro.what')}</p>
-          </div>
+          {PRO_VISIBLE && (
+            <div className="profree">
+              <p className="profree__head">{t('pro.title')}</p>
+              <p className="profree__free">{t('pro.freeForever')}</p>
+              <p className="profree__what">{t('pro.what')}</p>
+            </div>
+          )}
         </div>
       </Fold>
 

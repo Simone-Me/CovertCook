@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
@@ -59,6 +59,60 @@ function normaliseUrl(raw: string): string {
   // Anything without a dot is not a domain someone forgot to prefix; it is
   // something else entirely, and guessing at it would be inventing a link.
   return /^[^\s/]+\.[^\s/]/.test(url) ? `https://${url}` : url
+}
+
+// AUTOSAVE, TWICE (see the effect in the page).
+//
+// On this device at every keystroke, so closing the app, losing the signal or
+// the phone killing the tab never costs a paragraph; and on the server a
+// moment after typing stops, so the draft is there on another device too.
+// The device copy is the safety net, not the record: it is dropped as soon as
+// the server holds the same thing.
+const AUTOSAVE_DELAY_MS = 1500
+
+interface LocalDraft {
+  mode: Mode
+  dishName: string
+  ingredients: BriefIngredient[]
+  quickIngredients: string
+  procedure: string
+  externalUrl: string
+}
+
+const localKey = (roundId: string, position: number) => `covertcook.briefDraft.${roundId}.${position}`
+
+function readLocal(roundId: string, position: number): LocalDraft | null {
+  try {
+    const raw = localStorage.getItem(localKey(roundId, position))
+    return raw ? (JSON.parse(raw) as LocalDraft) : null
+  } catch {
+    return null
+  }
+}
+
+function writeLocal(roundId: string, position: number, d: LocalDraft) {
+  try {
+    localStorage.setItem(localKey(roundId, position), JSON.stringify(d))
+  } catch {
+    // Storage refused: the server copy still happens.
+  }
+}
+
+function clearLocal(roundId: string, position: number) {
+  try {
+    localStorage.removeItem(localKey(roundId, position))
+  } catch {
+    // Nothing to clear.
+  }
+}
+
+/** What the server and the device copy are compared on. Empty ingredient
+ *  rows are noise, not content. */
+function snapshot(d: LocalDraft) {
+  return JSON.stringify({
+    ...d,
+    ingredients: d.ingredients.filter((i) => i.name.trim() || i.quantity !== null || (i.unit ?? '').trim()),
+  })
 }
 
 export function BriefEditorPage() {
@@ -127,6 +181,10 @@ export function BriefEditorPage() {
   // does it used to be the same size and weight as "Save". This is what stands
   // between them.
   const [confirmingSubmit, setConfirmingSubmit] = useState(false)
+  // What the autosave last got the server to hold, and what it is doing now.
+  const lastSavedRef = useRef<string | null>(null)
+  const saveRef = useRef<() => Promise<void>>(async () => {})
+  const [autosave, setAutosave] = useState<'idle' | 'pending' | 'saved' | 'local'>('idle')
 
   const draft = drafts?.find((d) => d.recipe_no === position)
   // Sending sends everything at once, so "already sent" is a fact about the
@@ -153,8 +211,54 @@ export function BriefEditorPage() {
       setQuickIngredients(rows.map((i) => i.name).join('\n'))
       setMode('quick')
     }
+    // The server's version is what the autosave compares against…
+    const server: LocalDraft =
+      rows.length > 0 && itemised
+        ? { mode: 'careful', dishName: draft?.dish_name ?? '', ingredients: rows, quickIngredients: '', procedure: draft?.procedure ?? '', externalUrl: draft?.external_url ?? '' }
+        : { mode: 'quick', dishName: draft?.dish_name ?? '', ingredients: [{ name: '', quantity: null, unit: null }], quickIngredients: rows.map((i) => i.name).join('\n'), procedure: draft?.procedure ?? '', externalUrl: draft?.external_url ?? '' }
+    lastSavedRef.current = snapshot(server)
+    setAutosave(draft ? 'saved' : 'idle')
+    // …and a device copy that never reached it (the app was closed mid-word,
+    // the connection dropped) wins, and is sent up by the autosave below.
+    const local = roundId && !anySent ? readLocal(roundId, position) : null
+    if (local && roundId) {
+      if (snapshot(local) === lastSavedRef.current) {
+        clearLocal(roundId, position)
+      } else {
+        setMode(local.mode)
+        setDishName(local.dishName)
+        setIngredients(local.ingredients.length ? local.ingredients : [{ name: '', quantity: null, unit: null }])
+        setQuickIngredients(local.quickIngredients)
+        setProcedure(local.procedure)
+        setExternalUrl(local.externalUrl)
+      }
+    }
     setLoadedFor(position)
-  }, [drafts, draft, anySent, loadedFor, position])
+  }, [drafts, draft, anySent, loadedFor, position, roundId])
+
+  // THE AUTOSAVE. Every change goes to the device at once and to the server
+  // once typing pauses. Nothing happens until the fields hold what was loaded
+  // (loadedFor), and nothing once the recipe has gone or the round has moved on.
+  useEffect(() => {
+    if (!roundId || loadedFor !== position || submitted || round?.status !== 'ASSIGNED') return
+    const current: LocalDraft = { mode, dishName, ingredients, quickIngredients, procedure, externalUrl }
+    const snap = snapshot(current)
+    if (snap === lastSavedRef.current) return
+    writeLocal(roundId, position, current)
+    setAutosave('pending')
+    const id = setTimeout(() => {
+      saveRef.current()
+        .then(() => {
+          lastSavedRef.current = snap
+          clearLocal(roundId, position)
+          setAutosave('saved')
+        })
+        // Refused (offline, a malformed link, the deadline): the device copy
+        // stays, and the page says the draft lives here for now.
+        .catch(() => setAutosave('local'))
+    }, AUTOSAVE_DELAY_MS)
+    return () => clearTimeout(id)
+  }, [roundId, loadedFor, position, submitted, round?.status, mode, dishName, ingredients, quickIngredients, procedure, externalUrl])
 
   // Everything the sender wrote, as one searchable string. The quick mode
   // has no ingredient rows, so the block of text has to be scanned too.
@@ -302,6 +406,8 @@ export function BriefEditorPage() {
     })
   }
 
+  saveRef.current = save
+
   /** Move to another idea, keeping what is on the page.
    *
    *  Saved on the way out rather than on the way in: switching tabs is not an
@@ -348,6 +454,9 @@ export function BriefEditorPage() {
     setBusy(true)
     try {
       await save()
+      if (roundId) clearLocal(roundId, position)
+      lastSavedRef.current = snapshot({ mode, dishName, ingredients, quickIngredients, procedure, externalUrl })
+      setAutosave('saved')
       setSaved(true)
       await refetchDraft()
     } catch (err) {
@@ -375,6 +484,7 @@ export function BriefEditorPage() {
       // The recipe reaches its cook the instant it is submitted (0035), so the
       // notification belongs here rather than at the next phase change.
       void notifyMyCook(roundId)
+      for (let n = 1; n <= (round?.recipes_per_brief ?? 1); n++) clearLocal(roundId, n)
       setConfirmingSubmit(false)
       setSubmitted(true)
     } catch (err) {
@@ -388,6 +498,13 @@ export function BriefEditorPage() {
     <div className="stack sheet">
       <BackToTable />
       <h1>{t('briefs.editorTitle')}</h1>
+      {/* Pencil while it is a draft, tick once it has gone — the same two
+          marks the envelope on the table uses. */}
+      {submitted ? (
+        <p className="autosave is-sent">{t('briefs.autosave.sent')}</p>
+      ) : (
+        autosave !== 'idle' && <p className="autosave">{t(`briefs.autosave.${autosave}`)}</p>
+      )}
 
       {assignment && (
         <p className="muted">
