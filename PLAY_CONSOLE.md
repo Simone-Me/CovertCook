@@ -9,10 +9,10 @@ Public addresses used below (Netlify, until a domain exists):
 
 | What | URL |
 |---|---|
-| Privacy policy | `https://covertcook.netlify.app/legal/privacy` |
-| Terms | `https://covertcook.netlify.app/legal/terms` |
-| Moderation policy | `https://covertcook.netlify.app/legal/moderation` |
-| Help, including how to delete an account | `https://covertcook.netlify.app/help` |
+| Privacy policy | `https://covertcook.fr/legal/privacy` |
+| Terms | `https://covertcook.fr/legal/terms` |
+| Moderation policy | `https://covertcook.fr/legal/moderation` |
+| Help, including how to delete an account | `https://covertcook.fr/help` |
 | Contact | `contact@opus35.fr` |
 
 ---

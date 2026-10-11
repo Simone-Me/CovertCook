@@ -1,3 +1,11 @@
+# The real domain. Anything still pointing at the old Netlify address —
+# bookmarks, installed PWAs, mails already sent, the Play listing until it is
+# updated — lands on the same path on covertcook.fr. `!` forces it even where a
+# file exists at that path. Above the SPA fallback, which would otherwise
+# answer first.
+https://covertcook.netlify.app/*  https://covertcook.fr/:splat  301!
+https://www.covertcook.fr/*       https://covertcook.fr/:splat  301!
+
 /*    /index.html   200
 
 # Icons moved into folders (public/ reorganised). Old URLs live on in emails

@@ -51,12 +51,12 @@ export type EmailLocale = 'en' | 'fr' | 'it' | 'es'
 export interface AuthEmailInput {
   url: string
   locale?: EmailLocale
-  /** Where the logo is served from. Overridable so a preview or a future
-      domain does not have to hard-code the Netlify origin. */
+  /** Where the logo is served from. Overridable (APP_BASE_URL) so a preview
+      does not have to use the production origin. */
   appUrl?: string
 }
 
-const DEFAULT_APP_URL = 'https://covertcook.netlify.app'
+const DEFAULT_APP_URL = 'https://covertcook.fr'
 
 // Shared furniture: the same in every mail, so it is written once.
 const CHROME: Record<'en' | 'fr', { fallback: string; ignore: string; spam: string; signoff: string }> = {
