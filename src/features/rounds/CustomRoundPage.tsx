@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
@@ -386,7 +387,7 @@ export function CustomRoundPage() {
                 // these are usable, and a host who is never told they are
                 // a paid feature finds out by losing them.
                 tag:
-                  n > 1 ? (
+                  PRO_VISIBLE && n > 1 ? (
                     <>
                       <span className="shelf__tag shelf__tag--pro">{t('pro.badge')}</span>
                       {freeUntil && (
@@ -553,14 +554,16 @@ export function CustomRoundPage() {
         {/* What Crème is, in the same shape and the same words the account page
             uses (0075). One line, one chip, and it lights up when you touch
             it — a paragraph in a dashed box was a notice, and this is a door. */}
-        <Link to="/pro" className="pass__link">
-          <span className="pro-chip" aria-hidden="true">{t('pro.badge')}</span>
-          <span>
-            <strong>{t(isPro ? 'pro.status.on' : 'pro.status.off')}</strong>
-            {' — '}
-            {t('pro.seeWhatItOpens')}
-          </span>
-        </Link>
+        {PRO_VISIBLE && (
+          <Link to="/pro" className="pass__link">
+            <span className="pro-chip" aria-hidden="true">{t('pro.badge')}</span>
+            <span>
+              <strong>{t(isPro ? 'pro.status.on' : 'pro.status.off')}</strong>
+              {' — '}
+              {t('pro.seeWhatItOpens')}
+            </span>
+          </Link>
+        )}
 
         {/* KEEPING THIS TABLE. A host who has just spent four minutes deciding
             fifteen things is the one person who knows whether they will want

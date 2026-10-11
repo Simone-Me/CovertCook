@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import {
   listNameThemes,
   listTableThemes,
@@ -36,6 +37,7 @@ export function ProEndingNotice() {
   })
 
   const level = proWarningLevel(status)
+  if (!PRO_VISIBLE) return null
   if (!level || !status?.expires_at) return null
 
   return (
@@ -102,6 +104,9 @@ export function RoundProNotice({
     paidTableThemes: (tableThemes ?? []).filter((x) => x.tier === 'PAID').map((x) => x.code),
   })
 
+  // Nothing can lapse while everybody is Crème (0104), whatever date an older
+  // dinner was stamped with.
+  if (!PRO_VISIBLE) return null
   if (cover === 'NONE' || cover === 'OK' || !round.pro_until) return null
 
   const date = new Date(round.pro_until).toLocaleDateString(locale, {

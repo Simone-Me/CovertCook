@@ -29,6 +29,7 @@ import { sendTestPush, type TestPushResult } from '../../lib/rpc'
 import { Link } from 'react-router-dom'
 import { myProStatus } from '../../lib/rpc'
 import { ProEndingNotice } from '../pro/ProNotices'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 
 interface DietaryRow {
   id: string
@@ -127,6 +128,7 @@ export function ProfilePage() {
   // the PRO page reads the same key.
   const { data: proStatus } = useQuery({
     queryKey: ['pro', 'status'],
+    enabled: PRO_VISIBLE,
     queryFn: myProStatus,
     staleTime: 60 * 1000,
   })
@@ -301,14 +303,26 @@ export function ProfilePage() {
           account rather than about a dinner being planned. It says where you
           stand before it says there is more — somebody who already has it does
           not need to be sold to. */}
-      <Link to="/pro" className="pass__link">
-        <span className="pro-chip" aria-hidden="true">{t('pro.badge')}</span>
-        <span>
-          <strong>{t(proStatus?.pro ? 'pro.status.on' : 'pro.status.off')}</strong>
-          {' — '}
-          {t('pro.seeWhatItOpens')}
-        </span>
-      </Link>
+      {PRO_VISIBLE ? (
+        <Link to="/pro" className="pass__link">
+          <span className="pro-chip" aria-hidden="true">{t('pro.badge')}</span>
+          <span>
+            <strong>{t(proStatus?.pro ? 'pro.status.on' : 'pro.status.off')}</strong>
+            {' — '}
+            {t('pro.seeWhatItOpens')}
+          </span>
+        </Link>
+      ) : (
+        // While nothing is sold, the same row asks for a coffee instead.
+        <Link to="/support" className="pass__link">
+          <span aria-hidden="true">☕</span>
+          <span>
+            <strong>{t('support.row')}</strong>
+            {' — '}
+            {t('support.rowHint')}
+          </span>
+        </Link>
+      )}
 
       <Link to="/tutorial" className="pass__link">
         <img src="/logos/logo-face.webp" alt="" width={22} height={22} style={{ borderRadius: 4 }} />

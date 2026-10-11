@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import { ChoiceList } from '../../components/ChoiceList'
 import { type ThemeTier } from '../../lib/rpc'
 
@@ -85,7 +86,7 @@ export function ThemePicker({
                 seven free cloths — and on 1 January five of them would appear
                 to have been taken away. Marked now, with the date it stops
                 being free, nothing is a surprise later. */}
-            {opt.tier === 'PAID' && !opt.paused && (
+            {PRO_VISIBLE && opt.tier === 'PAID' && !opt.paused && (
               <>
                 <span className="shelf__tag shelf__tag--pro">{t('pro.badge')}</span>
                 {opt.owned && freeUntil && (

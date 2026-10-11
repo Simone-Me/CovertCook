@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { PRO_VISIBLE } from '../../lib/proVisible'
 import { useTranslation } from 'react-i18next'
 import { useNavigate, useParams, useLocation, Navigate } from 'react-router-dom'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
@@ -554,11 +555,13 @@ export function RoundSettingsPage() {
 
           {/* Pro is flavour, never access. Saying so where the switched-off
               options live is the only place a host would ask the question. */}
-          <div className="profree">
-            <p className="profree__head">{t('pro.title')}</p>
-            <p className="profree__free">{t('pro.freeForever')}</p>
-            <p className="profree__what">{t('pro.what')}</p>
-          </div>
+          {PRO_VISIBLE && (
+            <div className="profree">
+              <p className="profree__head">{t('pro.title')}</p>
+              <p className="profree__free">{t('pro.freeForever')}</p>
+              <p className="profree__what">{t('pro.what')}</p>
+            </div>
+          )}
         </div>
       </Fold>
 

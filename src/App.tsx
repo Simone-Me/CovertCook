@@ -30,6 +30,8 @@ import { BallotPage } from './features/vote/BallotPage'
 import { ManualTallyPage } from './features/vote/ManualTallyPage'
 import { ResultsPage } from './features/vote/ResultsPage'
 import { ProPage } from './features/pro/ProPage'
+import { SupportPage } from './features/support/SupportPage'
+import { PRO_VISIBLE } from './lib/proVisible'
 import { TutorialPage } from './features/tutorial/TutorialPage'
 
 function RequireAuth({ children }: { children: ReactNode }) {
@@ -184,11 +186,20 @@ function AppRoutes() {
         <Route
           path="/pro"
           element={
-            <RequireAuth>
-              <ProPage />
-            </RequireAuth>
+            PRO_VISIBLE ? (
+              <RequireAuth>
+                <ProPage />
+              </RequireAuth>
+            ) : (
+              // Crème is hidden while everybody has it (0104); old links land
+              // on the tip jar instead of a page about a difference that does
+              // not exist.
+              <Navigate to="/support" replace />
+            )
           }
         />
+        {/* Outside the guard: asking for a coffee does not need an account. */}
+        <Route path="/support" element={<SupportPage />} />
         <Route
           path="/rounds/:roundId/settings"
           element={

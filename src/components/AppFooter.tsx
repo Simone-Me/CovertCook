@@ -34,7 +34,7 @@ export function AppFooter() {
         <Link to="/legal/terms">{t('legal.terms')}</Link>
         <Link to="/legal/privacy">{t('legal.privacy')}</Link>
         <Link to="/legal/moderation">{t('legal.moderation')}</Link>
-        <a href="mailto:contact@opus35.fr">{t('legal.contact')}</a>
+        <a href="mailto:contact@covertcook.fr">{t('legal.contact')}</a>
       </p>
 
       <p className="app-foot__credit">
@@ -45,10 +45,7 @@ export function AppFooter() {
       </p>
 
       <p className="app-foot__credit">
-        <a href="https://opus35.fr" target="_blank" rel="noopener noreferrer">
-          Opus35.fr
-        </a>{' '}
-        {t('legal.company')} — {t('legal.by')} Simone Melotti
+        covertcook.fr — {t('legal.by')} Simone Melotti
       </p>
     </footer>
   )

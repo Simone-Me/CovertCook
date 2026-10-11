@@ -11,12 +11,10 @@ interface Section {
  * step — a policy that says different things in French and English is worse
  * than one that only exists in one.
  *
- * These are drafts written from what the app actually does, not legal advice.
- * They need a lawyer before CovertCook takes a single euro, and two things in
- * particular need one: the dietary panel collects health data (GDPR Article 9
- * special category), and the paid tier brings EU VAT on digital goods and a
- * statutory right of withdrawal with it. Both are flagged in the text rather
- * than quietly assumed away.
+ * Written from what the app actually does. Not legal advice: if CovertCook
+ * ever sells something again, a lawyer reads these first — the dietary panel
+ * holds health data (GDPR Article 9), and a sale brings EU VAT and a statutory
+ * right of withdrawal with it.
  */
 export function LegalPage({ page }: { page: 'terms' | 'privacy' | 'moderation' }) {
   const { t } = useTranslation()
@@ -28,10 +26,8 @@ export function LegalPage({ page }: { page: 'terms' | 'privacy' | 'moderation' }
       <h1>{t(`legal.${page}Doc.title`)}</h1>
 
       <p className="muted legal__meta">
-        {t('legal.updated')}: {t(`legal.${page}Doc.updated`)} · Opus35 · contact@opus35.fr
+        {t('legal.updated')}: {t(`legal.${page}Doc.updated`)} · CovertCook · contact@covertcook.fr
       </p>
-
-      <div className="legal__draft">{t('legal.draftNote')}</div>
 
       {sections.map((section) => (
         <section key={section.heading} className="legal__section">

@@ -1731,5 +1731,17 @@
     "points_other": "{{count}} pt",
     "finish": "Concludi il tour",
     "previous": "← Passaggio precedente"
+  },
+  "support": {
+    "row": "Offrici un caffè",
+    "rowHint": "per tenere CovertCook gratuito per tutti",
+    "title": "Tieni CovertCook gratuito",
+    "body": [
+      "CovertCook è gratuito per tutti, con ogni tema e ogni opzione aperti. Niente pubblicità, niente versione a pagamento, nessun dato venduto.",
+      "È fatto e gestito da una sola persona nel tempo libero, e server, dominio ed email costano un po' ogni mese. Se una serata alla vostra tavola ne è valsa la pena, un piccolo contributo — il prezzo di un caffè — aiuta a tenerlo gratuito per la tavola successiva."
+    ],
+    "cta": "Contribuisci",
+    "soon": "La pagina per contribuire arriva presto. Grazie per averci pensato.",
+    "nothingChanges": "Un contributo è un regalo: non sblocca nulla e non cambia nulla nell'app. Tutti hanno già tutto."
   }
 }

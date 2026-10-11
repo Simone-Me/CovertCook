@@ -1110,12 +1110,12 @@
     "updated": "Last updated",
     "termsDoc": {
       "title": "Terms of use",
-      "updated": "2026-09-14",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Who you are agreeing with",
           "body": [
-            "CovertCook is operated by Opus35 (opus35.fr). Writing to contact@opus35.fr reaches a person.",
+            "CovertCook is run by Simone Melotti, as a private individual — there is no company behind it. Writing to contact@covertcook.fr reaches that person.",
             "Using the app means accepting what is written here. If you do not accept it, do not use the app — there is no version of this where you are bound by something you never saw."
           ]
         },
@@ -1150,10 +1150,10 @@
           ]
         },
         {
-          "heading": "Free, and paid",
+          "heading": "Free, with a tip jar",
           "body": [
-            "Every part of the game is free and stays free: unlimited dinners, any number of guests, every feature that changes how the game is played.",
-            "A paid tier is planned for appearance only — tablecloths, themed evenings. Nothing is on sale yet. When it is, EU VAT rules and a statutory right of withdrawal apply, and these terms will say exactly how before anything is charged."
+            "Everything in CovertCook is free, for everybody: unlimited dinners, any number of guests, every theme and every feature.",
+            "You can leave a small voluntary contribution to help keep it that way. It is a gift: it buys nothing, unlocks nothing, and nothing changes in the app whether you give or not. It is handled by the payment service you are sent to, under its own terms."
           ]
         },
         {
@@ -1174,12 +1174,12 @@
     },
     "privacyDoc": {
       "title": "Privacy",
-      "updated": "2026-09-14",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Who holds your data",
           "body": [
-            "Opus35 (opus35.fr) is the data controller. contact@opus35.fr reaches a person, and questions about your data are answered there."
+            "CovertCook is run by Simone Melotti, as a private individual rather than through a company, and Simone Melotti is the data controller for everything described on this page. contact@covertcook.fr reaches a person, and questions about your data are answered there."
           ]
         },
         {
@@ -1240,7 +1240,7 @@
           "heading": "What you can ask for",
           "body": [
             "Access to what we hold, correction of what is wrong, deletion, a copy in a portable form, and the right to object to processing or withdraw consent. For the dietary data, withdrawing consent means deleting it, which you can do yourself.",
-            "Write to contact@opus35.fr. If the answer does not satisfy you, you can complain to the CNIL in France, or to your own country's data protection authority."
+            "Write to contact@covertcook.fr. If the answer does not satisfy you, you can complain to the CNIL in France, or to your own country's data protection authority."
           ]
         },
         {
@@ -1251,12 +1251,11 @@
         }
       ]
     },
-    "draftNote": "A draft, written from what the app actually does. It has not been reviewed by a lawyer, and it must be before CovertCook charges anybody — the dietary panel holds health data, and selling anything brings EU VAT and a right of withdrawal with it.",
     "by": "by",
     "moderation": "Moderation",
     "moderationDoc": {
       "title": "Moderation",
-      "updated": "2026-08-27",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "What this covers",
@@ -1296,7 +1295,7 @@
         {
           "heading": "Appealing, and reaching us",
           "body": [
-            "A warning or a removal is one host’s decision about one evening. If you think it was wrong, write to contact@opus35.fr and say which dinner it was; the audit log records every moderation act, including the ones we got wrong.",
+            "A warning or a removal is one host’s decision about one evening. If you think it was wrong, write to contact@covertcook.fr and say which dinner it was; the audit log records every moderation act, including the ones we got wrong.",
             "Anything urgent — a threat, a minor at risk, content that should be with the police rather than with us — goes to the same address, and is read by a person."
           ]
         }
@@ -1934,5 +1933,17 @@
     "points_other": "{{count}} pts",
     "finish": "Finish the tour",
     "previous": "← Previous step"
+  },
+  "support": {
+    "row": "Buy us a coffee",
+    "rowHint": "keep CovertCook free for everyone",
+    "title": "Keep CovertCook free",
+    "body": [
+      "CovertCook is free for everybody, with every theme and every option open. No ads, no paid tier, no data sold.",
+      "It is made and run by one person in their spare time, and the servers, the domain and the email cost a little every month. If an evening at your table was worth it, a small contribution — the price of a coffee — helps keep it free for the next table."
+    ],
+    "cta": "Contribute",
+    "soon": "The contribution page is on its way. Thank you for thinking of it.",
+    "nothingChanges": "A contribution is a gift: it unlocks nothing and changes nothing in the app. Everybody already has everything."
   }
 }

@@ -1110,12 +1110,12 @@
     "updated": "Dernière mise à jour",
     "termsDoc": {
       "title": "Conditions d'utilisation",
-      "updated": "2026-09-14",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Avec qui vous vous engagez",
           "body": [
-            "CovertCook est exploité par Opus35 (opus35.fr). Écrire à contact@opus35.fr permet de joindre une personne.",
+            "CovertCook est édité par Simone Melotti, à titre personnel — aucune société n'est derrière. Écrire à contact@covertcook.fr permet de joindre cette personne.",
             "Utiliser l'application vaut acceptation de ce qui est écrit ici. Si vous ne l'acceptez pas, ne l'utilisez pas — il n'existe pas de version où vous seriez engagé par un texte que vous n'avez jamais vu."
           ]
         },
@@ -1150,10 +1150,10 @@
           ]
         },
         {
-          "heading": "Gratuit, et payant",
+          "heading": "Gratuit, avec un pourboire",
           "body": [
-            "Toute la partie jeu est gratuite et le reste : dîners illimités, autant d'invités que vous voulez, toutes les fonctions qui changent la façon de jouer.",
-            "Une offre payante est prévue pour l'apparence seulement — nappes, soirées à thème. Rien n'est en vente aujourd'hui. Le moment venu, la TVA européenne et le droit de rétractation s'appliqueront, et ces conditions diront exactement comment avant le moindre paiement."
+            "Tout CovertCook est gratuit, pour tout le monde : dîners illimités, autant d'invités que voulu, tous les thèmes et toutes les fonctions.",
+            "Vous pouvez laisser une petite contribution volontaire pour qu'il le reste. C'est un don : il n'achète rien, ne débloque rien, et rien ne change dans l'application que vous donniez ou non. Il est traité par le service de paiement vers lequel vous êtes envoyé, selon ses propres conditions."
           ]
         },
         {
@@ -1174,12 +1174,12 @@
     },
     "privacyDoc": {
       "title": "Confidentialité",
-      "updated": "2026-09-14",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Qui détient vos données",
           "body": [
-            "Opus35 (opus35.fr) est le responsable de traitement. contact@opus35.fr permet de joindre une personne, et les questions sur vos données y trouvent réponse."
+            "CovertCook est édité par Simone Melotti, à titre personnel et non par une société ; Simone Melotti est le responsable de traitement pour tout ce que décrit cette page. contact@covertcook.fr permet de joindre une personne, et les questions sur vos données y trouvent réponse."
           ]
         },
         {
@@ -1240,7 +1240,7 @@
           "heading": "Ce que vous pouvez demander",
           "body": [
             "L'accès à ce que nous détenons, la rectification, l'effacement, une copie portable, et le droit de vous opposer au traitement ou de retirer votre consentement. Pour les données alimentaires, retirer son consentement revient à les supprimer, ce que vous pouvez faire vous-même.",
-            "Écrivez à contact@opus35.fr. Si la réponse ne vous satisfait pas, vous pouvez saisir la CNIL ou l'autorité de protection des données de votre pays."
+            "Écrivez à contact@covertcook.fr. Si la réponse ne vous satisfait pas, vous pouvez saisir la CNIL ou l'autorité de protection des données de votre pays."
           ]
         },
         {
@@ -1251,12 +1251,11 @@
         }
       ]
     },
-    "draftNote": "Un brouillon, écrit à partir de ce que fait réellement l'application. Il n'a pas été relu par un juriste, et il devra l'être avant que CovertCook facture quoi que ce soit — le panneau diététique contient des données de santé, et toute vente entraîne TVA européenne et droit de rétractation.",
     "by": "par",
     "moderation": "Modération",
     "moderationDoc": {
       "title": "Modération",
-      "updated": "2026-08-27",
+      "updated": "2026-10-11",
       "sections": [
         {
           "heading": "Ce que ce texte couvre",
@@ -1296,7 +1295,7 @@
         {
           "heading": "Contester, et nous joindre",
           "body": [
-            "Un avertissement ou un retrait est la décision d’un hôte sur une soirée. Si vous la jugez injuste, écrivez à contact@opus35.fr en précisant le dîner ; le journal enregistre chaque acte de modération, y compris ceux où nous nous sommes trompés.",
+            "Un avertissement ou un retrait est la décision d’un hôte sur une soirée. Si vous la jugez injuste, écrivez à contact@covertcook.fr en précisant le dîner ; le journal enregistre chaque acte de modération, y compris ceux où nous nous sommes trompés.",
             "Tout ce qui est urgent — une menace, un mineur en danger, un contenu qui relève de la police plutôt que de nous — va à la même adresse, et est lu par une personne."
           ]
         }
@@ -1934,5 +1933,17 @@
     "points_other": "{{count}} pts",
     "finish": "Terminer la visite",
     "previous": "← Étape précédente"
+  },
+  "support": {
+    "row": "Offrez-nous un café",
+    "rowHint": "pour que CovertCook reste gratuit pour tous",
+    "title": "Garder CovertCook gratuit",
+    "body": [
+      "CovertCook est gratuit pour tout le monde, avec tous les thèmes et toutes les options ouverts. Pas de pub, pas de version payante, aucune donnée vendue.",
+      "Il est fait et tenu par une seule personne sur son temps libre, et les serveurs, le domaine et les e-mails coûtent un peu chaque mois. Si une soirée à votre table en valait la peine, une petite contribution — le prix d'un café — aide à le garder gratuit pour la table suivante."
+    ],
+    "cta": "Contribuer",
+    "soon": "La page de contribution arrive bientôt. Merci d'y avoir pensé.",
+    "nothingChanges": "Une contribution est un don : elle ne débloque rien et ne change rien dans l'application. Tout le monde a déjà tout."
   }
 }
