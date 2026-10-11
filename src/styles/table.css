@@ -4125,3 +4125,16 @@
     grid-column: 1 / -1;
   }
 }
+
+/* A pass row announced before it exists: same paper, no lift, no pointer —
+   it is a sign, not a door. */
+.pass__link.is-wip {
+  cursor: default;
+  opacity: 0.75;
+}
+.pass__link.is-wip:hover,
+.pass__link.is-wip:focus-visible,
+.pass__link.is-wip:active {
+  border-color: var(--border);
+  color: var(--text);
+}

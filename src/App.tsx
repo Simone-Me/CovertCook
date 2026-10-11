@@ -15,7 +15,6 @@ import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { MyRoundsPage } from './features/rounds/MyRoundsPage'
 import { ProfilePage } from './features/profile/ProfilePage'
 import { AlbumPage, RecipesPage } from './features/profile/KeptPages'
-import { FootprintPage } from './features/profile/FootprintPage'
 import { CreateRoundPage } from './features/rounds/CreateRoundPage'
 import { CustomRoundPage } from './features/rounds/CustomRoundPage'
 import { JoinRoundPage } from './features/rounds/JoinRoundPage'
@@ -136,14 +135,6 @@ function AppRoutes() {
           element={
             <RequireAuth>
               <RecipesPage />
-            </RequireAuth>
-          }
-        />
-        <Route
-          path="/profile/footprint"
-          element={
-            <RequireAuth>
-              <FootprintPage />
             </RequireAuth>
           }
         />

@@ -30,6 +30,7 @@ import { Link } from 'react-router-dom'
 import { myProStatus } from '../../lib/rpc'
 import { ProEndingNotice } from '../pro/ProNotices'
 import { PRO_VISIBLE } from '../../lib/proVisible'
+import { WipChip } from '../../components/WipChip'
 
 interface DietaryRow {
   id: string
@@ -331,14 +332,13 @@ export function ProfilePage() {
         </span>
       </Link>
 
-      {/* Announced, not built: the page says so on its first line. */}
-      <Link to="/profile/footprint" className="pass__link">
+      {/* Announced, not built — and not a door yet: nothing behind it to open. */}
+      <div className="pass__link is-wip" aria-disabled="true">
         <span aria-hidden="true">🌱</span>
         <span>
-          <strong>{t('footprint.title')}</strong> — {t('footprint.row')}{' '}
-          <span className="wip-chip">{t('footprint.wip')}</span>
+          <strong>{t('footprint.title')}</strong> <WipChip />
         </span>
-      </Link>
+      </div>
 
       <DisplayPrefs />
 

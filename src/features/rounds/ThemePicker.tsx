@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { PRO_VISIBLE } from '../../lib/proVisible'
+import { WipChip } from '../../components/WipChip'
 import { ChoiceList } from '../../components/ChoiceList'
 import { type ThemeTier } from '../../lib/rpc'
 
@@ -66,13 +67,15 @@ export function ThemePicker({
       options={options.map((opt) => ({
         value: opt.code,
         label: t(`${labelKey}.${opt.code}`, { defaultValue: opt.code }),
-        hint: t(`${labelKey}.${opt.code}Hint`, { defaultValue: '' }) || undefined,
+        // A cloth being redrawn says only that it is in development: its old
+        // description would describe something that is not there yet.
+        hint: opt.paused ? undefined : t(`${labelKey}.${opt.code}Hint`, { defaultValue: '' }) || undefined,
         mark: opt.mark,
         locked: !opt.owned,
         // Two different sentences, and printing the wrong one is a support
         // question: "not yours yet" invites somebody to go and buy it, which
         // is not what is happening to a cloth that is back in the workshop.
-        lockedReason: opt.paused ? t('themes.paused') : t('themes.notYet'),
+        lockedReason: opt.paused ? undefined : t('themes.notYet'),
         tag: (
           <>
             {/* The tier, in words rather than by a padlock alone: "free" on the
@@ -109,7 +112,7 @@ export function ThemePicker({
                 on; what it costs belongs on the Crème page, once. A paused row
                 still carries its one word, because "being redrawn" is a fact
                 about the cloth rather than about the reader. */}
-            {opt.paused && <span className="shelf__tag">{t('themes.pausedTag')}</span>}
+            {opt.paused && <WipChip />}
           </>
         ),
       }))}

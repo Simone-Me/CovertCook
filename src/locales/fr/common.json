@@ -1955,25 +1955,7 @@
     "nothingChanges": "Une contribution est un don : elle ne débloque rien et ne change rien dans l'application. Tout le monde a déjà tout."
   },
   "footprint": {
-    "title": "Calculez votre consommation",
-    "row": "le CO₂ et les données derrière vos dîners",
-    "wip": "En développement",
-    "lead": "Cette page montrera ce que pèsent vos dîners et votre usage de CovertCook — en CO₂ et en données — pour que vous puissiez le voir, le comparer et le réduire si vous le souhaitez.",
-    "planned": [
-      {
-        "title": "Dans l'assiette",
-        "body": "Une estimation du CO₂ des plats cuisinés et mangés, à partir de leurs ingrédients : viande, produits laitiers, produits hors saison, distance parcourue — divisée par le nombre de convives."
-      },
-      {
-        "title": "Dans l'application",
-        "body": "Les données échangées et stockées : photos des albums, recettes, messages — en mégaoctets, et l'électricité et le CO₂ que coûtent leur stockage et leur envoi."
-      },
-      {
-        "title": "Dans le temps",
-        "body": "Dîner par dîner et mois par mois, avec des repères (un trajet en voiture, un film en streaming) pour que les chiffres parlent."
-      }
-    ],
-    "honest": "Rien n'est encore calculé : plutôt que d'afficher des chiffres inventés, cette page attend qu'ils soient réels."
+    "title": "Calculez votre consommation"
   },
   "admin": {
     "open": "Admin : sélection de la semaine",
@@ -1997,5 +1979,6 @@
       "save": "Enregistrer",
       "backToAuto": "Revenir à l'auto"
     }
-  }
+  },
+  "wip": "En développement"
 }

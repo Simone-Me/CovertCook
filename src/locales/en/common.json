@@ -1955,25 +1955,7 @@
     "nothingChanges": "A contribution is a gift: it unlocks nothing and changes nothing in the app. Everybody already has everything."
   },
   "footprint": {
-    "title": "Calculate your consumption",
-    "row": "the CO₂ and the data behind your dinners",
-    "wip": "In development",
-    "lead": "This page will show what your dinners and your use of CovertCook weigh — in CO₂ and in data — so that you can see it, compare it, and lower it if you want to.",
-    "planned": [
-      {
-        "title": "On the plate",
-        "body": "An estimate of the CO₂ of the dishes you cooked and ate, from their ingredients: meat, dairy, out-of-season produce, how far things travelled — divided by the number of people at the table."
-      },
-      {
-        "title": "In the app",
-        "body": "The data you moved and stored: photographs in albums, recipes, messages — in megabytes, and the electricity and CO₂ that storing and sending them costs."
-      },
-      {
-        "title": "Over time",
-        "body": "Dinner by dinner and month by month, with a sense of scale (a car journey, a streamed film) so the numbers mean something."
-      }
-    ],
-    "honest": "Nothing is calculated yet: rather than show made-up numbers, this page waits until they are real."
+    "title": "Calculate your consumption"
   },
   "admin": {
     "open": "Admin: pick of the week",
@@ -1997,5 +1979,6 @@
       "save": "Save",
       "backToAuto": "Back to auto"
     }
-  }
+  },
+  "wip": "In development"
 }
