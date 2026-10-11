@@ -3652,31 +3652,49 @@
 
 .coach__row {
   display: flex;
-  flex-wrap: wrap;
   align-items: center;
+  justify-content: space-between;
   gap: 8px;
 }
 
-.coach__row button {
-  width: auto;
-  padding: 7px 14px;
-  font-size: 14px;
+/* ← and →: round, the same size, icon only. */
+.coach__row .coach__arrow {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  border-radius: 50%;
+  font-size: 20px;
+  line-height: 1;
 }
 
-.coach__row .coach__exit {
-  padding: 4px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  font-size: 13px;
-  text-decoration: underline;
+.coach__arrow-gap {
+  width: 40px;
 }
 
 .coach__count {
-  margin-left: auto;
   font-size: 11px;
   color: var(--text-muted);
   font-variant-numeric: tabular-nums;
+}
+
+/* ⊗ in the corner: leave the tour. */
+.coach__close {
+  position: absolute;
+  top: -12px;
+  right: -12px;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  background: var(--paper-solid);
+  color: var(--accent);
+  font-size: 18px;
+  line-height: 1;
+}
+
+.coach__say {
+  padding-right: 8px;
 }
 
 /* A press somewhere else: the chef shakes its head once. */
