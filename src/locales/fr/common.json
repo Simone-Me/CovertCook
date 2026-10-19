@@ -772,7 +772,12 @@
       "NO_BRIEF": "Je n'ai pas reçu de recette",
       "THANKS": "Dire merci",
       "REPLY": "Répondre"
-    }
+    },
+    "limitTitle": "Pause messages",
+    "limitBody": "Vous avez envoyé 10 messages ces 30 dernières minutes. Attendez un peu et vous pourrez en écrire d’autres.",
+    "newCount_one": "{{count}} nouveau",
+    "newCount_other": "{{count}} nouveaux",
+    "new": "Nouveau"
   },
   "vote": {
     "title": "Votez le menu",
@@ -1012,7 +1017,7 @@
     "help": "Toute la table parle ici, et personne ne signe. Faites tourner le rouleau à pâtisserie pour trouver quoi dire, ou lancez l'œuf et laissez-le choisir.",
     "empty": "Rien dans le frigo. Soyez le premier.",
     "throwEgg": "Lancez l'œuf — dites quelque chose au hasard",
-    "rateLimit": "Ça suffit pour une heure. Laissez parler les autres.",
+    "rateLimit": "Ça suffit pour une demi-heure. Laissez parler les autres.",
     "yourChef": "Votre chef",
     "yourChefHelp": "Vos deux conversations privées : le chef pour qui vous écrivez, et le chef qui écrit pour vous.",
     "toYourCook": "Avec le chef pour qui vous écrivez",
@@ -1024,7 +1029,7 @@
     "answeringOne": "Vous répondez à celui-ci.",
     "whichChef": "Quel chef ?",
     "errors": {
-      "RATE_LIMIT": "Ça suffit pour cette heure-ci. Le frigo sera toujours là.",
+      "RATE_LIMIT": "Ça suffit pour cette demi-heure. Le frigo sera toujours là.",
       "NOT_A_CHEF_HERE": "Personne de ce nom ne cuisine à cette table.",
       "REPLY_NEEDS_PARENT": "Choisissez d'abord à quoi répondre.",
       "REPLY_PARENT_NOT_FOUND": "Celui-là a disparu, ou c'était déjà une réponse — le frigo ne descend que d'un cran.",
@@ -1789,7 +1794,7 @@
         "q": "Est-ce que c'est payant ?",
         "a": [
           "Non. Dîners illimités, autant de convives que vous voulez, tous les thèmes et toutes les options — tout est gratuit, pour tout le monde.",
-          "Si vous voulez aider à ce que cela dure, une page « Offrez-nous un café » se trouve dans votre profil. Une contribution est un don : elle ne débloque rien, puisque tout est déjà ouvert."
+          "Si vous voulez aider à ce que cela dure, une page « Soutenir ce projet » se trouve dans votre profil. Une contribution est un don : elle ne débloque rien, puisque tout est déjà ouvert."
         ]
       },
       {
@@ -1845,7 +1850,6 @@
   },
   "tutorial": {
     "title": "Visite guidée",
-    "cta": "Faire la visite guidée — deux minutes",
     "profileLink": "Refaire la visite guidée",
     "profileWhat": "Un dîner pour de faux, de l’invitation à la révélation.",
     "skip": "Passer cette étape",
@@ -1941,22 +1945,26 @@
     "previous": "Étape précédente"
   },
   "support": {
-    "row": "Offrez-nous un café",
+    "row": "Soutenir ce projet",
     "rowHint": "pour que CovertCook reste gratuit pour tous",
-    "title": "Offrez-nous un café",
+    "title": "Soutenir ce projet",
     "body": "CovertCook est gratuit et le restera. S’il vous plaît et que vous voulez aider à couvrir les frais, toute contribution est la bienvenue ❤️",
-    "thanks": "Merci !"
+    "thanks": "Merci !",
+    "paypal": "Donner"
   },
   "report": {
     "title": "Signaler un problème",
     "lead": "Quelque chose ne marche pas ? Racontez-nous ce qui s’est passé — ça nous arrive directement. Une capture d’écran aide.",
+    "subject": "Titre",
     "what": "Que s’est-il passé ?",
     "photo": "Capture d’écran (facultatif)",
     "removePhoto": "Retirer la capture",
     "send": "Envoyer",
     "sending": "Envoi…",
     "thanks": "Merci ! C’est bien reçu, on regarde.",
-    "failed": "L’envoi a échoué. Réessayez dans un instant, ou écrivez à contact@covertcook.fr."
+    "failed": "L’envoi a échoué. Réessayez dans un instant, ou écrivez à contact@covertcook.fr.",
+    "contactMe": "Je souhaite être recontacté",
+    "name": "Nom"
   },
   "footprint": {
     "title": "Calculez votre consommation"

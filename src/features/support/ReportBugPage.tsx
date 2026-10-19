@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useLocation } from 'react-router-dom'
 import { BackToTable } from '../../components/BackToTable'
+import { useAuth } from '../../lib/auth'
 import { invokeFunction } from '../../lib/functions'
 import { PhotoError, preparePhoto } from '../../lib/photo'
 
@@ -19,7 +20,14 @@ export function ReportBugPage() {
   // on. The header passes it; opened any other way, this page is all we know.
   const from = (useLocation().state as { from?: string } | null)?.from
   const page = window.location.origin + (from ?? window.location.pathname)
+  const { session, profile } = useAuth()
+  const [title, setTitle] = useState('')
   const [message, setMessage] = useState('')
+  // Asked, not assumed: somebody reporting a typo may not want a reply. When
+  // they do, the fields start from the account and stay editable.
+  const [contact, setContact] = useState(false)
+  const [contactName, setContactName] = useState(profile?.display_name ?? '')
+  const [contactEmail, setContactEmail] = useState(session?.user.email ?? '')
   const [image, setImage] = useState<Blob | null>(null)
   const [preview, setPreview] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
@@ -46,19 +54,22 @@ export function ReportBugPage() {
 
   async function send(e: React.FormEvent) {
     e.preventDefault()
-    if (!message.trim()) return
+    if (!title.trim() || !message.trim()) return
     setSending(true)
     setError(null)
     try {
       const encoded = image ? await toBase64(image) : undefined
       await invokeFunction('report-bug', {
+        title,
         message,
+        contact: contact ? { name: contactName.trim(), email: contactEmail.trim() } : null,
         page,
         userAgent: navigator.userAgent,
         version: __APP_VERSION__,
         image: encoded,
       })
       setSent(true)
+      setTitle('')
       setMessage('')
       clearImage()
     } catch {
@@ -78,6 +89,15 @@ export function ReportBugPage() {
         <form className="stack" onSubmit={send}>
           <p className="muted">{t('report.lead')}</p>
           {error && <div className="error">{error}</div>}
+          <label htmlFor="report-title">{t('report.subject')}</label>
+          <input
+            id="report-title"
+            required
+            maxLength={120}
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+          />
+
           <label htmlFor="report-message">{t('report.what')}</label>
           <textarea
             id="report-message"
@@ -100,7 +120,37 @@ export function ReportBugPage() {
             <input id="report-image" type="file" accept="image/*" onChange={(e) => pick(e.target.files?.[0])} />
           )}
 
-          <button type="submit" disabled={sending || !message.trim()}>
+          <label className="row">
+            <input
+              type="checkbox"
+              style={{ width: 'auto' }}
+              checked={contact}
+              onChange={(e) => setContact(e.target.checked)}
+            />
+            <span>{t('report.contactMe')}</span>
+          </label>
+          {contact && (
+            <div className="stack">
+              <label htmlFor="report-name">{t('report.name')}</label>
+              <input
+                id="report-name"
+                required
+                maxLength={80}
+                value={contactName}
+                onChange={(e) => setContactName(e.target.value)}
+              />
+              <label htmlFor="report-email">{t('auth.email')}</label>
+              <input
+                id="report-email"
+                type="email"
+                required
+                value={contactEmail}
+                onChange={(e) => setContactEmail(e.target.value)}
+              />
+            </div>
+          )}
+
+          <button type="submit" disabled={sending || !title.trim() || !message.trim()}>
             {sending ? t('report.sending') : t('report.send')}
           </button>
         </form>

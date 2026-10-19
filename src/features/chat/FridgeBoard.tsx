@@ -3,6 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
 import { faceFor } from '../../lib/themes'
+import { Popup } from '../../components/Popup'
 import { useRound, useRoundMembers } from '../rounds/hooks'
 import {
   getBoard,
@@ -150,6 +151,9 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
 
   const [posting, setPosting] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  // Ten in thirty minutes reached (0110). The red line below the fridge stays;
+  // this is the part that cannot be missed.
+  const [limited, setLimited] = useState(false)
   // Which opener the roller is currently answering. Null means it is offering
   // openers — the same control doing two jobs, which is what keeps the fridge
   // to one gesture instead of two.
@@ -172,11 +176,15 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
 
   // Opening the fridge is what clears its mark on the envelope — never a
   // timer. A badge that fades by itself stops meaning anything (0022, 0034).
+  // After the board has arrived, not on mount: the count beside the fold
+  // (BoardPage) is read on the way in, and marking first would zero it.
+  const boardLength = board?.length
   useEffect(() => {
+    if (boardLength === undefined) return
     markBoardRead(roundId)
       .then(() => queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'board-unread'] }))
       .catch(() => {})
-  }, [roundId, board?.length, queryClient])
+  }, [roundId, boardLength, queryClient])
 
   // The roller swaps its contents on the day, it does not grow. "What a
   // lovely day!" is not what anybody needs to say at 19:40 with a dish in the
@@ -216,6 +224,7 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
       await queryClient.invalidateQueries({ queryKey: ['rounds', roundId, 'board'] })
     } catch (err) {
       const raw = err instanceof Error ? err.message : ''
+      if (raw === 'RATE_LIMIT') setLimited(true)
       setError(
         t(`board.errors.${raw}`, { defaultValue: '' }) ||
           (raw === 'RATE_LIMIT' ? t('board.rateLimit') : raw || t('errors.generic')),
@@ -339,6 +348,9 @@ export function FridgeBoard({ roundId, isDinnerDay }: { roundId: string; isDinne
   return (
     <div className="stack">
       {error && <div className="error">{error}</div>}
+      <Popup open={limited} title={t('chat.limitTitle')} onClose={() => setLimited(false)}>
+        <p>{t('chat.limitBody')}</p>
+      </Popup>
 
       {/* The picture is the back of the compartment and it does not move: it
           is painted on the container at a fixed height, and the messages

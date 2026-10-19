@@ -3318,6 +3318,8 @@
  * top; the slight rotation is what stops eleven of them reading as a table.
  * ------------------------------------------------------------------------- */
 
+/* Named .pinnote, not .pin: .pin is the rolling pin on the fridge, and sharing
+   the name gave the rolling pin a note's no-shrink, no-wrap, tilted box. */
 .pinboard {
   display: flex;
   flex-wrap: wrap;
@@ -3326,7 +3328,7 @@
   padding: 8px 0 2px;
 }
 
-.pin {
+.pinnote {
   position: relative;
   /* A note keeps its own size: flex would otherwise shrink eleven of them into
      one clipped row, which is the one thing a pinned note must never look
@@ -3348,12 +3350,12 @@
   transform: rotate(-1deg);
 }
 
-.pin:nth-child(even) {
+.pinnote:nth-child(even) {
   transform: rotate(1.2deg);
 }
 
 /* The pin itself. */
-.pin::before {
+.pinnote::before {
   content: '';
   position: absolute;
   top: 2px;
@@ -3366,14 +3368,14 @@
   box-shadow: 0 1px 1px rgba(60, 30, 20, 0.4);
 }
 
-.pin:hover,
-.pin:focus-visible,
-.pin:active {
+.pinnote:hover,
+.pinnote:focus-visible,
+.pinnote:active {
   border-color: var(--accent);
   transform: rotate(0deg) translateY(-1px);
 }
 
-.pin.is-chosen {
+.pinnote.is-chosen {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--accent-contrast);
@@ -3383,11 +3385,11 @@
 /* In this week's selection: the same mark the folds use, drawn as the pin
    rather than written beside the name — there is no room on a note for a
    sentence. */
-.pin.is-week::before {
+.pinnote.is-week::before {
   background: var(--ok);
 }
 
-.pin.is-locked {
+.pinnote.is-locked {
   opacity: 0.4;
   cursor: not-allowed;
   transform: none;
@@ -4211,4 +4213,125 @@
 .pass__link.is-wip:active {
   border-color: var(--border);
   color: var(--text);
+}
+
+/* "3 new", beside a fold title and on a thread's head. The accent so it is
+   read before the title is. */
+.newcount {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--accent-contrast);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  vertical-align: middle;
+}
+
+/* A message that arrived since the last visit: a dot in the margin. */
+.newdot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  margin-right: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  vertical-align: middle;
+  animation: newdot-pulse 1.6s ease-in-out 3;
+}
+
+.menucard__row.is-new .thread-line__said {
+  font-weight: 700;
+}
+
+@keyframes newdot-pulse {
+  50% {
+    transform: scale(1.5);
+    opacity: 0.6;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .newdot {
+    animation: none;
+  }
+}
+
+/* A pop-up (components/Popup): the paper of the app, over a dimmed page. */
+.popup {
+  max-width: min(420px, calc(100vw - 32px));
+  padding: 20px;
+  border: 1px solid var(--env-edge);
+  border-radius: 10px;
+  background: var(--bg-elevated);
+  color: inherit;
+  box-shadow: 0 18px 40px rgba(60, 30, 20, 0.3);
+}
+
+.popup::backdrop {
+  background: rgba(30, 15, 10, 0.45);
+}
+
+.popup__title {
+  margin: 0 0 8px;
+  font-size: 18px;
+}
+
+.popup__body p {
+  margin: 0 0 16px;
+}
+
+/* The two ways to give (SupportPage), side by side at every width: two equal
+   columns, both cut to the shape of Buy Me a Coffee's own button (226 x 50),
+   so they are the same height however narrow the phone. */
+.support__buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  width: 100%;
+  max-width: 470px;
+  align-self: center;
+}
+
+.support__bmc,
+.support__paypal {
+  aspect-ratio: 226 / 50;
+  min-width: 0;
+}
+
+.support__bmc {
+  line-height: 0;
+}
+
+.support__bmc img {
+  width: 100%;
+  height: 100%;
+}
+
+.support__paypal {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  border-radius: 999px;
+  background: #0070ba;
+  color: #fff;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.support__paypal img {
+  width: 1.4em;
+  height: 1.4em;
+}
+
+.support__paypal:hover,
+.support__paypal:focus-visible {
+  background: #005ea6;
+  color: #fff;
 }

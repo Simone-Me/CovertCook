@@ -61,11 +61,13 @@ export function HowItWorks({ compact = false }: { compact?: boolean }) {
       </Fold>
 
       {/* Under both the first-run panel and the folded one: somebody who has
-          been to a dinner may still want to see the whole evening once. */}
-      <Link to="/tutorial">
-        <button type="button" className={compact ? 'secondary' : undefined}>
-          {t('tutorial.cta')}
-        </button>
+          been to a dinner may still want to see the whole evening once. The
+          same row as on the profile, so the tour is one door wherever it is. */}
+      <Link to="/tutorial" className="pass__link">
+        <img src="/logos/logo-face.webp" alt="" width={22} height={22} style={{ borderRadius: 4 }} />
+        <span>
+          <strong>{t('tutorial.profileLink')}</strong> — {t('tutorial.profileWhat')}
+        </span>
       </Link>
 
       {!compact && <p className="muted small-italic">{t('welcome.start')}</p>}

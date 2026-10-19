@@ -1,11 +1,12 @@
 import { useTranslation } from 'react-i18next'
 import { useParams } from 'react-router-dom'
+import { useEffect, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
 import { ChatThread } from './ChatThread'
 import { FridgeBoard } from './FridgeBoard'
-import { getMyAssignment, getMyBriefOffers, pickChosenBrief } from '../../lib/rpc'
+import { getBoardUnread, getMyAssignment, getMyBriefOffers, getUnreadCount, pickChosenBrief } from '../../lib/rpc'
 import { useRound } from '../rounds/hooks'
 
 // Two different things, and now two folds rather than one long scroll.
@@ -44,6 +45,26 @@ export function BoardPage() {
     select: pickChosenBrief,
   })
 
+  // How many arrived since the last visit, beside each fold. Taken once, on
+  // the way in: both counts drop to zero the moment the page marks them read,
+  // and a number that vanishes as it is read tells nobody anything.
+  const fridgeNew = useFirst(
+    useQuery({
+      queryKey: ['rounds', roundId, 'board-unread'],
+      enabled: !!roundId,
+      queryFn: () => getBoardUnread(roundId as string),
+    }).data,
+  )
+  const chefNew = useFirst(
+    useQuery({
+      queryKey: ['rounds', roundId, 'unread'],
+      enabled: !!roundId,
+      queryFn: () => getUnreadCount(roundId as string),
+    }).data,
+  )
+  const badge = (n: number | undefined) =>
+    n ? <span className="newcount">{t('chat.newCount', { count: n })}</span> : undefined
+
   if (!roundId) return null
 
   return (
@@ -51,11 +72,11 @@ export function BoardPage() {
       <BackToTable />
       <h1>{t('board.pageTitle')}</h1>
 
-      <Fold title={t('board.fridge')} hint={t('board.help')} defaultOpen>
+      <Fold title={t('board.fridge')} hint={t('board.help')} aside={badge(fridgeNew)} defaultOpen>
         <FridgeBoard roundId={roundId} isDinnerDay={round?.status === 'DINNER'} />
       </Fold>
 
-      <Fold title={t('board.yourChef')} hint={t('board.yourChefHelp')}>
+      <Fold title={t('board.yourChef')} hint={t('board.yourChefHelp')} aside={badge(chefNew)} defaultOpen={!!chefNew}>
         {/* Two conversations that look alike and are not alike: one is with
             the chef you are writing FOR, the other with the chef writing for
             you. Stacked under two plain headings they blurred together, so
@@ -102,4 +123,13 @@ export function BoardPage() {
       </Fold>
     </div>
   )
+}
+
+/** The first value a query settles on, kept for the life of the page. */
+function useFirst<T>(value: T | undefined): T | undefined {
+  const [first, setFirst] = useState<T | undefined>(undefined)
+  useEffect(() => {
+    if (first === undefined && value !== undefined) setFirst(value)
+  }, [first, value])
+  return first
 }

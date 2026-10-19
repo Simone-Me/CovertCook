@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAuth } from '../../lib/auth'
+import { Popup } from '../../components/Popup'
 import {
   getMessageTemplates,
   getThread,
@@ -28,6 +29,11 @@ export function ChatThread({ pairingId, roundId }: { pairingId: string; roundId?
   const [slotValue, setSlotValue] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [sending, setSending] = useState(false)
+  const [limited, setLimited] = useState(false)
+  // What arrived since this person last looked. Remembered for the whole
+  // visit: opening the thread marks everything read at once, and the next
+  // refetch would otherwise wipe the marks before anybody saw them.
+  const [fresh, setFresh] = useState<ReadonlySet<string>>(new Set())
 
   const { data: templates } = useQuery({
     queryKey: ['message-templates', locale],
@@ -43,8 +49,10 @@ export function ChatThread({ pairingId, roundId }: { pairingId: string; roundId?
   // Clear the unread badge by opening the thread, not on a timer — a
   // badge that fades by itself stops meaning anything (0022).
   useEffect(() => {
+    const unread = (thread ?? []).filter((m) => !m.is_mine && !m.read_at).map((m) => m.message_id)
+    if (unread.length > 0) setFresh((prev) => new Set([...prev, ...unread]))
     markThreadRead(pairingId).catch(() => {})
-  }, [pairingId, thread?.length])
+  }, [pairingId, thread])
 
   // BOARD phrases belong to the whole table and are posted through
   // post_to_board, so they must not appear in a private thread's picker.
@@ -78,7 +86,13 @@ export function ChatThread({ pairingId, roundId }: { pairingId: string; roundId?
       setSlotValue('')
       await queryClient.invalidateQueries({ queryKey: ['thread', pairingId] })
     } catch (err) {
-      setError(err instanceof Error ? err.message : t('errors.generic'))
+      const raw = err instanceof Error ? err.message : ''
+      if (raw === 'RATE_LIMIT') {
+        setLimited(true)
+        setError(t('board.rateLimit'))
+      } else {
+        setError(raw || t('errors.generic'))
+      }
     } finally {
       setSending(false)
     }
@@ -95,6 +109,9 @@ export function ChatThread({ pairingId, roundId }: { pairingId: string; roundId?
   return (
     <div className="stack">
       {error && <div className="error">{error}</div>}
+      <Popup open={limited} title={t('chat.limitTitle')} onClose={() => setLimited(false)}>
+        <p>{t('chat.limitBody')}</p>
+      </Popup>
 
       {/* THE CONVERSATION, WRITTEN AS A MENU.
           Two columns of pale bubbles inside an already-folded panel was the
@@ -108,16 +125,24 @@ export function ChatThread({ pairingId, roundId }: { pairingId: string; roundId?
           beside it, the day at the end. Yours is marked in the margin rather
           than moved to the other side of the page. */}
       <div className="menucard menucard--thread">
-        <p className="menucard__head">{t('chat.title')}</p>
+        <p className="menucard__head">
+          {t('chat.title')}
+          {fresh.size > 0 && <span className="newcount">{t('chat.newCount', { count: fresh.size })}</span>}
+        </p>
 
         {thread?.length === 0 && <p className="muted">{t('chat.empty')}</p>}
 
         <ol className="menucard__list">
           {thread?.map((m) => (
-            <li key={m.message_id} className="menucard__row">
+            <li key={m.message_id} className={`menucard__row${fresh.has(m.message_id) ? ' is-new' : ''}`}>
               <div className={`menucard__course thread-line${m.is_mine ? ' is-mine' : ''}`}>
                 <span className="menucard__name">
                   <span className="thread-line__who">
+                    {/* New since the last visit: a dot in the margin, the way
+                        an unread mail is marked. */}
+                    {fresh.has(m.message_id) && (
+                      <span className="newdot" role="img" aria-label={t('chat.new')} />
+                    )}
                     {m.is_mine
                       ? t('chat.you')
                       : (m.other_party_display_name ?? m.other_party_secret_name ?? '')}

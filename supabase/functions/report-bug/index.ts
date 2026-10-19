@@ -14,6 +14,7 @@
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const MAX_MESSAGE = 4000
+const MAX_TITLE = 120
 // The client sends a JPEG it has already shrunk to 1600px (src/lib/photo.ts);
 // base64 of that is well under this. Anything larger did not come from the app.
 const MAX_IMAGE_BASE64 = 4 * 1024 * 1024
@@ -52,15 +53,32 @@ Deno.serve(async (req) => {
   const user = auth?.user
   if (!user) return reply(401, { error: 'not authenticated' })
 
-  let body: { message?: string; page?: string; userAgent?: string; version?: string; image?: string }
+  let body: {
+    title?: string
+    message?: string
+    contact?: { name?: string; email?: string } | null
+    page?: string
+    userAgent?: string
+    version?: string
+    image?: string
+  }
   try {
     body = await req.json()
   } catch {
     return reply(400, { error: 'expected a JSON body' })
   }
 
+  // One line: it becomes the subject, and a newline in a subject is a header.
+  const title = (body.title ?? '').replace(/[\r\n]+/g, ' ').trim().slice(0, MAX_TITLE)
   const message = (body.message ?? '').trim().slice(0, MAX_MESSAGE)
-  if (!message) return reply(400, { error: 'EMPTY_REPORT' })
+  if (!title || !message) return reply(400, { error: 'EMPTY_REPORT' })
+
+  // Only an address that looks like one becomes Reply-To; anything else is
+  // still printed in the mail, so nothing they typed is lost.
+  const contactName = (body.contact?.name ?? '').trim().slice(0, 80)
+  const contactEmail = (body.contact?.email ?? '').trim().slice(0, 200)
+  const wantsReply = !!body.contact
+  const replyTo = wantsReply && /^[^\s@<>]+@[^\s@<>]+\.[^\s@<>]+$/.test(contactEmail) ? contactEmail : null
   const image = body.image ?? ''
   if (image.length > MAX_IMAGE_BASE64) return reply(413, { error: 'IMAGE_TOO_LARGE' })
 
@@ -68,7 +86,8 @@ Deno.serve(async (req) => {
   const who = profile?.display_name ?? '—'
 
   const details: [string, string][] = [
-    ['From', `${who} <${user.email ?? '?'}>`],
+    ['Account', `${who} <${user.email ?? '?'}>`],
+    ['Contact back', wantsReply ? `yes — ${contactName || '?'} <${contactEmail || '?'}>` : 'no'],
     ['Page', body.page ?? '?'],
     ['Version', body.version ?? '?'],
     ['Browser', body.userAgent ?? '?'],
@@ -84,8 +103,8 @@ Deno.serve(async (req) => {
     body: JSON.stringify({
       from,
       to: [to],
-      reply_to: user.email ? [user.email] : undefined,
-      subject: `[Bug] ${message.split('\n')[0].slice(0, 80)}`,
+      reply_to: replyTo ? [replyTo] : undefined,
+      subject: `[Bug] ${title}`,
       html,
       text,
       attachments: image ? [{ filename: 'screenshot.jpg', content: image }] : undefined,
