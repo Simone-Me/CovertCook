@@ -3,9 +3,7 @@ import { useTranslation } from 'react-i18next'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import {
   addCourse,
-  changeCourse,
   clearAssignment,
-  BRIEFS_EXIST,
   COURSE_IN_USE,
   getMenuStatus,
   getSlots,
@@ -17,7 +15,6 @@ import {
   type SlotMode,
 } from '../../lib/rpc'
 import { HostAction } from './HostAction'
-import { TurnBack } from '../../components/TurnBack'
 
 // Composing the menu, next to the other things the Executive Chef is being
 // asked to do — not buried in a settings page they'd have to know to visit.
@@ -26,6 +23,14 @@ import { TurnBack } from '../../components/TurnBack'
 // refused unless the courses equal the seated chefs (one dish each), but
 // the rule was enforced and never stated: being one course short produced a
 // refusal rather than a count, which reads as a broken button.
+//
+// EVERY COURSE IS ON THE PAGE, WITH A COUNT. It used to be a dropdown, an Add
+// button and a list of what had been added, with a turning arrow to swap one —
+// three controls to say "two mains and a dessert". Now each course has a
+// banana, a number and a plus; the count of courses against chefs sits on top;
+// and nothing is sent until OK, which waits for the two numbers to match. So
+// the menu is never saved half-made, and moving a dish from one course to
+// another is a banana here and a plus there.
 export function MenuPanel({
   roundId,
   slotMode,
@@ -42,18 +47,10 @@ export function MenuPanel({
 }) {
   const { t } = useTranslation()
   const queryClient = useQueryClient()
-  const [newCourse, setNewCourse] = useState<Course>('MAIN')
-  // Which course the picker below is about to replace. Null means the picker
-  // adds a new one — same control, two jobs, and the turning arrow is what
-  // says which job it is doing.
-  const [swapping, setSwapping] = useState<string | null>(null)
-  // A change the roulette refused. Held so the offer below can carry it out
-  // for real instead of only apologising.
-  const [blocked, setBlocked] = useState<{ slotId: string; course: Course } | null>(null)
-  // The last door, and the only destructive one in the app: clearing the
-  // roulette when recipes already exist takes those recipes and their private
-  // messages with it. Held separately so it can be asked for on its own.
-  const [discardAsk, setDiscardAsk] = useState<{ slotId: string; course: Course } | null>(null)
+  // What the host is composing, course by course. Null until they touch it:
+  // until then the page shows the menu as saved.
+  const [draft, setDraft] = useState<Record<Course, number> | null>(null)
+  const [saving, setSaving] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
   const { data: slots } = useQuery({
@@ -71,87 +68,77 @@ export function MenuPanel({
     queryClient.invalidateQueries({ queryKey: ['rounds', roundId] })
   }
 
-  // The RPCs raise named outcomes (0027) so the two things that can go
-  // wrong here can be said in words. Before this, deleting a course the
-  // roulette had already assigned surfaced the raw foreign-key constraint
-  // name, and everything else became "something went wrong".
-  async function run(fn: () => Promise<unknown>, onBlocked?: () => void) {
+  // The RPCs raise named outcomes (0027) so what can go wrong here can be
+  // said in words rather than as a constraint name.
+  function message(err: unknown) {
+    const raw = err instanceof Error ? err.message : ''
+    const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
+    return known || raw || t('errors.generic')
+  }
+
+  async function run(fn: () => Promise<unknown>) {
     setError(null)
     try {
       await fn()
       refresh()
     } catch (err) {
-      const raw = err instanceof Error ? err.message : ''
-      if (raw === COURSE_IN_USE && onBlocked) {
-        onBlocked()
-        return
-      }
-      const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
-      setError(known || raw || t('errors.generic'))
+      setError(message(err))
     }
   }
 
-  // The way through a COURSE_IN_USE: the course is frozen because the
-  // roulette has already dealt it, so undo the roulette and deal again. Safe
-  // because clear_assignment refuses once anybody has written (0037) — this
-  // can only ever throw away a shuffle.
-  async function forceChange(
-    discardBriefs = false,
-    direct?: { slotId: string; course: Course },
-  ) {
-    const target = direct ?? (discardBriefs ? discardAsk : blocked)
-    if (!target) return
-    const { slotId, course } = target
-    setBlocked(null)
-    setDiscardAsk(null)
+  const saved = Object.fromEntries(COURSES.map((c) => [c, 0])) as Record<Course, number>
+  for (const slot of slots ?? []) saved[slot.course] += 1
+  const counts = draft ?? saved
+
+  const seats = menu?.seats ?? 0
+  const placed = COURSES.reduce((n, c) => n + counts[c], 0)
+  const changed = COURSES.some((c) => counts[c] !== saved[c])
+  const balanced = placed === seats
+  // The count is a demand at LOCKED and a running total before it.
+  const counting = status === 'LOCKED'
+
+  function step(course: Course, by: 1 | -1) {
     setError(null)
-    try {
-      await clearAssignment(roundId, discardBriefs)
-      await changeCourse(roundId, slotId, course)
-      setSwapping(null)
-      refresh()
-    } catch (err) {
-      const raw = err instanceof Error ? err.message : ''
-      // Recipes are already written. Not a refusal to work around silently —
-      // the next offer says exactly what it would cost.
-      if (raw === BRIEFS_EXIST) {
-        setDiscardAsk({ slotId, course })
-        setError(t('rounds.menu.errors.BRIEFS_EXIST'))
-        return
-      }
-      const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
-      setError(known || raw || t('errors.generic'))
-    }
+    setDraft({ ...counts, [course]: Math.max(0, counts[course] + by) })
   }
 
   // A pairing on a course is only the roulette's shuffle until somebody
-  // writes: at LOCKED no recipe can exist yet, so refusing the edit with
-  // "somebody is already cooking that course" blocked the host for nothing.
-  // Clear the shuffle and carry the edit out; the host deals again after.
-  // Recipes already written still go through the explicit discard ask.
+  // writes: at LOCKED no recipe can exist yet, so a course the roulette has
+  // already dealt is freed by clearing the shuffle, and the host deals again
+  // after. Recipes already written are refused by clear_assignment (0037) and
+  // said in words.
   async function removeSlot(slotId: string) {
-    setError(null)
     try {
-      try {
-        await removeCourse(roundId, slotId)
-      } catch (err) {
-        if ((err instanceof Error ? err.message : '') !== COURSE_IN_USE) throw err
-        await clearAssignment(roundId, false)
-        await removeCourse(roundId, slotId)
-      }
-      refresh()
+      await removeCourse(roundId, slotId)
     } catch (err) {
-      const raw = err instanceof Error ? err.message : ''
-      const known = t(`rounds.menu.errors.${raw}`, { defaultValue: '' })
-      setError(known || raw || t('errors.generic'))
+      if ((err instanceof Error ? err.message : '') !== COURSE_IN_USE) throw err
+      await clearAssignment(roundId, false)
+      await removeCourse(roundId, slotId)
     }
   }
 
-  const courses = menu?.courses ?? 0
-  const seats = menu?.seats ?? 0
-  const balanced = courses === seats
-  // The count is a demand at LOCKED and a running total before it.
-  const counting = status === 'LOCKED'
+  // Removals first, so the menu never passes through more courses than chefs.
+  async function save() {
+    setSaving(true)
+    setError(null)
+    try {
+      for (const course of COURSES) {
+        const extra = saved[course] - counts[course]
+        if (extra <= 0) continue
+        const ofCourse = (slots ?? []).filter((s) => s.course === course)
+        for (const slot of ofCourse.slice(-extra)) await removeSlot(slot.id)
+      }
+      for (const course of COURSES) {
+        for (let i = saved[course]; i < counts[course]; i++) await addCourse(roundId, course)
+      }
+      setDraft(null)
+    } catch (err) {
+      setError(message(err))
+    } finally {
+      setSaving(false)
+      refresh()
+    }
+  }
 
   return (
     <HostAction
@@ -159,68 +146,13 @@ export function MenuPanel({
       aside={slotMode === 'CATEGORIES' ? t('rounds.menu.composed') : t('rounds.menu.free')}
       waiting={counting && slotMode === 'CATEGORIES' && !balanced}
     >
-      {/* An error with no way out is a dead end: the arrow stayed armed, the
-          message stayed on screen, and the only escape was leaving the page.
-          The OK clears both the message and the half-made swap. */}
+      {/* An error with no way out is a dead end, so the OK clears it. */}
       {error && (
         <div className="error stack">
           <span>{error}</span>
-          {discardAsk ? (
-            <>
-              <span className="muted">{t('rounds.menu.discardWarning')}</span>
-              <div className="row">
-                <button
-                  type="button"
-                  className="confirmbox__ok"
-                  onClick={() => forceChange(true)}
-                >
-                  {t('rounds.menu.discardConfirm')}
-                </button>
-                <button
-                  type="button"
-                  className="confirmbox__cancel"
-                  onClick={() => {
-                    setError(null)
-                    setDiscardAsk(null)
-                    setSwapping(null)
-                  }}
-                >
-                  {t('actions.no')}
-                </button>
-              </div>
-            </>
-          ) : blocked ? (
-            <>
-              <span className="muted">{t('rounds.menu.clearToChange')}</span>
-              <div className="row">
-                <button type="button" className="confirmbox__ok" onClick={() => forceChange(false)}>
-                  {t('actions.ok')}
-                </button>
-                <button
-                  type="button"
-                  className="confirmbox__cancel"
-                  onClick={() => {
-                    setError(null)
-                    setBlocked(null)
-                    setSwapping(null)
-                  }}
-                >
-                  {t('actions.no')}
-                </button>
-              </div>
-            </>
-          ) : (
-            <button
-              type="button"
-              className="confirmbox__ok"
-              onClick={() => {
-                setError(null)
-                setSwapping(null)
-              }}
-            >
-              {t('actions.ok')}
-            </button>
-          )}
+          <button type="button" className="confirmbox__ok" onClick={() => setError(null)}>
+            {t('actions.ok')}
+          </button>
         </div>
       )}
 
@@ -253,8 +185,7 @@ export function MenuPanel({
       {/* WHICH COURSES WAITS FOR THE DOOR TO SHUT, and the mode does not.
           There has to be exactly one course per chef, and until sign-ups close
           the number of chefs keeps moving: every arrival broke the sum the
-          host had just finished making, and the panel answered with a red line
-          about a menu that was not wrong yet. So before LOCKED this offers the
+          host had just finished making. So before LOCKED this offers the
           choice between a free-for-all and a composed menu, says when the menu
           gets composed, and stops there. */}
       {slotMode === 'CATEGORIES' && !counting && (
@@ -263,75 +194,53 @@ export function MenuPanel({
 
       {slotMode === 'CATEGORIES' && counting && (
         <>
-          {/* One course per chef, because every chef cooks exactly one
-              dish. Shown as it happens instead of as a refusal later. */}
-          <p className={balanced ? 'muted' : 'error'}>
-            {t(balanced ? 'rounds.menu.balanced' : 'rounds.menu.unbalanced', { courses, seats })}
+          {/* Always on top, and always the two numbers: courses on the menu,
+              out of how many there have to be. */}
+          <p className={`menu-tally${balanced ? ' is-balanced' : ''}`} aria-live="polite">
+            {t('rounds.menu.tally', { placed, seats })}
+            {!balanced && <span className="muted"> — {t('rounds.menu.tallyHint')}</span>}
           </p>
 
-          <div className="stack">
-            {slots?.map((slot) => (
-              <div key={slot.id} className="row" style={{ justifyContent: 'space-between' }}>
-                <span className={swapping === slot.id ? 'menu-slot is-swapping' : 'menu-slot'}>
-                  {t(`briefs.courseOption.${slot.course}`)}
-                </span>
-                <span className="row">
-                  {/* Same gesture as the status arrow: it turns, and it only
-                      arms the picker below — the button down there is what
-                      acts. Removing and re-adding left the menu one course
-                      short of the table in between, which is the exact state
-                      the roulette refuses on. */}
-                  <TurnBack
-                    open={swapping === slot.id}
-                    label={t('rounds.menu.swap')}
-                    onToggle={() => setSwapping((cur) => (cur === slot.id ? null : slot.id))}
-                  />
-                  <button
-                    type="button"
-                    className="menu-slot-remove"
-                    aria-label={t('actions.remove')}
-                    onClick={() => removeSlot(slot.id)}
-                  >
-                    🍌
-                  </button>
-                </span>
-              </div>
-            ))}
-          </div>
+          <ul className="menu-steps">
+            {COURSES.map((course) => {
+              const name = t(`briefs.courseOption.${course}`)
+              return (
+                <li key={course} className={`menu-steps__row${counts[course] > 0 ? ' is-on' : ''}`}>
+                  <span className="menu-steps__name">{name}</span>
+                  <span className="menu-steps__ctl">
+                    {/* The banana is the app's "take one away" already; here
+                        it takes one of this course off the menu. */}
+                    <button
+                      type="button"
+                      className="menu-slot-remove"
+                      aria-label={t('rounds.menu.less', { course: name })}
+                      title={t('rounds.menu.less', { course: name })}
+                      disabled={saving || counts[course] === 0}
+                      onClick={() => step(course, -1)}
+                    >
+                      🍌
+                    </button>
+                    <span className="menu-steps__count">{counts[course]}</span>
+                    <button
+                      type="button"
+                      className="menu-slot-remove menu-steps__more"
+                      aria-label={t('rounds.menu.more', { course: name })}
+                      title={t('rounds.menu.more', { course: name })}
+                      // One course per chef: past the table there is nobody to cook it.
+                      disabled={saving || placed >= seats}
+                      onClick={() => step(course, 1)}
+                    >
+                      +
+                    </button>
+                  </span>
+                </li>
+              )
+            })}
+          </ul>
 
-          <div className="row">
-            <select value={newCourse} onChange={(e) => setNewCourse(e.target.value as Course)}>
-              {COURSES.map((c) => (
-                <option key={c} value={c}>
-                  {t(`briefs.courseOption.${c}`)}
-                </option>
-              ))}
-            </select>
-            <button
-              type="button"
-              onClick={() =>
-                run(async () => {
-                  if (swapping) {
-                    const slotId = swapping
-                    await run(
-                      async () => {
-                        await changeCourse(roundId, slotId, newCourse)
-                        setSwapping(null)
-                      },
-                      () => {
-                        // Nobody has written: undo the shuffle and change.
-                        void forceChange(false, { slotId, course: newCourse })
-                      },
-                    )
-                  } else {
-                    await addCourse(roundId, newCourse)
-                  }
-                })
-              }
-            >
-              {swapping ? t('rounds.menu.change') : t('actions.add')}
-            </button>
-          </div>
+          <button type="button" disabled={saving || !balanced || !changed} onClick={save}>
+            {t('actions.ok')}
+          </button>
         </>
       )}
     </HostAction>

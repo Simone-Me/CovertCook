@@ -12,6 +12,7 @@ import { ChefSheet } from '../rounds/ChefSheet'
 import { Answer } from '../rounds/CreateWithChef'
 import { useSetupSummary } from '../rounds/setupSummary'
 import { CHAIN, COURSES, MESSAGE_CHOICES, POINTS, WINNER, chef, type ChefKey } from './fixture'
+import { Arrow } from '../../components/Arrow'
 
 /**
  * THE SCREENS OF THE GUIDED DINNER.
@@ -38,7 +39,7 @@ function Back() {
   const { t } = useTranslation()
   return (
     <button type="button" className="back-link" data-tour="back">
-      ← {t('rounds.backToTable')}
+      <Arrow dir="back" /> {t('rounds.backToTable')}
     </button>
   )
 }

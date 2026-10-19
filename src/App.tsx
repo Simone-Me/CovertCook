@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom'
-import type { ReactNode } from 'react'
+import { lazy, Suspense, type ComponentType, type ReactNode } from 'react'
 import { useAuth } from './lib/auth'
 import { rememberJoinCode } from './lib/pendingJoin'
 import { AppHeader } from './components/AppHeader'
@@ -7,33 +7,45 @@ import { PendingJoinBanner } from './components/PendingJoinBanner'
 import { SchemaMismatch } from './components/SchemaMismatch'
 import { ErrorBoundary } from './components/ErrorBoundary'
 import { AppFooter } from './components/AppFooter'
-import { LegalPage } from './features/legal/LegalPage'
-import { HelpPage } from './features/legal/HelpPage'
 import { SignInPage } from './features/auth/SignInPage'
-import { SignUpPage } from './features/auth/SignUpPage'
-import { ResetPasswordPage } from './features/auth/ResetPasswordPage'
 import { MyRoundsPage } from './features/rounds/MyRoundsPage'
-import { ProfilePage } from './features/profile/ProfilePage'
-import { AlbumPage, RecipesPage } from './features/profile/KeptPages'
-import { CreateRoundPage } from './features/rounds/CreateRoundPage'
-import { CustomRoundPage } from './features/rounds/CustomRoundPage'
-import { JoinRoundPage } from './features/rounds/JoinRoundPage'
-import { GoToNextDinner } from './features/rounds/GoToNextDinner'
-import { RoundHomePage } from './features/rounds/RoundHomePage'
-import { RoundSettingsPage } from './features/rounds/RoundSettingsPage'
-import { ChainPage } from './features/rounds/ChainPage'
-import { HostAlertsPage } from './features/rounds/HostAlertsPage'
-import { BriefEditorPage } from './features/briefs/BriefEditorPage'
-import { CookViewPage } from './features/briefs/CookViewPage'
-import { BoardPage } from './features/chat/BoardPage'
-import { BallotPage } from './features/vote/BallotPage'
-import { ManualTallyPage } from './features/vote/ManualTallyPage'
-import { ResultsPage } from './features/vote/ResultsPage'
-import { ProPage } from './features/pro/ProPage'
-import { SupportPage } from './features/support/SupportPage'
-import { AdminWeekPage } from './features/admin/AdminWeekPage'
 import { PRO_VISIBLE } from './lib/proVisible'
-import { TutorialPage } from './features/tutorial/TutorialPage'
+
+// Every page but the two a visit starts on (sign-in and the list of dinners)
+// is its own file, fetched the first time somebody goes there. In one bundle
+// the whole app — every editor, the vote, the admin — was downloaded before
+// the first screen could draw.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- each page keeps its own props
+function page<K extends string, P = any>(load: () => Promise<Record<K, ComponentType<P>>>, name: K) {
+  return lazy(() => load().then((m) => ({ default: m[name] })))
+}
+
+const LegalPage = page(() => import('./features/legal/LegalPage'), 'LegalPage')
+const HelpPage = page(() => import('./features/legal/HelpPage'), 'HelpPage')
+const SignUpPage = page(() => import('./features/auth/SignUpPage'), 'SignUpPage')
+const ResetPasswordPage = page(() => import('./features/auth/ResetPasswordPage'), 'ResetPasswordPage')
+const ProfilePage = page(() => import('./features/profile/ProfilePage'), 'ProfilePage')
+const AlbumPage = page(() => import('./features/profile/KeptPages'), 'AlbumPage')
+const RecipesPage = page(() => import('./features/profile/KeptPages'), 'RecipesPage')
+const CreateRoundPage = page(() => import('./features/rounds/CreateRoundPage'), 'CreateRoundPage')
+const CustomRoundPage = page(() => import('./features/rounds/CustomRoundPage'), 'CustomRoundPage')
+const JoinRoundPage = page(() => import('./features/rounds/JoinRoundPage'), 'JoinRoundPage')
+const GoToNextDinner = page(() => import('./features/rounds/GoToNextDinner'), 'GoToNextDinner')
+const RoundHomePage = page(() => import('./features/rounds/RoundHomePage'), 'RoundHomePage')
+const RoundSettingsPage = page(() => import('./features/rounds/RoundSettingsPage'), 'RoundSettingsPage')
+const ChainPage = page(() => import('./features/rounds/ChainPage'), 'ChainPage')
+const HostAlertsPage = page(() => import('./features/rounds/HostAlertsPage'), 'HostAlertsPage')
+const BriefEditorPage = page(() => import('./features/briefs/BriefEditorPage'), 'BriefEditorPage')
+const CookViewPage = page(() => import('./features/briefs/CookViewPage'), 'CookViewPage')
+const BoardPage = page(() => import('./features/chat/BoardPage'), 'BoardPage')
+const BallotPage = page(() => import('./features/vote/BallotPage'), 'BallotPage')
+const ManualTallyPage = page(() => import('./features/vote/ManualTallyPage'), 'ManualTallyPage')
+const ResultsPage = page(() => import('./features/vote/ResultsPage'), 'ResultsPage')
+const ProPage = page(() => import('./features/pro/ProPage'), 'ProPage')
+const SupportPage = page(() => import('./features/support/SupportPage'), 'SupportPage')
+const ReportBugPage = page(() => import('./features/support/ReportBugPage'), 'ReportBugPage')
+const AdminWeekPage = page(() => import('./features/admin/AdminWeekPage'), 'AdminWeekPage')
+const TutorialPage = page(() => import('./features/tutorial/TutorialPage'), 'TutorialPage')
 
 function RequireAuth({ children }: { children: ReactNode }) {
   const { session, profile, loading, needsSignupCompletion, recovering } = useAuth()
@@ -73,6 +85,9 @@ function AppRoutes() {
     // boundary above them would take them down with it. Keyed on the path so
     // walking away from a crashed page actually leaves it behind.
     <ErrorBoundary resetKey={location.pathname}>
+      {/* Nothing while a page's file arrives: it is a fraction of a second, and
+          a spinner flashing for that long reads as the app stuttering. */}
+      <Suspense fallback={null}>
       <Routes>
         <Route path="/legal/terms" element={<LegalPage page="terms" />} />
         <Route path="/legal/privacy" element={<LegalPage page="privacy" />} />
@@ -211,6 +226,14 @@ function AppRoutes() {
         {/* Outside the guard: asking for a coffee does not need an account. */}
         <Route path="/support" element={<SupportPage />} />
         <Route
+          path="/report"
+          element={
+            <RequireAuth>
+              <ReportBugPage />
+            </RequireAuth>
+          }
+        />
+        <Route
           path="/rounds/:roundId/settings"
           element={
             <RequireAuth>
@@ -284,6 +307,7 @@ function AppRoutes() {
         />
           <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
+      </Suspense>
     </ErrorBoundary>
   )
 }

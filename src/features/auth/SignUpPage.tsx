@@ -79,7 +79,12 @@ export function SignUpPage() {
   // as one page: one asks who you are, the other what you cannot eat. They are
   // two pages now, food first, because the food is the part somebody came to
   // answer and the name is the last thing before confirming.
-  const [profileStep, setProfileStep] = useState<'food' | 'name'>('food')
+  // A Google account never saw the account page, so its two consents get a
+  // page of their own in its place — on top of the food questions they read
+  // as one more thing about allergies, and the page did not say what it was.
+  const [profileStep, setProfileStep] = useState<'consent' | 'food' | 'name'>(
+    askConsentHere ? 'consent' : 'food',
+  )
 
   // The name is an identity now (migration 0046), so the form asks before the
   // submit does. Advisory only: `stale` drops answers that arrive after the
@@ -164,9 +169,13 @@ export function SignUpPage() {
   // Answered by the Continue button and again at submit: the second is not
   // paranoia, it is what stops a state change on the last page from letting an
   // unanswered question through.
-  function validateFood(): string | null {
+  function validateConsent(): string | null {
     if (askConsentHere && !acceptedTerms) return t('auth.mustAcceptTerms')
     if (askConsentHere && !acceptedAllergies) return t('auth.mustAcceptAllergies')
+    return null
+  }
+
+  function validateFood(): string | null {
     if (hasAllergies === null || hasDiet === null) return t('food.answerBoth')
     // Saying yes and then choosing nothing is the one answer that means
     // neither thing: it is not "no", and it records nothing a cook can use.
@@ -201,6 +210,12 @@ export function SignUpPage() {
       return
     }
 
+    const consentProblem = validateConsent()
+    if (consentProblem) {
+      setError(consentProblem)
+      setProfileStep('consent')
+      return
+    }
     const foodProblem = validateFood()
     if (foodProblem) {
       setError(foodProblem)
@@ -261,8 +276,14 @@ export function SignUpPage() {
     return (
       <div className="stack sheet">
         <LanguageSwitch />
-        <Steps n={profileStep === 'food' ? 2 : 3} />
-        <h1>{t('dietary.title')}</h1>
+        <Steps n={profileStep === 'consent' ? 1 : profileStep === 'food' ? 2 : 3} />
+        <h1>
+          {profileStep === 'consent'
+            ? t('auth.signUp')
+            : profileStep === 'food'
+              ? t('dietary.title')
+              : t('auth.name.title')}
+        </h1>
         {/* One sentence where three used to be — a page lead, a line over the
             allergy question and another over the diet one, all saying a
             version of the same thing. It also stops implying a private dinner
@@ -270,10 +291,8 @@ export function SignUpPage() {
         {profileStep === 'food' && <p className="muted">{t('dietary.help')}</p>}
         {error && <div className="error">{error}</div>}
         <form onSubmit={onDietarySubmit} className="stack">
-          {profileStep === 'food' ? (
+          {profileStep === 'consent' ? (
             <>
-
-          {askConsentHere && (
             <fieldset className="ask">
               <legend>{t('auth.consentFirst')}</legend>
               <label className="row">
@@ -303,7 +322,24 @@ export function SignUpPage() {
                 <span>{t('auth.acceptAllergies')}</span>
               </label>
             </fieldset>
-          )}
+              <button
+                type="button"
+                onClick={() => {
+                  const problem = validateConsent()
+                  if (problem) {
+                    setError(problem)
+                    return
+                  }
+                  setError(null)
+                  setProfileStep('food')
+                }}
+              >
+                {t('actions.next')}
+              </button>
+            </>
+          ) : profileStep === 'food' ? (
+            <>
+
 
           {/* Two questions, in pictures. The form they replace asked somebody
               to type their own allergens: whatever spelling came to mind, in

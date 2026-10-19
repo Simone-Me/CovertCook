@@ -36,6 +36,7 @@ import {
   MENU_VISIBILITIES,
   type MenuVisibility,
 } from '../../lib/rpc'
+import { Arrow } from '../../components/Arrow'
 
 // The order the questions are actually asked in, which is not the order the
 // enum was written in. A table decides *whether phones come out* first — hands
@@ -563,7 +564,7 @@ export function CustomRoundPage() {
             <span>
               <strong>{t(isPro ? 'pro.status.on' : 'pro.status.off')}</strong>
               {' — '}
-              {t('pro.seeWhatItOpens')}
+              {t('pro.seeWhatItOpens')} <Arrow />
             </span>
           </Link>
         )}

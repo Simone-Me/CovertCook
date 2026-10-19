@@ -6,6 +6,7 @@ import { Link } from 'react-router-dom'
 import { Fold } from '../../components/Fold'
 import { formatMoment } from '../../lib/datetime'
 import { forgetPhoto, myAlbum, photoUrl, type AlbumEntry } from '../../lib/rpc'
+import { Arrow } from '../../components/Arrow'
 
 /**
  * The evenings you chose to keep.
@@ -105,7 +106,7 @@ function AlbumPreview() {
           ))}
       </Link>
       <Link to="/profile/album" className="seeall">
-        {t('album.seeAll', { count: evenings.length })} →
+        {t('album.seeAll', { count: evenings.length })} <Arrow />
       </Link>
     </div>
   )

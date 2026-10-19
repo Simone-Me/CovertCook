@@ -5,7 +5,6 @@ interface ImportMetaEnv {
   readonly VITE_SUPABASE_ANON_KEY: string
   readonly VITE_APP_BASE_URL: string
   /** Optional: the page that takes a voluntary contribution (SupportPage). */
-  readonly VITE_DONATION_URL?: string
 }
 
 interface ImportMeta {

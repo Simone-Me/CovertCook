@@ -14,6 +14,10 @@
     <meta name="theme-color" content="#C6202C" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CovertCook</title>
+    <!-- Opens the connection to Supabase while the script is still arriving,
+         so the first query does not pay for DNS + TLS after it. crossorigin
+         because every call there is a CORS fetch, which uses its own pool. -->
+    <link rel="preconnect" href="%VITE_SUPABASE_URL%" crossorigin />
   </head>
   <body>
     <div id="root"></div>

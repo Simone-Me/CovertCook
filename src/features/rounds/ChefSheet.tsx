@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 import { useTranslation } from 'react-i18next'
+import { Arrow } from '../../components/Arrow'
 
 /**
  * The chef peeking over the counter, and whatever he is asking.
@@ -36,7 +37,7 @@ export function ChefSheet({
         <div className="chefsheet__bar">
           {onBack ? (
             <button type="button" className="chefsheet__nav" onClick={onBack}>
-              ← {t('actions.back')}
+              <Arrow dir="back" /> {t('actions.back')}
             </button>
           ) : (
             <span />

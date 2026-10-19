@@ -15,6 +15,7 @@ import { BackToTable } from '../../components/BackToTable'
 import { ChainCircle, ChainName } from './ChainCircle'
 import { walkCycles } from '../../lib/chain'
 import { InlineConfirm } from '../../components/InlineConfirm'
+import { Arrow } from '../../components/Arrow'
 
 export function ChainPage() {
   const { t } = useTranslation()
@@ -142,7 +143,7 @@ export function ChainPage() {
                 {cycle.map((link) => (
                   <span key={link.sender_member_id}>
                     <ChainName secret={link.sender_secret_name} real={realNames ? link.sender_display_name : null} />
-                    <span aria-hidden="true"> → </span>
+                    {' '}<Arrow />{' '}
                   </span>
                 ))}
                 {cycle[0] && (

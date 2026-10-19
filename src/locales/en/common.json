@@ -77,7 +77,8 @@
       "offensive": "That name is not allowed. Pick another.",
       "rule": "Names are lowercase; spaces become “-”.",
       "changeLater": "Changing it later is planned.",
-      "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name."
+      "whatItIs": "This is your real name, outside the game — how your friends recognise you and how a host knows who is asking to join. You are never called this at a dinner: each dinner draws you its own secret name.",
+      "title": "What should we call you?"
     },
     "passwordLabel": "Password",
     "step": "Step {{n}} of {{total}}",
@@ -403,20 +404,16 @@
       "freeHint": "everyone brings whatever they like. Nothing to plan.",
       "composed": "A composed menu",
       "composedHint": "you decide the courses, and each chef is given one to write.",
-      "balanced": "{{courses}} courses for {{seats}} chefs — the menu is complete.",
-      "unbalanced": "{{courses}} courses for {{seats}} chefs. Every chef cooks exactly one dish, so these two have to match before the roulette can run.",
+      "tally": "{{placed}}/{{seats}} courses on the menu",
+      "tallyHint": "one per chef, so OK waits for the two numbers to match.",
+      "less": "Remove one: {{course}}",
+      "more": "Add one: {{course}}",
       "locked": "The menu can no longer change: the chefs are already writing for the courses they were given.",
       "errors": {
         "MENU_LOCKED": "The menu is set — the chefs already have their courses. Re-roll the roulette to change it.",
         "COURSE_IN_USE": "Somebody is already cooking that course.",
         "BRIEFS_EXIST": "Recipes have already been written for this assignment."
       },
-      "swap": "Replace this course",
-      "change": "Change",
-      "clearToChange": "To change it, the roulette has to be cleared and spun again. Nobody has written yet, so nothing is lost.",
-      "discardWarning": "Changing the menu now means dealing the roulette again, and there is no way to do that without throwing away every recipe already written and every private message sent about them. This cannot be undone.",
-      "discardConfirm": "Delete the recipes and change the menu",
-      "stillFilling": "Courses so far: {{courses}}. They only have to match the number of chefs once sign-ups close.",
       "composedAtLock": "Which courses gets decided once sign-ups close — there has to be exactly one per chef, and until then that number is still moving."
     },
     "guest": {
@@ -1044,7 +1041,7 @@
     "what": "Crème unlocks special features.",
     "needed": "That setting is part of Crème.",
     "lockedHere": "Part of Crème.",
-    "seeWhatItOpens": "See what Crème opens →",
+    "seeWhatItOpens": "See what Crème opens",
     "status": {
       "on": "You have Crème.",
       "off": "You are on the free app — which has everything a dinner needs.",
@@ -1098,7 +1095,7 @@
       "MONTH": "Your Crème ends on {{date}}.",
       "WEEK": "Your Crème ends on {{date}} — that is under a week.",
       "whatHappens": "Dinners you have already created that use a Crème feature keep working for {{hours}} hours after that, and then go on hold until you renew. Nothing is deleted, and dinners that use nothing Crème are not affected at all.",
-      "renew": "What Crème is, and how to keep it →"
+      "renew": "What Crème is, and how to keep it"
     },
     "round": {
       "ending": "This dinner’s Crème cover ends on {{date}}.",
@@ -1413,8 +1410,9 @@
     ],
     "whyTitle": "Why does this exist?",
     "why": [
-      "I made this app for my friends. We like eating together — sharing a good evening, passing recipes and tricks around. We wanted to meet up around a game and show each other the dishes we love — and what better way to learn a recipe than to cook it yourself?",
-      "Whether you love cooking or you eat the same three ready meals every week, I hope you enjoy making the recipe somebody wanted to share with you."
+      "It started with friends from different cities: the idea was a dinner where everyone brought the typical dish from back home.",
+      "Then we realised the best way to discover a dish is to cook it yourself, and that is how the idea of swapping recipes to prepare was born. From there, step by step, we kept adding new ideas and features.",
+      "I hope you have fun too — discovering new dishes, swapping cooking tips, and spending a good moment with the people you love."
     ],
     "start": "Start by creating a dinner, or join one with a code somebody sent you.",
     "readAgain": "How CovertCook works"
@@ -1837,7 +1835,7 @@
         "What deletion does: your login is removed and your profile is emptied of anything that identifies you. It takes effect after thirty days and you can cancel it at any point before that by signing in again.",
         "What it does not do: it does not erase the dinners you took part in. An evening belongs to everybody who was at that table, and deleting one person's account would delete seven other people's evening. What remains carries no name."
       ],
-      "signIn": "Sign in to delete your account →",
+      "signIn": "Sign in to delete your account",
       "cannotSignIn": "Cannot sign in? Write to us and we will do it for you:"
     },
     "contact": {
@@ -1940,19 +1938,25 @@
     "points_one": "{{count}} pt",
     "points_other": "{{count}} pts",
     "finish": "Finish the tour",
-    "previous": "← Previous step"
+    "previous": "Previous step"
   },
   "support": {
     "row": "Buy us a coffee",
     "rowHint": "keep CovertCook free for everyone",
-    "title": "Keep CovertCook free",
-    "body": [
-      "CovertCook is free for everybody, with every theme and every option open. No ads, no paid tier, no data sold.",
-      "It is made and run by one person in their spare time, and the servers, the domain and the email cost a little every month. If an evening at your table was worth it, a small contribution — the price of a coffee — helps keep it free for the next table."
-    ],
-    "cta": "Contribute",
-    "soon": "The contribution page is on its way. Thank you for thinking of it.",
-    "nothingChanges": "A contribution is a gift: it unlocks nothing and changes nothing in the app. Everybody already has everything."
+    "title": "Buy us a coffee",
+    "body": "CovertCook is free and will stay free. If you enjoy it and want to help with the costs, any contribution is very welcome ❤️",
+    "thanks": "Thank you!"
+  },
+  "report": {
+    "title": "Report a problem",
+    "lead": "Something not working? Tell us what happened — it goes straight to us. A screenshot helps.",
+    "what": "What happened?",
+    "photo": "Screenshot (optional)",
+    "removePhoto": "Remove the screenshot",
+    "send": "Send",
+    "sending": "Sending…",
+    "thanks": "Thank you! We got it and will look into it.",
+    "failed": "It could not be sent. Try again in a moment, or write to contact@covertcook.fr."
   },
   "footprint": {
     "title": "Calculate your consumption"

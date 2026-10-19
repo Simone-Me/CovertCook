@@ -11,17 +11,20 @@ function keys(t: Tree, prefix = ''): string[] {
 }
 
 describe('translations', () => {
-  const en = new Set(keys(load('en')))
-  const fr = new Set(keys(load('fr')))
   // i18next plural suffixes may legitimately differ per language.
   const base = (k: string) => k.replace(/_(zero|one|two|few|many|other)$/, '')
-  const enBase = new Set([...en].map(base))
-  const frBase = new Set([...fr].map(base))
+  const set = (l: string) => new Set(keys(load(l)).map(base))
+  const enBase = set('en')
 
-  it('French has every English key', () => {
-    expect([...enBase].filter((k) => !frBase.has(k))).toEqual([])
-  })
-  it('English has every French key', () => {
-    expect([...frBase].filter((k) => !enBase.has(k))).toEqual([])
-  })
+  // Each language loads on its own, with no English behind it (src/lib/i18n.ts),
+  // so a key missing here is a raw key on somebody's screen.
+  for (const l of ['fr', 'it', 'es']) {
+    const other = set(l)
+    it(`${l} has every English key`, () => {
+      expect([...enBase].filter((k) => !other.has(k))).toEqual([])
+    })
+    it(`English has every ${l} key`, () => {
+      expect([...other].filter((k) => !enBase.has(k))).toEqual([])
+    })
+  }
 })

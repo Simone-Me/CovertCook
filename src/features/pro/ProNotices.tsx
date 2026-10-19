@@ -13,6 +13,7 @@ import {
   type NameTheme,
   type TableTheme,
 } from '../../lib/rpc'
+import { Arrow } from '../../components/Arrow'
 
 /**
  * "Your PRO is ending", said twice and then not again.
@@ -54,7 +55,7 @@ export function ProEndingNotice() {
         {t('pro.ending.whatHappens', { hours: PRO_GRACE_HOURS })}
       </p>
       <p style={{ margin: '6px 0 0' }}>
-        <Link to="/pro">{t('pro.ending.renew')}</Link>
+        <Link to="/pro">{t('pro.ending.renew')} <Arrow /></Link>
       </p>
     </div>
   )
@@ -127,7 +128,7 @@ export function RoundProNotice({
       </p>
       {isHost && (
         <p style={{ margin: '6px 0 0' }}>
-          <Link to="/pro">{t('pro.ending.renew')}</Link>
+          <Link to="/pro">{t('pro.ending.renew')} <Arrow /></Link>
         </p>
       )}
     </div>
