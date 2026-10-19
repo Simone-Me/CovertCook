@@ -772,7 +772,12 @@
       "NO_BRIEF": "I haven't received a brief",
       "THANKS": "Say thanks",
       "REPLY": "Reply"
-    }
+    },
+    "limitTitle": "Message break",
+    "limitBody": "You have sent 10 messages in the last 30 minutes. Wait a little and you can write more.",
+    "newCount_one": "{{count}} new",
+    "newCount_other": "{{count}} new",
+    "new": "New"
   },
   "vote": {
     "title": "Vote the menu",
@@ -1012,7 +1017,7 @@
     "help": "The whole table talks here, and nobody signs it. Turn the rolling pin for something to say, or throw the egg and let it choose.",
     "empty": "Nothing in the fridge yet. Be the first.",
     "throwEgg": "Throw the egg — say something at random",
-    "rateLimit": "That is plenty for one hour. Let somebody else talk.",
+    "rateLimit": "That is plenty for half an hour. Let somebody else talk.",
     "yourChef": "Your Chef",
     "yourChefHelp": "Your two private conversations: the chef you write for, and the chef who writes for you.",
     "toYourCook": "With the chef you write for",
@@ -1024,7 +1029,7 @@
     "answeringOne": "Answering this one.",
     "whichChef": "Which chef?",
     "errors": {
-      "RATE_LIMIT": "That is enough for one hour. The fridge will still be here.",
+      "RATE_LIMIT": "That is enough for half an hour. The fridge will still be here.",
       "NOT_A_CHEF_HERE": "Nobody by that name is cooking at this table.",
       "REPLY_NEEDS_PARENT": "Pick something to answer first.",
       "REPLY_PARENT_NOT_FOUND": "That one has gone, or it was itself an answer — the fridge only goes one deep.",
@@ -1789,7 +1794,7 @@
         "q": "Does it cost anything?",
         "a": [
           "No. Unlimited dinners, any number of guests, every theme and every option — all of it is free, for everybody.",
-          "If you would like to help keep it that way, there is a “Buy us a coffee” page in your profile. A contribution is a gift: it unlocks nothing, because everything is already open."
+          "If you would like to help keep it that way, there is a “Support this project” page in your profile. A contribution is a gift: it unlocks nothing, because everything is already open."
         ]
       },
       {
@@ -1845,7 +1850,6 @@
   },
   "tutorial": {
     "title": "Guided tour",
-    "cta": "Take the guided tour — two minutes",
     "profileLink": "Take the guided tour again",
     "profileWhat": "A pretend dinner, from the invitation to the reveal.",
     "skip": "Skip this step",
@@ -1941,22 +1945,26 @@
     "previous": "Previous step"
   },
   "support": {
-    "row": "Buy us a coffee",
+    "row": "Support this project",
     "rowHint": "keep CovertCook free for everyone",
-    "title": "Buy us a coffee",
+    "title": "Support this project",
     "body": "CovertCook is free and will stay free. If you enjoy it and want to help with the costs, any contribution is very welcome ❤️",
-    "thanks": "Thank you!"
+    "thanks": "Thank you!",
+    "paypal": "Donate"
   },
   "report": {
     "title": "Report a problem",
     "lead": "Something not working? Tell us what happened — it goes straight to us. A screenshot helps.",
+    "subject": "Title",
     "what": "What happened?",
     "photo": "Screenshot (optional)",
     "removePhoto": "Remove the screenshot",
     "send": "Send",
     "sending": "Sending…",
     "thanks": "Thank you! We got it and will look into it.",
-    "failed": "It could not be sent. Try again in a moment, or write to contact@covertcook.fr."
+    "failed": "It could not be sent. Try again in a moment, or write to contact@covertcook.fr.",
+    "contactMe": "I would like to be contacted",
+    "name": "Name"
   },
   "footprint": {
     "title": "Calculate your consumption"

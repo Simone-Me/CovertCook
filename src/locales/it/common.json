@@ -773,7 +773,12 @@
       "NO_BRIEF": "Non ho ricevuto una ricetta",
       "THANKS": "Ringrazia",
       "REPLY": "Rispondi"
-    }
+    },
+    "limitTitle": "Pausa messaggi",
+    "limitBody": "Hai inviato 10 messaggi negli ultimi 30 minuti. Aspetta un po’ e potrai scriverne altri.",
+    "newCount_one": "{{count}} nuovo",
+    "newCount_other": "{{count}} nuovi",
+    "new": "Nuovo"
   },
   "vote": {
     "title": "Vota il menu",
@@ -1013,7 +1018,7 @@
     "help": "Qui parla tutta la tavola, e nessuno firma. Gira il matterello per trovare qualcosa da dire, o lancia l'uovo e lascia scegliere a lui.",
     "empty": "Ancora niente nel frigo. Sii il primo.",
     "throwEgg": "Lancia l'uovo — dì qualcosa a caso",
-    "rateLimit": "Basta così per un'ora. Lascia parlare qualcun altro.",
+    "rateLimit": "Basta così per mezz’ora. Lascia parlare qualcun altro.",
     "yourChef": "Il tuo Chef",
     "yourChefHelp": "Le tue due conversazioni private: lo chef per cui scrivi e lo chef che scrive per te.",
     "toYourCook": "Con lo chef per cui scrivi",
@@ -1025,7 +1030,7 @@
     "answeringOne": "Stai rispondendo a questa.",
     "whichChef": "Quale chef?",
     "errors": {
-      "RATE_LIMIT": "Basta per un'ora. Il frigo sarà ancora qui.",
+      "RATE_LIMIT": "Basta per mezz’ora. Il frigo sarà ancora qui.",
       "NOT_A_CHEF_HERE": "Nessuno con quel nome cucina a questa tavola.",
       "REPLY_NEEDS_PARENT": "Scegli prima a cosa rispondere.",
       "REPLY_PARENT_NOT_FOUND": "Quella non c'è più, oppure era già una risposta — il frigo arriva a un solo livello.",
@@ -1587,7 +1592,7 @@
         "q": "Costa qualcosa?",
         "a": [
           "No. Cene illimitate, qualsiasi numero di ospiti, ogni tema e ogni opzione — tutto è gratis, per tutti.",
-          "Se vuoi aiutare a mantenerlo così, nel tuo profilo c’è la pagina «Offrici un caffè». Un contributo è un regalo: non sblocca nulla, perché tutto è già aperto."
+          "Se vuoi aiutare a mantenerlo così, nel tuo profilo c’è la pagina «Supporta questo progetto». Un contributo è un regalo: non sblocca nulla, perché tutto è già aperto."
         ]
       },
       {
@@ -1643,7 +1648,6 @@
   },
   "tutorial": {
     "title": "Tour guidato",
-    "cta": "Fai il tour guidato — due minuti",
     "profileLink": "Rifai il tour guidato",
     "profileWhat": "Una cena finta, dall'invito alla rivelazione.",
     "skip": "Salta questo passaggio",
@@ -1739,22 +1743,26 @@
     "previous": "Passaggio precedente"
   },
   "support": {
-    "row": "Offrici un caffè",
+    "row": "Supporta questo progetto",
     "rowHint": "per tenere CovertCook gratuito per tutti",
-    "title": "Offrici un caffè",
+    "title": "Supporta questo progetto",
     "body": "CovertCook è gratuito e lo resterà. Se ti piace e vuoi darci una mano con i costi, un contributo è sempre ben accetto ❤️",
-    "thanks": "Grazie!"
+    "thanks": "Grazie!",
+    "paypal": "Dona"
   },
   "report": {
     "title": "Segnala un problema",
     "lead": "Qualcosa non funziona? Raccontaci cosa è successo — arriva direttamente a noi. Uno screenshot aiuta.",
+    "subject": "Titolo",
     "what": "Cosa è successo?",
     "photo": "Screenshot (facoltativo)",
     "removePhoto": "Togli lo screenshot",
     "send": "Invia",
     "sending": "Invio…",
     "thanks": "Grazie! L’abbiamo ricevuto e ci diamo un’occhiata.",
-    "failed": "Non è stato possibile inviarlo. Riprova tra poco, o scrivi a contact@covertcook.fr."
+    "failed": "Non è stato possibile inviarlo. Riprova tra poco, o scrivi a contact@covertcook.fr.",
+    "contactMe": "Voglio essere ricontattato",
+    "name": "Nome"
   },
   "footprint": {
     "title": "Calcola il tuo consumo"

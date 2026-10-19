@@ -439,7 +439,7 @@ export function FilRougePicker({
                         <button
                           key={o.code}
                           type="button"
-                          className={`pin${code === o.code ? ' is-chosen' : ''}${
+                          className={`pinnote${code === o.code ? ' is-chosen' : ''}${
                             openKind('COUNTRY') ? '' : ' is-locked'
                           }${o.drawn ? ' is-week' : ''}`}
                           disabled={!openKind('COUNTRY')}
@@ -537,7 +537,7 @@ export function FilRougePicker({
                                           <button
                                             key={o.code}
                                             type="button"
-                                            className={`pin${code === o.code ? ' is-chosen' : ''}${
+                                            className={`pinnote${code === o.code ? ' is-chosen' : ''}${
                                               openKind('COUNTRY') ? '' : ' is-locked'
                                             }${o.drawn ? ' is-week' : ''}`}
                                             disabled={!openKind('COUNTRY')}
