@@ -8,6 +8,7 @@ import { InlineConfirm } from '../../components/InlineConfirm'
 import { FoodLabel } from '../../components/FoodLabel'
 import { formatMoment } from '../../lib/datetime'
 import { COURSES, forgetRecipe, listMyRecipes, type SavedRecipe } from '../../lib/rpc'
+import { Arrow } from '../../components/Arrow'
 
 /**
  * Everything you kept, from every dinner.
@@ -262,7 +263,7 @@ function RecipesPreview() {
         ))}
       </ol>
       <Link to="/profile/recipes" className="seeall">
-        {t('book.seeAll', { count: recipes.length })} →
+        {t('book.seeAll', { count: recipes.length })} <Arrow />
       </Link>
     </div>
   )

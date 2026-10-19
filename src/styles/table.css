@@ -394,6 +394,9 @@
   color: var(--text-muted);
   font-size: 14px;
   cursor: pointer;
+  /* An <a> on the album and recipe pages, a <button> elsewhere: the same
+     line either way, so no underline. */
+  text-decoration: none;
 }
 
 .back-link:hover,
@@ -597,6 +600,16 @@
   background: var(--bg);
   font-style: italic;
   overflow-wrap: anywhere;
+}
+
+/* The app's one arrow (components/Arrow): the header's, everywhere. Its own
+   font, so a label set in another face does not redraw it. */
+.arrow {
+  display: inline-block;
+  font-family: system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-weight: 600;
+  font-style: normal;
+  line-height: 1;
 }
 
 .app-logo__back {
@@ -1286,10 +1299,60 @@
   border-left-color: var(--accent);
 }
 
-/* The course currently armed for replacement. */
-.menu-slot.is-swapping {
+/* Composing the menu: every course, each with a banana, a count and a plus
+   (MenuPanel). A course with none on the menu goes quiet, so the ones that
+   are on it read as the menu. */
+.menu-tally {
+  margin: 0;
   font-weight: 700;
   color: var(--accent);
+}
+
+.menu-tally.is-balanced {
+  color: inherit;
+}
+
+.menu-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menu-steps__row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+}
+
+.menu-steps__row.is-on {
+  color: inherit;
+  font-weight: 600;
+}
+
+.menu-steps__ctl {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.menu-steps__count {
+  min-width: 1.5em;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.menu-steps__more {
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.menu-slot-remove:disabled {
+  opacity: 0.35;
+  cursor: default;
 }
 
 /* ---------------------------------------------------------------------------
@@ -4078,9 +4141,20 @@
   order: 10;
 }
 
-/* The question mark sits on the pass's own face. */
+/* The question mark sits on the pass's own face, in the row beside the
+   "needs you" mark rather than pinned over the corner where that mark goes. */
 .env--pass .env__face {
   position: relative;
+}
+
+.env--pass .env__face .infocorner__btn {
+  position: static;
+  flex: none;
+  margin-left: auto;
+}
+
+.env--pass .env__face .env__pip--pass + .infocorner__btn {
+  margin-left: 0;
 }
 
 /* The admin's door beside the bell: the same pill, outlined rather than

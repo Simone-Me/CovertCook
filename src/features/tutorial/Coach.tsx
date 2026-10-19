@@ -1,4 +1,5 @@
 import { useTranslation } from 'react-i18next'
+import { Arrow } from '../../components/Arrow'
 
 /**
  * The chef who tells the story, one sentence at a time.
@@ -59,7 +60,7 @@ export function Coach({
               aria-label={t('tutorial.previous')}
               title={t('tutorial.previous')}
             >
-              ←
+              <Arrow dir="back" />
             </button>
           ) : (
             <span className="coach__arrow-gap" aria-hidden="true" />
@@ -78,7 +79,7 @@ export function Coach({
               aria-label={t('actions.ok')}
               title={t('actions.ok')}
             >
-              →
+              <Arrow />
             </button>
           ) : (
             <span className="coach__arrow-gap" aria-hidden="true" />

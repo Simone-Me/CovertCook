@@ -24,6 +24,13 @@ import { Fold } from '../../components/Fold'
  */
 export function HowItWorks({ compact = false }: { compact?: boolean }) {
   const { t } = useTranslation()
+  const steps = (
+    <ol className="howto__steps">
+      {(t('welcome.how', { returnObjects: true }) as string[]).map((step) => (
+        <li key={step}>{step}</li>
+      ))}
+    </ol>
+  )
 
   return (
     <div className="stack">
@@ -34,13 +41,16 @@ export function HowItWorks({ compact = false }: { compact?: boolean }) {
         </>
       )}
 
-      <Fold title={t('welcome.howTitle')} defaultOpen={!compact}>
-        <ol className="howto__steps">
-          {(t('welcome.how', { returnObjects: true }) as string[]).map((step) => (
-            <li key={step}>{step}</li>
-          ))}
-        </ol>
-      </Fold>
+      {/* Folded on the first run only. The compact copy already sits inside a
+          fold called "How CovertCook works", and a second fold asking "How
+          does it work?" inside it was the same door twice. */}
+      {compact ? (
+        steps
+      ) : (
+        <Fold title={t('welcome.howTitle')} defaultOpen>
+          {steps}
+        </Fold>
+      )}
 
       <Fold title={t('welcome.whyTitle')}>
         {(t('welcome.why', { returnObjects: true }) as string[]).map((para) => (

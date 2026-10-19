@@ -10,12 +10,15 @@ import { TurnBack } from './TurnBack'
  * current language cannot read "French" either, and can read "Français".
  * `search` carries the other spellings so the box finds it however it is
  * typed — a third language costs one row here and nothing else.
+ *
+ * `switchTo` is the confirm button, in the language it switches to, for the
+ * same reason: it is read by somebody who may not read the current one.
  */
 const LANGS = [
-  { code: 'fr', label: 'Français', search: 'francais french français fr' },
-  { code: 'en', label: 'English', search: 'english anglais en' },
-  { code: 'it', label: 'Italiano', search: 'italiano italian italien it' },
-  { code: 'es', label: 'Español', search: 'espanol español spanish espagnol es' },
+  { code: 'fr', label: 'Français', switchTo: 'Passer en français', search: 'francais french français fr' },
+  { code: 'en', label: 'English', switchTo: 'Switch to English', search: 'english anglais en' },
+  { code: 'it', label: 'Italiano', switchTo: 'Passa all’italiano', search: 'italiano italian italien it' },
+  { code: 'es', label: 'Español', switchTo: 'Cambiar a español', search: 'espanol español spanish espagnol es' },
 ] as const
 
 const SHOW_LANGUAGE_SEARCH = false
@@ -125,9 +128,8 @@ export function LanguageSwitch({ onChange }: { onChange?: (code: LangCode) => vo
               disabled={!aimed || aimed === current}
               onClick={apply}
             >
-              {t('app.languageConfirm', {
-                lang: LANGS.find((l) => l.code === aimed)?.label ?? '',
-              })}
+              {LANGS.find((l) => l.code === aimed)?.switchTo ??
+                t('app.languageConfirm', { lang: currentLabel })}
             </button>
             <button
               type="button"

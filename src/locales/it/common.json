@@ -77,7 +77,8 @@
       "offensive": "Quel nome non è ammesso. Scegline un altro.",
       "rule": "I nomi sono in minuscolo; gli spazi diventano «-».",
       "changeLater": "Poterlo cambiare in seguito è previsto.",
-      "whatItIs": "Questo è il tuo vero nome, fuori dal gioco — come ti riconoscono gli amici e come un capo sa chi chiede di entrare. Non ti chiamano mai così a una cena: ogni cena ti assegna un nome segreto tutto suo."
+      "whatItIs": "Questo è il tuo vero nome, fuori dal gioco — come ti riconoscono gli amici e come un capo sa chi chiede di entrare. Non ti chiamano mai così a una cena: ogni cena ti assegna un nome segreto tutto suo.",
+      "title": "Come ti chiamiamo?"
     },
     "passwordLabel": "Password",
     "step": "Passo {{n}} di {{total}}",
@@ -403,20 +404,16 @@
       "freeHint": "ognuno porta ciò che preferisce. Niente da pianificare.",
       "composed": "Un menu composto",
       "composedHint": "decidi le portate, e a ogni chef ne viene assegnata una da scrivere.",
-      "balanced": "{{courses}} portate per {{seats}} chef — il menu è completo.",
-      "unbalanced": "{{courses}} portate per {{seats}} chef. Ogni chef cucina esattamente un piatto, quindi questi due numeri devono coincidere prima che la roulette possa girare.",
+      "tally": "{{placed}}/{{seats}} portate nel menu",
+      "tallyHint": "una per chef, quindi OK aspetta che i due numeri coincidano.",
+      "less": "Togli: {{course}}",
+      "more": "Aggiungi: {{course}}",
       "locked": "Il menu non può più cambiare: gli chef stanno già scrivendo per le portate che hanno ricevuto.",
       "errors": {
         "MENU_LOCKED": "Il menu è fissato — gli chef hanno già le loro portate. Rifai la roulette per cambiarlo.",
         "COURSE_IN_USE": "Qualcuno sta già cucinando quella portata.",
         "BRIEFS_EXIST": "Sono già state scritte ricette per questa assegnazione."
       },
-      "swap": "Sostituisci questa portata",
-      "change": "Cambia",
-      "clearToChange": "Per cambiarla, la roulette va annullata e rifatta. Nessuno ha ancora scritto, quindi non si perde nulla.",
-      "discardWarning": "Cambiare il menu ora significa distribuire di nuovo la roulette, e non c'è modo di farlo senza buttare via ogni ricetta già scritta e ogni messaggio privato inviato su di esse. Non si può annullare.",
-      "discardConfirm": "Elimina le ricette e cambia il menu",
-      "stillFilling": "Portate finora: {{courses}}. Devono coincidere con il numero di chef solo quando le iscrizioni si chiudono.",
       "composedAtLock": "Quali portate si decide quando le iscrizioni si chiudono — deve essercene esattamente una per chef, e fino ad allora quel numero continua a cambiare."
     },
     "guest": {
@@ -1045,7 +1042,7 @@
     "what": "Crème sblocca funzioni speciali.",
     "needed": "Quell'impostazione fa parte di Crème.",
     "lockedHere": "Fa parte di Crème.",
-    "seeWhatItOpens": "Scopri cosa apre Crème →",
+    "seeWhatItOpens": "Scopri cosa apre Crème",
     "status": {
       "on": "Hai Crème.",
       "off": "Usi l'app gratuita — che ha tutto ciò che serve a una cena.",
@@ -1099,7 +1096,7 @@
       "MONTH": "Il tuo Crème termina il {{date}}.",
       "WEEK": "Il tuo Crème termina il {{date}} — manca meno di una settimana.",
       "whatHappens": "Le cene che hai già creato e che usano una funzione Crème continuano a funzionare per {{hours}} ore dopo quella data, poi restano in pausa finché non rinnovi. Nulla viene cancellato, e le cene che non usano nulla di Crème non sono toccate affatto.",
-      "renew": "Cos'è Crème e come tenerlo →"
+      "renew": "Cos'è Crème e come tenerlo"
     },
     "round": {
       "ending": "La copertura Crème di questa cena termina il {{date}}.",
@@ -1211,8 +1208,9 @@
     ],
     "whyTitle": "Perché esiste?",
     "why": [
-      "Ho fatto quest'app per i miei amici. Ci piace mangiare insieme — condividere una bella serata, scambiarci ricette e trucchi. Volevamo trovarci attorno a un gioco e mostrarci i piatti che amiamo — e qual è il modo migliore per imparare una ricetta se non cucinarla di persona?",
-      "Che tu ami cucinare o mangi ogni settimana gli stessi tre piatti pronti, spero che ti piaccia preparare la ricetta che qualcuno ha voluto condividere con te."
+      "È nato tutto tra amici venuti da città diverse: l’idea era preparare una cena in cui ognuno portasse il piatto tipico di casa sua.",
+      "Poi ci siamo resi conto che il modo migliore per scoprire un piatto è cucinarlo con le proprie mani, e così è nata l’idea di scambiarci le ricette da preparare. Da lì, passo dopo passo, abbiamo continuato ad aggiungere nuove idee e funzionalità.",
+      "Spero che anche tu possa divertirti a scoprire nuovi piatti, a scambiare consigli in cucina e a passare un bel momento con le persone che ami."
     ],
     "start": "Comincia creando una cena, oppure unisciti a una con il codice che qualcuno ti ha mandato.",
     "readAgain": "Come funziona CovertCook"
@@ -1635,7 +1633,7 @@
         "Cosa fa l'eliminazione: il tuo accesso viene rimosso e il tuo profilo viene svuotato di tutto ciò che ti identifica. Ha effetto dopo trenta giorni e puoi annullarla in qualsiasi momento prima accedendo di nuovo.",
         "Cosa non fa: non cancella le cene a cui hai partecipato. Una serata appartiene a tutti quelli che erano a quella tavola, ed eliminare l'account di una persona cancellerebbe la serata di altre sette. Ciò che resta non porta nessun nome."
       ],
-      "signIn": "Accedi per eliminare il tuo account →",
+      "signIn": "Accedi per eliminare il tuo account",
       "cannotSignIn": "Non riesci ad accedere? Scrivici e lo facciamo noi per te:"
     },
     "contact": {
@@ -1738,24 +1736,229 @@
     "points_one": "{{count}} pt",
     "points_other": "{{count}} pt",
     "finish": "Concludi il tour",
-    "previous": "← Passaggio precedente"
+    "previous": "Passaggio precedente"
   },
   "support": {
     "row": "Offrici un caffè",
     "rowHint": "per tenere CovertCook gratuito per tutti",
-    "title": "Tieni CovertCook gratuito",
-    "body": [
-      "CovertCook è gratuito per tutti, con ogni tema e ogni opzione aperti. Niente pubblicità, niente versione a pagamento, nessun dato venduto.",
-      "È fatto e gestito da una sola persona nel tempo libero, e server, dominio ed email costano un po' ogni mese. Se una serata alla vostra tavola ne è valsa la pena, un piccolo contributo — il prezzo di un caffè — aiuta a tenerlo gratuito per la tavola successiva."
-    ],
-    "cta": "Contribuisci",
-    "soon": "La pagina per contribuire arriva presto. Grazie per averci pensato.",
-    "nothingChanges": "Un contributo è un regalo: non sblocca nulla e non cambia nulla nell'app. Tutti hanno già tutto."
+    "title": "Offrici un caffè",
+    "body": "CovertCook è gratuito e lo resterà. Se ti piace e vuoi darci una mano con i costi, un contributo è sempre ben accetto ❤️",
+    "thanks": "Grazie!"
+  },
+  "report": {
+    "title": "Segnala un problema",
+    "lead": "Qualcosa non funziona? Raccontaci cosa è successo — arriva direttamente a noi. Uno screenshot aiuta.",
+    "what": "Cosa è successo?",
+    "photo": "Screenshot (facoltativo)",
+    "removePhoto": "Togli lo screenshot",
+    "send": "Invia",
+    "sending": "Invio…",
+    "thanks": "Grazie! L’abbiamo ricevuto e ci diamo un’occhiata.",
+    "failed": "Non è stato possibile inviarlo. Riprova tra poco, o scrivi a contact@covertcook.fr."
   },
   "footprint": {
     "title": "Calcola il tuo consumo"
   },
   "legal": {
+    "terms": "Condizioni",
+    "privacy": "Privacy",
+    "contact": "Contatti",
+    "soon": "Questa pagina non è ancora scritta. Deve esistere prima che CovertCook incassi qualsiasi somma — vedi ROADMAP.md.",
+    "updated": "Ultimo aggiornamento",
+    "termsDoc": {
+      "title": "Condizioni d'uso",
+      "updated": "2026-10-11",
+      "sections": [
+        {
+          "heading": "Con chi stai prendendo un accordo",
+          "body": [
+            "CovertCook è gestito da Simone Melotti, come persona fisica — non c'è nessuna società dietro. Scrivendo a contact@covertcook.fr si raggiunge quella persona.",
+            "Usare l'app significa accettare quanto scritto qui. Se non lo accetti, non usare l'app — non esiste un caso in cui tu sia vincolato da qualcosa che non hai mai visto."
+          ]
+        },
+        {
+          "heading": "A cosa serve l'app",
+          "body": [
+            "CovertCook organizza una cena in cui ogni ospite scrive in segreto una ricetta che un altro ospite dovrà cucinare. Questo è tutto il prodotto. Non è un marketplace, non gestisce pagamenti tra ospiti e non consegna cibo.",
+            "Ti serve un account, e devi avere l'età per averne uno dove vivi — 15 anni in Francia, 16 in gran parte dell'UE, 13 nel Regno Unito e negli Stati Uniti."
+          ]
+        },
+        {
+          "heading": "Cosa ti impegni a non fare",
+          "body": [
+            "Non usare CovertCook per molestare qualcuno, per inviare qualcosa di illecito o per aggirare l'anonimato su cui si basa il gioco. Cercare di scoprire chi ha scritto per chi prima della rivelazione rovina l'unica cosa che l'app protegge.",
+            "Non scrivere una ricetta che sai che qualcuno a quel tavolo non può mangiare in sicurezza. Il pannello alimentare esiste perché questo si possa sapere; ignorarlo è l'unica cosa qui che può davvero far male a qualcuno.",
+            "L'Executive Chef di una cena può rimuovere chiunque. Possiamo sospendere un account usato per fare del male alle persone, e diremo perché."
+          ]
+        },
+        {
+          "heading": "Le foto di una cena",
+          "body": [
+            "Puoi aggiungere foto a una cena a cui partecipi, guardare quelle aggiunte dagli altri e salvarle sul tuo dispositivo. Solo le persone di quella cena possono vederle.",
+            "Carica solo ciò che hai il diritto di caricare. La foto di qualcuno che non ha accettato di essere in quell'album non lo è, e pubblicarla comunque è il genere di cosa per cui un account viene sospeso.",
+            "L'Executive Chef può rimuovere qualsiasi foto dalla sua cena, tu puoi rimuovere le tue, e chiunque a quel tavolo può segnalarne una. L'album resta accessibile a chi era presente anche dopo che la cena stessa è stata eliminata."
+          ]
+        },
+        {
+          "heading": "I tuoi contenuti",
+          "body": [
+            "Le tue ricette, foto, messaggi e nomi delle cene restano tuoi. Ci concedi solo ciò che serve per far funzionare l'app: conservarli, mostrarli alle persone della tua cena e farne copie di sicurezza.",
+            "Se elimini il tuo account, quei contenuti spariscono con lui, tranne dove rimuoverli romperebbe una cena organizzata da qualcun altro. Ciò che resta viene allora privato di qualsiasi elemento che ti identifichi."
+          ]
+        },
+        {
+          "heading": "Gratis, con un salvadanaio",
+          "body": [
+            "Tutto in CovertCook è gratuito, per tutti: cene illimitate, un numero qualsiasi di ospiti, ogni tema e ogni funzione.",
+            "Puoi lasciare un piccolo contributo volontario per aiutare a mantenerlo così. È un regalo: non compra nulla, non sblocca nulla, e nell'app non cambia niente che tu dia o no. È gestito dal servizio di pagamento verso cui vieni indirizzato, secondo le sue condizioni."
+          ]
+        },
+        {
+          "heading": "Nessuna promessa che non possiamo mantenere",
+          "body": [
+            "L'app è fornita così com'è. Non promettiamo che sarà disponibile in un momento preciso, che una cena andrà bene o che nessuno indovinerà chi ha scritto la sua ricetta.",
+            "Rispondiamo di ciò di cui la legge ci rende responsabili, e non meno — ma non di un piatto bruciato, di un ospite che non si presenta o di una serata andata diversamente da come speravi."
+          ]
+        },
+        {
+          "heading": "Modifiche, e la legge applicabile",
+          "body": [
+            "Se queste condizioni cambiano in un modo che conta, l'app lo dirà invece di aggiornare una data in silenzio.",
+            "Si applica la legge francese. Se sei un consumatore, questo non ti toglie le tutele della legge del paese in cui vivi, e conservi il diritto di portare una controversia davanti ai suoi tribunali."
+          ]
+        }
+      ]
+    },
+    "privacyDoc": {
+      "title": "Privacy",
+      "updated": "2026-10-11",
+      "sections": [
+        {
+          "heading": "Chi conserva i tuoi dati",
+          "body": [
+            "CovertCook è gestito da Simone Melotti, come persona fisica e non tramite una società, e Simone Melotti è il titolare del trattamento per tutto ciò che è descritto in questa pagina. contact@covertcook.fr raggiunge una persona, e lì si risponde alle domande sui tuoi dati."
+          ]
+        },
+        {
+          "heading": "Cosa viene raccolto, e perché",
+          "body": [
+            "Il tuo indirizzo email e la tua password, per avere un account. La password non è mai visibile a noi — viene cifrata (hash) dal nostro fornitore di autenticazione.",
+            "Un nome visualizzato, che è ciò che vedono le persone che ti invitano.",
+            "Le tue restrizioni alimentari, perché una cena non ti serva qualcosa che non puoi mangiare.",
+            "Ciò che scrivi nell'app: ricette, i messaggi predefiniti che invii, le frasi che appendi al frigo e come hai votato.",
+            "Le foto che aggiungi all'album di una cena, e le didascalie che ci metti.",
+            "Se attivi le notifiche, l'indirizzo che il tuo browser ci fornisce per raggiungere quel dispositivo. È un indirizzo di consegna, non un nome, e disattivandole viene rimosso.",
+            "Niente viene raccolto a scopo pubblicitario. Non c'è pubblicità, nessun tracciamento su altri siti e nessun profilo analitico su di te."
+          ]
+        },
+        {
+          "heading": "Perché possiamo conservarli",
+          "body": [
+            "Il tuo account, le tue cene e ciò che ci scrivi sono conservati perché ci hai chiesto di gestire una cena per te. È un contratto, ed è la base giuridica dell'articolo 6(1)(b) del GDPR.",
+            "I dati alimentari e sulle allergie si basano sul tuo consenso esplicito e su nient'altro — articolo 9(2)(a). È l'unica cosa qui che puoi revocare senza perdere l'account."
+          ]
+        },
+        {
+          "heading": "Dati sanitari, detto chiaramente",
+          "body": [
+            "Un'allergia grave è un dato sanitario. Secondo l'articolo 9 del GDPR è una categoria particolare, ed è la cosa più sensibile che questa app conserva.",
+            "Lo chiediamo perché una cena in cui nessuno lo sa è davvero pericolosa, e lo trattiamo sulla base del tuo consenso esplicito — lo inserisci tu stesso, e puoi rimuoverlo in qualsiasi momento dal tuo profilo.",
+            "Viene mostrato alle persone delle tue cene come un elenco di restrizioni senza alcun nome associato, così chi cucina sa cosa evitare senza sapere di chi è l'allergia."
+          ]
+        },
+        {
+          "heading": "Foto",
+          "body": [
+            "Chiunque partecipi a una cena può aggiungere foto all'album di quella cena, vedere quelle aggiunte dagli altri e salvarle sul proprio dispositivo. Nessuno al di fuori di quella cena può farlo.",
+            "Il luogo in cui è stata scattata la foto viene rimosso prima che lasci il tuo telefono. Una foto dal telefono porta con sé le coordinate dell'appartamento in cui è stata scattata; l'app ridisegna l'immagine e carica solo i pixel, quindi fotocamera, data e posizione non arrivano mai qui.",
+            "L'album è conservato chiuso e mostrato tramite link che smettono di funzionare dopo un'ora — un link inoltrato fuori dall'app scade da solo.",
+            "L'Executive Chef di una cena può rimuovere per tutti qualsiasi foto, chi l'ha aggiunta può rimuovere la propria, e chiunque a quel tavolo può segnalarne una. L'album sopravvive alla cena di proposito: resta accessibile a chi era presente anche quando la serata stessa non c'è più.",
+            "Non vanno caricate foto di persone che non hanno accettato di essere in quell'album. Questa parte è responsabilità di chi preme il pulsante."
+          ]
+        },
+        {
+          "heading": "Chi altro li tratta",
+          "body": [
+            "Supabase ospita il database, gli account e le foto, in un data center in Germania. Netlify distribuisce l'app, e Resend invia le email che l'app deve mandarti.",
+            "I dati si trovano quindi nell'Unione europea — ma tutte e tre sono aziende americane, e una capogruppo americana può in linea di principio essere raggiunta dalle autorità americane ovunque si trovino i dischi. Ciascuna è vincolata a noi da un accordo di trattamento basato sulle clausole contrattuali tipo della Commissione europea, che è il meccanismo che copre questo caso.",
+            "Ciascuna è un responsabile del trattamento che agisce secondo le nostre istruzioni. Nulla viene venduto, e nulla viene condiviso con chi non serve a far funzionare l'app."
+          ]
+        },
+        {
+          "heading": "Per quanto tempo vengono conservati",
+          "body": [
+            "Il tuo account e i suoi contenuti sono conservati finché l'account esiste.",
+            "I messaggi del frigo vengono eliminati dopo 24 ore — sono chiacchiere di una sera e dopo non valgono nulla.",
+            "Se chiedi di eliminare il tuo account, l'account stesso sparisce subito: l'indirizzo email, la password e le sessioni aperte vengono eliminati immediatamente, e ciò che resta nelle cene organizzate da altri viene privato di qualsiasi elemento che ti identifichi.",
+            "Quella richiesta può essere annullata per trenta giorni accedendo di nuovo. Dopo trenta giorni viene eseguita definitivamente e non resta nulla da annullare."
+          ]
+        },
+        {
+          "heading": "Cosa puoi chiedere",
+          "body": [
+            "Accesso a ciò che conserviamo, rettifica di ciò che è sbagliato, cancellazione, una copia in formato portabile, e il diritto di opporti al trattamento o di revocare il consenso. Per i dati alimentari, revocare il consenso significa eliminarli, cosa che puoi fare da solo.",
+            "Scrivi a contact@covertcook.fr. Se la risposta non ti soddisfa, puoi presentare un reclamo alla CNIL in Francia, o all'autorità per la protezione dei dati del tuo paese."
+          ]
+        },
+        {
+          "heading": "Cookie",
+          "body": [
+            "CovertCook memorizza un token di sessione perché tu resti connesso, e la lingua che hai scelto. Entrambi sono necessari al funzionamento dell'app, nessuno dei due ti segue altrove, e non ci sono cookie pubblicitari o analitici."
+          ]
+        }
+      ]
+    },
+    "by": "di",
+    "moderation": "Moderazione",
+    "moderationDoc": {
+      "title": "Moderazione",
+      "updated": "2026-10-11",
+      "sections": [
+        {
+          "heading": "Cosa copre",
+          "body": [
+            "CovertCook permette alle persone di scriversi in tre posti: la conversazione privata con la persona per cui cucini, quella con la persona che cucina per te, e la bacheca del frigo che legge tutto il tavolo. Tutto ciò che vi si scrive oggi è scelto da un elenco di frasi già pronte; il giorno in cui si aprirà il testo libero, questa pagina si applicherà senza modifiche.",
+            "Copre anche le ricette stesse, che sono scritte da un ospite e lette da un altro."
+          ]
+        },
+        {
+          "heading": "Cosa non è permesso",
+          "body": [
+            "Insulti, molestie, minacce, e qualsiasi cosa rivolta a qualcuno per ciò che è e non per ciò che ha cucinato. Contenuti sessuali. Tentativi di identificare un altro ospite che gioca in forma anonima, o di spingere qualcun altro a farlo. Usare una ricetta per far mangiare a qualcuno qualcosa che ha dichiarato di non poter mangiare.",
+            "Quest'ultima è l'unica regola specifica di questa app, ed è la più grave. Il pannello alimentare esiste perché a un tavolo condiviso un piatto arriva a tutti."
+          ]
+        },
+        {
+          "heading": "Segnalare",
+          "body": [
+            "Ogni messaggio ha una bandierina. Segnalarne uno lo invia all'Executive Chef di quella cena — la persona che la gestisce — e a nessun altro. Chi segnala non viene mai nominato a nessuno.",
+            "L'Executive Chef vede la frase prima di vedere da quale posto proviene, e può agire senza mai sapere chi l'ha scritta."
+          ]
+        },
+        {
+          "heading": "Cosa può fare l'Executive Chef",
+          "body": [
+            "Inviare un avvertimento al posto, che la persona legge sulla pagina della cena. Rimuovere il posto dalla cena, con lo stesso comando usato quando qualcuno si ritira. Entrambi sono rivolti a un posto, non a un nome.",
+            "Può anche rivelare chi ha scritto un messaggio segnalato. Questo richiede una motivazione scritta e viene registrato in modo permanente nel registro della cena, insieme a chi l'ha chiesto. Esiste perché qualcuno possa essere raggiunto fuori dal gioco — non è un passaggio per decidere cosa fare dentro il gioco."
+          ]
+        },
+        {
+          "heading": "Bloccare",
+          "body": [
+            "Chiunque può bloccare chiunque, dalla bacheca, senza sapere chi sia. Le frasi di una persona bloccata spariscono subito dalla tua bacheca, e nessuno dei due può prendere posto in una cena a cui l'altro partecipa già.",
+            "Bloccare non interrompe una cena già in corso: la serata di altre tre persone si basa sulla catena di chi cucina per chi, e un blocco non può farla crollare. Ha pieno effetto dalla cena successiva."
+          ]
+        },
+        {
+          "heading": "Contestare, e contattarci",
+          "body": [
+            "Un avvertimento o una rimozione è la decisione di un solo organizzatore su una sola serata. Se pensi che sia stata sbagliata, scrivi a contact@covertcook.fr indicando di quale cena si tratta; il registro conserva ogni atto di moderazione, compresi quelli in cui abbiamo sbagliato.",
+            "Qualsiasi cosa urgente — una minaccia, un minore in pericolo, un contenuto che dovrebbe essere nelle mani della polizia piuttosto che nelle nostre — va allo stesso indirizzo, e viene letta da una persona."
+          ]
+        }
+      ]
+    },
+    "help": "Aiuto e contatti",
     "designBy": "Design di",
     "faviconBy": "Favicon:"
   },

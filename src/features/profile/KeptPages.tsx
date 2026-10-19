@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { RecipeBook } from './RecipeBook'
 import { Album } from './Album'
+import { Arrow } from '../../components/Arrow'
 
 // The two things you kept, each on a page of its own, reached from the profile
 // and leading back to it — not "back" in history, because these are also where
@@ -11,7 +12,7 @@ function ToProfile() {
   const { t } = useTranslation()
   return (
     <Link to="/profile" className="back-link">
-      ← {t('profile.title')}
+      <Arrow dir="back" /> {t('profile.title')}
     </Link>
   )
 }

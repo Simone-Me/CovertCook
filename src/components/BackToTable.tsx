@@ -1,5 +1,6 @@
 import { useTranslation } from 'react-i18next'
 import { useLocation, useNavigate, useParams } from 'react-router-dom'
+import { Arrow } from './Arrow'
 
 // Every screen needs a way back, and it has to be the way *you* came.
 //
@@ -29,7 +30,7 @@ export function BackToTable() {
 
   return (
     <button type="button" className="back-link" onClick={goBack}>
-      ← {roundId ? t('rounds.backToTable') : t('actions.back')}
+      <Arrow dir="back" /> {roundId ? t('rounds.backToTable') : t('actions.back')}
     </button>
   )
 }

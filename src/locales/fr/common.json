@@ -77,7 +77,8 @@
       "offensive": "Ce nom n’est pas autorisé. Choisissez-en un autre.",
       "rule": "Les noms sont en minuscules ; les espaces deviennent « - ».",
       "changeLater": "Pouvoir le changer plus tard est prévu.",
-      "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret."
+      "whatItIs": "C’est votre vrai nom, hors jeu — celui auquel vos amis vous reconnaissent et par lequel un organisateur sait qui demande à entrer. On ne vous appellera jamais ainsi à un dîner : chaque dîner vous tire son propre nom secret.",
+      "title": "Comment vous appeler ?"
     },
     "passwordLabel": "Mot de passe",
     "step": "Étape {{n}} sur {{total}}",
@@ -403,20 +404,16 @@
       "freeHint": "chacun apporte ce qu'il veut. Rien à prévoir.",
       "composed": "Un menu composé",
       "composedHint": "vous décidez les plats, et chaque chef en reçoit un à écrire.",
-      "balanced": "{{courses}} plats pour {{seats}} chefs — le menu est complet.",
-      "unbalanced": "{{courses}} plats pour {{seats}} chefs. Chaque chef cuisine exactement un plat, donc ces deux nombres doivent correspondre avant de lancer la roulette.",
+      "tally": "{{placed}}/{{seats}} plats au menu",
+      "tallyHint": "un par chef, donc OK attend que les deux nombres soient égaux.",
+      "less": "Retirer : {{course}}",
+      "more": "Ajouter : {{course}}",
       "locked": "Le menu ne peut plus changer : les chefs écrivent déjà pour les plats qui leur ont été attribués.",
       "errors": {
         "MENU_LOCKED": "Le menu est arrêté — les chefs ont déjà leurs plats. Relancez la roulette pour le changer.",
         "COURSE_IN_USE": "Quelqu'un cuisine déjà ce plat.",
         "BRIEFS_EXIST": "Des recettes ont déjà été écrites pour cette attribution."
       },
-      "swap": "Remplacer ce plat",
-      "change": "Changer",
-      "clearToChange": "Pour le changer, il faut effacer la roulette et la relancer. Personne n'a encore écrit, donc rien n'est perdu.",
-      "discardWarning": "Changer le menu maintenant impose de relancer la roulette, et cela ne peut pas se faire sans supprimer toutes les recettes déjà écrites et tous les messages privés les concernant. C'est irréversible.",
-      "discardConfirm": "Supprimer les recettes et changer le menu",
-      "stillFilling": "Plats pour l’instant : {{courses}}. Ils ne doivent égaler le nombre de chefs qu’une fois les inscriptions fermées.",
       "composedAtLock": "Quels plats se décide une fois les inscriptions fermées — il en faut exactement un par chef, et jusque-là ce nombre bouge encore."
     },
     "guest": {
@@ -1044,7 +1041,7 @@
     "what": "Crème débloque des fonctions spéciales.",
     "needed": "Ce réglage fait partie de Crème.",
     "lockedHere": "Fait partie de Crème.",
-    "seeWhatItOpens": "Voir ce que Crème ouvre →",
+    "seeWhatItOpens": "Voir ce que Crème ouvre",
     "status": {
       "on": "Vous avez Crème.",
       "off": "Vous êtes sur l’application gratuite — celle qui a tout ce qu’il faut pour un dîner.",
@@ -1098,7 +1095,7 @@
       "MONTH": "Votre Crème se termine le {{date}}.",
       "WEEK": "Votre Crème se termine le {{date}} — dans moins d’une semaine.",
       "whatHappens": "Les dîners déjà créés qui utilisent une fonction Crème continuent {{hours}} heures après cette date, puis se mettent en pause jusqu’au renouvellement. Rien n’est supprimé, et les dîners qui n’utilisent rien de Crème ne sont pas concernés.",
-      "renew": "Ce qu’est Crème, et comment le garder →"
+      "renew": "Ce qu’est Crème, et comment le garder"
     },
     "round": {
       "ending": "La couverture Crème de ce dîner se termine le {{date}}.",
@@ -1413,8 +1410,9 @@
     ],
     "whyTitle": "Pourquoi ça existe ?",
     "why": [
-      "J’ai créé cette application pour mes amis. On aime les repas en famille : partager un bon moment, se passer des recettes et des astuces. On voulait se retrouver autour d’un jeu et faire découvrir aux autres nos plats préférés — et quelle meilleure façon d’apprendre une recette que de la faire soi-même ?",
-      "Que vous aimiez cuisiner ou que vous mangiez toujours les trois mêmes plats tout prêts, j’espère que vous prendrez plaisir à préparer la recette que quelqu’un a eu envie de partager avec vous."
+      "Tout est parti d’amis venus de villes différentes : l’idée était de préparer un dîner où chacun apporterait le plat typique de chez lui.",
+      "Puis nous nous sommes rendu compte que la meilleure façon de découvrir un plat, c’est de le cuisiner soi-même, et c’est ainsi qu’est née l’idée de nous échanger des recettes à préparer. Depuis, pas à pas, nous n’avons cessé d’ajouter de nouvelles idées et fonctionnalités.",
+      "J’espère que vous aussi prendrez plaisir à découvrir de nouveaux plats, à échanger des conseils en cuisine et à passer un bon moment avec les personnes que vous aimez."
     ],
     "start": "Commencez par créer un dîner, ou rejoignez-en un avec un code qu’on vous a envoyé.",
     "readAgain": "Comment fonctionne CovertCook"
@@ -1837,7 +1835,7 @@
         "Ce que fait la suppression : votre identifiant de connexion est supprimé et votre profil est vidé de tout ce qui vous identifie. Elle prend effet au bout de trente jours et vous pouvez l'annuler à tout moment avant en vous reconnectant.",
         "Ce qu'elle ne fait pas : elle n'efface pas les dîners auxquels vous avez participé. Une soirée appartient à tous ceux qui étaient à cette table, et supprimer le compte d'une personne effacerait la soirée de sept autres. Ce qui reste ne porte aucun nom."
       ],
-      "signIn": "Se connecter pour supprimer son compte →",
+      "signIn": "Se connecter pour supprimer son compte",
       "cannotSignIn": "Impossible de vous connecter ? Écrivez-nous et nous le ferons :"
     },
     "contact": {
@@ -1940,19 +1938,25 @@
     "points_one": "{{count}} pt",
     "points_other": "{{count}} pts",
     "finish": "Terminer la visite",
-    "previous": "← Étape précédente"
+    "previous": "Étape précédente"
   },
   "support": {
     "row": "Offrez-nous un café",
     "rowHint": "pour que CovertCook reste gratuit pour tous",
-    "title": "Garder CovertCook gratuit",
-    "body": [
-      "CovertCook est gratuit pour tout le monde, avec tous les thèmes et toutes les options ouverts. Pas de pub, pas de version payante, aucune donnée vendue.",
-      "Il est fait et tenu par une seule personne sur son temps libre, et les serveurs, le domaine et les e-mails coûtent un peu chaque mois. Si une soirée à votre table en valait la peine, une petite contribution — le prix d'un café — aide à le garder gratuit pour la table suivante."
-    ],
-    "cta": "Contribuer",
-    "soon": "La page de contribution arrive bientôt. Merci d'y avoir pensé.",
-    "nothingChanges": "Une contribution est un don : elle ne débloque rien et ne change rien dans l'application. Tout le monde a déjà tout."
+    "title": "Offrez-nous un café",
+    "body": "CovertCook est gratuit et le restera. S’il vous plaît et que vous voulez aider à couvrir les frais, toute contribution est la bienvenue ❤️",
+    "thanks": "Merci !"
+  },
+  "report": {
+    "title": "Signaler un problème",
+    "lead": "Quelque chose ne marche pas ? Racontez-nous ce qui s’est passé — ça nous arrive directement. Une capture d’écran aide.",
+    "what": "Que s’est-il passé ?",
+    "photo": "Capture d’écran (facultatif)",
+    "removePhoto": "Retirer la capture",
+    "send": "Envoyer",
+    "sending": "Envoi…",
+    "thanks": "Merci ! C’est bien reçu, on regarde.",
+    "failed": "L’envoi a échoué. Réessayez dans un instant, ou écrivez à contact@covertcook.fr."
   },
   "footprint": {
     "title": "Calculez votre consommation"

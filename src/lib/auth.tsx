@@ -39,8 +39,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [recovering, setRecovering] = useState(recoveryPending)
 
-  async function loadProfile(uid: string) {
-    const { data } = await supabase.from('profiles').select('*').eq('id', uid).maybeSingle()
+  async function loadProfile() {
+    // A select on profiles gives only the public columns, even for yourself
+    // (0109); the whole row of your own comes from the function.
+    // Falls back to the old select while a database without 0109 is still
+    // answering, so the client can ship before the migration does.
+    const res = await supabase.rpc('my_profile').maybeSingle()
+    if (!res.error) {
+      setProfile(res.data as Profile | null)
+      return
+    }
+    const { data: { user } } = await supabase.auth.getUser()
+    if (!user) return setProfile(null)
+    const { data } = await supabase.from('profiles').select('*').eq('id', user.id).maybeSingle()
     setProfile(data as Profile | null)
   }
 
@@ -73,12 +84,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         clearRecoveryPending()
         setRecovering(false)
       }
-      if (data.session && (await discardGhostSession())) {
+      if (!data.session) {
+        setSession(null)
+        setLoading(false)
+        return
+      }
+      // Both at once: the ghost check is a round trip to Auth and the profile
+      // has no reason to queue behind it. A ghost's profile is simply dropped.
+      const [ghost] = await Promise.all([discardGhostSession(), loadProfile()])
+      if (ghost) {
+        setProfile(null)
         setLoading(false)
         return
       }
       setSession(data.session)
-      if (data.session) await loadProfile(data.session.user.id)
       setLoading(false)
     })
 
@@ -91,8 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setRecovering(false)
       }
       setSession(newSession)
+      // The first session is getSession's to load, above, and a refreshed
+      // token is the same person: asking for the profile again on either was
+      // the second identical request on every start.
+      if (event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') return
       if (newSession) {
-        await loadProfile(newSession.user.id)
+        await loadProfile()
       } else {
         setProfile(null)
       }
@@ -112,7 +135,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setRecovering(false)
     },
     refreshProfile: async () => {
-      if (session) await loadProfile(session.user.id)
+      if (session) await loadProfile()
     },
   }
 

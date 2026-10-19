@@ -31,6 +31,7 @@ import { myProStatus } from '../../lib/rpc'
 import { ProEndingNotice } from '../pro/ProNotices'
 import { PRO_VISIBLE } from '../../lib/proVisible'
 import { WipChip } from '../../components/WipChip'
+import { Arrow } from '../../components/Arrow'
 
 interface DietaryRow {
   id: string
@@ -310,7 +311,7 @@ export function ProfilePage() {
           <span>
             <strong>{t(proStatus?.pro ? 'pro.status.on' : 'pro.status.off')}</strong>
             {' — '}
-            {t('pro.seeWhatItOpens')}
+            {t('pro.seeWhatItOpens')} <Arrow />
           </span>
         </Link>
       ) : (

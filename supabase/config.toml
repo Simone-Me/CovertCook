@@ -416,3 +416,8 @@ enabled = true
 # declarative_schema_path = "./database"
 # JSON string passed through to pg-delta SQL formatting.
 # format_options = "{\"keywordCase\":\"upper\",\"indent\":2,\"maxWidth\":80,\"commaStyle\":\"trailing\"}"
+
+# A signed-in user's bug report, mailed to the contact inbox. The JWT gate is
+# what keeps it from being an open relay.
+[functions.report-bug]
+verify_jwt = true

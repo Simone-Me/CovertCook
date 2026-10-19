@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { BackToTable } from '../../components/BackToTable'
 import { Fold } from '../../components/Fold'
+import { Arrow } from '../../components/Arrow'
 
 interface QA {
   q: string
@@ -59,7 +60,7 @@ export function HelpPage() {
         {/* A link to the sign-in, never a button that deletes: the one thing
             this page must not be is a way to delete somebody else's account. */}
         <p>
-          <Link to="/signin">{t('help.delete.signIn')}</Link>
+          <Link to="/signin">{t('help.delete.signIn')} <Arrow /></Link>
         </p>
         <p className="muted">
           {t('help.delete.cannotSignIn')}{' '}

@@ -1,8 +1,9 @@
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useQuery } from '@tanstack/react-query'
 import { useAuth } from '../lib/auth'
 import { isAppAdmin, myOpenAlerts } from '../lib/rpc'
+import { Arrow } from './Arrow'
 
 // The round switcher that used to live here is gone. It solved a problem
 // this product doesn't have: people run one dinner at a time, and every
@@ -19,6 +20,7 @@ export function AppHeader() {
   // A reset link's session is not a way into the account until the new
   // password is saved (src/lib/recovery.ts): no name, no profile, no bell.
   const session = recovering ? null : realSession
+  const location = useLocation()
 
   // The in-app half of telling the host (0059). A push is for the phone in a
   // pocket; this is for the app already open, where an alert should not have to
@@ -55,7 +57,7 @@ export function AppHeader() {
           thing lifts a little, the same gesture as picking an envelope off
           the cloth, so the way back announces itself before it's clicked. */}
       <Link to="/" className="app-logo" aria-label={t('rounds.myRounds')}>
-        <span className="app-logo__back" aria-hidden="true">←</span>
+        <Arrow dir="back" className="app-logo__back" />
         {/* Decorative: the name is right beside it and says the same thing. */}
         <img className="app-logo__mark" src="/logos/logo-mark.webp" alt="" aria-hidden="true" width={26} height={26} />
         <span className="app-logo__name">{t('app.name')}</span>
@@ -87,6 +89,19 @@ export function AppHeader() {
             <span className="alert-pip__count">0</span>
           </span>
         ))}
+      {/* While the app is still being tried out: the quickest way to say
+          something broke, from wherever it broke. */}
+      {session && (
+        <Link
+          to="/report"
+          state={{ from: location.pathname }}
+          className="alert-pip is-admin"
+          aria-label={t('report.title')}
+          title={t('report.title')}
+        >
+          <span aria-hidden="true">🐞</span>
+        </Link>
+      )}
       {session && admin && (
         <Link to="/admin/week" className="alert-pip is-admin" aria-label={t('admin.open')} title={t('admin.open')}>
           <span aria-hidden="true">🛠</span>
