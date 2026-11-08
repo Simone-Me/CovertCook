@@ -54,6 +54,7 @@ registerRoute(
     // instead of the image — which made a working logo look broken.
     denylist: [
       /^\/rest\//,
+      /^\/lab\//,
       /^\/auth\//,
       /^\/functions\//,
       /^\/\.well-known\//,
@@ -69,6 +70,8 @@ registerRoute(
     plugins: [new ExpirationPlugin({ maxEntries: 200, maxAgeSeconds: 60 * 60 * 24 * 7 })],
   }),
 )
+
+registerRoute(({ url }) => url.pathname.startsWith('/models/') || url.pathname.startsWith('/ort/'), new CacheFirst({ cacheName: 'ml-models', plugins: [new ExpirationPlugin({ maxEntries: 20 })] }))
 
 // The allergen and diet tiles, kept out of the precache (vite.config.ts) because
 // they are a third of the app for a screen seen at sign-up. CacheFirst rather

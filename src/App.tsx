@@ -22,6 +22,8 @@ function page<K extends string, P = any>(load: () => Promise<Record<K, Component
 
 const LegalPage = page(() => import('./features/legal/LegalPage'), 'LegalPage')
 const HelpPage = page(() => import('./features/legal/HelpPage'), 'HelpPage')
+const LabBench = lazy(() => import('./pages/LabBench'))
+const FoodScan = lazy(() => import('./pages/FoodScan'))
 const SignUpPage = page(() => import('./features/auth/SignUpPage'), 'SignUpPage')
 const ResetPasswordPage = page(() => import('./features/auth/ResetPasswordPage'), 'ResetPasswordPage')
 const ProfilePage = page(() => import('./features/profile/ProfilePage'), 'ProfilePage')
@@ -97,7 +99,7 @@ function AppRoutes() {
         {/* Outside the guard on purpose: the whole point is that somebody who
             cannot sign in — or has not installed the app — can still read how
             to have their account deleted. */}
-        <Route path="/help" element={<HelpPage />} />
+        <Route path="/lab/bench" element={<LabBench />} /> <Route path="/scan" element={<FoodScan />} /> <Route path="/help" element={<HelpPage />} />
         <Route path="/signin" element={session && !recovering ? <Navigate to="/" replace /> : <SignInPage />} />
         <Route
           path="/signup"

@@ -32,3 +32,6 @@ android/app/
 android/*.aab
 android/*.apk
 android/*.idsig
+
+# Local Netlify folder
+.netlify
