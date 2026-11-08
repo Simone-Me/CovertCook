@@ -1969,6 +1969,19 @@
   "footprint": {
     "title": "Calculate your consumption"
   },
+  "scan": {
+    "toProfile": "Profile",
+    "lead": "Photograph your plate: the ingredients are recognised on your phone, the photo never leaves it.",
+    "takePhoto": "Take a photo",
+    "gallery": "From the gallery",
+    "photoAlt": "Your photo",
+    "downloading": "Downloading the model (first time only)… {{pct}}%",
+    "analysing": "Analysing the photo…",
+    "error": "The analysis did not work. Try again in a moment.",
+    "unknown": "No food recognised in this photo. Try another one, closer to the plate.",
+    "removeHint": "Tap an ingredient to remove it if it is wrong.",
+    "timings": "Prepared in {{pre}} ms · analysed in {{run}} ms"
+  },
   "admin": {
     "open": "Admin: pick of the week",
     "week": {

@@ -1767,6 +1767,19 @@
   "footprint": {
     "title": "Calcola il tuo consumo"
   },
+  "scan": {
+    "toProfile": "Profilo",
+    "lead": "Fotografa il tuo piatto: gli ingredienti vengono riconosciuti sul telefono, la foto non lo lascia mai.",
+    "takePhoto": "Scatta una foto",
+    "gallery": "Dalla galleria",
+    "photoAlt": "La tua foto",
+    "downloading": "Download del modello (solo la prima volta)… {{pct}}%",
+    "analysing": "Analisi della foto…",
+    "error": "L'analisi non ha funzionato. Riprova tra un momento.",
+    "unknown": "Nessun alimento riconosciuto in questa foto. Provane un’altra, più vicina al piatto.",
+    "removeHint": "Tocca un ingrediente per toglierlo se è sbagliato.",
+    "timings": "Preparata in {{pre}} ms · analizzata in {{run}} ms"
+  },
   "legal": {
     "terms": "Condizioni",
     "privacy": "Privacy",

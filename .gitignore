@@ -35,3 +35,11 @@ android/*.idsig
 
 # Local Netlify folder
 .netlify
+
+# On-device food recognition (food-recognition repo, step A14).
+# The onnxruntime-web runtime is copied from node_modules at build time (scripts/copy-ort.mjs).
+public/ort/
+# Models: only the variant served by /scan is committed; the others are for /lab/bench draft deploys.
+public/models/*
+!public/models/a_convnext__model_int8_minmax_200_pc_only-conv_rr.onnx
+!public/models/a_convnext__meta.json

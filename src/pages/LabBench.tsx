@@ -18,14 +18,18 @@ export default function LabBench() {
   const [photo, setPhoto] = useState<File | null>(null);
   const [log, setLog] = useState<BenchResult[]>([]);
   const [running, setRunning] = useState(false);
+  const [done, setDone] = useState(0);
+  const [copyState, setCopyState] = useState("");
+  const backends: Backend[] = "gpu" in navigator ? ["wasm", "webgpu"] : ["wasm"];
+  const total = campaigns * VARIANTS.length * backends.length;
 
   async function runAll() {
     setRunning(true);
+    setDone(0);
     const out: BenchResult[] = [];
     for (let c = 0; c < campaigns; c++) {
       for (const url of VARIANTS) {
         const meta: ModelMeta = await (await fetch(metaUrlOf(url))).json();
-        const backends: Backend[] = "gpu" in navigator ? ["wasm", "webgpu"] : ["wasm"];
         for (const b of backends) {
           try {
             out.push(await bench(url, meta, b, b === "wasm" ? threads : 1, photo, device));
@@ -33,10 +37,31 @@ export default function LabBench() {
             console.error(url, b, e);
           }
           setLog([...out]);
+          setDone((d) => d + 1);
         }
       }
     }
     setRunning(false);
+  }
+
+  const json = () => JSON.stringify(log, null, 2);
+
+  // The clipboard is refused on some phones (no recognised gesture, permissions): say so, and keep the download.
+  async function copyJson() {
+    try {
+      await navigator.clipboard.writeText(json());
+      setCopyState("copied");
+    } catch {
+      setCopyState("copy refused: use download");
+    }
+  }
+
+  function downloadJson() {
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(new Blob([json()], { type: "application/json" }));
+    a.download = `bench_${(device || "phone").replace(/\W+/g, "-")}_t${threads}_c${campaigns}.json`;
+    a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 1000);
   }
 
   return (
@@ -50,18 +75,29 @@ export default function LabBench() {
         onChange={(e) => setCampaigns(+e.target.value)} /></label>
       <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
       <button disabled={running || !device} onClick={runAll}>{running ? "running…" : "run"}</button>
-      <button onClick={() => navigator.clipboard.writeText(JSON.stringify(log, null, 2))}>copy JSON</button>
-      <table>
-        <thead><tr><th>variant</th><th>backend</th><th>load</th><th>pre</th><th>median</th><th>p95</th></tr></thead>
-        <tbody>
-          {log.map((r, i) => (
-            <tr key={i}>
-              <td>{r.variant}</td><td>{r.backend}/{r.numThreads}</td><td>{r.loadMs.toFixed(0)}</td>
-              <td>{r.preMs?.toFixed(1) ?? "-"}</td><td>{r.runMedian.toFixed(1)}</td><td>{r.runP95.toFixed(1)}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <button disabled={log.length === 0} onClick={copyJson}>copy JSON</button>
+      <button disabled={log.length === 0} onClick={downloadJson}>download JSON</button>
+      {copyState && <span> {copyState}</span>}
+      {(running || done > 0) && (
+        <p>
+          <progress max={total} value={done} style={{ width: "100%" }} /> {done} / {total}
+        </p>
+      )}
+      {/* Wide table: it scrolls sideways inside its box instead of being cut by the phone screen. */}
+      <div style={{ overflowX: "auto", maxWidth: "100%" }}>
+        <table style={{ borderCollapse: "collapse", whiteSpace: "nowrap", fontSize: 12 }}>
+          <thead><tr><th>variant</th><th>backend</th><th>load ms</th><th>pre ms</th><th>median ms</th><th>p95 ms</th></tr></thead>
+          <tbody>
+            {log.map((r, i) => (
+              <tr key={i} style={{ borderTop: "1px solid #ccc" }}>
+                <td style={{ paddingRight: 8 }}>{r.variant.replace("__model_", " ")}</td><td>{r.backend}/{r.numThreads}</td>
+                <td align="right">{r.loadMs.toFixed(0)}</td><td align="right">{r.preMs?.toFixed(1) ?? "-"}</td>
+                <td align="right">{r.runMedian.toFixed(1)}</td><td align="right">{r.runP95.toFixed(1)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   );
 }
