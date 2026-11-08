@@ -75,3 +75,40 @@
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* An ingredient: read-only in the answer, a toggle while evaluating. */
+.scan__chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--bg-elevated);
+  color: inherit;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+button.scan__chip--toggle {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+button.scan__chip--toggle.is-removed {
+  border-style: dashed;
+  color: var(--text-muted);
+  text-decoration: line-through;
+}
+
+button.scan__chip--added {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.scan__suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}

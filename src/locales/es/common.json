@@ -1765,8 +1765,8 @@
     "name": "Nombre"
   },
   "scan": {
-    "title": "Encuentra los ingredientes",
-    "profileHint": "a partir de una foto de tu plato",
+    "title": "Analiza tu plato",
+    "profileHint": "reconoce los ingredientes a partir de una foto",
     "toProfile": "Perfil",
     "lead": "Fotografía tu plato: los ingredientes se reconocen en tu teléfono y la foto nunca sale de él.",
     "takePhoto": "Hacer una foto",
@@ -1776,8 +1776,20 @@
     "analysing": "Analizando la foto…",
     "error": "El análisis no ha funcionado. Inténtalo de nuevo en un momento.",
     "unknown": "No se ha reconocido ningún alimento en esta foto. Prueba con otra, más cerca del plato.",
-    "removeHint": "Toca un ingrediente para quitarlo si es incorrecto.",
-    "timings": "Preparada en {{pre}} ms · analizada en {{run}} ms"
+    "timings": "Preparada en {{pre}} ms · analizada en {{run}} ms",
+    "evaluate": "Evaluar",
+    "evaluateHint": "Toca un ingrediente que no está en el plato para quitarlo, y añade los que faltan (nombres en inglés por ahora). Solo se envían los nombres de los ingredientes, nunca la foto.",
+    "addPlaceholder": "Añadir un ingrediente…",
+    "cancel": "Cancelar",
+    "send": "Enviar",
+    "sending": "Enviando…",
+    "score": "El modelo acertó en un {{pct}} %",
+    "scoreDetail": "De lo que encontró, el {{precision}} % era correcto · de lo que había, encontró el {{recall}} %",
+    "sent": "Gracias: tu evaluación se ha guardado y ayuda a medir el modelo.",
+    "signInToSend": "Inicia sesión para enviar tus evaluaciones: ayudan a medir el modelo.",
+    "signIn": "Iniciar sesión",
+    "sendError": "No se ha podido enviar: {{message}}",
+    "rateLimit": "Son muchas evaluaciones en una hora: inténtalo de nuevo un poco más tarde."
   },
   "legal": {
     "terms": "Condiciones",

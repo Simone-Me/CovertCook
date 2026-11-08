@@ -1967,8 +1967,8 @@
     "name": "Nom"
   },
   "scan": {
-    "title": "Trouver les ingrédients",
-    "profileHint": "à partir d’une photo de votre assiette",
+    "title": "Analyser votre assiette",
+    "profileHint": "reconnaît les ingrédients à partir d’une photo",
     "toProfile": "Profil",
     "lead": "Photographiez votre assiette : les ingrédients sont reconnus sur votre téléphone, la photo ne le quitte jamais.",
     "takePhoto": "Prendre une photo",
@@ -1978,8 +1978,20 @@
     "analysing": "Analyse de la photo…",
     "error": "L'analyse n'a pas fonctionné. Réessayez dans un instant.",
     "unknown": "Aucun aliment reconnu sur cette photo. Essayez-en une autre, plus près de l’assiette.",
-    "removeHint": "Touchez un ingrédient pour le retirer s’il est faux.",
-    "timings": "Préparée en {{pre}} ms · analysée en {{run}} ms"
+    "timings": "Préparée en {{pre}} ms · analysée en {{run}} ms",
+    "evaluate": "Évaluer",
+    "evaluateHint": "Touchez un ingrédient absent de l’assiette pour le retirer, et ajoutez ceux qui manquent (noms en anglais pour l’instant). Seuls les noms des ingrédients sont envoyés, jamais la photo.",
+    "addPlaceholder": "Ajouter un ingrédient…",
+    "cancel": "Annuler",
+    "send": "Envoyer",
+    "sending": "Envoi…",
+    "score": "Le modèle avait raison à {{pct}} %",
+    "scoreDetail": "De ce qu’il a trouvé, {{precision}} % était juste · de ce qu’il y avait, il a trouvé {{recall}} %",
+    "sent": "Merci : votre évaluation est enregistrée et aide à mesurer le modèle.",
+    "signInToSend": "Connectez-vous pour envoyer vos évaluations : elles aident à mesurer le modèle.",
+    "signIn": "Se connecter",
+    "sendError": "L’envoi n’a pas fonctionné : {{message}}",
+    "rateLimit": "Cela fait beaucoup d’évaluations en une heure : réessayez un peu plus tard."
   },
   "admin": {
     "open": "Admin : sélection de la semaine",

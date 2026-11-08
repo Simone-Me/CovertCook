@@ -1967,8 +1967,8 @@
     "name": "Name"
   },
   "scan": {
-    "title": "Find the ingredients",
-    "profileHint": "from a photo of your plate",
+    "title": "Analyse your plate",
+    "profileHint": "recognises the ingredients from a photo",
     "toProfile": "Profile",
     "lead": "Photograph your plate: the ingredients are recognised on your phone, the photo never leaves it.",
     "takePhoto": "Take a photo",
@@ -1978,8 +1978,20 @@
     "analysing": "Analysing the photo…",
     "error": "The analysis did not work. Try again in a moment.",
     "unknown": "No food recognised in this photo. Try another one, closer to the plate.",
-    "removeHint": "Tap an ingredient to remove it if it is wrong.",
-    "timings": "Prepared in {{pre}} ms · analysed in {{run}} ms"
+    "timings": "Prepared in {{pre}} ms · analysed in {{run}} ms",
+    "evaluate": "Evaluate",
+    "evaluateHint": "Tap an ingredient that is not on the plate to remove it, and add the missing ones (English names for now). Only the ingredient names are sent, never the photo.",
+    "addPlaceholder": "Add an ingredient…",
+    "cancel": "Cancel",
+    "send": "Send",
+    "sending": "Sending…",
+    "score": "The model was {{pct}}% right",
+    "scoreDetail": "Of what it found, {{precision}}% was right · of what was there, it found {{recall}}%",
+    "sent": "Thank you: your evaluation is saved and helps measure the model.",
+    "signInToSend": "Sign in to send your evaluations: they help measure the model.",
+    "signIn": "Sign in",
+    "sendError": "It could not be sent: {{message}}",
+    "rateLimit": "That is a lot of evaluations for one hour: try again a little later."
   },
   "admin": {
     "open": "Admin: pick of the week",
