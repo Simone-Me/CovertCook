@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "node scripts/copy-ort.mjs && tsc -b && vite build",
     "lint": "oxlint",
     "preview": "vite preview",
     "mail:templates": "node --experimental-strip-types scripts/render-email-templates.mjs",

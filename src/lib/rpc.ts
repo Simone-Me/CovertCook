@@ -2417,3 +2417,31 @@ export async function adminSetFilRougePick(
   })
   return unwrap(res)
 }
+
+// The corrections of one on-device scan (/scan), sent only when the user
+// presses "Send" after "Evaluate": ingredient ids, never the photo (0111).
+// The server computes the scores itself; the client only shows what comes back.
+export interface ScanScores {
+  precision: number | null
+  recall: number | null
+  jaccard: number | null
+}
+
+export async function submitScanFeedback(v: {
+  modelVersion: string
+  proposed: number[]
+  proposedProbs: number[]
+  removed: number[]
+  added: number[]
+}): Promise<ScanScores> {
+  const res = await guardedRpc('submit_scan_feedback', {
+    p_model_version: v.modelVersion,
+    p_proposed: v.proposed,
+    p_proposed_probs: v.proposedProbs,
+    p_removed: v.removed,
+    p_added: v.added,
+  })
+  const rows = unwrap(res) as { out_precision: number | null; out_recall: number | null; out_jaccard: number | null }[]
+  const r = rows[0]
+  return { precision: r?.out_precision ?? null, recall: r?.out_recall ?? null, jaccard: r?.out_jaccard ?? null }
+}

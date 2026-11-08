@@ -61,3 +61,9 @@
 /lab/*
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Embedder-Policy: require-corp
+
+# The onnxruntime-web worker scripts: with wasm threads > 1, the cross-origin isolated /lab/* page starts
+# workers from /ort/, and a worker of a COEP page must itself be served with COEP (else ERR_BLOCKED_BY_RESPONSE).
+/ort/*
+  Cross-Origin-Embedder-Policy: require-corp
+  Cross-Origin-Resource-Policy: same-origin

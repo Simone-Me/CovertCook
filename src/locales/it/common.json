@@ -1764,8 +1764,183 @@
     "contactMe": "Voglio essere ricontattato",
     "name": "Nome"
   },
-  "footprint": {
-    "title": "Calcola il tuo consumo"
+  "scan": {
+    "title": "Analizza il tuo piatto",
+    "profileHint": "riconosce gli ingredienti da una foto",
+    "toProfile": "Profilo",
+    "lead": "Fotografa il tuo piatto: gli ingredienti vengono riconosciuti sul telefono, la foto non lo lascia mai.",
+    "takePhoto": "Scatta una foto",
+    "gallery": "Dalla galleria",
+    "photoAlt": "La tua foto",
+    "downloading": "Download del modello (solo la prima volta)… {{pct}}%",
+    "analysing": "Analisi della foto…",
+    "error": "L'analisi non ha funzionato. Riprova tra un momento.",
+    "unknown": "Nessun alimento riconosciuto in questa foto. Provane un’altra, più vicina al piatto.",
+    "timings": "Preparata in {{pre}} ms · analizzata in {{run}} ms",
+    "evaluate": "Valuta",
+    "evaluateHint": "Tocca un ingrediente che non è nel piatto per toglierlo, e aggiungi quelli che mancano (per ora nomi in inglese). Vengono inviati solo i nomi degli ingredienti, mai la foto.",
+    "addPlaceholder": "Aggiungi un ingrediente…",
+    "cancel": "Annulla",
+    "send": "Invia",
+    "sending": "Invio…",
+    "score": "Il modello aveva ragione: {{pct}}%",
+    "scoreDetail": "Giusto tra ciò che ha trovato: {{precision}}% · trovato tra ciò che c’era: {{recall}}%",
+    "sent": "Grazie: la tua valutazione è salvata e aiuta a misurare il modello.",
+    "signInToSend": "Accedi per inviare le tue valutazioni: aiutano a misurare il modello.",
+    "signIn": "Accedi",
+    "sendError": "Non è stato possibile inviarla: {{message}}",
+    "rateLimit": "Sono molte valutazioni in un’ora: riprova un po’ più tardi.",
+    "howItWorks": "Come funziona il modello?"
+  },
+  "modelPage": {
+    "title": "Come funziona il modello",
+    "lead": "Il modello dietro «Analizza il tuo piatto». Apri una sezione per vederla.",
+    "loading": "Caricamento delle misure…",
+    "loadError": "Non è stato possibile caricare le misure.",
+    "s1": "1. Il modello in breve",
+    "step1": "Scatti o scegli una foto: non lascia mai il telefono.",
+    "step2": "Viene raddrizzata, ritagliata al quadrato e ridotta a {{res}} × {{res}} pixel.",
+    "step3": "Una rete {{name}} quantizzata in int8 ({{size}} MB) gira nel browser con onnxruntime-web.",
+    "step4": "Dà una probabilità per ognuno dei {{n}} ingredienti.",
+    "step5": "Ogni ingrediente ha la sua soglia; se nessuno arriva a 0,4, la risposta è “non riconosciuto”.",
+    "tileMap": "mAP sul test",
+    "tileSize": "Download",
+    "tileLatency": "Modello sul telefono (4 thread)",
+    "dataset": "Addestrato su {{name}}: {{classes}} ingredienti, {{train}} foto di training, {{val}} di validazione, {{test}} per il test finale.",
+    "s2": "2. Training",
+    "s2Lead": "I 3 finalisti, stessa ricetta. ● = epoca tenuta.",
+    "mapChart": "mAP di validazione per epoca",
+    "lossChart": "Loss per epoca",
+    "trainLoss": "loss di training",
+    "valLoss": "loss di validazione",
+    "epoch": "epoca",
+    "overfit": "Tratteggio = training, linea piena = validazione. Quando si separano: overfitting.",
+    "model": "Modello",
+    "bestEpoch": "Epoca migliore / giocate",
+    "valMap": "mAP val",
+    "testMap": "mAP test",
+    "secEpoch": "s / epoca",
+    "s3": "3. Quantizzazione: cosa è stato fatto",
+    "s3Lead": "PTQ statica int8 (onnxruntime), 11 varianti. Barra = mAP persa sulla validazione.",
+    "quantChart": "mAP persa da ogni variante int8 (validazione, punti)",
+    "target": "obiettivo {{v}} pt",
+    "chosen": "scelta",
+    "fix1": "Testa in float",
+    "fix2": "reduce_range (pesi a 7 bit)",
+    "fix3": "Solo le convoluzioni in int8",
+    "s4": "4. Modello float contro int8",
+    "cmpChart": "mAP sul test (2.135 foto)",
+    "loss": "Perdita (punti, IC 95%)",
+    "size": "Dimensione",
+    "why": "Stesse {{test}} foto di test. Perdita con intervallo di confidenza al 95%.",
+    "s5": "5. Sul telefono",
+    "s5Lead": "Tempo mediano (ms) su {{device}}, Chrome. Totale = foto + modello, CPU 4.",
+    "variant": "Variante",
+    "total": "Totale",
+    "s6": "6. Cosa è in produzione, e perché",
+    "s6Body": "{{name}} int8: {{map}} di mAP test, {{size}} MB. La variante quantizzata più precisa.",
+    "limits": "Limiti: mAP sotto l'obiettivo {{target}}, ingredienti rari deboli, nessuna foto senza cibo nel training.",
+    "screenTitle": "Screening: 6 backbone provati",
+    "screenLead": "✓ = finalisti.",
+    "params": "Parametri (M)",
+    "gmacs": "Calcoli (G mult-add)",
+    "quantNote": "Sul test la variante scelta perde {{t}} pt (sezione 4).",
+    "glTitle": "Glossario",
+    "gl": {
+      "map": {
+        "t": "mAP",
+        "d": "Media sui 103 ingredienti dell'AP. Da 0 a 1."
+      },
+      "ap": {
+        "t": "AP",
+        "d": "Le foto con l'ingrediente sono in cima alla classifica?"
+      },
+      "select": {
+        "t": "val_map · select",
+        "d": "mAP di validazione; sceglie l'epoca da tenere."
+      },
+      "test": {
+        "t": "mAP test",
+        "d": "mAP sulle 2.135 foto di test, misurata una volta sul PC."
+      },
+      "pt": {
+        "t": "punto (pt)",
+        "d": "1 pt = 0,01 di mAP."
+      },
+      "loss": {
+        "t": "loss",
+        "d": "L'errore che il training riduce."
+      },
+      "epoch": {
+        "t": "epoca",
+        "d": "Un passaggio su tutte le foto di training."
+      },
+      "es": {
+        "t": "early stopping",
+        "d": "Stop dopo 6 epoche senza miglioramento."
+      },
+      "lr": {
+        "t": "LR",
+        "d": "Learning rate: la dimensione di ogni passo."
+      },
+      "sec": {
+        "t": "s / epoca",
+        "d": "Secondi per epoca di training sul PC."
+      },
+      "fp": {
+        "t": "fp32 · int8",
+        "d": "Numeri a 32 bit con virgola / interi a 8 bit."
+      },
+      "ptq": {
+        "t": "PTQ",
+        "d": "Quantizzazione dopo il training, senza riaddestrare."
+      },
+      "calib": {
+        "t": "calibrazione (50 · 200 · 500)",
+        "d": "Foto usate per misurare gli intervalli dei valori."
+      },
+      "method": {
+        "t": "MinMax · Entropy · Percentile",
+        "d": "Come si sceglie l'intervallo: min-max, distribuzione, estremi tagliati."
+      },
+      "pc": {
+        "t": "per-channel · per-tensor",
+        "d": "Una scala per filtro / una per strato."
+      },
+      "cov": {
+        "t": "coverage",
+        "d": "Foto di calibrazione che coprono i 103 ingredienti."
+      },
+      "rr": {
+        "t": "reduce_range",
+        "d": "Pesi a 7 bit: niente saturazione su CPU senza VNNI."
+      },
+      "conv": {
+        "t": "only Conv",
+        "d": "Solo le convoluzioni in int8, il resto in float."
+      },
+      "ci": {
+        "t": "IC 95%",
+        "d": "Intervallo di confidenza 95% (bootstrap)."
+      },
+      "thread": {
+        "t": "CPU 1 · CPU 4 · GPU",
+        "d": "Core CPU in parallelo / scheda grafica."
+      },
+      "convnext": {
+        "t": "ConvNeXt-Atto",
+        "d": "ConvNeXt più piccolo (Meta, 2022), 3,4 M parametri."
+      },
+      "mnv3": {
+        "t": "MobileNetV3-Large",
+        "d": "Rete di Google per telefoni (2019)."
+      },
+      "lite0": {
+        "t": "EfficientNet-Lite0",
+        "d": "EfficientNet semplificata per l'embarcato (Google)."
+      }
+    },
+    "fixesTitle": "Le 3 correzioni"
   },
   "legal": {
     "terms": "Condizioni",

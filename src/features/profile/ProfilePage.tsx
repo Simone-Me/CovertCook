@@ -333,13 +333,13 @@ export function ProfilePage() {
         </span>
       </Link>
 
-      {/* Announced, not built — and not a door yet: nothing behind it to open. */}
-      <div className="pass__link is-wip" aria-disabled="true">
-        <span aria-hidden="true">🌱</span>
+      {/* A first version now: the plate scan (/scan), still marked as in development. */}
+      <Link to="/scan" className="pass__link">
+        <span aria-hidden="true">📷</span>
         <span>
-          <strong>{t('footprint.title')}</strong> <WipChip />
+          <strong>{t('scan.title')}</strong> — {t('scan.profileHint')} <WipChip />
         </span>
-      </div>
+      </Link>
 
       <DisplayPrefs />
 

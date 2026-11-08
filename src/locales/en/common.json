@@ -1966,8 +1966,183 @@
     "contactMe": "I would like to be contacted",
     "name": "Name"
   },
-  "footprint": {
-    "title": "Calculate your consumption"
+  "scan": {
+    "title": "Analyse your plate",
+    "profileHint": "recognises the ingredients from a photo",
+    "toProfile": "Profile",
+    "lead": "Photograph your plate: the ingredients are recognised on your phone, the photo never leaves it.",
+    "takePhoto": "Take a photo",
+    "gallery": "From the gallery",
+    "photoAlt": "Your photo",
+    "downloading": "Downloading the model (first time only)… {{pct}}%",
+    "analysing": "Analysing the photo…",
+    "error": "The analysis did not work. Try again in a moment.",
+    "unknown": "No food recognised in this photo. Try another one, closer to the plate.",
+    "timings": "Prepared in {{pre}} ms · analysed in {{run}} ms",
+    "evaluate": "Evaluate",
+    "evaluateHint": "Tap an ingredient that is not on the plate to remove it, and add the missing ones (English names for now). Only the ingredient names are sent, never the photo.",
+    "addPlaceholder": "Add an ingredient…",
+    "cancel": "Cancel",
+    "send": "Send",
+    "sending": "Sending…",
+    "score": "The model was {{pct}}% right",
+    "scoreDetail": "Of what it found, {{precision}}% was right · of what was there, it found {{recall}}%",
+    "sent": "Thank you: your evaluation is saved and helps measure the model.",
+    "signInToSend": "Sign in to send your evaluations: they help measure the model.",
+    "signIn": "Sign in",
+    "sendError": "It could not be sent: {{message}}",
+    "rateLimit": "That is a lot of evaluations for one hour: try again a little later.",
+    "howItWorks": "How does the model work?"
+  },
+  "modelPage": {
+    "title": "How the model works",
+    "lead": "The model behind \"Analyse your plate\". Open a section to see it.",
+    "loading": "Loading the measures…",
+    "loadError": "The measures could not be loaded.",
+    "s1": "1. The model in one look",
+    "step1": "You take or choose a photo: it never leaves your phone.",
+    "step2": "It is straightened, cropped to a square and reduced to {{res}} × {{res}} pixels.",
+    "step3": "A {{name}} network quantized to int8 ({{size}} MB) runs in the browser with onnxruntime-web.",
+    "step4": "It gives one probability for each of the {{n}} ingredients.",
+    "step5": "Each ingredient has its own threshold; when none reaches 0.4, the answer is “not recognised”.",
+    "tileMap": "mAP on the test set",
+    "tileSize": "Download",
+    "tileLatency": "Model on the phone (4 threads)",
+    "dataset": "Trained on {{name}}: {{classes}} ingredients, {{train}} training photos, {{val}} for validation, {{test}} for the final test.",
+    "s2": "2. Training",
+    "s2Lead": "The 3 finalists, same recipe. ● = epoch kept.",
+    "mapChart": "Validation mAP per epoch",
+    "lossChart": "Loss per epoch",
+    "trainLoss": "training loss",
+    "valLoss": "validation loss",
+    "epoch": "epoch",
+    "overfit": "Dashed = training, solid = validation. Where they part: overfitting.",
+    "model": "Model",
+    "bestEpoch": "Best epoch / played",
+    "valMap": "Val mAP",
+    "testMap": "Test mAP",
+    "secEpoch": "s / epoch",
+    "s3": "3. Quantization: what was done",
+    "s3Lead": "Static int8 PTQ (onnxruntime), 11 variants. Bar = mAP lost on validation.",
+    "quantChart": "mAP lost by each int8 variant (validation, points)",
+    "target": "target {{v}} pt",
+    "chosen": "chosen",
+    "fix1": "Head kept in float",
+    "fix2": "reduce_range (7-bit weights)",
+    "fix3": "Only convolutions in int8",
+    "s4": "4. Float model against int8",
+    "cmpChart": "mAP on the test set (2,135 photos)",
+    "loss": "Loss (points, 95 % CI)",
+    "size": "Size",
+    "why": "Same {{test}} test photos. Loss with 95% confidence interval.",
+    "s5": "5. On the phone",
+    "s5Lead": "Median time (ms) on a {{device}}, Chrome. Total = photo + model, CPU 4.",
+    "variant": "Variant",
+    "total": "Total",
+    "s6": "6. What is deployed, and why",
+    "s6Body": "{{name}} int8: {{map}} test mAP, {{size}} MB. The most accurate quantized variant.",
+    "limits": "Limits: mAP below the {{target}} target, weak on rare ingredients, no food-free photos in training.",
+    "screenTitle": "Screening: 6 backbones tried",
+    "screenLead": "✓ = finalists.",
+    "params": "Parameters (M)",
+    "gmacs": "Compute (G mult-adds)",
+    "quantNote": "On the test set the chosen variant loses {{t}} pt (section 4).",
+    "glTitle": "Glossary",
+    "gl": {
+      "map": {
+        "t": "mAP",
+        "d": "Mean of the AP over the 103 ingredients. 0 to 1."
+      },
+      "ap": {
+        "t": "AP",
+        "d": "Are the photos with the ingredient at the top of the ranking?"
+      },
+      "select": {
+        "t": "val_map · select",
+        "d": "Validation mAP; picks the epoch to keep."
+      },
+      "test": {
+        "t": "test mAP",
+        "d": "mAP on the 2,135 test photos, measured once on the PC."
+      },
+      "pt": {
+        "t": "point (pt)",
+        "d": "1 pt = 0.01 of mAP."
+      },
+      "loss": {
+        "t": "loss",
+        "d": "The error training reduces."
+      },
+      "epoch": {
+        "t": "epoch",
+        "d": "One pass over all training photos."
+      },
+      "es": {
+        "t": "early stopping",
+        "d": "Stop after 6 epochs without improvement."
+      },
+      "lr": {
+        "t": "LR",
+        "d": "Learning rate: the size of each step."
+      },
+      "sec": {
+        "t": "s / epoch",
+        "d": "Seconds per training epoch on the PC."
+      },
+      "fp": {
+        "t": "fp32 · int8",
+        "d": "32-bit floating-point numbers / 8-bit integers."
+      },
+      "ptq": {
+        "t": "PTQ",
+        "d": "Quantization after training, without retraining."
+      },
+      "calib": {
+        "t": "calibration (50 · 200 · 500)",
+        "d": "Photos used to measure the value ranges."
+      },
+      "method": {
+        "t": "MinMax · Entropy · Percentile",
+        "d": "How the range is chosen: min-max, distribution, extremes cut."
+      },
+      "pc": {
+        "t": "per-channel · per-tensor",
+        "d": "One scale per filter / one per layer."
+      },
+      "cov": {
+        "t": "coverage",
+        "d": "Calibration photos covering the 103 ingredients."
+      },
+      "rr": {
+        "t": "reduce_range",
+        "d": "7-bit weights: no saturation on CPUs without VNNI."
+      },
+      "conv": {
+        "t": "only Conv",
+        "d": "Only convolutions in int8, the rest in float."
+      },
+      "ci": {
+        "t": "95% CI",
+        "d": "95% confidence interval (bootstrap)."
+      },
+      "thread": {
+        "t": "CPU 1 · CPU 4 · GPU",
+        "d": "CPU cores in parallel / graphics chip."
+      },
+      "convnext": {
+        "t": "ConvNeXt-Atto",
+        "d": "Smallest ConvNeXt (Meta, 2022), 3.4 M parameters."
+      },
+      "mnv3": {
+        "t": "MobileNetV3-Large",
+        "d": "Google network for phones (2019)."
+      },
+      "lite0": {
+        "t": "EfficientNet-Lite0",
+        "d": "EfficientNet simplified for embedded devices (Google)."
+      }
+    },
+    "fixesTitle": "The 3 fixes"
   },
   "admin": {
     "open": "Admin: pick of the week",
