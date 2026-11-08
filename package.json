@@ -25,6 +25,7 @@
     "i18next-browser-languagedetector": "^8.2.1",
     "leo-profanity": "^1.9.0",
     "obscenity": "^0.4.6",
+    "onnxruntime-web": "^1.31.1",
     "react": "^19.2.7",
     "react-dom": "^19.2.7",
     "react-i18next": "^17.0.11",
