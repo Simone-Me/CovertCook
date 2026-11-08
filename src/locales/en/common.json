@@ -2016,7 +2016,7 @@
     "trainLoss": "training loss",
     "valLoss": "validation loss",
     "epoch": "epoch",
-    "overfit": "The training loss keeps falling while the validation loss stops and rises: the model starts to memorise its photos (overfitting). Early stopping keeps the best epoch.",
+    "overfit": "How to read it: at first both curves go down together. Then the training loss (dashed, photos already seen) keeps falling while the validation loss (photos never seen) stops and climbs back: the model memorises its own photos instead of general rules. That is overfitting.",
     "model": "Model",
     "bestEpoch": "Best epoch / played",
     "valMap": "Val mAP",
@@ -2044,7 +2044,107 @@
     "s6": "6. What is deployed, and why",
     "s6Body": "{{name}} in int8 ({{map}} test mAP, {{size}} MB): the most accurate of the quantized variants, as the brief asks.",
     "limits": "Limits: the mAP target of {{target}} is not reached, rare ingredients are recognised much worse than frequent ones, and the model has never seen photos without food.",
-    "source": "Measures of {{date}}, from the food-recognition repository (results/)."
+    "lossVsMap": "The validation loss is lowest at epoch {{lossEp}}, yet the epoch kept is {{mapEp}}: the choice is made on mAP (are the right ingredients at the top?), not on loss (are the probabilities well calibrated?). Calibration is fixed afterwards, with the temperature. Early stopping ends the run after 6 epochs without improvement.",
+    "screenTitle": "Screening: which backbones were tried",
+    "screenLead": "Six backbones tried with a short recipe; the three ✓ were trained all the way (charts above). EfficientNet-Lite0 came last but was kept anyway: it is designed for int8 on phones.",
+    "params": "Parameters (M)",
+    "gmacs": "Compute (G mult-adds)",
+    "quantNote": "The bars are measured on the {{val}} validation photos: rare ingredients have few photos, so the estimate is noisy. The chosen ConvNeXt variant loses {{v}} pt here, but {{t}} pt on the {{test}} test photos (section 4): that is the reference number.",
+    "glTitle": "Glossary",
+    "gl": {
+      "map": {
+        "t": "mAP",
+        "d": "mean Average Precision: the AP of each ingredient, averaged over the 103. A rare ingredient counts as much as a common one. From 0 to 1, higher is better."
+      },
+      "ap": {
+        "t": "AP",
+        "d": "Average Precision of one ingredient: photos are sorted by the probability given to it; AP is high when the photos that really contain it are at the top. It does not depend on any threshold."
+      },
+      "select": {
+        "t": "val_map · select",
+        "d": "val_map is the mAP on the validation photos, measured after each epoch. select is the number used to pick the epoch to keep: here it equals val_map (with the part-D dish head it would be the mean of val_map and top-1)."
+      },
+      "test": {
+        "t": "test mAP",
+        "d": "mAP on the 2,135 FoodSeg103 test photos, measured once at the end, on the PC. It does not come from the phone JSON files, which only measure time."
+      },
+      "pt": {
+        "t": "point (pt)",
+        "d": "1 point = 0.01 of mAP. From 0.388 to 0.367 is a loss of 2.1 points."
+      },
+      "loss": {
+        "t": "loss",
+        "d": "The error training reduces (binary cross-entropy): low when the probabilities are close to the right answers (1 if the ingredient is there, 0 if not)."
+      },
+      "epoch": {
+        "t": "epoch",
+        "d": "One full pass over all the training photos."
+      },
+      "es": {
+        "t": "early stopping",
+        "d": "Training stops by itself after 6 epochs without select improving, and the best epoch is kept."
+      },
+      "lr": {
+        "t": "LR",
+        "d": "Learning rate: how far the weights move at each step. Too high and training diverges, too low and it learns slowly; each backbone has its own, found by trial."
+      },
+      "sec": {
+        "t": "s / epoch",
+        "d": "Seconds per training epoch on the PC: the cost of training, not of use on the phone."
+      },
+      "fp": {
+        "t": "fp32 · int8",
+        "d": "fp32: each weight is a 32-bit floating-point number (the original model). int8: an 8-bit integer, so 4 times less space, with some precision lost."
+      },
+      "ptq": {
+        "t": "PTQ",
+        "d": "Post-Training Quantization: an already trained model is converted to int8 without retraining it (unlike QAT, quantization-aware training)."
+      },
+      "calib": {
+        "t": "calibration (50 · 200 · 500)",
+        "d": "50, 200 or 500 photos go through the float model to measure the range of its internal values (activations); that range is used to turn them into integers."
+      },
+      "method": {
+        "t": "MinMax · Entropy · Percentile",
+        "d": "Three ways to choose the range. MinMax: from the smallest to the largest value seen. Entropy: the range that best keeps the shape of the distribution. Percentile: the rarest extreme values are cut off."
+      },
+      "pc": {
+        "t": "per-channel · per-tensor",
+        "d": "per-channel: a separate scale for each convolution filter (more precise, the default here). per-tensor: one scale for all the weights of a layer."
+      },
+      "cov": {
+        "t": "coverage",
+        "d": "The calibration photos are chosen to cover all 103 ingredients, instead of at random."
+      },
+      "rr": {
+        "t": "reduce_range",
+        "d": "Weights on 7 bits instead of 8: keeps int8 arithmetic from saturating on x86 processors without VNNI instructions."
+      },
+      "conv": {
+        "t": "only Conv",
+        "d": "Mixed precision: only the convolutions go to int8; LayerNorm, GELU and the head stay in float."
+      },
+      "ci": {
+        "t": "95% CI",
+        "d": "95% confidence interval, computed by bootstrap (the photos are resampled thousands of times). If it does not contain 0, the loss is real and not chance."
+      },
+      "thread": {
+        "t": "CPU 1 · CPU 4 · GPU",
+        "d": "How many processor cores work in parallel (WebAssembly), or the phone's graphics chip (WebGPU)."
+      },
+      "convnext": {
+        "t": "ConvNeXt-Atto",
+        "d": "The smallest version (3.4 M parameters) of ConvNeXt (Meta, 2022), a modern convolutional network that borrows ideas from Transformers. \"Atto\" is the 10⁻¹⁸ prefix: the family's smallest size."
+      },
+      "mnv3": {
+        "t": "MobileNetV3-Large",
+        "d": "Google network (2019) designed for phones; \"Large\" is the big variant, the other is \"Small\"."
+      },
+      "lite0": {
+        "t": "EfficientNet-Lite0",
+        "d": "EfficientNet (Google, 2019) simplified for embedded devices (no squeeze-and-excitation, ReLU6 activation) so that it quantizes well. \"0\" is the smallest size."
+      }
+    }
   },
   "admin": {
     "open": "Admin: pick of the week",

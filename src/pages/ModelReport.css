@@ -114,8 +114,8 @@
 
 .mr-tip {
   position: absolute;
-  top: 4px;
-  transform: translateX(-50%);
+  top: calc(100% + 4px); /* under the plot: the lines stay visible while the finger is on them */
+  z-index: 2;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -172,4 +172,25 @@
   display: grid;
   gap: 4px;
   font-size: 14px;
+}
+
+.mr-h3 {
+  margin: 8px 0 0;
+  font-size: 15px;
+}
+
+.mr-glossary {
+  margin: 0;
+  display: grid;
+  gap: 10px;
+  font-size: 14px;
+}
+
+.mr-glossary dt {
+  font-weight: 700;
+}
+
+.mr-glossary dd {
+  margin: 2px 0 0;
+  color: var(--text-muted);
 }

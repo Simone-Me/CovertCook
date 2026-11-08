@@ -40,6 +40,13 @@ const f3 = (v: number) => v.toFixed(3)
 const pts = (v: number) => (Math.abs(v) < 0.0005 ? 0 : v * 100).toFixed(1) // no "-0.0"
 const ms = (v: number) => Math.round(v).toString()
 const NAMES: Record<string, string> = { a_convnext: 'ConvNeXt', a_mnv3: 'MobileNetV3', a_lite0: 'Lite0' }
+const BACKBONES: Record<string, string> = {
+  convnext_atto: 'ConvNeXt-Atto', mobilenetv3_large_100: 'MobileNetV3-Large', efficientnet_b0: 'EfficientNet-B0',
+  mobilenetv3_small_100: 'MobileNetV3-Small', mobilevit_xs: 'MobileViT-XS', tf_efficientnet_lite0: 'EfficientNet-Lite0',
+}
+// Glossary order: the metrics first, then training, then quantization, then the phone and the model names.
+const GLOSSARY = ['map', 'ap', 'select', 'test', 'pt', 'loss', 'epoch', 'es', 'lr', 'sec', 'fp', 'ptq', 'calib', 'method',
+  'pc', 'cov', 'rr', 'conv', 'ci', 'thread', 'convnext', 'mnv3', 'lite0']
 
 function variantLabel(q: QuantVariant) {
   return [
@@ -82,6 +89,9 @@ export default function ModelReport() {
     { id: 'train', label: t('modelPage.trainLoss'), color: SERIES[0], dashed: true, points: lossModel.history.map((h) => ({ x: h.epoch, y: h.train_loss })) },
     { id: 'val', label: t('modelPage.valLoss'), color: SERIES[1], mark: lossModel.best_epoch, points: lossModel.history.map((h) => ({ x: h.epoch, y: h.val_loss })) },
   ]
+  const lossEp = lossModel.history.reduce((a, b) => (b.val_loss < a.val_loss ? b : a)).epoch
+  const finalists = new Set(report.models.map((m) => m.backbone))
+  const chosenQuant = report.quantization.find((q) => q.chosen && q.run === cmp.run)
   const quant = [...report.quantization].sort((a, b) => b.loss_val - a.loss_val)
   const phoneName = (v: string) => {
     const [run, variant] = v.split('__')
@@ -131,6 +141,7 @@ export default function ModelReport() {
         </div>
         <LineChart title={`${t('modelPage.lossChart')} — ${lossModel.name}`} series={lossSeries} yLabel={t('modelPage.epoch')} format={(v) => v.toFixed(3)} />
         <p className="muted">{t('modelPage.overfit')}</p>
+        <p className="muted">{t('modelPage.lossVsMap', { lossEp, mapEp: lossModel.best_epoch })}</p>
         <div className="mr-table">
           <table>
             <thead><tr><th>{t('modelPage.model')}</th><th>{t('modelPage.bestEpoch')}</th><th>{t('modelPage.valMap')}</th><th>{t('modelPage.testMap')}</th><th>{t('modelPage.secEpoch')}</th><th>LR</th></tr></thead>
@@ -145,6 +156,21 @@ export default function ModelReport() {
           </table>
         </div>
         <p className="muted">{t('modelPage.select')}</p>
+        <h3 className="mr-h3">{t('modelPage.screenTitle')}</h3>
+        <p className="muted">{t('modelPage.screenLead')}</p>
+        <div className="mr-table">
+          <table>
+            <thead><tr><th>{t('modelPage.model')}</th><th>{t('modelPage.valMap')}</th><th>{t('modelPage.params')}</th><th>{t('modelPage.gmacs')}</th></tr></thead>
+            <tbody>
+              {report.screening.map((s) => (
+                <tr key={s.model}>
+                  <td>{BACKBONES[s.model] ?? s.model}{finalists.has(s.model) ? ' ✓' : ''}</td>
+                  <td>{f3(s.val_map)}</td><td>{s.params_m}</td><td>{s.mult_adds_g}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </section>
 
       {/* 3. Quantization: what was done */}
@@ -155,6 +181,9 @@ export default function ModelReport() {
           refValue={report.targets.max_map_drop} refLabel={t('modelPage.target', { v: pts(report.targets.max_map_drop) })}
           format={(v) => `${pts(v)} pt`}
           rows={quant.map((q) => ({ id: `${q.run}${q.variant}`, label: variantLabel(q), value: q.loss_val, note: q.chosen ? `✓ ${t('modelPage.chosen')}` : '' }))} />
+        {chosenQuant && (
+          <p className="muted">{t('modelPage.quantNote', { val: report.dataset.val, test: report.dataset.test.toLocaleString(), v: pts(chosenQuant.loss_val), t: pts(cmp.loss) })}</p>
+        )}
         <ul className="mr-fixes">
           <li>{t('modelPage.fix1')}</li>
           <li>{t('modelPage.fix2')}</li>
@@ -214,7 +243,16 @@ export default function ModelReport() {
         <p className="muted">{t('modelPage.limits', { target: report.targets.min_map })}</p>
       </section>
 
-      <small className="muted">{t('modelPage.source', { date: report.generated })}</small>
+      {/* 7. Every acronym on the page */}
+      <section className="card stack">
+        <h2>{t('modelPage.glTitle')}</h2>
+        <dl className="mr-glossary">
+          {GLOSSARY.map((k) => (
+            <div key={k}><dt>{t(`modelPage.gl.${k}.t`)}</dt><dd>{t(`modelPage.gl.${k}.d`)}</dd></div>
+          ))}
+        </dl>
+      </section>
+
     </div>
   )
 }

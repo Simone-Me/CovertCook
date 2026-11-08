@@ -140,7 +140,8 @@ export function LineChart({ series, yLabel, format, title }: {
             onPointerMove={onMove} onPointerDown={onMove} onPointerLeave={() => setHoverX(null)} />
         </svg>
         {tip && hoverX !== null && (
-          <div className="mr-tip" style={{ left: `${(sx(hoverX) / W) * 100}%` }}>
+          // Below the plot, so it never hides the lines; shifted by its own width so it stays inside the card.
+          <div className="mr-tip" style={{ left: `${(sx(hoverX) / W) * 100}%`, transform: `translateX(-${(sx(hoverX) / W) * 100}%)` }}>
             <strong>{yLabel} {hoverX}</strong>
             {tip.map(({ s, p }) => (
               <span key={s.id}><i style={{ background: s.color }} />{s.label}: {p && p.y !== null ? format(p.y) : '—'}</span>

@@ -1814,7 +1814,7 @@
     "trainLoss": "pérdida de entrenamiento",
     "valLoss": "pérdida de validación",
     "epoch": "época",
-    "overfit": "La pérdida de entrenamiento sigue bajando mientras la de validación se detiene y sube: el modelo empieza a memorizar sus fotos (sobreajuste). El early stopping conserva la mejor época.",
+    "overfit": "Cómo leerlo: al principio las dos curvas bajan juntas. Luego la loss de entrenamiento (discontinua, fotos ya vistas) sigue bajando mientras la de validación (fotos nunca vistas) se detiene y vuelve a subir: el modelo memoriza sus fotos en lugar de reglas generales. Eso es el sobreajuste (overfitting).",
     "model": "Modelo",
     "bestEpoch": "Mejor época / jugadas",
     "valMap": "mAP val",
@@ -1842,7 +1842,107 @@
     "s6": "6. Qué se despliega, y por qué",
     "s6Body": "{{name}} en int8 ({{map}} de mAP test, {{size}} MB): la más precisa de las variantes cuantizadas, como pide el enunciado.",
     "limits": "Límites: no se alcanza el objetivo de mAP de {{target}}, los ingredientes raros se reconocen mucho peor que los frecuentes y el modelo nunca ha visto fotos sin comida.",
-    "source": "Medidas del {{date}}, del repositorio food-recognition (results/)."
+    "lossVsMap": "La loss de validación es mínima en la época {{lossEp}}, pero la época que se conserva es la {{mapEp}}: la elección se hace con la mAP (¿están arriba los ingredientes correctos?) y no con la loss (¿están bien calibradas las probabilidades?). La calibración se corrige después, con la temperatura. El early stopping lo detiene todo tras 6 épocas sin mejora.",
+    "screenTitle": "Cribado: qué backbones se probaron",
+    "screenLead": "Seis backbones probados con una receta corta; los tres ✓ se entrenaron hasta el final (gráficos de arriba). EfficientNet-Lite0 quedó último pero se conservó: está diseñado para int8 en teléfonos.",
+    "params": "Parámetros (M)",
+    "gmacs": "Cálculo (G mult-add)",
+    "quantNote": "Las barras se miden en las {{val}} fotos de validación: los ingredientes raros tienen pocas fotos, así que la estimación es ruidosa. La variante elegida de ConvNeXt pierde {{v}} pt aquí, pero {{t}} pt en las {{test}} fotos de test (sección 4): esa es la cifra de referencia.",
+    "glTitle": "Glosario",
+    "gl": {
+      "map": {
+        "t": "mAP",
+        "d": "mean Average Precision: el AP de cada ingrediente, promediado sobre los 103. Un ingrediente raro cuenta tanto como uno frecuente. De 0 a 1, más alto es mejor."
+      },
+      "ap": {
+        "t": "AP",
+        "d": "Average Precision de un ingrediente: se ordenan las fotos por la probabilidad que se le da; el AP es alto si las fotos que de verdad lo contienen quedan arriba. No depende de ningún umbral."
+      },
+      "select": {
+        "t": "val_map · select",
+        "d": "val_map es la mAP en las fotos de validación, medida tras cada época. select es el número que sirve para elegir la época que se conserva: aquí es igual a val_map (con la cabeza «plato» de la parte D sería la media de val_map y top-1)."
+      },
+      "test": {
+        "t": "mAP test",
+        "d": "mAP en las 2135 fotos de test de FoodSeg103, medida una sola vez al final, en el PC. No viene de los JSON del teléfono, que solo miden tiempos."
+      },
+      "pt": {
+        "t": "punto (pt)",
+        "d": "1 punto = 0,01 de mAP. De 0,388 a 0,367 se pierden 2,1 puntos."
+      },
+      "loss": {
+        "t": "loss",
+        "d": "El error que el entrenamiento reduce (entropía cruzada binaria): es baja cuando las probabilidades se acercan a las respuestas correctas (1 si el ingrediente está, 0 si no)."
+      },
+      "epoch": {
+        "t": "época",
+        "d": "Una pasada completa por todas las fotos de entrenamiento."
+      },
+      "es": {
+        "t": "early stopping",
+        "d": "El entrenamiento se detiene solo tras 6 épocas sin que select mejore, y se conserva la mejor época."
+      },
+      "lr": {
+        "t": "LR",
+        "d": "Learning rate (tasa de aprendizaje): cuánto se mueven los pesos en cada paso. Demasiado alta y el entrenamiento diverge; demasiado baja y aprende despacio. Cada backbone tiene la suya, hallada probando."
+      },
+      "sec": {
+        "t": "s / época",
+        "d": "Segundos por época de entrenamiento en el PC: el coste del entrenamiento, no del uso en el teléfono."
+      },
+      "fp": {
+        "t": "fp32 · int8",
+        "d": "fp32: cada peso es un número de coma flotante de 32 bits (el modelo original). int8: un entero de 8 bits, es decir 4 veces menos espacio, con algo de precisión perdida."
+      },
+      "ptq": {
+        "t": "PTQ",
+        "d": "Post-Training Quantization: se convierte a int8 un modelo ya entrenado, sin volver a entrenarlo (a diferencia de la QAT, quantization-aware training)."
+      },
+      "calib": {
+        "t": "calibración (50 · 200 · 500)",
+        "d": "Se pasan 50, 200 o 500 fotos por el modelo float para medir el rango de sus valores internos (activaciones); ese rango sirve para convertirlos en enteros."
+      },
+      "method": {
+        "t": "MinMax · Entropy · Percentile",
+        "d": "Tres formas de elegir el rango. MinMax: del mínimo al máximo observados. Entropy: el rango que mejor conserva la forma de la distribución. Percentile: se recortan los valores extremos más raros."
+      },
+      "pc": {
+        "t": "per-channel · per-tensor",
+        "d": "per-channel: una escala por cada filtro de convolución (más preciso, el valor por defecto aquí). per-tensor: una sola escala para todos los pesos de una capa."
+      },
+      "cov": {
+        "t": "coverage",
+        "d": "Las fotos de calibración se eligen para cubrir los 103 ingredientes, en lugar de al azar."
+      },
+      "rr": {
+        "t": "reduce_range",
+        "d": "Pesos en 7 bits en lugar de 8: evita que los cálculos int8 se saturen en procesadores x86 sin instrucciones VNNI."
+      },
+      "conv": {
+        "t": "only Conv",
+        "d": "Precisión mixta: solo las convoluciones pasan a int8; LayerNorm, GELU y la cabeza siguen en float."
+      },
+      "ci": {
+        "t": "IC 95 %",
+        "d": "Intervalo de confianza al 95 %, calculado por bootstrap (se remuestrean las fotos miles de veces). Si no contiene 0, la pérdida es real y no casual."
+      },
+      "thread": {
+        "t": "CPU 1 · CPU 4 · GPU",
+        "d": "Cuántos núcleos del procesador trabajan en paralelo (WebAssembly), o el chip gráfico del teléfono (WebGPU)."
+      },
+      "convnext": {
+        "t": "ConvNeXt-Atto",
+        "d": "La versión más pequeña (3,4 M parámetros) de ConvNeXt (Meta, 2022), una red convolucional moderna que toma ideas de los Transformers. «Atto» es el prefijo 10⁻¹⁸: el tamaño mínimo de la familia."
+      },
+      "mnv3": {
+        "t": "MobileNetV3-Large",
+        "d": "Red de Google (2019) diseñada para teléfonos; «Large» es la variante grande, la otra es «Small»."
+      },
+      "lite0": {
+        "t": "EfficientNet-Lite0",
+        "d": "EfficientNet (Google, 2019) simplificada para dispositivos embebidos (sin squeeze-and-excitation, activación ReLU6) para cuantizarse bien. «0» es el tamaño más pequeño."
+      }
+    }
   },
   "legal": {
     "terms": "Condiciones",
