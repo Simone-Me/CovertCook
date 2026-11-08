@@ -71,7 +71,16 @@ registerRoute(
   }),
 )
 
-registerRoute(({ url }) => url.pathname.startsWith('/models/') || url.pathname.startsWith('/ort/'), new CacheFirst({ cacheName: 'ml-models', plugins: [new ExpirationPlugin({ maxEntries: 20 })] }))
+// Never cache an HTML answer here: when a file was missing from a deploy, the SPA fallback answered
+// 200 + index.html, and CacheFirst kept that page for good ("file not found on the server" on the
+// phone only, while a desktop browser without the poisoned cache worked). The cache name is new
+// ('v2') so installed PWAs drop the poisoned one.
+const rejectHtml = {
+  cacheWillUpdate: async ({ response }: { response: Response }) =>
+    response && response.status === 200 && !(response.headers.get('content-type') ?? '').includes('text/html') ? response : null,
+}
+self.addEventListener('activate', (e) => (e as ExtendableEvent).waitUntil(caches.delete('ml-models')))
+registerRoute(({ url }) => url.pathname.startsWith('/models/') || url.pathname.startsWith('/ort/'), new CacheFirst({ cacheName: 'ml-models-v2', plugins: [rejectHtml, new ExpirationPlugin({ maxEntries: 20 })] }))
 
 // The allergen and diet tiles, kept out of the precache (vite.config.ts) because
 // they are a third of the app for a screen seen at sign-up. CacheFirst rather
