@@ -43,3 +43,5 @@ public/ort/
 public/models/*
 !public/models/a_convnext__model_int8_minmax_200_pc_only-conv_rr.onnx
 !public/models/a_convnext__meta.json
+# The measures shown on /scan/model (food-recognition: scripts/export_model_report.py).
+!public/models/model_report.json
