@@ -1966,10 +1966,9 @@
     "contactMe": "I would like to be contacted",
     "name": "Name"
   },
-  "footprint": {
-    "title": "Calculate your consumption"
-  },
   "scan": {
+    "title": "Find the ingredients",
+    "profileHint": "from a photo of your plate",
     "toProfile": "Profile",
     "lead": "Photograph your plate: the ingredients are recognised on your phone, the photo never leaves it.",
     "takePhoto": "Take a photo",

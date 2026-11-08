@@ -46,7 +46,7 @@ export default function FoodScan() {
     <div className="stack sheet scan">
       <Link to="/profile" className="scan__back">← {t('scan.toProfile')}</Link>
       <h1>
-        {t('footprint.title')} <WipChip />
+        {t('scan.title')} <WipChip />
       </h1>
       <p className="muted">{t('scan.lead')}</p>
 

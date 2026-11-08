@@ -1764,10 +1764,9 @@
     "contactMe": "Quiero que me contactéis",
     "name": "Nombre"
   },
-  "footprint": {
-    "title": "Calcula tu consumo"
-  },
   "scan": {
+    "title": "Encuentra los ingredientes",
+    "profileHint": "a partir de una foto de tu plato",
     "toProfile": "Perfil",
     "lead": "Fotografía tu plato: los ingredientes se reconocen en tu teléfono y la foto nunca sale de él.",
     "takePhoto": "Hacer una foto",

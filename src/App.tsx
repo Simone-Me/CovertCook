@@ -99,7 +99,11 @@ function AppRoutes() {
         {/* Outside the guard on purpose: the whole point is that somebody who
             cannot sign in — or has not installed the app — can still read how
             to have their account deleted. */}
-        <Route path="/lab/bench" element={<LabBench />} /> <Route path="/scan" element={<FoodScan />} /> <Route path="/help" element={<HelpPage />} />
+        <Route path="/help" element={<HelpPage />} />
+        {/* On-device food recognition (food-recognition repo). Public: the model runs on the phone and nothing
+            is sent to the server. /lab/bench is a hidden measuring page, not in any menu. */}
+        <Route path="/scan" element={<FoodScan />} />
+        <Route path="/lab/bench" element={<LabBench />} />
         <Route path="/signin" element={session && !recovering ? <Navigate to="/" replace /> : <SignInPage />} />
         <Route
           path="/signup"

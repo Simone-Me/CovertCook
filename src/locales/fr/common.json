@@ -1966,10 +1966,9 @@
     "contactMe": "Je souhaite être recontacté",
     "name": "Nom"
   },
-  "footprint": {
-    "title": "Calculez votre consommation"
-  },
   "scan": {
+    "title": "Trouver les ingrédients",
+    "profileHint": "à partir d’une photo de votre assiette",
     "toProfile": "Profil",
     "lead": "Photographiez votre assiette : les ingrédients sont reconnus sur votre téléphone, la photo ne le quitte jamais.",
     "takePhoto": "Prendre une photo",

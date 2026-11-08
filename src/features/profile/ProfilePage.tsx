@@ -335,9 +335,9 @@ export function ProfilePage() {
 
       {/* A first version now: the plate scan (/scan), still marked as in development. */}
       <Link to="/scan" className="pass__link">
-        <span aria-hidden="true">🌱</span>
+        <span aria-hidden="true">📷</span>
         <span>
-          <strong>{t('footprint.title')}</strong> <WipChip />
+          <strong>{t('scan.title')}</strong> — {t('scan.profileHint')} <WipChip />
         </span>
       </Link>
 
