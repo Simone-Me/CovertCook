@@ -20,27 +20,45 @@ export default function LabBench() {
   const [running, setRunning] = useState(false);
   const [done, setDone] = useState(0);
   const [copyState, setCopyState] = useState("");
-  const backends: Backend[] = "gpu" in navigator ? ["wasm", "webgpu"] : ["wasm"];
+  const [withGpu, setWithGpu] = useState(true);
+  const [status, setStatus] = useState("");
+  const hasGpu = "gpu" in navigator;
+  const backends: Backend[] = hasGpu && withGpu ? ["wasm", "webgpu"] : ["wasm"];
   const total = campaigns * VARIANTS.length * backends.length;
 
   async function runAll() {
     setRunning(true);
     setDone(0);
+    setStatus("");
+    // A phone turns its screen off after ~30 s and Chrome then suspends the page: the run froze at 1 result.
+    // The wake lock keeps the screen on while measuring (released automatically if the tab is hidden).
+    let lock: { release: () => Promise<void> } | null = null;
+    try {
+      lock = await (navigator as Navigator & { wakeLock?: { request: (t: "screen") => Promise<{ release: () => Promise<void> }> } })
+        .wakeLock?.request("screen") ?? null;
+    } catch {
+      setStatus("screen wake lock refused: keep touching the screen");
+    }
     const out: BenchResult[] = [];
     for (let c = 0; c < campaigns; c++) {
       for (const url of VARIANTS) {
         const meta: ModelMeta = await (await fetch(metaUrlOf(url))).json();
         for (const b of backends) {
+          const name = url.split("/").pop()!.replace(".onnx", "");
+          setStatus(`campaign ${c + 1}/${campaigns}: ${name} on ${b}${b === "wasm" ? `/${threads}` : ""}…`);
           try {
             out.push(await bench(url, meta, b, b === "wasm" ? threads : 1, photo, device));
           } catch (e) {
             console.error(url, b, e);
+            setStatus(`failed: ${name} on ${b}: ${e instanceof Error ? e.message : String(e)}`);
           }
           setLog([...out]);
           setDone((d) => d + 1);
         }
       }
     }
+    await lock?.release().catch(() => undefined);
+    setStatus(`finished: ${out.length} / ${total} measures`);
     setRunning(false);
   }
 
@@ -74,15 +92,21 @@ export default function LabBench() {
       <label> campaigns <input type="number" min={1} max={5} value={campaigns}
         onChange={(e) => setCampaigns(+e.target.value)} /></label>
       <input type="file" accept="image/*" onChange={(e) => setPhoto(e.target.files?.[0] ?? null)} />
+      {hasGpu && (
+        <label> <input type="checkbox" checked={withGpu} disabled={running}
+          onChange={(e) => setWithGpu(e.target.checked)} /> also WebGPU</label>
+      )}
       <button disabled={running || !device} onClick={runAll}>{running ? "running…" : "run"}</button>
-      <button disabled={log.length === 0} onClick={copyJson}>copy JSON</button>
-      <button disabled={log.length === 0} onClick={downloadJson}>download JSON</button>
+      {/* Disabled while running: a file downloaded halfway holds only part of the measures. */}
+      <button disabled={running || log.length === 0} onClick={copyJson}>copy JSON</button>
+      <button disabled={running || log.length === 0} onClick={downloadJson}>download JSON</button>
       {copyState && <span> {copyState}</span>}
       {(running || done > 0) && (
         <p>
           <progress max={total} value={done} style={{ width: "100%" }} /> {done} / {total}
         </p>
       )}
+      {status && <p>{status}</p>}
       {/* Wide table: it scrolls sideways inside its box instead of being cut by the phone screen. */}
       <div style={{ overflowX: "auto", maxWidth: "100%" }}>
         <table style={{ borderCollapse: "collapse", whiteSpace: "nowrap", fontSize: 12 }}>

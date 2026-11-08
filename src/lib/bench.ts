@@ -42,6 +42,7 @@ export async function bench(
     const tp = performance.now();
     const bitmap = await createImageBitmap(photo, { imageOrientation: "from-image" });
     data = toTensorData(cropResize(bitmap, res), res, meta.mean, meta.std);
+    bitmap.close(); // a decoded 12 MP photo is ~48 MB: never released, the phone ran out of memory after 1 measure
     preMs = performance.now() - tp;
   }
   const feeds = { [session.inputNames[0]]: new ort.Tensor("float32", data, [1, 3, res, res]) };

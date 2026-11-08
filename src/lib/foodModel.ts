@@ -149,6 +149,7 @@ export async function predictFile(file: Blob, modelUrl: string, metaUrl: string,
   // imageOrientation "from-image": apply the EXIF rotation of phone photos (Python: ImageOps.exif_transpose).
   const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
   const data = toTensorData(cropResize(bitmap, meta.resolution), meta.resolution, meta.mean, meta.std);
+  bitmap.close(); // release the decoded photo now (tens of MB on a phone), not at garbage collection
   const input = new ort.Tensor("float32", data, [1, 3, meta.resolution, meta.resolution]);
   const t1 = performance.now();
   const out = await session.run({ [meta.input_name]: input });
