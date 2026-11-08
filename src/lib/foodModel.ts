@@ -90,7 +90,34 @@ export function resetFoodModel() {
 }
 
 /** Same geometry as Python eval: resize short side to `res`, center crop res x res. Returns RGBA pixels. */
-export function cropResize(bitmap: ImageBitmap, res: number): Uint8ClampedArray {
+/** A decoded photo, EXIF rotation applied (Python: ImageOps.exif_transpose).
+ *  createImageBitmap first: fast, off the main thread. Some WebKit builds refuse certain JPEGs with it
+ *  (progressive JPEGs, e.g. photos saved from WhatsApp): fall back to an <img>, which decodes any image
+ *  the browser can show and applies the EXIF orientation by default. */
+export type Photo = ImageBitmap | HTMLImageElement;
+
+export async function decodePhoto(file: Blob): Promise<Photo> {
+  try {
+    return await createImageBitmap(file, { imageOrientation: "from-image" });
+  } catch {
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      img.src = url;
+      await img.decode();
+      return img;
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+}
+
+/** Release a decoded photo now (tens of MB on a phone), not at garbage collection. */
+export function releasePhoto(photo: Photo) {
+  if ("close" in photo) photo.close();
+}
+
+export function cropResize(bitmap: Photo, res: number): Uint8ClampedArray {
   const canvas = typeof OffscreenCanvas !== "undefined"
     ? new OffscreenCanvas(res, res)
     : Object.assign(document.createElement("canvas"), { width: res, height: res });
@@ -146,10 +173,9 @@ export async function predictFile(file: Blob, modelUrl: string, metaUrl: string,
                                   onProgress?: OnProgress): Promise<Prediction> {
   const { session, meta } = await loadFoodModel(modelUrl, metaUrl, ["wasm"], 1, onProgress);
   const t0 = performance.now();
-  // imageOrientation "from-image": apply the EXIF rotation of phone photos (Python: ImageOps.exif_transpose).
-  const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+  const bitmap = await decodePhoto(file);
   const data = toTensorData(cropResize(bitmap, meta.resolution), meta.resolution, meta.mean, meta.std);
-  bitmap.close(); // release the decoded photo now (tens of MB on a phone), not at garbage collection
+  releasePhoto(bitmap);
   const input = new ort.Tensor("float32", data, [1, 3, meta.resolution, meta.resolution]);
   const t1 = performance.now();
   const out = await session.run({ [meta.input_name]: input });
