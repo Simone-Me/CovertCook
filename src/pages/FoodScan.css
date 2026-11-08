@@ -21,16 +21,11 @@
   padding: 10px 12px;
   border: 1px solid var(--accent);
   border-radius: var(--radius);
-  background: var(--accent);
-  color: var(--accent-contrast);
+  background: var(--bg-elevated);
+  color: var(--accent);
   font-weight: 700;
   text-align: center;
   cursor: pointer;
-}
-
-.scan__pick.secondary {
-  background: var(--bg-elevated);
-  color: var(--accent);
 }
 
 .scan__pick.is-disabled {
@@ -38,11 +33,15 @@
   cursor: not-allowed;
 }
 
+/* The real file input, invisible but still reachable by keyboard and screen readers: its own
+   "No file chosen" text must not show on screen. */
 .scan__pick input {
   position: absolute;
   width: 1px;
   height: 1px;
   opacity: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
   pointer-events: none;
 }
 

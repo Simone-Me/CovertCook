@@ -53,12 +53,12 @@ export default function FoodScan() {
       <div className="scan__actions">
         {/* Two inputs, not one: `capture` opens the camera directly, without it the phone offers the gallery. */}
         <label className={`scan__pick${busy ? ' is-disabled' : ''}`}>
-          <span aria-hidden="true">📷</span> {t('scan.takePhoto')}
+          {t('scan.takePhoto')}
           <input type="file" accept="image/*" capture="environment" disabled={busy}
             onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} />
         </label>
-        <label className={`scan__pick secondary${busy ? ' is-disabled' : ''}`}>
-          <span aria-hidden="true">🖼️</span> {t('scan.gallery')}
+        <label className={`scan__pick${busy ? ' is-disabled' : ''}`}>
+          {t('scan.gallery')}
           <input type="file" accept="image/*" disabled={busy}
             onChange={(e) => { onFile(e.target.files?.[0]); e.target.value = '' }} />
         </label>
