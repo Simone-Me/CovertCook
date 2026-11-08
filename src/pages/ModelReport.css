@@ -182,7 +182,7 @@
 .mr-glossary {
   margin: 0;
   display: grid;
-  gap: 10px;
+  gap: 6px;
   font-size: 14px;
 }
 
@@ -193,4 +193,44 @@
 .mr-glossary dd {
   margin: 2px 0 0;
   color: var(--text-muted);
+}
+
+/* Collapsible sections: a triangle that turns when the section is open. */
+.mr-sec > summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  list-style: none;
+}
+
+.mr-sec > summary::-webkit-details-marker {
+  display: none;
+}
+
+.mr-sec > summary::before {
+  content: '▶';
+  color: var(--accent);
+  font-size: 13px;
+  transition: transform 0.15s;
+}
+
+.mr-sec[open] > summary::before {
+  transform: rotate(90deg);
+}
+
+.mr-sec[open] > summary {
+  margin-bottom: 12px;
+}
+
+/* Glossary: the term in bold, its definition running on after it like a sentence. */
+.mr-glossary dt,
+.mr-glossary dd {
+  display: inline;
+  margin: 0;
+}
+
+.mr-glossary dt::after {
+  content: ' — ';
+  font-weight: 400;
 }

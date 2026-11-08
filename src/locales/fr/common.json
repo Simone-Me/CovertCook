@@ -1996,7 +1996,7 @@
   },
   "modelPage": {
     "title": "Comment fonctionne le modèle",
-    "lead": "Le modèle derrière « Analyser votre assiette » : comment il a été entraîné, comment il a été rendu assez petit pour un téléphone, et ce que cela coûte.",
+    "lead": "Le modèle derrière « Analyser votre assiette ». Ouvrez une section pour la voir.",
     "loading": "Chargement des mesures…",
     "loadError": "Les mesures n’ont pas pu être chargées.",
     "s1": "1. Le modèle en un coup d’œil",
@@ -2010,141 +2010,139 @@
     "tileLatency": "Modèle sur le téléphone (4 threads)",
     "dataset": "Entraîné sur {{name}} : {{classes}} ingrédients, {{train}} photos d’entraînement, {{val}} de validation, {{test}} pour le test final.",
     "s2": "2. Entraînement",
-    "s2Lead": "Trois backbones pré-entraînés sur ImageNet, retenus après un screening de six, affinés avec la même recette (256 px, augmentation photo). Le cercle marque l’époque retenue pour chaque modèle.",
+    "s2Lead": "Les 3 finalistes, même recette. ● = époque gardée.",
     "mapChart": "mAP de validation par époque",
     "lossChart": "Perte par époque",
     "trainLoss": "perte d’entraînement",
     "valLoss": "perte de validation",
     "epoch": "époque",
-    "overfit": "Comment le lire : au début les deux courbes descendent ensemble. Puis la loss d'entraînement (en pointillé, photos déjà vues) continue de baisser tandis que la loss de validation (photos jamais vues) s'arrête et remonte : le modèle apprend ses photos par cœur au lieu de règles générales. C'est le surapprentissage (overfitting).",
+    "overfit": "Pointillé = entraînement, trait plein = validation. Quand elles s'écartent : surapprentissage.",
     "model": "Modèle",
     "bestEpoch": "Meilleure époque / jouées",
     "valMap": "mAP val",
     "testMap": "mAP test",
     "secEpoch": "s / époque",
-    "select": "« select » est le critère qui choisit la meilleure époque : ici la mAP de validation. mAP = moyenne sur les 103 ingrédients de l’Average Precision : un ingrédient rare compte autant qu’un fréquent.",
     "s3": "3. Quantification : ce qui a été fait",
-    "s3Lead": "Quantification statique post-entraînement (PTQ) en int8 avec onnxruntime : poids sur 8 bits, plages des activations calibrées sur 200 photos de validation. 11 variantes comparées sur la validation ; chaque barre est la mAP perdue par rapport au modèle float.",
+    "s3Lead": "PTQ statique int8 (onnxruntime), 11 variantes. Barre = mAP perdue sur la validation.",
     "quantChart": "mAP perdue par chaque variante int8 (validation, points)",
     "target": "objectif {{v}} pt",
     "chosen": "retenue",
-    "fix1": "La sortie sigmoïde était aussi quantifiée : 256 probabilités possibles seulement, 40 % tombées à 0. Correction : la tête reste en float.",
-    "fix2": "Les noyaux int8 d’un PC sans VNNI saturent. Correction : reduce_range (poids sur 7 bits).",
-    "fix3": "ConvNeXt (LayerNorm, GELU) supporte mal l’int8. Correction : précision mixte, seules les convolutions en int8.",
+    "fix1": "Tête gardée en float",
+    "fix2": "reduce_range (poids sur 7 bits)",
+    "fix3": "Seules les convolutions en int8",
     "s4": "4. Modèle float contre int8",
     "cmpChart": "mAP sur le test (2 135 photos)",
     "loss": "Perte (points, IC 95 %)",
     "size": "Taille",
-    "why": "Les deux modèles répondent sur les mêmes 2 135 photos ; un bootstrap apparié de la différence donne l’intervalle. Pour ConvNeXt, la perte est faible mais réelle (2,1 points, intervalle au-dessus de 0) ; pour Lite0, elle est nulle. En échange, le fichier est 3,7 fois plus petit.",
+    "why": "Mêmes {{test}} photos de test. Perte avec intervalle de confiance à 95 %.",
     "s5": "5. Sur le téléphone",
-    "s5Lead": "Temps médian d’une analyse en ms, sur un {{device}} (Chrome), 3 campagnes de 100 exécutions. Total = préparation de la photo + modèle, 4 threads.",
+    "s5Lead": "Temps médian (ms) sur un {{device}}, Chrome. Total = photo + modèle, CPU 4.",
     "variant": "Variante",
     "total": "Total",
-    "phoneNote": "L’int8 n’est pas plus rapide dans le navigateur : son gain est la taille. Le modèle seul tient l’objectif de 300 ms ; la chaîne complète non, car préparer une photo de 12 mégapixels prend 350 à 560 ms.",
     "s6": "6. Ce qui est déployé, et pourquoi",
-    "s6Body": "{{name}} en int8 ({{map}} de mAP test, {{size}} Mo) : la plus précise des variantes quantifiées, comme le demande le sujet.",
-    "limits": "Limites : l’objectif de mAP de {{target}} n’est pas atteint, les ingrédients rares sont bien moins reconnus que les fréquents, et le modèle n’a jamais vu de photos sans nourriture.",
-    "lossVsMap": "La loss de validation est au plus bas à l'époque {{lossEp}}, mais l'époque gardée est la {{mapEp}} : le choix se fait sur la mAP (les bons ingrédients sont-ils en tête ?) et non sur la loss (les probabilités sont-elles bien calibrées ?). La calibration se corrige après, avec la température. L'early stopping arrête tout après 6 époques sans amélioration.",
-    "screenTitle": "Criblage : quels backbones ont été essayés",
-    "screenLead": "Six backbones essayés avec une recette courte ; les trois ✓ ont été entraînés jusqu'au bout (graphiques ci-dessus). EfficientNet-Lite0 est arrivé dernier mais a été gardé : il est conçu pour l'int8 sur téléphone.",
+    "s6Body": "{{name}} int8 : {{map}} de mAP test, {{size}} MB. La variante quantifiée la plus précise.",
+    "limits": "Limites : mAP sous l'objectif {{target}}, faible sur les ingrédients rares, aucune photo sans nourriture à l'entraînement.",
+    "screenTitle": "Criblage : 6 backbones essayés",
+    "screenLead": "✓ = finalistes.",
     "params": "Paramètres (M)",
     "gmacs": "Calcul (G mult-add)",
-    "quantNote": "Les barres sont mesurées sur les {{val}} photos de validation : les ingrédients rares y ont peu de photos, l'estimation est donc bruitée. La variante retenue de ConvNeXt perd {{v}} pt ici, mais {{t}} pt sur les {{test}} photos de test (section 4) : c'est le chiffre de référence.",
+    "quantNote": "Sur le test, la variante retenue perd {{t}} pt (section 4).",
     "glTitle": "Glossaire",
     "gl": {
       "map": {
         "t": "mAP",
-        "d": "mean Average Precision : l'AP de chaque ingrédient, moyennée sur les 103. Un ingrédient rare compte autant qu'un fréquent. De 0 à 1, plus haut est mieux."
+        "d": "Moyenne de l'AP sur les 103 ingrédients. De 0 à 1."
       },
       "ap": {
         "t": "AP",
-        "d": "Average Precision d'un ingrédient : on trie les photos par la probabilité qui lui est donnée ; l'AP est haute si les photos qui le contiennent vraiment sont en tête. Elle ne dépend d'aucun seuil."
+        "d": "Les photos avec l'ingrédient sont-elles en tête du classement ?"
       },
       "select": {
         "t": "val_map · select",
-        "d": "val_map est la mAP sur les photos de validation, mesurée après chaque époque. select est le nombre qui sert à choisir l'époque gardée : ici il vaut val_map (avec la tête « plat » de la partie D, ce serait la moyenne de val_map et du top-1)."
+        "d": "mAP de validation ; choisit l'époque gardée."
       },
       "test": {
         "t": "mAP test",
-        "d": "mAP sur les 2 135 photos de test de FoodSeg103, mesurée une seule fois à la fin, sur le PC. Elle ne vient pas des JSON du téléphone, qui ne mesurent que le temps."
+        "d": "mAP sur les 2 135 photos de test, mesurée une fois sur le PC."
       },
       "pt": {
         "t": "point (pt)",
-        "d": "1 point = 0,01 de mAP. De 0,388 à 0,367, on perd 2,1 points."
+        "d": "1 pt = 0,01 de mAP."
       },
       "loss": {
         "t": "loss",
-        "d": "L'erreur que l'entraînement réduit (entropie croisée binaire) : basse quand les probabilités sont proches des bonnes réponses (1 si l'ingrédient est là, 0 sinon)."
+        "d": "L'erreur que l'entraînement réduit."
       },
       "epoch": {
         "t": "époque",
-        "d": "Un passage complet sur toutes les photos d'entraînement."
+        "d": "Un passage sur toutes les photos d'entraînement."
       },
       "es": {
         "t": "early stopping",
-        "d": "L'entraînement s'arrête seul après 6 époques sans amélioration de select, et l'on garde la meilleure époque."
+        "d": "Arrêt après 6 époques sans amélioration."
       },
       "lr": {
         "t": "LR",
-        "d": "Learning rate (taux d'apprentissage) : de combien les poids bougent à chaque pas. Trop haut, l'entraînement diverge ; trop bas, il apprend lentement. Chaque backbone a le sien, trouvé par essais."
+        "d": "Learning rate : la taille de chaque pas."
       },
       "sec": {
         "t": "s / époque",
-        "d": "Secondes par époque d'entraînement sur le PC : le coût de l'entraînement, pas de l'usage sur le téléphone."
+        "d": "Secondes par époque d'entraînement sur le PC."
       },
       "fp": {
         "t": "fp32 · int8",
-        "d": "fp32 : chaque poids est un nombre à virgule flottante sur 32 bits (le modèle d'origine). int8 : un entier sur 8 bits, donc 4 fois moins de place, avec un peu de précision perdue."
+        "d": "Nombres à virgule sur 32 bits / entiers sur 8 bits."
       },
       "ptq": {
         "t": "PTQ",
-        "d": "Post-Training Quantization : on convertit en int8 un modèle déjà entraîné, sans le réentraîner (contrairement à la QAT, quantization-aware training)."
+        "d": "Quantification après l'entraînement, sans réentraîner."
       },
       "calib": {
         "t": "calibration (50 · 200 · 500)",
-        "d": "On fait passer 50, 200 ou 500 photos dans le modèle float pour mesurer la plage de ses valeurs internes (activations) ; cette plage sert à les convertir en entiers."
+        "d": "Photos servant à mesurer les plages de valeurs."
       },
       "method": {
         "t": "MinMax · Entropy · Percentile",
-        "d": "Trois façons de choisir la plage. MinMax : du minimum au maximum observés. Entropy : la plage qui conserve le mieux la forme de la distribution. Percentile : on coupe les valeurs extrêmes les plus rares."
+        "d": "Choix de la plage : min-max, distribution, extrêmes coupés."
       },
       "pc": {
         "t": "per-channel · per-tensor",
-        "d": "per-channel : une échelle par filtre de convolution (plus précis, le défaut ici). per-tensor : une seule échelle pour tous les poids d'une couche."
+        "d": "Une échelle par filtre / une par couche."
       },
       "cov": {
         "t": "coverage",
-        "d": "Les photos de calibration sont choisies pour couvrir les 103 ingrédients, au lieu d'être tirées au hasard."
+        "d": "Photos de calibration couvrant les 103 ingrédients."
       },
       "rr": {
         "t": "reduce_range",
-        "d": "Poids sur 7 bits au lieu de 8 : évite la saturation des calculs int8 sur les processeurs x86 sans instructions VNNI."
+        "d": "Poids sur 7 bits : pas de saturation sur CPU sans VNNI."
       },
       "conv": {
         "t": "only Conv",
-        "d": "Précision mixte : seules les convolutions passent en int8 ; LayerNorm, GELU et la tête restent en float."
+        "d": "Seules les convolutions en int8, le reste en float."
       },
       "ci": {
         "t": "IC 95 %",
-        "d": "Intervalle de confiance à 95 %, calculé par bootstrap (on rééchantillonne les photos des milliers de fois). S'il ne contient pas 0, la perte est réelle et pas due au hasard."
+        "d": "Intervalle de confiance à 95 % (bootstrap)."
       },
       "thread": {
         "t": "CPU 1 · CPU 4 · GPU",
-        "d": "Combien de cœurs du processeur travaillent en parallèle (WebAssembly), ou la puce graphique du téléphone (WebGPU)."
+        "d": "Cœurs CPU en parallèle / puce graphique."
       },
       "convnext": {
         "t": "ConvNeXt-Atto",
-        "d": "La plus petite version (3,4 M paramètres) de ConvNeXt (Meta, 2022), un réseau convolutif moderne qui reprend des idées des Transformers. « Atto » est le préfixe 10⁻¹⁸ : la plus petite taille de la famille."
+        "d": "Le plus petit ConvNeXt (Meta, 2022), 3,4 M paramètres."
       },
       "mnv3": {
         "t": "MobileNetV3-Large",
-        "d": "Réseau de Google (2019) conçu pour les téléphones ; « Large » est la grande variante, l'autre est « Small »."
+        "d": "Réseau de Google pour téléphones (2019)."
       },
       "lite0": {
         "t": "EfficientNet-Lite0",
-        "d": "EfficientNet (Google, 2019) simplifié pour l'embarqué (sans squeeze-and-excitation, activation ReLU6) pour bien se quantifier. « 0 » est la plus petite taille."
+        "d": "EfficientNet simplifié pour l'embarqué (Google)."
       }
-    }
+    },
+    "fixesTitle": "Les 3 corrections"
   },
   "admin": {
     "open": "Admin : sélection de la semaine",

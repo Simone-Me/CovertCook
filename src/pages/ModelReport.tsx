@@ -1,7 +1,7 @@
 // "How the model works" (/scan/model): the model behind /scan, its training, its int8 quantization, the
 // fp32 / int8 comparison and the phone measures. Every number comes from model_report.json, written by
 // food-recognition/scripts/export_model_report.py from the committed results: nothing here is typed by hand.
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router-dom'
 import { BarList, DumbbellChart, LineChart, SERIES, type Series } from './modelReportCharts'
@@ -59,6 +59,16 @@ function variantLabel(q: QuantVariant) {
   ].filter(Boolean).join(' · ')
 }
 
+/** A card that opens on tap: the page stays short and the speaker opens the part being discussed. */
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <details className="card mr-sec">
+      <summary><h2>{title}</h2></summary>
+      <div className="stack">{children}</div>
+    </details>
+  )
+}
+
 export default function ModelReport() {
   const { t } = useTranslation()
   const [report, setReport] = useState<Report | null>(null)
@@ -89,7 +99,6 @@ export default function ModelReport() {
     { id: 'train', label: t('modelPage.trainLoss'), color: SERIES[0], dashed: true, points: lossModel.history.map((h) => ({ x: h.epoch, y: h.train_loss })) },
     { id: 'val', label: t('modelPage.valLoss'), color: SERIES[1], mark: lossModel.best_epoch, points: lossModel.history.map((h) => ({ x: h.epoch, y: h.val_loss })) },
   ]
-  const lossEp = lossModel.history.reduce((a, b) => (b.val_loss < a.val_loss ? b : a)).epoch
   const finalists = new Set(report.models.map((m) => m.backbone))
   const chosenQuant = report.quantization.find((q) => q.chosen && q.run === cmp.run)
   const quant = [...report.quantization].sort((a, b) => b.loss_val - a.loss_val)
@@ -112,8 +121,7 @@ export default function ModelReport() {
       <p className="muted">{t('modelPage.lead')}</p>
 
       {/* 1. The model in one look */}
-      <section className="card stack">
-        <h2>{t('modelPage.s1')}</h2>
+      <Section title={t('modelPage.s1')}>
         <ol className="mr-steps">
           <li>{t('modelPage.step1')}</li>
           <li>{t('modelPage.step2', { res: deployed.resolution })}</li>
@@ -127,11 +135,10 @@ export default function ModelReport() {
           <div><span className="muted">{t('modelPage.tileLatency')}</span><strong>{deployedPhone?.w4 ? `${ms(deployedPhone.w4.run_ms)} ms` : '—'}</strong></div>
         </div>
         <p className="muted">{t('modelPage.dataset', { ...report.dataset })}</p>
-      </section>
+      </Section>
 
       {/* 2. Training */}
-      <section className="card stack">
-        <h2>{t('modelPage.s2')}</h2>
+      <Section title={t('modelPage.s2')}>
         <p className="muted">{t('modelPage.s2Lead')}</p>
         <LineChart title={t('modelPage.mapChart')} series={mapSeries} yLabel={t('modelPage.epoch')} format={f3} />
         <div className="mr-switch" role="group" aria-label={t('modelPage.lossChart')}>
@@ -141,7 +148,6 @@ export default function ModelReport() {
         </div>
         <LineChart title={`${t('modelPage.lossChart')} — ${lossModel.name}`} series={lossSeries} yLabel={t('modelPage.epoch')} format={(v) => v.toFixed(3)} />
         <p className="muted">{t('modelPage.overfit')}</p>
-        <p className="muted">{t('modelPage.lossVsMap', { lossEp, mapEp: lossModel.best_epoch })}</p>
         <div className="mr-table">
           <table>
             <thead><tr><th>{t('modelPage.model')}</th><th>{t('modelPage.bestEpoch')}</th><th>{t('modelPage.valMap')}</th><th>{t('modelPage.testMap')}</th><th>{t('modelPage.secEpoch')}</th><th>LR</th></tr></thead>
@@ -155,7 +161,6 @@ export default function ModelReport() {
             </tbody>
           </table>
         </div>
-        <p className="muted">{t('modelPage.select')}</p>
         <h3 className="mr-h3">{t('modelPage.screenTitle')}</h3>
         <p className="muted">{t('modelPage.screenLead')}</p>
         <div className="mr-table">
@@ -171,29 +176,28 @@ export default function ModelReport() {
             </tbody>
           </table>
         </div>
-      </section>
+      </Section>
 
       {/* 3. Quantization: what was done */}
-      <section className="card stack">
-        <h2>{t('modelPage.s3')}</h2>
-        <p>{t('modelPage.s3Lead')}</p>
+      <Section title={t('modelPage.s3')}>
+        <p className="muted">{t('modelPage.s3Lead')}</p>
         <BarList title={t('modelPage.quantChart')} max={Math.max(...quant.map((q) => q.loss_val)) * 1.15}
           refValue={report.targets.max_map_drop} refLabel={t('modelPage.target', { v: pts(report.targets.max_map_drop) })}
           format={(v) => `${pts(v)} pt`}
           rows={quant.map((q) => ({ id: `${q.run}${q.variant}`, label: variantLabel(q), value: q.loss_val, note: q.chosen ? `✓ ${t('modelPage.chosen')}` : '' }))} />
         {chosenQuant && (
-          <p className="muted">{t('modelPage.quantNote', { val: report.dataset.val, test: report.dataset.test.toLocaleString(), v: pts(chosenQuant.loss_val), t: pts(cmp.loss) })}</p>
+          <p className="muted">{t('modelPage.quantNote', { t: pts(cmp.loss) })}</p>
         )}
+        <h3 className="mr-h3">{t('modelPage.fixesTitle')}</h3>
         <ul className="mr-fixes">
           <li>{t('modelPage.fix1')}</li>
           <li>{t('modelPage.fix2')}</li>
           <li>{t('modelPage.fix3')}</li>
         </ul>
-      </section>
+      </Section>
 
       {/* 4. fp32 against int8 */}
-      <section className="card stack">
-        <h2>{t('modelPage.s4')}</h2>
+      <Section title={t('modelPage.s4')}>
         <DumbbellChart title={t('modelPage.cmpChart')} labels={['fp32', 'int8']} domain={[0.3, 0.4]} format={f3}
           rows={report.comparison.map((c) => ({ id: c.run, label: c.name, a: c.fp32.map, b: c.int8.map }))} />
         <div className="mr-table">
@@ -210,13 +214,12 @@ export default function ModelReport() {
             </tbody>
           </table>
         </div>
-        <p className="muted">{t('modelPage.why')}</p>
-      </section>
+        <p className="muted">{t('modelPage.why', { test: report.dataset.test.toLocaleString() })}</p>
+      </Section>
 
       {/* 5. On the phone */}
       {report.phone && (
-        <section className="card stack">
-          <h2>{t('modelPage.s5')}</h2>
+        <Section title={t('modelPage.s5')}>
           <p className="muted">{t('modelPage.s5Lead', { device: report.phone.device })}</p>
           <div className="mr-table">
             <table>
@@ -232,26 +235,23 @@ export default function ModelReport() {
               </tbody>
             </table>
           </div>
-          <p className="muted">{t('modelPage.phoneNote')}</p>
-        </section>
+        </Section>
       )}
 
       {/* 6. What is deployed, and why */}
-      <section className="card stack">
-        <h2>{t('modelPage.s6')}</h2>
+      <Section title={t('modelPage.s6')}>
         <p>{t('modelPage.s6Body', { name: cmp.name, map: f3(cmp.int8.map), size: cmp.int8.size_mb })}</p>
         <p className="muted">{t('modelPage.limits', { target: report.targets.min_map })}</p>
-      </section>
+      </Section>
 
       {/* 7. Every acronym on the page */}
-      <section className="card stack">
-        <h2>{t('modelPage.glTitle')}</h2>
+      <Section title={t('modelPage.glTitle')}>
         <dl className="mr-glossary">
           {GLOSSARY.map((k) => (
             <div key={k}><dt>{t(`modelPage.gl.${k}.t`)}</dt><dd>{t(`modelPage.gl.${k}.d`)}</dd></div>
           ))}
         </dl>
-      </section>
+      </Section>
 
     </div>
   )

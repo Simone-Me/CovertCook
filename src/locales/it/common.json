@@ -1794,7 +1794,7 @@
   },
   "modelPage": {
     "title": "Come funziona il modello",
-    "lead": "Il modello dietro “Analizza il tuo piatto”: come è stato addestrato, come è stato reso abbastanza piccolo per un telefono, e cosa costa.",
+    "lead": "Il modello dietro «Analizza il tuo piatto». Apri una sezione per vederla.",
     "loading": "Caricamento delle misure…",
     "loadError": "Non è stato possibile caricare le misure.",
     "s1": "1. Il modello in breve",
@@ -1808,141 +1808,139 @@
     "tileLatency": "Modello sul telefono (4 thread)",
     "dataset": "Addestrato su {{name}}: {{classes}} ingredienti, {{train}} foto di training, {{val}} di validazione, {{test}} per il test finale.",
     "s2": "2. Training",
-    "s2Lead": "Tre backbone pre-addestrati su ImageNet, scelti dopo uno screening di sei, affinati con la stessa ricetta (256 px, augmentation foto). Il cerchio indica l’epoca tenuta per ogni modello.",
+    "s2Lead": "I 3 finalisti, stessa ricetta. ● = epoca tenuta.",
     "mapChart": "mAP di validazione per epoca",
     "lossChart": "Loss per epoca",
     "trainLoss": "loss di training",
     "valLoss": "loss di validazione",
     "epoch": "epoca",
-    "overfit": "Come leggerlo: all'inizio le due curve scendono insieme. Poi la loss di training (tratteggiata, foto già viste) continua a scendere, mentre quella di validazione (foto mai viste) si ferma e risale: il modello impara a memoria le sue foto invece di regole generali. Questo è l'overfitting.",
+    "overfit": "Tratteggio = training, linea piena = validazione. Quando si separano: overfitting.",
     "model": "Modello",
     "bestEpoch": "Epoca migliore / giocate",
     "valMap": "mAP val",
     "testMap": "mAP test",
     "secEpoch": "s / epoca",
-    "select": "“select” è il criterio che sceglie l’epoca migliore: qui la mAP di validazione. mAP = media sui 103 ingredienti dell’Average Precision: un ingrediente raro conta quanto uno frequente.",
     "s3": "3. Quantizzazione: cosa è stato fatto",
-    "s3Lead": "Quantizzazione statica post-training (PTQ) in int8 con onnxruntime: pesi a 8 bit, intervalli delle attivazioni calibrati su 200 foto di validazione. 11 varianti confrontate sulla validazione; ogni barra è la mAP persa rispetto al modello float.",
+    "s3Lead": "PTQ statica int8 (onnxruntime), 11 varianti. Barra = mAP persa sulla validazione.",
     "quantChart": "mAP persa da ogni variante int8 (validazione, punti)",
     "target": "obiettivo {{v}} pt",
     "chosen": "scelta",
-    "fix1": "Anche l’uscita sigmoide era quantizzata: solo 256 probabilità possibili, il 40% finite a 0. Correzione: la testa resta in float.",
-    "fix2": "I kernel int8 di un PC senza VNNI saturano. Correzione: reduce_range (pesi a 7 bit).",
-    "fix3": "ConvNeXt (LayerNorm, GELU) sopporta male l’int8. Correzione: precisione mista, solo le convoluzioni in int8.",
+    "fix1": "Testa in float",
+    "fix2": "reduce_range (pesi a 7 bit)",
+    "fix3": "Solo le convoluzioni in int8",
     "s4": "4. Modello float contro int8",
     "cmpChart": "mAP sul test (2.135 foto)",
     "loss": "Perdita (punti, IC 95%)",
     "size": "Dimensione",
-    "why": "I due modelli rispondono sulle stesse 2.135 foto; un bootstrap appaiato della differenza dà l’intervallo. Per ConvNeXt la perdita è piccola ma reale (2,1 punti, intervallo sopra 0); per Lite0 è nulla. In cambio il file è 3,7 volte più piccolo.",
+    "why": "Stesse {{test}} foto di test. Perdita con intervallo di confidenza al 95%.",
     "s5": "5. Sul telefono",
-    "s5Lead": "Tempo mediano di un’analisi in ms, su un {{device}} (Chrome), 3 campagne da 100 esecuzioni. Totale = preparazione della foto + modello, 4 thread.",
+    "s5Lead": "Tempo mediano (ms) su {{device}}, Chrome. Totale = foto + modello, CPU 4.",
     "variant": "Variante",
     "total": "Totale",
-    "phoneNote": "L’int8 non è più veloce nel browser: il suo vantaggio è la dimensione. Il modello da solo rispetta i 300 ms; la catena completa no, perché preparare una foto da 12 megapixel richiede da 350 a 560 ms.",
     "s6": "6. Cosa è in produzione, e perché",
-    "s6Body": "{{name}} in int8 ({{map}} di mAP test, {{size}} MB): la più precisa delle varianti quantizzate, come chiede il soggetto.",
-    "limits": "Limiti: l’obiettivo di mAP {{target}} non è raggiunto, gli ingredienti rari sono riconosciuti molto peggio di quelli frequenti, e il modello non ha mai visto foto senza cibo.",
-    "lossVsMap": "Il punto più basso della loss di validazione è all'epoca {{lossEp}}, ma l'epoca tenuta è la {{mapEp}}: la scelta si fa sulla mAP (gli ingredienti giusti sono in cima?) e non sulla loss (le probabilità sono ben calibrate?). La calibrazione si corregge dopo, con la temperatura. L'early stopping ferma tutto dopo 6 epoche senza miglioramento.",
-    "screenTitle": "Screening: quali backbone sono stati provati",
-    "screenLead": "Sei backbone provati con una ricetta corta; i tre ✓ sono stati addestrati fino in fondo (grafici sopra). EfficientNet-Lite0 è arrivato ultimo ma è stato tenuto lo stesso: è progettato per l'int8 sui telefoni.",
+    "s6Body": "{{name}} int8: {{map}} di mAP test, {{size}} MB. La variante quantizzata più precisa.",
+    "limits": "Limiti: mAP sotto l'obiettivo {{target}}, ingredienti rari deboli, nessuna foto senza cibo nel training.",
+    "screenTitle": "Screening: 6 backbone provati",
+    "screenLead": "✓ = finalisti.",
     "params": "Parametri (M)",
     "gmacs": "Calcoli (G mult-add)",
-    "quantNote": "Le barre sono misurate sulle {{val}} foto di validazione: per gli ingredienti rari ci sono poche foto, quindi la stima è rumorosa. La variante scelta di ConvNeXt perde {{v}} pt qui, ma {{t}} pt sulle {{test}} foto di test (sezione 4): è quello il numero di riferimento.",
+    "quantNote": "Sul test la variante scelta perde {{t}} pt (sezione 4).",
     "glTitle": "Glossario",
     "gl": {
       "map": {
         "t": "mAP",
-        "d": "mean Average Precision: si calcola l'AP di ogni ingrediente, poi la media sui 103. Un ingrediente raro conta quanto uno frequente. Va da 0 a 1, più alto è meglio."
+        "d": "Media sui 103 ingredienti dell'AP. Da 0 a 1."
       },
       "ap": {
         "t": "AP",
-        "d": "Average Precision di un ingrediente: si ordinano le foto per la probabilità data a quell'ingrediente; l'AP è alta se le foto che lo contengono davvero sono in cima. Non dipende da nessuna soglia."
+        "d": "Le foto con l'ingrediente sono in cima alla classifica?"
       },
       "select": {
         "t": "val_map · select",
-        "d": "val_map è la mAP sulle foto di validazione, misurata dopo ogni epoca. select è il numero usato per scegliere l'epoca da tenere: qui è uguale a val_map (con la testa «piatto» della parte D sarebbe la media di val_map e top-1)."
+        "d": "mAP di validazione; sceglie l'epoca da tenere."
       },
       "test": {
         "t": "mAP test",
-        "d": "mAP sulle 2.135 foto di test di FoodSeg103, misurata una sola volta alla fine, sul PC. Non viene dai JSON del telefono, che misurano solo i tempi."
+        "d": "mAP sulle 2.135 foto di test, misurata una volta sul PC."
       },
       "pt": {
         "t": "punto (pt)",
-        "d": "1 punto = 0,01 di mAP. Da 0,388 a 0,367 si perdono 2,1 punti."
+        "d": "1 pt = 0,01 di mAP."
       },
       "loss": {
         "t": "loss",
-        "d": "L'errore che il training riduce (binary cross-entropy): è bassa quando le probabilità sono vicine alle risposte giuste (1 se l'ingrediente c'è, 0 se no)."
+        "d": "L'errore che il training riduce."
       },
       "epoch": {
         "t": "epoca",
-        "d": "Un passaggio completo su tutte le foto di training."
+        "d": "Un passaggio su tutte le foto di training."
       },
       "es": {
         "t": "early stopping",
-        "d": "Il training si ferma da solo dopo 6 epoche senza miglioramento di select, e si tiene l'epoca migliore."
+        "d": "Stop dopo 6 epoche senza miglioramento."
       },
       "lr": {
         "t": "LR",
-        "d": "Learning rate: quanto si spostano i pesi a ogni passo. Troppo alto e il training diverge, troppo basso e impara lentamente; ogni backbone ha il suo, trovato con prove."
+        "d": "Learning rate: la dimensione di ogni passo."
       },
       "sec": {
         "t": "s / epoca",
-        "d": "Secondi per un'epoca di training sul PC: il costo del training, non dell'uso sul telefono."
+        "d": "Secondi per epoca di training sul PC."
       },
       "fp": {
         "t": "fp32 · int8",
-        "d": "fp32: ogni peso è un numero con la virgola su 32 bit (il modello originale). int8: un intero su 8 bit, quindi 4 volte meno spazio, con un po' di precisione persa."
+        "d": "Numeri a 32 bit con virgola / interi a 8 bit."
       },
       "ptq": {
         "t": "PTQ",
-        "d": "Post-Training Quantization: si converte in int8 un modello già addestrato, senza riaddestrarlo (a differenza della QAT, quantization-aware training)."
+        "d": "Quantizzazione dopo il training, senza riaddestrare."
       },
       "calib": {
         "t": "calibrazione (50 · 200 · 500)",
-        "d": "Si fanno passare 50, 200 o 500 foto nel modello float per misurare l'intervallo dei valori interni (attivazioni); quell'intervallo serve a convertirli in interi."
+        "d": "Foto usate per misurare gli intervalli dei valori."
       },
       "method": {
         "t": "MinMax · Entropy · Percentile",
-        "d": "Tre modi di scegliere l'intervallo. MinMax: dal minimo al massimo osservato. Entropy: l'intervallo che conserva meglio la forma della distribuzione. Percentile: si tagliano i valori estremi più rari."
+        "d": "Come si sceglie l'intervallo: min-max, distribuzione, estremi tagliati."
       },
       "pc": {
         "t": "per-channel · per-tensor",
-        "d": "per-channel: una scala diversa per ogni filtro di convoluzione (più preciso, è il default qui). per-tensor: una sola scala per tutti i pesi di uno strato."
+        "d": "Una scala per filtro / una per strato."
       },
       "cov": {
         "t": "coverage",
-        "d": "Le foto di calibrazione sono scelte per coprire tutti i 103 ingredienti, invece che a caso."
+        "d": "Foto di calibrazione che coprono i 103 ingredienti."
       },
       "rr": {
         "t": "reduce_range",
-        "d": "Pesi su 7 bit invece di 8: evita che i calcoli int8 vadano in saturazione sui processori x86 senza istruzioni VNNI."
+        "d": "Pesi a 7 bit: niente saturazione su CPU senza VNNI."
       },
       "conv": {
         "t": "only Conv",
-        "d": "Precisione mista: solo le convoluzioni passano in int8; LayerNorm, GELU e la testa restano in float."
+        "d": "Solo le convoluzioni in int8, il resto in float."
       },
       "ci": {
         "t": "IC 95%",
-        "d": "Intervallo di confidenza al 95%, calcolato con un bootstrap (si ricampionano le foto migliaia di volte). Se non contiene 0, la perdita è reale e non dovuta al caso."
+        "d": "Intervallo di confidenza 95% (bootstrap)."
       },
       "thread": {
         "t": "CPU 1 · CPU 4 · GPU",
-        "d": "Quanti core del processore lavorano in parallelo (WebAssembly), oppure la scheda grafica del telefono (WebGPU)."
+        "d": "Core CPU in parallelo / scheda grafica."
       },
       "convnext": {
         "t": "ConvNeXt-Atto",
-        "d": "La versione più piccola (3,4 M parametri) di ConvNeXt (Meta, 2022), una rete a convoluzioni moderna che riprende idee dei Transformer. «Atto» è il prefisso 10⁻¹⁸: la taglia minima della famiglia."
+        "d": "ConvNeXt più piccolo (Meta, 2022), 3,4 M parametri."
       },
       "mnv3": {
         "t": "MobileNetV3-Large",
-        "d": "Rete di Google (2019) progettata per i telefoni; «Large» è la variante grande, l'altra è «Small»."
+        "d": "Rete di Google per telefoni (2019)."
       },
       "lite0": {
         "t": "EfficientNet-Lite0",
-        "d": "EfficientNet (Google, 2019) semplificata per i dispositivi embarcati (niente squeeze-and-excitation, attivazione ReLU6), per quantizzarsi bene. «0» è la taglia più piccola."
+        "d": "EfficientNet semplificata per l'embarcato (Google)."
       }
-    }
+    },
+    "fixesTitle": "Le 3 correzioni"
   },
   "legal": {
     "terms": "Condizioni",
